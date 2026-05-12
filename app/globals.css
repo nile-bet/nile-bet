@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-nile-blue: #1B3A6B;
+  --color-gold: #C9A84C;
+  --color-gold-light: #D4AF70;
+  --color-charcoal: #1A1A2E;
+  --color-slate-dark: #16213E;
+  --color-nile-white: #F0F0F0;
+  --color-nile-success: #2ECC71;
+  --color-nile-danger: #E74C3C;
+  --color-nile-orange: #E8621A;
+  --color-nile-purple: #9B59B6;
+  --color-nile-blue-light: #4A90D9;
+
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "Roboto Mono", monospace;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-odd-flash: odd-flash 0.5s ease-in-out;
+  --animate-pulse-gold: pulse-gold 2s infinite;
+
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+
+  @keyframes odd-flash {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(201,168,76,0.3); }
+    100% { background-color: transparent; }
+  }
+
+  @keyframes pulse-gold {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(201,168,76,0); }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: #1A1A2E;
+    color: #F0F0F0;
+    font-family: "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3 {
+    font-family: "Playfair Display", serif;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #16213E;
+}
+::-webkit-scrollbar-thumb {
+  background: #C9A84C;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D4AF70;
+}
+
+/* Selection color */
+::selection {
+  background: rgba(201, 168, 76, 0.3);
+  color: #F0F0F0;
+}
+
+/* Hide scrollbar but keep scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
