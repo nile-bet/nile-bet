@@ -49,7 +49,7 @@ export function getValidationErrors(
 ): string[] {
   const errors: string[] = []
 
-  if (selections.length 
+  if (selections.length <
     settings.minSelections) {
     errors.push(
       `Minimum ${settings.minSelections} selections required (${selections.length} selected)`

@@ -16,7 +16,6 @@ export const metadata: Metadata = {
     'jackpot',
     'football betting',
   ],
-  themeColor: '#C9A84C',
 }
 
 export default function RootLayout({
@@ -59,4 +58,7 @@ export default function RootLayout({
       </body>
     </html>
   )
+}
+export const viewport = {
+  themeColor: '#C9A84C',
 }

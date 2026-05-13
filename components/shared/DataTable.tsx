@@ -33,7 +33,7 @@ interface DataTableProps<T> {
   keyField?: string
 }
 
-export function DataTable
+export function DataTable<
   T extends Record<string, unknown>
 >({
   columns,
@@ -44,10 +44,10 @@ export function DataTable
   className,
   keyField = 'id',
 }: DataTableProps<T>) {
-  const [sortKey, setSortKey] = useState
+  const [sortKey, setSortKey] = useState<
     string | null
   >(null)
-  const [sortDir, setSortDir] = useState
+  const [sortDir, setSortDir] = useState<
     'asc' | 'desc'
   >('asc')
 

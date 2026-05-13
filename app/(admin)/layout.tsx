@@ -1,3 +1,4 @@
+'use client'
 import { OfflineBanner }
   from '@/components/shared/OfflineBanner'
 import {

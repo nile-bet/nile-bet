@@ -63,7 +63,7 @@ export function FilterBar({
     onFilterChange(null)
   }
 
-  const filterLabel: Record
+  const filterLabel: Record<
     FilterType,
     string
   > = {

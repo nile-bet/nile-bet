@@ -19,7 +19,7 @@ function getConfig(
   type: BadgeType
 ): { label: string; className: string } {
   if (type === 'slip') {
-    const map: Record
+    const map: Record<
       string,
       { label: string; className: string }
     > = {
@@ -59,7 +59,7 @@ function getConfig(
   }
 
   if (type === 'user') {
-    const map: Record
+    const map: Record<
       string,
       { label: string; className: string }
     > = {
@@ -89,7 +89,7 @@ function getConfig(
   }
 
   if (type === 'match') {
-    const map: Record
+    const map: Record<
       string,
       { label: string; className: string }
     > = {
@@ -134,7 +134,7 @@ function getConfig(
   }
 
   if (type === 'coupon') {
-    const map: Record
+    const map: Record<
       string,
       { label: string; className: string }
     > = {
@@ -169,7 +169,7 @@ function getConfig(
   }
 
   if (type === 'jackpot') {
-    const map: Record
+    const map: Record<
       string,
       { label: string; className: string }
     > = {
@@ -204,7 +204,7 @@ function getConfig(
   }
 
   if (type === 'request') {
-    const map: Record
+    const map: Record<
       string,
       { label: string; className: string }
     > = {

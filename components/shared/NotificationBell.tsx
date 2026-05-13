@@ -175,11 +175,11 @@ export function NotificationBell() {
         </div>
 
         <div className="p-3 border-t border-nile-blue/20">
-          
+          <a
             href="/notifications"
             className="text-xs text-gold hover:text-gold-light text-center block"
           >
-            View all notifications →
+            View all notifications &#8594;
           </a>
         </div>
       </PopoverContent>
