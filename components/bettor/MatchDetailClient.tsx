@@ -39,7 +39,7 @@ export function MatchDetailClient({
     leagues?.countries?.name ?? ''
 
   // Group markets by category
-  const byCategory = new Map
+  const byCategory = new Map<
     string,
     typeof match.match_markets
   >()
