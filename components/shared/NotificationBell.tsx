@@ -1,16 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { Bell, Check, Trophy, X,
-  CheckCircle, Clock, Wallet,
-  Megaphone, Gift, XCircle,
-  RotateCcw } from 'lucide-react'
+import {
+  Bell,
+  Check,
+  Trophy,
+  CheckCircle,
+  Clock,
+  Wallet,
+  Megaphone,
+  Gift,
+  XCircle,
+  RotateCcw,
+} from 'lucide-react'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Button } from '@/components/ui/button'
 import { useNotificationStore }
   from '@/lib/stores/notificationStore'
 import { formatTimeAgo }
@@ -19,11 +26,15 @@ import { cn } from '@/lib/utils'
 import type { Notification }
   from '@/types/database.types'
 
-function getNotifIcon(type: string) {
-  const map: Record
-    string,
-    { icon: React.ElementType; color: string }
-  > = {
+type IconConfig = {
+  icon: React.ElementType
+  color: string
+}
+
+function getNotifIcon(
+  type: string
+): IconConfig {
+  const icons: Record<string, IconConfig> = {
     slip_won: {
       icon: Trophy,
       color: 'text-gold',
@@ -61,7 +72,8 @@ function getNotifIcon(type: string) {
       color: 'text-nile-blue-light',
     },
   }
-  return map[type] ?? {
+
+  return icons[type] ?? {
     icon: Bell,
     color: 'text-white/50',
   }
