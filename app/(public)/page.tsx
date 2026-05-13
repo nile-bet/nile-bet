@@ -15,7 +15,7 @@ export default async function HomePage() {
     topLeagues,
     settings,
   ] = await Promise.all([
-    getUpcomingMatches({ isTopLeagues: true }),
+    getUpcomingMatches({}),
     getCountriesWithLeagues(),
     getTopLeagues(),
     getPlatformSettings(),
