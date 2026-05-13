@@ -1,9 +1,6 @@
-import { PublicNavbar }
-  from '@/components/shared/PublicNavbar'
-import { Footer }
-  from '@/components/shared/Footer'
-import { MatchListClient }
-  from '@/components/bettor/MatchListClient'
+import { PublicNavbar } from '@/components/shared/PublicNavbar'
+import { Footer } from '@/components/shared/Footer'
+import { MatchListClient } from '@/components/bettor/MatchListClient'
 import {
   getUpcomingMatches,
   getCountriesWithLeagues,
@@ -25,10 +22,12 @@ export default async function HomePage() {
   ])
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden bg-charcoal">
+      {/* Sticky Navbar */}
       <PublicNavbar />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Main body: filter + content + footer */}
+      <div className="flex flex-col flex-1 overflow-hidden">
         <MatchListClient
           initialMatches={initialMatches}
           countries={countries}
@@ -36,8 +35,6 @@ export default async function HomePage() {
           settings={settings}
         />
       </div>
-
-      <Footer />
     </div>
   )
 }

@@ -149,7 +149,7 @@ export function MatchListClient({
   )
 
   return (
-    <>
+    <div className="flex flex-col flex-1 overflow-hidden">
       {/* Filter Bar */}
       <FilterBar
         onFilterChange={handleFilterChange}
@@ -163,7 +163,7 @@ export function MatchListClient({
           topLeagues={topLeagues}
           selectedLeagueId={selectedLeagueId}
           onLeagueSelect={handleLeagueSelect}
-          className="hidden md:flex flex-col"
+          className="flex flex-col"
         />
 
         {/* Match List */}
@@ -242,7 +242,7 @@ export function MatchListClient({
                           -{' '}
                           {first.league_name}
                         </span>
-                        <span className="text-[11px] text-nile-blue-light">
+                        <span suppressHydrationWarning className="text-[11px] text-nile-blue-light">
                           {formatKickOff(
                             groupMatches[0]
                               .kick_off_time
@@ -277,6 +277,12 @@ export function MatchListClient({
           role="bettor"
         />
       </div>
-    </>
+      {/* Footer */}
+      <footer className="border-t border-gold/10 py-3 px-6 bg-slate-dark shrink-0">
+        <p className="text-xs text-white/30 text-center">
+          &copy; 2026 NILE Bet. All rights reserved. Bet responsibly. 18+ only.
+        </p>
+      </footer>
+    </div>
   )
 }
