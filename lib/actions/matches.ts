@@ -81,6 +81,14 @@ export async function getUpcomingMatches(options: {
           name,
           flag_emoji
         )
+      ),
+      match_markets (
+        *,
+        market_templates (
+          id,
+          name
+        ),
+        match_market_odds (*)
       )
     `)
     .eq('status', 'upcoming')
