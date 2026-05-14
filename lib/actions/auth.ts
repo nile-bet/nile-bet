@@ -218,7 +218,7 @@ export async function registerBettor(
 
   // Create profile
   const { error: profileError } =
-    await supabase.from('profiles').insert({
+    await adminClient.from('profiles').insert({
       id: authData.user.id,
       username,
       role: 'bettor',
