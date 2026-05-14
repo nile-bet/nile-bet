@@ -346,9 +346,9 @@ export async function cancelBet(
           credit_balance:
             data.credit_balance +
             slip.stake,
-        })
         .eq('id', slip.placed_by)
     }
+  }
 
 
 
