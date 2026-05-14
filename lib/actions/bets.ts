@@ -324,32 +324,33 @@ export async function cancelBet(
     .eq('id', slip.id)
 
   // Refund stake
-  await supabase.rpc(
-    'refund_stake_to_placer',
-    {
-      p_placed_by: slip.placed_by,
-      p_stake: slip.stake,
-    }
-  ).catch(() => {
+  try {
+    await supabase.rpc(
+      'refund_stake_to_placer',
+      {
+        p_placed_by: slip.placed_by,
+        p_stake: slip.stake,
+      }
+    )
+  } catch {
     // Fallback manual refund
-    supabase
+    const { data } = await supabase
       .from('profiles')
       .select('credit_balance')
       .eq('id', slip.placed_by)
       .single()
-      .then(({ data }) => {
-        if (data) {
-          supabase
-            .from('profiles')
-            .update({
-              credit_balance:
-                data.credit_balance +
-                slip.stake,
-            })
-            .eq('id', slip.placed_by)
-        }
-      })
-  })
+    if (data) {
+      await supabase
+        .from('profiles')
+        .update({
+          credit_balance:
+            data.credit_balance +
+            slip.stake,
+        })
+        .eq('id', slip.placed_by)
+    }
+
+
 
   // Refund bettor if different from placer
   if (
