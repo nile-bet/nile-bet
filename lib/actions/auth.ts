@@ -14,6 +14,7 @@ export async function loginUser(
   role?: string
   attemptsLeft?: number
 }> {
+  try {
   const supabase = await createClient()
 
   // Get profile by username
@@ -63,6 +64,7 @@ export async function loginUser(
       email,
       password,
     })
+  console.log("LOGIN DEBUG:", { error: authError?.message, hasUser: !!authData?.user })
 
   if (authError || !authData.user) {
     // Increment attempts
@@ -143,6 +145,10 @@ export async function loginUser(
   return {
     success: true,
     role: profile.role,
+  }
+  } catch (err) {
+    console.error("loginUser error:", err)
+    return { success: false, error: String(err) }
   }
 }
 
