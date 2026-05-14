@@ -88,9 +88,9 @@ export function Footer() {
             </h4>
             <div className="flex flex-col gap-2.5">
               {[
-                { label: 'My Bets', href: '/my-bets' },
-                { label: 'Top-up', href: '/profile?tab=topup' },
-                { label: 'Withdraw', href: '/profile?tab=withdraw' },
+                { label: 'My Bets', href: '/bettor-bets' },
+                { label: 'Top-up', href: '/bettor-profile?tab=topup' },
+                { label: 'Withdraw', href: '/bettor-profile?tab=withdraw' },
                 { label: 'Check Slip', href: '/check-slip' },
                 { label: 'Weekend Jackpot', href: '/jackpot' },
                 { label: 'About NILE Betting', href: '/about' },

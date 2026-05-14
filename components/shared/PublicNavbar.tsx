@@ -147,7 +147,7 @@ export function PublicNavbar() {
 
               {/* My Bets */}
               <Link
-                href="/my-bets"
+                href="/bettor-bets"
                 className="hidden md:block text-sm text-white/70 hover:text-gold transition-colors"
               >
                 My Bets
@@ -182,7 +182,7 @@ export function PublicNavbar() {
                   </div>
                   <DropdownMenuItem asChild>
                     <Link
-                      href="/my-bets"
+                      href="/bettor-bets"
                       className="cursor-pointer"
                     >
                       My Bets
@@ -190,7 +190,7 @@ export function PublicNavbar() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
-                      href="/profile"
+                      href="/bettor-profile"
                       className="cursor-pointer"
                     >
                       My Profile
@@ -198,7 +198,7 @@ export function PublicNavbar() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
-                      href="/notifications"
+                      href="/bettor-notifications"
                       className="cursor-pointer"
                     >
                       Notifications
@@ -257,7 +257,7 @@ export function PublicNavbar() {
                   {isAuthenticated && (
                     <>
                       <Link
-                        href="/my-bets"
+                        href="/bettor-bets"
                         onClick={() =>
                           setMobileOpen(false)
                         }
@@ -266,7 +266,7 @@ export function PublicNavbar() {
                         My Bets
                       </Link>
                       <Link
-                        href="/profile"
+                        href="/bettor-profile"
                         onClick={() =>
                           setMobileOpen(false)
                         }

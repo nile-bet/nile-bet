@@ -166,8 +166,8 @@ export async function proxy(
   // Protect bettor routes
   if (
     (pathname.startsWith('/bettor-') ||
-      pathname === '/my-bets' ||
-      pathname === '/profile' ||
+      pathname === '/bettor-bets' ||
+      pathname === '/bettor-profile' ||
       pathname === '/notifications') &&
     !user
   ) {

@@ -110,7 +110,7 @@ export function PlaceBetModal({
               <button
                 onClick={() => {
                   handleClose()
-                  router.push('/my-bets')
+                  router.push('/bettor-bets')
                 }}
                 className="flex-1 border border-gold/30 text-gold py-2 rounded-lg text-sm hover:bg-gold/10"
               >
