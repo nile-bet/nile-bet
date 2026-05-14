@@ -1,6 +1,11 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['nilebetting.vercel.app', 'localhost:3000'],
+    },
+  },
   images: {
     remotePatterns: [
       {
