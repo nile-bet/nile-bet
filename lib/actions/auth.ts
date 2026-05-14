@@ -167,7 +167,7 @@ export async function registerBettor(
     .from('profiles')
     .select('id')
     .eq('username', username)
-    .single()
+    .maybeSingle()
 
   if (existing) {
     return {
