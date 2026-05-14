@@ -205,6 +205,7 @@ export async function registerBettor(
       email,
       password,
       email_confirm: true,
+      user_metadata: { username },
     })
 
   if (authError || !authData.user) {
