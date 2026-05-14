@@ -11,6 +11,8 @@ import { LeagueSidebar }
   from '@/components/shared/LeagueSidebar'
 import { BetSlipSidebar }
   from './BetSlipSidebar'
+import { PlaceBetModal }
+  from './PlaceBetModal'
 import { MatchRow } from './MatchRow'
 import { EmptyState }
   from '@/components/shared/EmptyState'
@@ -19,8 +21,6 @@ import { SkeletonMatchRow }
 import {
   getUpcomingMatches,
 } from '@/lib/actions/matches'
-import { useBetSlipStore }
-  from '@/lib/stores/betSlipStore'
 import { formatKickOff }
   from '@/lib/utils/formatCurrency'
 import { Swords } from 'lucide-react'
@@ -55,9 +55,9 @@ export function MatchListClient({
     useState<string | 'top'>('top')
   const [activeFilter, setActiveFilter] =
     useState<FilterType | null>(null)
+  const [showPlaceBet, setShowPlaceBet] =
+    useState(false)
   const supabase = createClient()
-  const { removeSelection } =
-    useBetSlipStore()
 
   const loadMatches = useCallback(
     async (
@@ -121,7 +121,7 @@ export function MatchListClient({
               )
             )
             toast.warning(
-              `Match betting closed`
+              'A match has closed for betting'
             )
           }
         }
@@ -133,7 +133,7 @@ export function MatchListClient({
     }
   }, [])
 
-  // Group matches by league
+  // Group by league
   const grouped = matches.reduce(
     (acc, m) => {
       const key = `${(m as any).league_name}-${(m as any).flag_emoji}`
@@ -149,8 +149,7 @@ export function MatchListClient({
   )
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Filter Bar */}
+    <>
       <FilterBar
         onFilterChange={handleFilterChange}
         matchCount={matches.length}
@@ -163,26 +162,18 @@ export function MatchListClient({
           topLeagues={topLeagues}
           selectedLeagueId={selectedLeagueId}
           onLeagueSelect={handleLeagueSelect}
-          className="flex flex-col"
+          className="hidden md:flex flex-col"
         />
 
         {/* Match List */}
         <div className="flex-1 overflow-y-auto">
-          {/* Sticky column headers */}
-          <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 px-4 py-2 hidden md:grid grid-cols-[1fr_auto] items-center">
+          {/* Column headers */}
+          <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 px-4 py-2 hidden md:flex items-center justify-between">
             <div className="flex items-center gap-4 text-[11px] text-white/40 uppercase tracking-wide">
-              <span className="w-[158px]">
-                Match Result
-              </span>
-              <span className="mx-2 text-gold/20">
-                |
-              </span>
-              <span className="w-[158px]">
-                Double Chance
-              </span>
-              <span className="mx-2 text-gold/20">
-                |
-              </span>
+              <span className="w-[158px]">Match Result</span>
+              <span className="mx-2 text-gold/20">|</span>
+              <span className="w-[158px]">Double Chance</span>
+              <span className="mx-2 text-gold/20">|</span>
               <span>Both Score</span>
             </div>
             <span className="text-[11px] text-white/30 pr-2">
@@ -204,7 +195,7 @@ export function MatchListClient({
             />
           ) : (
             <>
-              {/* Featured matches first */}
+              {/* Featured */}
               {featured.length > 0 && (
                 <div>
                   <div className="px-4 py-1.5 bg-gold/5 border-b border-gold/20">
@@ -216,9 +207,7 @@ export function MatchListClient({
                     (match, i) => (
                       <MatchRow
                         key={match.id}
-                        match={
-                          match as unknown as MatchWithMarkets
-                        }
+                        match={match as unknown as MatchWithMarkets}
                         isEven={i % 2 === 0}
                         basePath={basePath}
                       />
@@ -230,34 +219,26 @@ export function MatchListClient({
               {/* Grouped by league */}
               {Object.entries(grouped).map(
                 ([key, groupMatches]) => {
-                  const first =
-                    groupMatches[0] as any
+                  const first = groupMatches[0] as any
                   return (
                     <div key={key}>
-                      {/* League header */}
                       <div className="flex items-center justify-between px-4 py-1.5 bg-slate-dark/80 border-b border-gold/10">
                         <span className="text-[11px] text-gold/60">
                           {first.flag_emoji}{' '}
-                          {first.country_name}{' '}
-                          -{' '}
+                          {first.country_name} -{' '}
                           {first.league_name}
                         </span>
-                        <span suppressHydrationWarning className="text-[11px] text-nile-blue-light">
+                        <span className="text-[11px] text-nile-blue-light">
                           {formatKickOff(
-                            groupMatches[0]
-                              .kick_off_time
+                            groupMatches[0].kick_off_time
                           )}
                         </span>
                       </div>
-
-                      {/* Match rows */}
                       {groupMatches.map(
                         (match, i) => (
                           <MatchRow
                             key={match.id}
-                            match={
-                              match as unknown as MatchWithMarkets
-                            }
+                            match={match as unknown as MatchWithMarkets}
                             isEven={i % 2 === 0}
                             basePath={basePath}
                           />
@@ -275,14 +256,15 @@ export function MatchListClient({
         <BetSlipSidebar
           settings={settings}
           role="bettor"
+          onPlaceBet={() => setShowPlaceBet(true)}
         />
       </div>
-      {/* Footer */}
-      <footer className="border-t border-gold/10 py-3 px-6 bg-slate-dark shrink-0">
-        <p className="text-xs text-white/30 text-center">
-          &copy; 2026 NILE Bet. All rights reserved. Bet responsibly. 18+ only.
-        </p>
-      </footer>
-    </div>
+
+      {/* Place Bet Modal */}
+      <PlaceBetModal
+        isOpen={showPlaceBet}
+        onClose={() => setShowPlaceBet(false)}
+      />
+    </>
   )
 }

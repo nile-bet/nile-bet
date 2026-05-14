@@ -1,1 +1,178 @@
-export default function Page() { return <div>Loading...</div> }
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Eye, EyeOff } from 'lucide-react'
+import { Logo }
+  from '@/components/shared/Logo'
+import { loginUser }
+  from '@/lib/actions/auth'
+import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
+
+export default function LoginPage() {
+  const [username, setUsername] =
+    useState('')
+  const [password, setPassword] =
+    useState('')
+  const [showPw, setShowPw] = useState(false)
+  const [loading, setLoading] =
+    useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
+
+  const handleSubmit = async (
+    e: React.FormEvent
+  ) => {
+    e.preventDefault()
+    if (!username || !password) return
+
+    setLoading(true)
+    setError('')
+
+    const result = await loginUser(
+      username.trim(),
+      password
+    )
+
+    if (result.success) {
+      toast.success('Welcome back!')
+      const role = result.role
+      if (role === 'admin') {
+        router.push('/dashboard')
+      } else if (role === 'agent') {
+        router.push('/agent-dashboard')
+      } else if (role === 'cashier') {
+        router.push('/cashier-dashboard')
+      } else {
+        router.push('/')
+      }
+      router.refresh()
+    } else {
+      setError(result.error ?? 'Login failed')
+    }
+
+    setLoading(false)
+  }
+
+  return (
+    <div className="min-h-screen bg-charcoal flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <Logo size="lg" showTagline />
+        </div>
+
+        {/* Card */}
+        <div className="bg-slate-dark border border-nile-blue/40 rounded-2xl p-8">
+          <h1 className="font-display text-2xl font-bold text-white mb-1">
+            Welcome Back
+          </h1>
+          <p className="text-white/50 text-sm mb-8">
+            Sign in to your account
+          </p>
+
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
+            {/* Username */}
+            <div>
+              <label className="text-sm text-white/70 block mb-1.5">
+                Username
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) =>
+                  setUsername(e.target.value)
+                }
+                placeholder="Enter username"
+                className="w-full bg-charcoal border border-gold/20 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-gold/50 text-sm"
+                autoComplete="username"
+                disabled={loading}
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="text-sm text-white/70 block mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={
+                    showPw ? 'text' : 'password'
+                  }
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(e.target.value)
+                  }
+                  placeholder="Enter password"
+                  className="w-full bg-charcoal border border-gold/20 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-white/30 focus:outline-none focus:border-gold/50 text-sm"
+                  autoComplete="current-password"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPw(!showPw)
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                >
+                  {showPw ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg px-4 py-3">
+                <p className="text-nile-danger text-sm">
+                  {error}
+                </p>
+              </div>
+            )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={
+                loading ||
+                !username ||
+                !password
+              }
+              className={cn(
+                'w-full py-3 rounded-lg font-semibold text-sm transition-colors',
+                loading ||
+                  !username ||
+                  !password
+                  ? 'bg-white/10 text-white/30 cursor-not-allowed'
+                  : 'bg-gold text-charcoal hover:bg-gold-light'
+              )}
+            >
+              {loading
+                ? 'Signing in...'
+                : 'Sign In'}
+            </button>
+          </form>
+
+          <p className="text-center text-white/40 text-sm mt-6">
+            Don&apos;t have an account?{' '}
+            <Link
+              href="/register"
+              className="text-gold hover:text-gold-light"
+            >
+              Register here
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}

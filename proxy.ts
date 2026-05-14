@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import type { NextRequest }
+  from 'next/server'
+import { createServerClient }
+  from '@supabase/ssr'
 
 export async function proxy(
   request: NextRequest
@@ -44,6 +46,7 @@ export async function proxy(
     '/check-slip',
     '/results',
     '/weekend-jackpot',
+    '/weekend-jackpot/results',
     '/rules',
     '/privacy',
     '/terms',
@@ -57,6 +60,7 @@ export async function proxy(
   const isPublic =
     publicPaths.includes(pathname) ||
     pathname.startsWith('/slip/') ||
+    pathname.startsWith('/match/') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname.includes('.')
@@ -78,6 +82,7 @@ export async function proxy(
   const role = profile?.role
   const status = profile?.status
 
+  // Suspended
   if (
     status === 'suspended' &&
     pathname !== '/suspended'
@@ -87,6 +92,7 @@ export async function proxy(
     return NextResponse.redirect(url)
   }
 
+  // Redirect from login/register
   if (
     pathname === '/login' ||
     pathname === '/register'
@@ -100,6 +106,73 @@ export async function proxy(
         : role === 'cashier'
         ? '/cashier-dashboard'
         : '/'
+    return NextResponse.redirect(url)
+  }
+
+  // Protect admin routes
+  if (
+    (pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/matches') ||
+      pathname.startsWith('/users') ||
+      pathname.startsWith('/credits') ||
+      pathname.startsWith('/coupons') ||
+      pathname.startsWith('/reports') ||
+      pathname.startsWith('/broadcast') ||
+      pathname.startsWith('/activity') ||
+      pathname.startsWith('/settings') ||
+      pathname.startsWith('/jackpot')) &&
+    role !== 'admin'
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname =
+      role === 'agent'
+        ? '/agent-dashboard'
+        : role === 'cashier'
+        ? '/cashier-dashboard'
+        : '/'
+    return NextResponse.redirect(url)
+  }
+
+  // Protect agent routes
+  if (
+    pathname.startsWith('/agent-') &&
+    role !== 'agent'
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname =
+      role === 'admin'
+        ? '/dashboard'
+        : role === 'cashier'
+        ? '/cashier-dashboard'
+        : '/'
+    return NextResponse.redirect(url)
+  }
+
+  // Protect cashier routes
+  if (
+    pathname.startsWith('/cashier-') &&
+    role !== 'cashier'
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname =
+      role === 'admin'
+        ? '/dashboard'
+        : role === 'agent'
+        ? '/agent-dashboard'
+        : '/'
+    return NextResponse.redirect(url)
+  }
+
+  // Protect bettor routes
+  if (
+    (pathname.startsWith('/bettor-') ||
+      pathname === '/my-bets' ||
+      pathname === '/profile' ||
+      pathname === '/notifications') &&
+    !user
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
