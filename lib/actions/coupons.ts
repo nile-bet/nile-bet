@@ -112,7 +112,7 @@ export async function generateWithdrawalCoupon(
     }
   }
 
-  // Check balance
+  // Check balance <
   const { data: profile } = await supabase
     .from('profiles')
     .select('credit_balance, reserved_balance')
@@ -169,7 +169,7 @@ export async function generateWithdrawalCoupon(
     expiresAt.getHours() + expiryHours
   )
 
-  // Reserve balance
+  // Reserve balance <
   await supabase
     .from('profiles')
     .update({
@@ -198,7 +198,7 @@ export async function generateWithdrawalCoupon(
     })
 
   if (error) {
-    // Rollback balance
+    // Rollback balance <
     await supabase
       .from('profiles')
       .update({

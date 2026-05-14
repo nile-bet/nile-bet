@@ -176,7 +176,7 @@ export function NotificationBell() {
 
         <div className="p-3 border-t border-nile-blue/20">
           <a
-            href="/notifications"
+            href="/bettor-notifications"
             className="text-xs text-gold hover:text-gold-light text-center block"
           >
             View all notifications &#8594;

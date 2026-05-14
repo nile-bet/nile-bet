@@ -83,7 +83,7 @@ export async function placeJackpotBet(input: {
     }
   }
 
-  // Check balance
+  // Check balance <
   const stake = jackpot.fixed_stake ?? 50
 
   const { data: placer } = await supabase
@@ -141,7 +141,7 @@ export async function placeJackpotBet(input: {
     .from('jackpot_slip_selections')
     .insert(rows)
 
-  // Deduct balance
+  // Deduct balance <
   await supabase
     .from('profiles')
     .update({

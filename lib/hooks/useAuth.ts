@@ -7,6 +7,8 @@ import { useAuthStore }
   from '@/lib/stores/authStore'
 import type { PlatformSettings }
   from '@/types/database.types'
+import { useNotificationStore }
+  from '@/lib/stores/notificationStore'
 
 function parseSettings(
   rows: { key: string; value: string }[]
@@ -109,6 +111,7 @@ export function useAuth() {
     role,
     settings,
   } = useAuthStore()
+  const { setNotifications } = useNotificationStore()
 
   const supabase = createClient()
 
@@ -132,6 +135,14 @@ export function useAuth() {
 
       if (profile) {
         setUser(profile)
+        // Load notifications
+        const { data: notifData } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('to_user_id', authUser.id)
+          .order('created_at', { ascending: false })
+          .limit(20)
+        if (notifData) setNotifications(notifData)
       }
 
       const { data: settingsRows } =

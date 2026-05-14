@@ -126,7 +126,7 @@ export async function placeBet(input: {
     }
   }
 
-  // Check placer balance
+  // Check placer balance <
   const { data: placer } = await supabase
     .from('profiles')
     .select('credit_balance')
@@ -323,7 +323,7 @@ export async function cancelBet(
     .update({ status: 'cancelled' })
     .eq('id', slip.id)
 
-  // Refund stake
+  // Refund stake <
   try {
     await supabase.rpc(
       'refund_stake_to_placer',

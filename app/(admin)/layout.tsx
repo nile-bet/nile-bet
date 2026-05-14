@@ -1,4 +1,7 @@
 'use client'
+
+import { useAuth }
+  from '@/lib/hooks/useAuth'
 import { OfflineBanner }
   from '@/components/shared/OfflineBanner'
 import {
@@ -71,6 +74,11 @@ const adminNav: NavItem[] = [
   },
 ]
 
+function AdminInitializer() {
+  useAuth()
+  return null
+}
+
 export default function AdminLayout({
   children,
 }: {
@@ -78,6 +86,7 @@ export default function AdminLayout({
 }) {
   return (
     <>
+      <AdminInitializer />
       <OfflineBanner />
       <SidebarLayout navItems={adminNav}>
         {children}
