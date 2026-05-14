@@ -103,7 +103,6 @@ export default function RegisterPage() {
         '🌊 Welcome to NILE Bet! Top up to start betting.'
       )
       router.push('/')
-      router.refresh()
     } else {
       setError(
         result.error ?? 'Registration failed'
