@@ -277,14 +277,18 @@ export async function getTopLeagues(): Promise<League[]> {
 
   const { data, error } = await supabase
     .from('leagues')
-    .select('*')
+    .select('*, countries(name, flag_emoji)')
     .eq('is_top_league', true)
     .order('display_order', {
       ascending: true,
     })
 
   if (error) return []
-  return (data ?? []) as League[]
+  return (data ?? []).map((l: any) => ({
+    ...l,
+    flag_emoji: l.countries?.flag_emoji ?? '🏳️',
+    country_name: l.countries?.name ?? '',
+  })) as League[]
 }
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
