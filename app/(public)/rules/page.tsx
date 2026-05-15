@@ -61,10 +61,10 @@ const sections = [
       Maximum potential win per slip: ETB 500,000.
 
       One Loss Insurance (10+ selections):
-      - Exactly 1 loss → 2% of Net Payout credited
-      - Exactly 2 losses → 1% of Net Payout credited
-      - Exactly 3 losses → Full stake refunded (no tax)
-      - 4+ losses → Standard lost slip
+      - Exactly 1 loss &#8594; 2% of Net Payout credited
+      - Exactly 2 losses &#8594; 1% of Net Payout credited
+      - Exactly 3 losses &#8594; Full stake refunded (no tax)
+      - 4+ losses &#8594; Standard lost slip
 
       Cancelled bets: Cancelled selections in an accumulator have their odds set to 1.00. If all selections void, full stake refunded.
     `,

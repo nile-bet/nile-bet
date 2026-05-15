@@ -209,7 +209,7 @@ export function TopupFlowModal({
             >
               {loading
                 ? 'Generating...'
-                : 'Generate Coupon →'}
+                : 'Generate Coupon &#8594;'}
             </button>
           </div>
         ) : (

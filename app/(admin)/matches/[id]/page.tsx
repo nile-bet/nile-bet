@@ -445,7 +445,7 @@ export default function ResultEntryPage({
                   : 'bg-white/10 text-white/30 cursor-not-allowed'
               )}
             >
-              Next →
+              Next &#8594;
             </button>
           </div>
         </div>
@@ -598,7 +598,7 @@ export default function ResultEntryPage({
               onClick={() => setStep(3)}
               className="bg-gold text-charcoal px-6 py-2.5 rounded-lg text-sm font-semibold"
             >
-              Next →
+              Next &#8594;
             </button>
           </div>
         </div>
@@ -752,7 +752,7 @@ export default function ResultEntryPage({
               }}
               className="bg-gold text-charcoal px-6 py-2.5 rounded-lg text-sm font-semibold"
             >
-              Next →
+              Next &#8594;
             </button>
           </div>
         </div>

@@ -82,7 +82,7 @@ export function DashboardNavbar({
       {/* Right */}
       <div className="flex items-center gap-2">
         {/* Jackpot */}
-        <Link href="/jackpot">
+        <Link href={role === "agent" ? "/agent-jackpot" : role === "cashier" ? "/cashier-jackpot" : "/jackpot"}>
           <button className="bg-gold text-charcoal font-bold text-xs px-3 py-1.5 rounded-md hover:bg-gold-light transition-colors animate-pulse-gold hover:animate-none">
             🏆 JACKPOT
           </button>

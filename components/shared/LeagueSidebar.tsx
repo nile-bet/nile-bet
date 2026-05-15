@@ -123,6 +123,9 @@ export function LeagueSidebar({
                   : 'text-white/60 hover:bg-gold/5 hover:text-white border-l-2 border-transparent'
               )}
             >
+              <span className="flex-shrink-0">
+                {(league as any).flag_emoji ?? '🏳️'}
+              </span>
               <span className="truncate">
                 {league.name}
               </span>

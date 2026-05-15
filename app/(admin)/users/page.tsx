@@ -540,7 +540,7 @@ export default function UsersPage() {
             }
             className="px-4 py-2 border border-nile-blue/30 text-white/60 rounded-lg text-sm disabled:opacity-30"
           >
-            Next →
+            Next &#8594;
           </button>
         </div>
       )}

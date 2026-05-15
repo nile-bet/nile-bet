@@ -439,7 +439,7 @@ export function MatchWizard({
                     : 'bg-white/10 text-white/30 cursor-not-allowed'
                 )}
               >
-                Next Step →
+                Next Step &#8594;
               </button>
             </div>
           </div>
@@ -668,7 +668,7 @@ export function MatchWizard({
                     : 'bg-white/10 text-white/30 cursor-not-allowed'
                 )}
               >
-                Next Step →
+                Next Step &#8594;
               </button>
             </div>
           </div>

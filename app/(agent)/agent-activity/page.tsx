@@ -1,55 +1,52 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getActivityLogs }
-  from '@/lib/actions/admin'
+import { getAgentActivityLog }
+  from '@/lib/actions/agent'
 import { DataTable }
   from '@/components/shared/DataTable'
 import { formatDate }
   from '@/lib/utils/formatCurrency'
-import { Search } from 'lucide-react'
+import { useAuthStore }
+  from '@/lib/stores/authStore'
 import { cn } from '@/lib/utils'
 import * as XLSX from 'xlsx'
 
-const ACTION_COLORS: Record<string, string> =
-  {
-    bet_placed: 'text-nile-blue-light',
-    bet_cancelled: 'text-nile-orange',
-    user_created: 'text-nile-success',
-    credits_assigned: 'text-gold',
-    force_logout: 'text-nile-danger',
-    broadcast_sent: 'text-nile-purple',
-    settings_updated: 'text-white/60',
-    login: 'text-white/40',
-    register: 'text-nile-success',
-    coupon_generated: 'text-nile-blue',
-    jackpot_bet_placed: 'text-gold',
-  }
+const ACTION_COLORS: Record<
+  string,
+  string
+> = {
+  bet_placed: 'text-nile-blue-light',
+  cashier_created: 'text-nile-success',
+  credits_assigned: 'text-gold',
+  coupon_topup_approved: 'text-nile-success',
+  coupon_withdrawal_approved:
+    'text-nile-orange',
+  credit_request_created:
+    'text-nile-blue-light',
+  user_suspended: 'text-nile-danger',
+  user_activated: 'text-nile-success',
+}
 
-export default function ActivityPage() {
+export default function AgentActivityPage() {
+  const { user } = useAuthStore()
   const [logs, setLogs] = useState<any[]>([])
   const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] =
+    useState(true)
   const [page, setPage] = useState(1)
-  const [actionFilter, setActionFilter] =
-    useState('')
-  const [startDate, setStartDate] =
-    useState('')
-  const [endDate, setEndDate] = useState('')
 
   useEffect(() => {
-    loadLogs()
-  }, [page, actionFilter, startDate, endDate])
+    if (user) loadLogs()
+  }, [user, page])
 
   const loadLogs = async () => {
+    if (!user) return
     setLoading(true)
     const { logs: data, total: t } =
-      await getActivityLogs({
-        actionType: actionFilter || undefined,
-        startDate: startDate || undefined,
-        endDate: endDate || undefined,
+      await getAgentActivityLog(user.id, {
         page,
-        limit: 50,
+        limit: 30,
       })
     setLogs(data)
     setTotal(t)
@@ -64,13 +61,17 @@ export default function ActivityPage() {
       Details: JSON.stringify(l.details),
       Time: formatDate(l.created_at),
     }))
-
     const wb = XLSX.utils.book_new()
     const ws = XLSX.utils.json_to_sheet(rows)
     XLSX.utils.book_append_sheet(
-      wb, ws, 'Activity'
+      wb,
+      ws,
+      'Activity'
     )
-    XLSX.writeFile(wb, 'activity-logs.xlsx')
+    XLSX.writeFile(
+      wb,
+      'agent-activity.xlsx'
+    )
   }
 
   const columns = [
@@ -121,7 +122,7 @@ export default function ActivityPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold text-white">
-          Activity Logs
+          Activity Log
         </h1>
         <button
           onClick={handleExport}
@@ -131,67 +132,20 @@ export default function ActivityPage() {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-          <input
-            value={actionFilter}
-            onChange={(e) => {
-              setActionFilter(e.target.value)
-              setPage(1)
-            }}
-            placeholder="Filter by action..."
-            className="bg-slate-dark border border-nile-blue/30 rounded-lg pl-9 pr-4 py-2 text-white text-sm focus:outline-none focus:border-gold/40 w-48"
-          />
-        </div>
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => {
-            setStartDate(e.target.value)
-            setPage(1)
-          }}
-          className="bg-slate-dark border border-nile-blue/30 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
-        />
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => {
-            setEndDate(e.target.value)
-            setPage(1)
-          }}
-          className="bg-slate-dark border border-nile-blue/30 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
-        />
-        {(actionFilter ||
-          startDate ||
-          endDate) && (
-          <button
-            onClick={() => {
-              setActionFilter('')
-              setStartDate('')
-              setEndDate('')
-              setPage(1)
-            }}
-            className="text-xs text-white/50 hover:text-white border border-white/20 px-3 py-2 rounded-lg"
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
-
       <DataTable
         columns={columns}
         data={logs}
         isLoading={loading}
-        emptyMessage="No activity logs"
+        emptyMessage="No activity yet"
       />
 
-      {total > 50 && (
+      {total > 30 && (
         <div className="flex justify-center gap-3">
           <button
             onClick={() =>
-              setPage((p) => Math.max(1, p - 1))
+              setPage((p) =>
+                Math.max(1, p - 1)
+              )
             }
             disabled={page === 1}
             className="px-4 py-2 border border-nile-blue/30 text-white/60 rounded-lg text-sm disabled:opacity-30"
@@ -199,12 +153,14 @@ export default function ActivityPage() {
             ← Prev
           </button>
           <span className="text-white/50 text-sm py-2">
-            {page} / {Math.ceil(total / 50)}
+            {page} / {Math.ceil(total / 30)}
           </span>
           <button
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() =>
+              setPage((p) => p + 1)
+            }
             disabled={
-              page >= Math.ceil(total / 50)
+              page >= Math.ceil(total / 30)
             }
             className="px-4 py-2 border border-nile-blue/30 text-white/60 rounded-lg text-sm disabled:opacity-30"
           >

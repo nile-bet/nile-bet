@@ -1,3 +1,9 @@
+'use client'
+
+import { useAuth }
+  from '@/lib/hooks/useAuth'
+import { useRealtimeAgent }
+  from '@/lib/hooks/useRealtimeAgent'
 import { OfflineBanner }
   from '@/components/shared/OfflineBanner'
 import {
@@ -34,7 +40,7 @@ const agentNav: NavItem[] = [
     icon: User,
   },
   {
-    href: '/weekend-jackpot',
+    href: '/agent-jackpot',
     label: 'Jackpot',
     icon: Trophy,
   },
@@ -70,6 +76,12 @@ const agentNav: NavItem[] = [
   },
 ]
 
+function AgentInitializer() {
+  useAuth()
+  useRealtimeAgent()
+  return null
+}
+
 export default function AgentLayout({
   children,
 }: {
@@ -77,6 +89,7 @@ export default function AgentLayout({
 }) {
   return (
     <>
+      <AgentInitializer />
       <OfflineBanner />
       <SidebarLayout navItems={agentNav}>
         {children}

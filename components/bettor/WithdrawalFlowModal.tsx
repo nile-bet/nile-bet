@@ -231,7 +231,7 @@ export function WithdrawalFlowModal({
             >
               {loading
                 ? 'Generating...'
-                : 'Generate Withdrawal Coupon →'}
+                : 'Generate Withdrawal Coupon &#8594;'}
             </button>
           </div>
         ) : (
