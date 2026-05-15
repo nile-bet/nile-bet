@@ -1,11 +1,8 @@
 'use client'
-
-import { useAuth }
-  from '@/lib/hooks/useAuth'
-import { OfflineBanner }
-  from '@/components/shared/OfflineBanner'
-import { BroadcastBanner }
-  from '@/components/shared/BroadcastBanner'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { useAuthStore } from '@/lib/stores/authStore'
+import { OfflineBanner } from '@/components/shared/OfflineBanner'
+import { BroadcastBanner } from '@/components/shared/BroadcastBanner'
 
 function AuthInitializer() {
   useAuth()

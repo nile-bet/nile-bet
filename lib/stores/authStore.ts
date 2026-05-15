@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type {
   Profile,
   UserRole,
@@ -25,7 +26,9 @@ interface AuthState {
 }
 
 export const useAuthStore =
-  create<AuthState>((set) => ({
+  create<AuthState>()(
+  persist(
+  (set) => ({
     user: null,
     role: null,
     isLoading: true,
@@ -54,6 +57,9 @@ export const useAuthStore =
             }
           : null,
       })),
+  { name: 'nile-auth-store', partialize: (state) => ({ user: state.user, role: state.role, isAuthenticated: state.isAuthenticated }) }
+  )
+),
 
     updateReservedBalance: (amount) =>
       set((state) => ({
