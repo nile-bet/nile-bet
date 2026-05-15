@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { useNotificationStore }
   from '@/lib/stores/notificationStore'
 import { formatTimeAgo }
@@ -81,12 +82,20 @@ function getNotifIcon(
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false)
+  const { role } = useAuthStore()
   const {
     notifications,
     unreadCount,
     markAsRead,
     markAllAsRead,
   } = useNotificationStore()
+  const notifPath = role === 'admin'
+    ? '/notifications'
+    : role === 'agent'
+    ? '/agent-notifications'
+    : role === 'cashier'
+    ? '/cashier-notifications'
+    : '/bettor-notifications'
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -176,7 +185,7 @@ export function NotificationBell() {
 
         <div className="p-3 border-t border-nile-blue/20">
           <a
-            href="/bettor-notifications"
+            href={notifPath}
             className="text-xs text-gold hover:text-gold-light text-center block"
           >
             View all notifications &#8594;

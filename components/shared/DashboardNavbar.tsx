@@ -48,10 +48,10 @@ export function DashboardNavbar({
 
   const dashboardLink =
     role === 'admin'
-      ? '/admin/dashboard'
+      ? '/dashboard'
       : role === 'agent'
-      ? '/agent/dashboard'
-      : '/cashier/dashboard'
+      ? '/agent-dashboard'
+      : '/cashier-dashboard'
 
   return (
     <nav className="bg-slate-dark border-b border-gold/20 h-14 px-4 md:px-6 flex items-center justify-between sticky top-0 z-40">
@@ -150,9 +150,11 @@ export function DashboardNavbar({
               <Link
                 href={
                   role === 'cashier'
-                    ? '/cashier/check-slip'
+                    ? '/cashier-check-slip'
                     : role === 'agent'
-                    ? '/agent/check-slip'
+                    ? '/agent-check-slip'
+                    : role === 'admin'
+                    ? '/slip-lookup'
                     : '/check-slip'
                 }
                 className="cursor-pointer flex items-center gap-2"
