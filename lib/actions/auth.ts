@@ -64,7 +64,6 @@ export async function loginUser(
       email,
       password,
     })
-  console.log("LOGIN DEBUG:", { error: authError?.message, hasUser: !!authData?.user })
 
   if (authError || !authData.user) {
     // Increment attempts
