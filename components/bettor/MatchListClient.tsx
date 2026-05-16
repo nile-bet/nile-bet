@@ -149,7 +149,7 @@ export function MatchListClient({
   )
 
   return (
-    <>
+    <div className="flex flex-col flex-1 overflow-hidden">
       <FilterBar
         onFilterChange={handleFilterChange}
         matchCount={matches.length}
@@ -265,6 +265,6 @@ export function MatchListClient({
         isOpen={showPlaceBet}
         onClose={() => setShowPlaceBet(false)}
       />
-    </>
+    </div>
   )
 }

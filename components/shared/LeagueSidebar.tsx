@@ -61,7 +61,7 @@ export function LeagueSidebar({
   return (
     <div
       className={cn(
-        'w-[220px] flex-shrink-0 bg-slate-dark border-r border-gold/10 flex flex-col overflow-hidden',
+        'w-[200px] flex-shrink-0 bg-slate-dark border-r border-gold/10 flex flex-col overflow-hidden',
         className
       )}
     >

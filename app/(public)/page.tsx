@@ -22,12 +22,15 @@ export default async function HomePage() {
   ])
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-charcoal">
+    <div className="flex flex-col min-h-screen bg-charcoal">
       {/* Sticky Navbar */}
       <PublicNavbar />
 
-      {/* Main body: filter + content + footer */}
-      <div className="flex flex-col flex-1 overflow-hidden">
+      {/* Main 3-column area — fixed height, no scroll on outer */}
+      <div
+        className="flex flex-col flex-1"
+        style={{ height: 'calc(100vh - 56px)' }}
+      >
         <MatchListClient
           initialMatches={initialMatches}
           countries={countries}
@@ -35,6 +38,9 @@ export default async function HomePage() {
           settings={settings}
         />
       </div>
+
+      {/* Footer — full width, below the 3 columns */}
+      <Footer />
     </div>
   )
 }
