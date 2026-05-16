@@ -1,12 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { OddButton } from './OddButton'
-import { formatKickOff }
-  from '@/lib/utils/formatCurrency'
-import type { MatchWithMarkets }
-  from '@/types/database.types'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import type { MatchWithMarkets } from '@/types/database.types'
 
 interface MatchRowProps {
   match: MatchWithMarkets
@@ -14,54 +13,41 @@ interface MatchRowProps {
   basePath?: string
 }
 
-function getQuickOdds(
-  match: MatchWithMarkets,
-  marketName: string
-) {
-  const market = match.match_markets?.find(
-    (mm) =>
-      mm.market_templates?.name ===
-        marketName && mm.is_enabled
-  )
-  if (!market) return null
-  return market
+function getQuickOdds(match: MatchWithMarkets, marketName: string) {
+  return match.match_markets?.find(
+    (mm) => mm.market_templates?.name === marketName && mm.is_enabled
+  ) ?? null
 }
 
-export function MatchRow({
-  match,
-  isEven,
-  basePath = '',
-}: MatchRowProps) {
+export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
   const router = useRouter()
+  const [expanded, setExpanded] = useState(false)
+  const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
-  const market1x2 = getQuickOdds(
-    match,
-    '1X2 (Full Time Result)'
-  )
-  const marketDC = getQuickOdds(
-    match,
-    'Double Chance'
-  )
-  const marketBTTS = getQuickOdds(
-    match,
-    'Both Teams to Score'
-  )
+  const market1x2 = getQuickOdds(match, '1X2 (Full Time Result)')
+  const marketDC = getQuickOdds(match, 'Double Chance')
+  const marketBTTS = getQuickOdds(match, 'Both Teams to Score')
 
-  const getOdd = (
-    market: typeof market1x2,
-    sel: string
-  ) => {
+  const getOdd = (market: ReturnType<typeof getQuickOdds>, sel: string) => {
     if (!market) return null
-    const o = market.match_market_odds?.find(
-      (o) => o.selection === sel
-    )
-    return o?.odd_value ?? null
+    return market.match_market_odds?.find((o) => o.selection === sel)?.odd_value ?? null
   }
 
-  const totalMarkets =
-    match.match_markets?.filter(
-      (m) => m.is_enabled
-    ).length ?? 0
+  const totalMarkets = match.match_markets?.filter((m) => m.is_enabled).length ?? 0
+
+  // Group markets by category
+  const marketsByCategory = (match.match_markets ?? [])
+    .filter((mm) => mm.is_enabled)
+    .reduce((acc, mm) => {
+      const cat = (mm.market_templates as any)?.market_categories?.name ?? 'MAIN'
+      if (!acc[cat]) acc[cat] = []
+      acc[cat].push(mm)
+      return acc
+    }, {} as Record<string, typeof match.match_markets>)
+
+  const categories = Object.keys(marketsByCategory)
+  const currentCategory = activeCategory ?? categories[0] ?? 'MAIN'
+  const currentMarkets = marketsByCategory[currentCategory] ?? []
 
   const commonProps = {
     matchId: match.id,
@@ -78,8 +64,7 @@ export function MatchRow({
       className={cn(
         'border-b border-nile-blue/20 transition-colors',
         isEven ? 'bg-charcoal' : 'bg-charcoal/60',
-        match.is_featured &&
-          'border border-gold/30 bg-gold/5'
+        match.is_featured && 'border border-gold/30 bg-gold/5'
       )}
     >
       {/* Match name row */}
@@ -91,130 +76,91 @@ export function MatchRow({
             </span>
           )}
           <span className="text-[14px] font-medium text-white">
-            {match.home_team} V{' '}
-            {match.away_team}
+            {match.home_team} V {match.away_team}
           </span>
         </div>
         <button
-          onClick={() =>
-            router.push(
-              `${basePath}/match/${match.id}`
-            )
-          }
-          className="text-nile-blue-light text-xs bg-nile-blue/20 border border-nile-blue/40 px-2 py-1 rounded hover:bg-nile-blue/30 transition-colors flex-shrink-0 ml-2"
+          onClick={() => setExpanded(!expanded)}
+          className="text-nile-blue-light text-xs bg-nile-blue/20 border border-nile-blue/40 px-2 py-1 rounded hover:bg-nile-blue/30 transition-colors flex-shrink-0 ml-2 flex items-center gap-1"
         >
-          +{totalMarkets} more ▶
+          +{totalMarkets} more
+          {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
         </button>
       </div>
 
-      {/* Odds row */}
+      {/* Main odds row */}
       <div className="flex items-center gap-1 px-4 pb-2 overflow-x-auto scrollbar-hide">
-        {/* 1X2 */}
         <div className="flex gap-1 flex-shrink-0">
-          <OddButton
-            {...commonProps}
-            label="1"
-            odd={getOdd(market1x2, 'Home')}
-            matchMarketId={
-              market1x2?.id ?? `${match.id}-1x2-1`
-            }
-            selection="Home"
-            marketName="1X2 (Full Time Result)"
-            categoryName="MAIN"
-          />
-          <OddButton
-            {...commonProps}
-            label="X"
-            odd={getOdd(market1x2, 'Draw')}
-            matchMarketId={
-              market1x2?.id ?? `${match.id}-1x2-x`
-            }
-            selection="Draw"
-            marketName="1X2 (Full Time Result)"
-            categoryName="MAIN"
-          />
-          <OddButton
-            {...commonProps}
-            label="2"
-            odd={getOdd(market1x2, 'Away')}
-            matchMarketId={
-              market1x2?.id ?? `${match.id}-1x2-2`
-            }
-            selection="Away"
-            marketName="1X2 (Full Time Result)"
-            categoryName="MAIN"
-          />
+          <OddButton {...commonProps} label="1" odd={getOdd(market1x2, 'Home')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-1`} selection="Home" marketName="1X2 (Full Time Result)" categoryName="MAIN" />
+          <OddButton {...commonProps} label="X" odd={getOdd(market1x2, 'Draw')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-x`} selection="Draw" marketName="1X2 (Full Time Result)" categoryName="MAIN" />
+          <OddButton {...commonProps} label="2" odd={getOdd(market1x2, 'Away')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-2`} selection="Away" marketName="1X2 (Full Time Result)" categoryName="MAIN" />
         </div>
-
-        {/* Divider */}
         <div className="w-px h-8 bg-gold/20 flex-shrink-0 mx-1" />
-
-        {/* Double Chance */}
         <div className="flex gap-1 flex-shrink-0">
-          <OddButton
-            {...commonProps}
-            label="1X"
-            odd={getOdd(marketDC, '1X')}
-            matchMarketId={
-              marketDC?.id ?? `${match.id}-dc-1x`
-            }
-            selection="1X"
-            marketName="Double Chance"
-            categoryName="MAIN"
-          />
-          <OddButton
-            {...commonProps}
-            label="12"
-            odd={getOdd(marketDC, '12')}
-            matchMarketId={
-              marketDC?.id ?? `${match.id}-dc-12`
-            }
-            selection="12"
-            marketName="Double Chance"
-            categoryName="MAIN"
-          />
-          <OddButton
-            {...commonProps}
-            label="X2"
-            odd={getOdd(marketDC, 'X2')}
-            matchMarketId={
-              marketDC?.id ?? `${match.id}-dc-x2`
-            }
-            selection="X2"
-            marketName="Double Chance"
-            categoryName="MAIN"
-          />
+          <OddButton {...commonProps} label="1X" odd={getOdd(marketDC, '1X')} matchMarketId={marketDC?.id ?? `${match.id}-dc-1x`} selection="1X" marketName="Double Chance" categoryName="MAIN" />
+          <OddButton {...commonProps} label="12" odd={getOdd(marketDC, '12')} matchMarketId={marketDC?.id ?? `${match.id}-dc-12`} selection="12" marketName="Double Chance" categoryName="MAIN" />
+          <OddButton {...commonProps} label="X2" odd={getOdd(marketDC, 'X2')} matchMarketId={marketDC?.id ?? `${match.id}-dc-x2`} selection="X2" marketName="Double Chance" categoryName="MAIN" />
         </div>
-
-        {/* Divider */}
         <div className="w-px h-8 bg-gold/20 flex-shrink-0 mx-1" />
-
-        {/* BTTS */}
         <div className="flex gap-1 flex-shrink-0">
-          <OddButton
-            {...commonProps}
-            label="Yes"
-            odd={getOdd(marketBTTS, 'Yes')}
-            matchMarketId={
-              marketBTTS?.id ?? `${match.id}-btts-y`
-            }
-            selection="Yes"
-            marketName="Both Teams to Score"
-            categoryName="MAIN"
-          />
-          <OddButton
-            {...commonProps}
-            label="No"
-            odd={getOdd(marketBTTS, 'No')}
-            matchMarketId={
-              marketBTTS?.id ?? `${match.id}-btts-n`
-            }
-            selection="No"
-            marketName="Both Teams to Score"
-            categoryName="MAIN"
-          />
+          <OddButton {...commonProps} label="Yes" odd={getOdd(marketBTTS, 'Yes')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-y`} selection="Yes" marketName="Both Teams to Score" categoryName="MAIN" />
+          <OddButton {...commonProps} label="No" odd={getOdd(marketBTTS, 'No')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-n`} selection="No" marketName="Both Teams to Score" categoryName="MAIN" />
         </div>
       </div>
+
+      {/* Expanded markets panel */}
+      {expanded && (
+        <div className="border-t border-nile-blue/30 bg-slate-dark/60 text-[55%]">
+          {/* Category tabs */}
+          <div className="flex overflow-x-auto scrollbar-hide border-b border-nile-blue/20 bg-slate-dark">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={cn(
+                  'text-[9px] px-2 py-1 font-semibold tracking-wider uppercase whitespace-nowrap transition-colors flex-shrink-0',
+                  currentCategory === cat
+                    ? 'text-gold border-b-2 border-gold'
+                    : 'text-white/40 hover:text-white'
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Markets in selected category */}
+          <div className="p-1 space-y-1">
+            {currentMarkets?.map((market) => (
+              <div key={market.id}>
+                <div
+                  className="flex items-center justify-between py-0 cursor-pointer"
+                >
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                    {market.market_templates?.name}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-0.5 mt-0.5">
+                  {market.match_market_odds?.map((odd) => (
+                    <div key={odd.id} className="flex items-center justify-between bg-charcoal/60 rounded px-1 py-0.5">
+                      <span className="text-[10px] text-white/60 truncate mr-1">{odd.selection}</span>
+                      <OddButton
+                        {...commonProps}
+                        label={String(odd.odd_value)}
+                        odd={odd.odd_value}
+                        matchMarketId={market.id}
+                        selection={odd.selection}
+                        marketName={market.market_templates?.name ?? ''}
+                        categoryName={(market.market_templates as any)?.market_categories?.name ?? 'MAIN'}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
