@@ -110,40 +110,38 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
 
       {/* Expanded markets panel */}
       {expanded && (
-        <div className="border-t border-nile-blue/30 bg-slate-dark/60 text-[55%]">
+        <div className="border-t border-nile-blue/30 bg-slate-dark">
           {/* Category tabs */}
-          <div className="flex overflow-x-auto scrollbar-hide border-b border-nile-blue/20 bg-slate-dark">
+          <div className="flex overflow-x-auto scrollbar-hide border-b border-nile-blue/20">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={cn(
-                  'text-[9px] px-2 py-1 font-semibold tracking-wider uppercase whitespace-nowrap transition-colors flex-shrink-0',
+                  'text-[9px] px-3 py-2 font-bold tracking-widest uppercase whitespace-nowrap transition-colors flex-shrink-0 border-b-2',
                   currentCategory === cat
-                    ? 'text-gold border-b-2 border-gold'
-                    : 'text-white/40 hover:text-white'
+                    ? 'text-gold border-gold'
+                    : 'text-white/30 border-transparent hover:text-white/60'
                 )}
               >
-                {cat}
+                {cat}({marketsByCategory[cat]?.length ?? 0})
               </button>
             ))}
           </div>
-
-          {/* Markets in selected category */}
-          <div className="p-1 space-y-1">
+          {/* Markets list */}
+          <div className="divide-y divide-nile-blue/10 overflow-y-auto max-h-64">
             {currentMarkets?.map((market) => (
               <div key={market.id}>
-                <div
-                  className="flex items-center justify-between py-0 cursor-pointer"
-                >
+                <div className="flex items-center justify-between px-4 py-1.5 bg-nile-blue/5">
                   <span className="text-[10px] font-bold text-white uppercase tracking-wide">
                     {market.market_templates?.name}
                   </span>
+                  <ChevronUp className="w-3 h-3 text-white/30" />
                 </div>
-                <div className="grid grid-cols-4 gap-0.5 mt-0.5">
+                <div className="grid px-4 py-2 gap-y-1.5" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
                   {market.match_market_odds?.map((odd) => (
-                    <div key={odd.id} className="flex items-center justify-between bg-charcoal/60 rounded px-1 py-0.5">
-                      <span className="text-[10px] text-white/60 truncate mr-1">{odd.selection}</span>
+                    <div key={odd.id} className="flex items-center justify-between pr-2">
+                      <span className="text-[10px] text-white/50">{odd.selection}</span>
                       <OddButton
                         {...commonProps}
                         label={String(odd.odd_value)}

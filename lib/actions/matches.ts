@@ -86,7 +86,8 @@ export async function getUpcomingMatches(options: {
         *,
         market_templates (
           id,
-          name
+          name,
+          market_categories (id, name, display_order)
         ),
         match_market_odds (*)
       )
