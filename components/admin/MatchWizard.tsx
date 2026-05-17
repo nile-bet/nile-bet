@@ -702,12 +702,48 @@ export function MatchWizard({
                       (template) => {
                         if (template.is_dynamic)
                           return (
-                            <p
+                            <div
                               key={template.id}
-                              className="text-white/40 text-xs px-2 mb-1"
+                              className="bg-charcoal/50 rounded-lg p-3 mb-2"
                             >
-                              {template.name} — player odds auto-generated from player list
-                            </p>
+                              <p className="text-white/60 text-xs mb-2">
+                                {template.name}
+                              </p>
+                              {players.length === 0 ? (
+                                <p className="text-white/30 text-xs">
+                                  Add players in the Markets step first
+                                </p>
+                              ) : (
+                                <div className="flex flex-wrap gap-2">
+                                  {players.map((player, pi) => {
+                                    const val = getOdd(template.id, player.name)
+                                    return (
+                                      <div key={pi} className="flex flex-col items-center gap-1">
+                                        <span className="text-white/50 text-[10px] text-center max-w-[80px] truncate">
+                                          {player.name}
+                                        </span>
+                                        <input
+                                          type="number"
+                                          step="0.01"
+                                          min="1.01"
+                                          value={val}
+                                          onChange={(e) =>
+                                            setOdds((prev) => ({
+                                              ...prev,
+                                              [template.id]: {
+                                                ...(prev[template.id] ?? {}),
+                                                [player.name]: e.target.value,
+                                              },
+                                            }))
+                                          }
+                                          className="w-16 bg-charcoal border border-nile-blue/40 rounded px-1 py-1 text-center text-gold font-mono text-xs focus:outline-none focus:border-gold"
+                                        />
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              )}
+                            </div>
                           )
 
                         const sels: string[] =

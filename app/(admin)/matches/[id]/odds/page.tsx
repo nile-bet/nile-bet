@@ -7,6 +7,8 @@ import { createClient }
 import {
   updateMatch,
   applyGlobalMargin,
+  addPlayerToScorers,
+  removePlayerFromScorers,
 } from '@/lib/actions/adminMatches'
 import { StatusBadge }
   from '@/components/shared/StatusBadge'
@@ -45,6 +47,9 @@ export default function OddsPage({
   const [showMarginConfirm, setShowMarginConfirm] =
     useState(false)
   const [saving, setSaving] = useState(false)
+  const [players, setPlayers] = useState<any[]>([])
+  const [newPlayer, setNewPlayer] = useState({ name: '', team: 'home' as 'home' | 'away', odd: '2.00' })
+  const [addingPlayer, setAddingPlayer] = useState(false)
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -78,7 +83,48 @@ export default function OddsPage({
       .eq('id', id)
       .single()
 
-    if (data) setMatch(data)
+    if (data) {
+      setMatch(data)
+      // Load players for scorers markets
+      const supabase2 = createClient()
+      const { data: pl } = await supabase2
+        .from('match_players')
+        .select('*')
+        .eq('match_id', id)
+        .order('team', { ascending: true })
+      if (pl) setPlayers(pl)
+    }
+  }
+
+  const handleAddPlayer = async () => {
+    if (!newPlayer.name.trim() || !matchId || !user) return
+    setAddingPlayer(true)
+    const result = await addPlayerToScorers(
+      matchId,
+      newPlayer.name.trim(),
+      newPlayer.team,
+      parseFloat(newPlayer.odd) || 2.00,
+      user.id
+    )
+    if (result.success) {
+      setNewPlayer({ name: '', team: 'home', odd: '2.00' })
+      toast.success('Player added!')
+      loadMatch(matchId)
+      // Reload players
+      const supabase = createClient()
+      const { data: pl } = await supabase.from('match_players').select('*').eq('match_id', matchId).order('team')
+      if (pl) setPlayers(pl)
+    } else {
+      toast.error(result.error ?? 'Failed to add player')
+    }
+    setAddingPlayer(false)
+  }
+
+  const handleRemovePlayer = async (playerId: string, playerName: string) => {
+    await removePlayerFromScorers(matchId, playerId, playerName)
+    setPlayers(players.filter((p: any) => p.id !== playerId))
+    loadMatch(matchId)
+    toast.success('Player removed')
   }
 
   const getCategoryMarkets = (cat: string) =>
@@ -254,10 +300,72 @@ export default function OddsPage({
 
       {/* Odds table */}
       <div className="space-y-4">
+        {/* SCORERS special UI */}
+        {activeCategory === 'SCORERS' && (
+          <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-4 mb-4">
+            <p className="text-white font-medium text-sm mb-3">Add Player</p>
+            <div className="flex gap-2 flex-wrap">
+              <input
+                type="text"
+                value={newPlayer.name}
+                onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
+                placeholder="Player name"
+                className="flex-1 min-w-[160px] bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold"
+              />
+              <select
+                value={newPlayer.team}
+                onChange={(e) => setNewPlayer({ ...newPlayer, team: e.target.value as 'home' | 'away' })}
+                className="bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
+              >
+                <option value="home">{match.home_team}</option>
+                <option value="away">{match.away_team}</option>
+              </select>
+              <input
+                type="number"
+                step="0.01"
+                min="1.01"
+                value={newPlayer.odd}
+                onChange={(e) => setNewPlayer({ ...newPlayer, odd: e.target.value })}
+                placeholder="Odd"
+                className="w-24 bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none text-center"
+              />
+              <button
+                onClick={handleAddPlayer}
+                disabled={addingPlayer || !newPlayer.name.trim()}
+                className="bg-gold text-charcoal px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gold-light disabled:opacity-50"
+              >
+                {addingPlayer ? 'Adding...' : '+ Add Player'}
+              </button>
+            </div>
+            {/* Player list */}
+            {players.length > 0 && (
+              <div className="mt-4">
+                <p className="text-white/50 text-xs mb-2 uppercase tracking-widest">Players ({players.length})</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {players.map((p: any) => (
+                    <div key={p.id} className="flex items-center justify-between bg-charcoal/60 rounded-lg px-3 py-2">
+                      <div>
+                        <span className="text-white text-sm">{p.player_name}</span>
+                        <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded ${p.team === 'home' ? 'bg-nile-blue/30 text-nile-blue-light' : 'bg-nile-orange/20 text-nile-orange'}`}>
+                          {p.team === 'home' ? match.home_team : match.away_team}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleRemovePlayer(p.id, p.player_name)}
+                        className="text-nile-danger/60 hover:text-nile-danger text-xs ml-2"
+                      >✕</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {getCategoryMarkets(activeCategory)
           .length === 0 ? (
           <p className="text-white/30 text-sm">
-            No markets in this category
+            {activeCategory === 'SCORERS' ? 'Add players above to enable scorer markets' : 'No markets in this category'}
           </p>
         ) : (
           getCategoryMarkets(activeCategory).map(

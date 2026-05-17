@@ -1724,3 +1724,82 @@ export async function getAllJackpots() {
 
   return data ?? []
 }
+export async function addPlayerToScorers(
+  matchId: string,
+  playerName: string,
+  team: 'home' | 'away',
+  odd: number,
+  addedBy: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  // Insert player
+  const { error: playerError } = await supabase
+    .from('match_players')
+    .insert({ match_id: matchId, player_name: playerName, team, added_by: addedBy })
+
+  if (playerError) return { success: false, error: playerError.message }
+
+  // Get scorer market IDs
+  const { data: markets } = await supabase
+    .from('match_markets')
+    .select('id, market_templates(name)')
+    .eq('match_id', matchId)
+    .in('market_template_id',
+      (await supabase.from('market_templates')
+        .select('id')
+        .in('name', ['Anytime Scorer', 'First Scorer', 'Last Scorer'])
+      ).data?.map((t: any) => t.id) ?? []
+    )
+
+  if (!markets?.length) return { success: false, error: 'No scorer markets found' }
+
+  // Insert odds for each scorer market
+  const oddsToInsert = markets.map((mm: any) => ({
+    match_market_id: mm.id,
+    selection: playerName,
+    odd_value: odd,
+    original_odd: odd,
+    last_updated_by: addedBy,
+  }))
+
+  const { error: oddsError } = await supabase
+    .from('match_market_odds')
+    .insert(oddsToInsert)
+
+  if (oddsError) return { success: false, error: oddsError.message }
+
+  return { success: true }
+}
+
+export async function removePlayerFromScorers(
+  matchId: string,
+  playerId: string,
+  playerName: string
+): Promise<{ success: boolean }> {
+  const supabase = await createClient()
+
+  await supabase.from('match_players').delete().eq('id', playerId)
+
+  const { data: markets } = await supabase
+    .from('match_markets')
+    .select('id')
+    .eq('match_id', matchId)
+    .in('market_template_id',
+      (await supabase.from('market_templates')
+        .select('id')
+        .in('name', ['Anytime Scorer', 'First Scorer', 'Last Scorer'])
+      ).data?.map((t: any) => t.id) ?? []
+    )
+
+  if (markets?.length) {
+    for (const mm of markets) {
+      await supabase.from('match_market_odds')
+        .delete()
+        .eq('match_market_id', mm.id)
+        .eq('selection', playerName)
+    }
+  }
+
+  return { success: true }
+}
