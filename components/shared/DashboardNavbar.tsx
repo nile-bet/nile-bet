@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { LogOut, LayoutDashboard,
+import { PanelLeftClose, PanelLeftOpen, LogOut, LayoutDashboard,
   Search } from 'lucide-react'
 import {
   DropdownMenu,
@@ -29,12 +29,16 @@ interface DashboardNavbarProps {
   title?: string
   showRedeemSlip?: boolean
   onRedeemSlip?: () => void
+  onToggleSidebar?: () => void
+  sidebarCollapsed?: boolean
 }
 
 export function DashboardNavbar({
   title,
   showRedeemSlip = false,
   onRedeemSlip,
+  onToggleSidebar,
+  sidebarCollapsed,
 }: DashboardNavbarProps) {
   const { user, role } = useAuthStore()
   const router = useRouter()
@@ -55,10 +59,17 @@ export function DashboardNavbar({
 
   return (
     <nav className="bg-slate-dark border-b border-gold/20 h-14 px-4 md:px-6 flex items-center justify-between sticky top-0 z-40">
-      {/* Left: Logo */}
-      <Link href={dashboardLink}>
-        <Logo size="sm" showTagline />
-      </Link>
+      {/* Left: Logo + Toggle */}
+      <div className="flex items-center gap-2">
+        {onToggleSidebar && (
+          <button onClick={onToggleSidebar} className="hidden md:flex p-1.5 text-white/40 hover:text-white">
+            {sidebarCollapsed ? '▶' : '◀'}
+          </button>
+        )}
+        <Link href={dashboardLink}>
+          <Logo size="sm" showTagline />
+        </Link>
+      </div>
 
       {/* Center: Redeem or Title */}
       <div className="flex items-center gap-4">
@@ -102,6 +113,13 @@ export function DashboardNavbar({
           )}
 
         {/* Notification bell */}
+        {role && role !== 'admin' && (
+          <span className={`hidden md:flex text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
+            role === 'cashier' ? 'bg-nile-blue/30 text-nile-blue-light border border-nile-blue/40' :
+            role === 'agent' ? 'bg-nile-orange/20 text-nile-orange border border-nile-orange/40' :
+            'bg-gold/20 text-gold border border-gold/40'
+          }`}>{role}</span>
+        )}
         <NotificationBell />
 
         {/* Avatar dropdown */}

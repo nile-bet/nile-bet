@@ -117,14 +117,15 @@ export function SidebarLayout({
   showRedeemSlip = false,
   onRedeemSlip,
 }: SidebarLayoutProps) {
-  const [mobileOpen, setMobileOpen] =
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     useState(false)
 
   return (
     <div className="flex h-screen overflow-hidden bg-charcoal">
       {/* Desktop sidebar */}
-      <div className="hidden md:flex w-60 flex-shrink-0">
-        <div className="w-full border-r border-gold/10">
+      <div className={cn("hidden md:flex flex-shrink-0 transition-all duration-300 border-r border-gold/10", sidebarCollapsed ? "w-0 overflow-hidden" : "w-60")}>
+        <div className="w-full">
           <SidebarContent
             navItems={navItems}
           />
@@ -136,6 +137,8 @@ export function SidebarLayout({
         <DashboardNavbar
           showRedeemSlip={showRedeemSlip}
           onRedeemSlip={onRedeemSlip}
+          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+          sidebarCollapsed={sidebarCollapsed}
         />
 
         {/* Mobile sidebar trigger */}

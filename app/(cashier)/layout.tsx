@@ -48,7 +48,7 @@ const cashierNav: NavItem[] = [
     icon: Swords,
   },
   {
-    href: '/weekend-jackpot',
+    href: '/cashier-jackpot',
     label: 'Jackpot',
     icon: Trophy,
   },
