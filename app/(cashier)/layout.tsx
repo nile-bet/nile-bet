@@ -127,7 +127,7 @@ export default function CashierLayout({
         open={redeemOpen}
         onOpenChange={setRedeemOpen}
       >
-        <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-md">
+        <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-lg w-full">
           <DialogHeader>
             <DialogTitle className="text-white">
               🎟️ Redeem Coupon
