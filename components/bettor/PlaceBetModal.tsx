@@ -1,23 +1,30 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { placeBet }
+  from '@/lib/actions/bets'
 import { useBetSlipStore }
   from '@/lib/stores/betSlipStore'
 import { useAuthStore }
   from '@/lib/stores/authStore'
-import { placeBet }
-  from '@/lib/actions/bets'
+import { PrintReceiptModal }
+  from '@/components/cashier/PrintReceiptModal'
 import { formatETB }
   from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import {
+  X,
+  Lock,
+  Unlock,
+  AlertTriangle,
+} from 'lucide-react'
 
 interface PlaceBetModalProps {
   isOpen: boolean
@@ -28,174 +35,357 @@ export function PlaceBetModal({
   isOpen,
   onClose,
 }: PlaceBetModalProps) {
-  const [loading, setLoading] =
-    useState(false)
-  const [slipId, setSlipId] = useState('')
-  const [success, setSuccess] =
-    useState(false)
-
   const {
     selections,
     stake,
+    setStake,
     calculation,
+    removeSelection,
     clearSlip,
-    copiedFromSlipId,
   } = useBetSlipStore()
+  const { totalOdds, maxPayout, netPayout, winningTax } = calculation
+  const insuranceApplied = false
 
-  const { user, isAuthenticated } =
-    useAuthStore()
-  const router = useRouter()
+  const { user, settings } = useAuthStore()
 
-  const handleConfirm = async () => {
-    if (!user || !isAuthenticated) {
-      router.push('/login')
-      return
-    }
+  const [isAnonymous, setIsAnonymous] =
+    useState(false)
+  const [placing, setPlacing] =
+    useState(false)
 
-    setLoading(true)
+  // Receipt
+  const [showReceipt, setShowReceipt] =
+    useState(false)
+  const [receiptData, setReceiptData] =
+    useState<any>(null)
+
+  const minStake =
+    settings?.minStake ?? 10
+  const minSelections =
+    settings?.minSelections ?? 4
+
+  const stakeNum = stake || 0
+  const balance = user?.credit_balance ?? 0
+
+  const errors: string[] = []
+  if (
+    selections.length < minSelections
+  ) {
+    errors.push(
+      `Minimum ${minSelections} selections required`
+    )
+  }
+  if (stakeNum < minStake) {
+    errors.push(
+      `Minimum stake is ${formatETB(minStake)}`
+    )
+  }
+  if (stakeNum > balance) {
+    errors.push('Insufficient balance')
+  }
+  if (stakeNum <= 0) {
+    errors.push('Enter a valid stake')
+  }
+
+  const canPlace =
+    errors.length === 0 && !placing
+
+  const handlePlace = async () => {
+    if (!canPlace || !user) return
+    setPlacing(true)
 
     const result = await placeBet({
-      selections,
-      stake,
+      selections: selections.map((s) => ({
+        ...s,
+        matchId: s.matchId,
+        matchMarketId: s.matchMarketId,
+        selection: s.selection,
+        odd: s.odd,
+      })),
+      stake: stakeNum,
       bettorId: user.id,
       placedById: user.id,
-      isAnonymous: false,
-      copiedFromSlipId:
-        copiedFromSlipId ?? undefined,
+      isAnonymous,
     })
 
     if (result.success && result.slipId) {
-      setSlipId(result.slipId)
-      setSuccess(true)
-      clearSlip()
       toast.success(
-        `🎉 Bet placed! Slip #${result.slipId}`
+        `Bet placed! Slip #${result.slipId}`
       )
+
+      // Build receipt data
+      setReceiptData({
+        slipId: result.slipId,
+        stake: stakeNum,
+        totalOdds,
+        maxPayout,
+        netPayout,
+        winningTax,
+        insuranceApplied,
+        isAnonymous,
+        bettorUsername: isAnonymous
+          ? undefined
+          : user.username,
+        cashierUsername:
+          user.role === 'cashier' ||
+          user.role === 'agent'
+            ? user.username
+            : undefined,
+        placedAt: new Date().toISOString(),
+        cancellationDeadline: settings
+          ?.cancellationWindowMins
+          ? new Date(
+              Date.now() +
+                settings.cancellationWindowMins *
+                  60000
+            ).toISOString()
+          : undefined,
+        selections: selections.map((s) => ({
+          matchName: `${s.homeTeam} vs ${s.awayTeam}`,
+          marketName: s.marketName,
+          selection: s.selection,
+          odd: s.odd,
+        })),
+      })
+
+      clearSlip()
+      onClose()
+      setShowReceipt(true)
     } else {
       toast.error(
         result.error ?? 'Failed to place bet'
       )
-      onClose()
     }
 
-    setLoading(false)
-  }
-
-  const handleClose = () => {
-    setSuccess(false)
-    setSlipId('')
-    onClose()
+    setPlacing(false)
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-white">
-            {success
-              ? '🎉 Bet Placed!'
-              : 'Confirm Bet'}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={onClose}
+      >
+        <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white">
+              Place Bet
+            </DialogTitle>
+          </DialogHeader>
 
-        {success ? (
-          <div className="text-center py-4">
-            <p className="text-white/60 text-sm mb-3">
-              Your slip ID:
-            </p>
-            <p className="text-gold font-mono text-3xl font-bold mb-6">
-              #{slipId}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  handleClose()
-                  router.push('/bettor-bets')
-                }}
-                className="flex-1 border border-gold/30 text-gold py-2 rounded-lg text-sm hover:bg-gold/10"
-              >
-                View My Bets
-              </button>
-              <button
-                onClick={handleClose}
-                className="flex-1 bg-gold text-charcoal py-2 rounded-lg text-sm font-semibold hover:bg-gold-light"
-              >
-                Place Another
-              </button>
+          {selections.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-white/40">
+                No selections yet
+              </p>
+              <p className="text-white/30 text-sm mt-1">
+                Add matches to your slip
+              </p>
             </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {/* Selections */}
-            <div className="space-y-1 max-h-40 overflow-y-auto">
-              {selections.map((s) => (
+          ) : (
+            <div className="space-y-4">
+              {/* Selections list */}
+              <div className="max-h-48 overflow-y-auto space-y-2 scrollbar-hide">
+                {selections.map((sel, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between bg-charcoal/50 rounded-lg px-3 py-2"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white/50 text-xs truncate">
+                        {sel.homeTeam} vs{' '}
+                        {sel.awayTeam}
+                      </p>
+                      <p className="text-white text-sm">
+                        {sel.selection}
+                      </p>
+                      <p className="text-white/40 text-xs">
+                        {sel.marketName}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-gold font-mono text-sm font-bold">
+                        {sel.odd.toFixed(2)}
+                      </span>
+                      <button
+                        onClick={() =>
+                          removeSelection(
+                            sel.matchMarketId,
+                            sel.selection
+                          )
+                        }
+                        className="text-white/30 hover:text-nile-danger"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Insurance badge */}
+              {insuranceApplied && (
+                <div className="bg-gold/10 border border-gold/30 rounded-lg px-3 py-2 text-xs text-gold flex items-center gap-2">
+                  🛡️ Insurance active — miss
+                  1-2 and still get payout
+                </div>
+              )}
+
+              {/* Validation errors */}
+              {errors.map((e) => (
                 <div
-                  key={`${s.matchMarketId}-${s.selection}`}
-                  className="flex justify-between text-xs bg-charcoal/50 rounded px-3 py-1.5"
+                  key={e}
+                  className="flex items-center gap-2 text-nile-danger text-xs"
                 >
-                  <span className="text-white/60 truncate flex-1">
-                    {s.homeTeam} vs {s.awayTeam} — {s.selection}
-                  </span>
-                  <span className="text-gold font-mono ml-2">
-                    {s.odd.toFixed(2)}
-                  </span>
+                  <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                  {e}
                 </div>
               ))}
-            </div>
 
-            {/* Calculation */}
-            <div className="bg-charcoal/50 rounded-lg p-4 space-y-1.5">
-              <div className="flex justify-between text-sm">
-                <span className="text-white/50">Stake:</span>
-                <span className="text-white font-mono">{formatETB(stake)}</span>
+              {/* Stake input */}
+              <div>
+                <label className="text-xs text-white/60 block mb-1">
+                  Stake (ETB)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={stake}
+                    onChange={(e) =>
+                      setStake(parseFloat(e.target.value) || 0)
+                    }
+                    placeholder={`Min: ${formatETB(minStake)}`}
+                    min={minStake}
+                    className="flex-1 bg-charcoal border border-gold/20 rounded-lg px-3 py-2.5 text-white font-mono focus:outline-none"
+                  />
+                </div>
+                <p className="text-white/30 text-xs mt-1">
+                  Balance:{' '}
+                  {formatETB(balance)}
+                </p>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-white/50">Total Odds:</span>
-                <span className="text-white font-mono">{calculation.totalOdds.toFixed(2)}</span>
-              </div>
-              <div className="border-t border-gold/10 my-1" />
-              <div className="flex justify-between text-sm">
-                <span className="text-white/50">Max Payout:</span>
-                <span className="text-white font-mono">{formatETB(calculation.maxPayout)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-white/50">Tax (15%):</span>
-                <span className="text-nile-danger font-mono">- {formatETB(calculation.winningTax)}</span>
-              </div>
-              <div className="border-t border-gold/10 my-1" />
-              <div className="flex justify-between">
-                <span className="text-white font-medium">Net Payout:</span>
-                <span className="text-gold font-mono font-bold text-lg">{formatETB(calculation.netPayout)}</span>
-              </div>
-            </div>
 
-            {/* Buttons */}
-            <div className="flex gap-3">
+              {/* Quick stake buttons */}
+              <div className="flex gap-2 flex-wrap">
+                {[10, 20, 50, 100, 200].map(
+                  (amt) => (
+                    <button
+                      key={amt}
+                      onClick={() =>
+                        setStake(amt)
+                      }
+                      className={cn(
+                        'text-xs px-3 py-1.5 rounded-full border',
+                        stake === amt
+                          ? 'bg-gold border-gold text-charcoal font-semibold'
+                          : 'border-gold/30 text-gold hover:bg-gold/10'
+                      )}
+                    >
+                      {amt}
+                    </button>
+                  )
+                )}
+              </div>
+
+              {/* Calculation */}
+              {stakeNum > 0 && (
+                <div className="bg-charcoal/50 rounded-xl p-3 space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-white/50">
+                      Selections:
+                    </span>
+                    <span className="text-white">
+                      {selections.length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50">
+                      Total Odds:
+                    </span>
+                    <span className="text-white font-mono">
+                      {totalOdds.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50">
+                      Max Payout:
+                    </span>
+                    <span className="text-white font-mono">
+                      {formatETB(maxPayout)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50">
+                      Tax (15%):
+                    </span>
+                    <span className="text-nile-danger font-mono">
+                      -{formatETB(winningTax)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-t border-gold/10 pt-1 mt-1">
+                    <span className="text-white font-medium">
+                      Net Win:
+                    </span>
+                    <span className="text-gold font-mono font-bold">
+                      {formatETB(netPayout)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Anonymous toggle */}
               <button
-                onClick={handleClose}
-                disabled={loading}
-                className="flex-1 border border-white/20 text-white/60 py-2.5 rounded-lg text-sm hover:border-white/40 hover:text-white"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={loading}
+                onClick={() =>
+                  setIsAnonymous(!isAnonymous)
+                }
                 className={cn(
-                  'flex-1 py-2.5 rounded-lg text-sm font-semibold transition-colors',
-                  loading
-                    ? 'bg-white/10 text-white/30'
-                    : 'bg-gold text-charcoal hover:bg-gold-light'
+                  'flex items-center gap-2 text-xs px-3 py-2 rounded-lg border w-full',
+                  isAnonymous
+                    ? 'border-nile-orange/40 text-nile-orange bg-nile-orange/10'
+                    : 'border-nile-blue/30 text-white/50 hover:text-white'
                 )}
               >
-                {loading
+                {isAnonymous ? (
+                  <Lock className="w-3 h-3" />
+                ) : (
+                  <Unlock className="w-3 h-3" />
+                )}
+                {isAnonymous
+                  ? 'Placing anonymously'
+                  : 'Place anonymously'}
+              </button>
+
+              {/* Place button */}
+              <button
+                onClick={handlePlace}
+                disabled={!canPlace}
+                className={cn(
+                  'w-full py-3 rounded-xl text-sm font-bold transition-colors',
+                  canPlace
+                    ? 'bg-gold text-charcoal hover:bg-gold-light'
+                    : 'bg-white/10 text-white/30 cursor-not-allowed'
+                )}
+              >
+                {placing
                   ? 'Placing...'
-                  : 'Confirm & Place Bet'}
+                  : `Place Bet — ${formatETB(stakeNum)}`}
               </button>
             </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Print Receipt after bet */}
+      {receiptData && (
+        <PrintReceiptModal
+          isOpen={showReceipt}
+          onClose={() => {
+            setShowReceipt(false)
+            setReceiptData(null)
+          }}
+          slipData={receiptData}
+        />
+      )}
+    </>
   )
 }
