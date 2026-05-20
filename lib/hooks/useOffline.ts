@@ -5,8 +5,10 @@ import { useOfflineStore }
   from '@/lib/stores/offlineStore'
 
 export function useOffline() {
-  const { isOnline, setOnline,
-    setWasOffline } = useOfflineStore()
+  const { isOffline, setOffline } = useOfflineStore()
+  const isOnline = !isOffline
+  const setOnline = (online: boolean) => setOffline(!online)
+  const setWasOffline = (_v: boolean) => {}
 
   useEffect(() => {
     const handleOnline = () => {

@@ -65,84 +65,83 @@ export function formatDateShort(
   }
 }
 
-export function formatTimeAgo(
-  date: string | null | undefined
-): string {
-  if (!date) return ''
-  try {
-    const now = new Date()
-    const then = new Date(date)
-    const seconds = Math.floor(
-      (now.getTime() - then.getTime()) / 1000
-    )
-    if (seconds < 60) return 'just now'
-    const minutes = Math.floor(seconds / 60)
-    if (minutes < 60)
-      return `${minutes}m ago`
-    const hours = Math.floor(minutes / 60)
-    if (hours < 24)
-      return `${hours}h ago`
-    const days = Math.floor(hours / 24)
-    return `${days}d ago`
-  } catch {
-    return ''
-  }
-}
+// Add at end of lib/utils/formatCurrency.ts if not present
 
 export function formatKickOff(
-  date: string | null | undefined
+  dateStr: string
 ): string {
-  if (!date) return ''
-  try {
-    const d = new Date(date)
-    const now = new Date()
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
+  if (!dateStr) return '—'
+  const d = new Date(dateStr)
+  const today = new Date()
+  const tomorrow = new Date(
+    today.getTime() + 86400000
+  )
 
-    const time = format(d, 'HH:mm')
+  const isToday =
+    d.toDateString() === today.toDateString()
+  const isTomorrow =
+    d.toDateString() ===
+    tomorrow.toDateString()
 
-    if (
-      format(d, 'yyyy-MM-dd') ===
-      format(now, 'yyyy-MM-dd')
-    ) {
-      return `Today ${time}`
-    }
-    if (
-      format(d, 'yyyy-MM-dd') ===
-      format(tomorrow, 'yyyy-MM-dd')
-    ) {
-      return `Tomorrow ${time}`
-    }
-    return format(d, 'EEE dd MMM HH:mm')
-  } catch {
-    return ''
-  }
+  const time = d.toLocaleTimeString('en-ET', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+  if (isToday) return `Today ${time}`
+  if (isTomorrow) return `Tomorrow ${time}`
+
+  return d.toLocaleDateString('en-ET', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export function formatCountdown(
-  expiresAt: string | null | undefined
+  dateStr: string
 ): string {
-  if (!expiresAt) return ''
-  try {
-    const diff =
-      new Date(expiresAt).getTime() -
-      Date.now()
-    if (diff <= 0) return 'Expired'
-    const hours = Math.floor(
-      diff / 3600000
-    )
-    const mins = Math.floor(
-      (diff % 3600000) / 60000
-    )
-    const secs = Math.floor(
-      (diff % 60000) / 1000
-    )
-    if (hours > 0)
-      return `${hours}h ${mins}m`
-    if (mins > 0)
-      return `${mins}m ${secs}s`
-    return `${secs}s`
-  } catch {
-    return ''
+  if (!dateStr) return '—'
+  const target = new Date(dateStr).getTime()
+  const now = Date.now()
+  const diff = target - now
+
+  if (diff <= 0) return 'Expired'
+
+  const hours = Math.floor(
+    diff / 3600000
+  )
+  const minutes = Math.floor(
+    (diff % 3600000) / 60000
+  )
+  const seconds = Math.floor(
+    (diff % 60000) / 1000
+  )
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`
   }
+  if (minutes > 0) {
+    return `${minutes}m ${seconds}s`
+  }
+  return `${seconds}s`
+}
+
+export function formatTimeAgo(
+  dateStr: string
+): string {
+  if (!dateStr) return '—'
+  const date = new Date(dateStr).getTime()
+  const now = Date.now()
+  const diff = now - date
+
+  if (diff < 60000) return 'Just now'
+  if (diff < 3600000) {
+    return `${Math.floor(diff / 60000)}m ago`
+  }
+  if (diff < 86400000) {
+    return `${Math.floor(diff / 3600000)}h ago`
+  }
+  return `${Math.floor(diff / 86400000)}d ago`
 }

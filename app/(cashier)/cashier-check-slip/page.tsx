@@ -7,7 +7,9 @@ import { SlipDetailCard }
   from '@/components/shared/SlipDetailCard'
 import { LoadingSpinner }
   from '@/components/shared/LoadingSpinner'
-import { Search } from 'lucide-react'
+import { QRScanner }
+  from '@/components/cashier/QRScanner'
+import { Search, Camera } from 'lucide-react'
 import type { SlipWithSelections }
   from '@/types/database.types'
 
@@ -19,15 +21,20 @@ export default function CashierCheckSlipPage() {
     useState(false)
   const [notFound, setNotFound] =
     useState(false)
+  const [showScanner, setShowScanner] =
+    useState(false)
 
-  const handleCheck = async () => {
-    const id = slipId.trim().toUpperCase()
-    if (!id) return
+  const handleCheck = async (id?: string) => {
+    const checkId = (
+      id ?? slipId
+    ).trim().toUpperCase()
+    if (!checkId) return
     setLoading(true)
     setNotFound(false)
     setSlip(null)
+    setShowScanner(false)
 
-    const data = await getSlipById(id)
+    const data = await getSlipById(checkId)
     if (data) {
       setSlip(data)
     } else {
@@ -36,17 +43,21 @@ export default function CashierCheckSlipPage() {
     setLoading(false)
   }
 
+  const handleScan = (code: string) => {
+    setSlipId(code)
+    handleCheck(code)
+  }
+
   return (
     <div className="p-6 max-w-2xl">
       <h1 className="font-display text-2xl font-bold text-white mb-2">
         Check Slip
       </h1>
       <p className="text-white/50 text-sm mb-6">
-        Enter slip ID manually or scan barcode
-        — scanner auto-submits on Enter.
+        Enter slip ID or scan QR / barcode
       </p>
 
-      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5 mb-6">
+      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5 mb-6 space-y-4">
         <div className="flex gap-3">
           <input
             type="text"
@@ -60,12 +71,12 @@ export default function CashierCheckSlipPage() {
               }
             }}
             placeholder="48392017"
-            maxLength={10}
+            maxLength={12}
             autoFocus
             className="flex-1 bg-charcoal border border-gold/20 rounded-lg px-4 py-3 text-white font-mono text-xl text-center placeholder:text-white/20 placeholder:font-sans placeholder:text-base focus:outline-none focus:border-gold/50"
           />
           <button
-            onClick={handleCheck}
+            onClick={() => handleCheck()}
             disabled={
               !slipId.trim() || loading
             }
@@ -74,10 +85,31 @@ export default function CashierCheckSlipPage() {
             <Search className="w-4 h-4" />
             Check
           </button>
+          <button
+            onClick={() =>
+              setShowScanner(!showScanner)
+            }
+            className="border border-nile-blue/30 text-white/60 px-3 py-3 rounded-lg hover:text-white hover:border-gold/30"
+            title="Scan QR Code"
+          >
+            <Camera className="w-5 h-5" />
+          </button>
         </div>
-        <p className="text-white/25 text-xs mt-2 text-center">
+
+        {/* QR Scanner */}
+        {showScanner && (
+          <QRScanner
+            onScan={handleScan}
+            onClose={() =>
+              setShowScanner(false)
+            }
+            label="Scan Slip QR Code"
+          />
+        )}
+
+        <p className="text-white/25 text-xs text-center">
           ↵ Barcode scanner auto-submits on
-          Enter
+          Enter • 📷 Tap camera to scan QR
         </p>
       </div>
 
