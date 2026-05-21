@@ -127,6 +127,11 @@ export function Footer() {
                 +44 7788 443322
               </span>
             </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-sm text-gold font-medium">
+                ✉ nilebetting@gmail.com
+              </span>
+            </div>
           </div>
         </div>
       </div>

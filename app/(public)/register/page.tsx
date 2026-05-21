@@ -353,6 +353,10 @@ export default function RegisterPage() {
               Sign in
             </Link>
           </p>
+          <p className="text-center text-white/30 text-xs mt-4 leading-relaxed">
+            Cashiers talk to <span className="text-gold/60">AGENTS</span> or contact us via<br/>
+            ✉ <a href="mailto:nilebetting@gmail.com" className="text-gold/60 hover:text-gold">nilebetting@gmail.com</a>
+          </p>
         </div>
       </div>
     </div>

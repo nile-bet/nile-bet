@@ -1,4 +1,5 @@
 'use client'
+import { Footer } from '@/components/shared/Footer'
 
 import { useState } from 'react'
 import { MatchListClient }
@@ -29,8 +30,8 @@ export function AgentPlaceBetClient({
     useState(false)
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex flex-col">
+      <div className="flex flex-col" style={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
         <MatchListClient
           initialMatches={initialMatches}
           countries={countries}
@@ -46,6 +47,7 @@ export function AgentPlaceBetClient({
           setShowPlaceBet(false)
         }
       />
+      <Footer />
     </div>
   )
 }
