@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 const LOGO_URL =
-  'https://i.postimg.cc/GmNfPP1Z/nile-logo-cropped-removebg-preview.png'
+  'https://i.postimg.cc/15mmFn80/nile-logo-cropped-removebg-preview-(1).png'
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg'
