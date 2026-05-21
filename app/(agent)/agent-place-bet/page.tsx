@@ -8,6 +8,7 @@ import { getActiveJackpot }
   from '@/lib/actions/jackpot'
 import { AgentPlaceBetClient }
   from '@/components/agent/AgentPlaceBetClient'
+import { Footer } from '@/components/shared/Footer'
 
 export default async function AgentPlaceBetPage() {
   const [
@@ -27,12 +28,15 @@ export default async function AgentPlaceBetPage() {
   ])
 
   return (
-    <AgentPlaceBetClient
-      initialMatches={initialMatches}
-      countries={countries}
-      topLeagues={topLeagues}
-      settings={settings}
-      jackpot={jackpot}
-    />
+    <>
+      <AgentPlaceBetClient
+        initialMatches={initialMatches}
+        countries={countries}
+        topLeagues={topLeagues}
+        settings={settings}
+        jackpot={jackpot}
+      />
+      <Footer />
+    </>
   )
 }

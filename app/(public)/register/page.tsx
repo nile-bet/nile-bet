@@ -357,6 +357,7 @@ export default function RegisterPage() {
             Cashiers talk to <span className="text-gold/60">AGENTS</span> or contact us via<br/>
             ✉ <a href="mailto:nilebetting@gmail.com" className="text-gold/60 hover:text-gold">nilebetting@gmail.com</a>
           </p>
+          
         </div>
       </div>
     </div>

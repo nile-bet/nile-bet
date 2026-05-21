@@ -220,6 +220,10 @@ export default function LoginPage() {
             </button>
           </form>
 
+          <p className="text-center text-white/30 text-xs mt-4 leading-relaxed">
+            Cashiers talk to <span className="text-gold/60">AGENTS</span> or contact us via Email:{' '}
+            <a href="mailto:nilebetting@gmail.com" className="text-gold/60 hover:text-gold">nilebetting@gmail.com</a>
+          </p>
           <p className="text-center text-white/40 text-sm mt-6">
             Don&apos;t have an account?{' '}
             <Link

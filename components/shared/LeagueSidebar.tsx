@@ -140,7 +140,7 @@ export function LeagueSidebar({
 
         {/* All Countries - shown when toggled or searching */}
         {shouldShowCountries && (
-          <div className="max-h-96 overflow-y-auto scrollbar-hide">
+          <div className="max-h-64 overflow-y-auto">
             {filtered.map((country) => (
               <div key={country.id}>
                 {/* Country header */}
