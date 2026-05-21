@@ -594,3 +594,47 @@ export async function redeemWinningSlip(
 
   return { success: true, amount: slip.net_payout }
 }
+
+export async function redeemJackpotWinningSlip(
+  slipId: string,
+  cashierId: string
+): Promise<{ success: boolean; amount?: number; status?: string; correctCount?: number; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: slip } = await supabase
+    .from('jackpot_slips')
+    .select('id, slip_id, status, reward_amount, bettor_id')
+    .eq('slip_id', slipId)
+    .single()
+
+  if (!slip) return { success: false, error: 'Jackpot slip not found' }
+  if (!['won', 'near_win'].includes(slip.status)) {
+    return { success: false, error: `Slip is ${slip.status} — only won/near_win slips can be redeemed`, status: slip.status }
+  }
+  if (!slip.reward_amount || slip.reward_amount <= 0) {
+    return { success: false, error: 'No reward amount for this slip' }
+  }
+
+  const { data: cashier } = await supabase
+    .from('profiles')
+    .select('credit_balance')
+    .eq('id', cashierId)
+    .single()
+
+  if (!cashier) return { success: false, error: 'Cashier not found' }
+  if (cashier.credit_balance < slip.reward_amount) {
+    return { success: false, error: `Insufficient balance. Need ${slip.reward_amount.toLocaleString()} but have ${cashier.credit_balance.toLocaleString()}` }
+  }
+
+  await supabase.from('jackpot_slips').update({ status: 'paid' }).eq('id', slip.id)
+  await supabase.from('profiles').update({ credit_balance: cashier.credit_balance - slip.reward_amount }).eq('id', cashierId)
+  await supabase.from('transactions').insert({
+    profile_id: cashierId,
+    type: 'jackpot_payout',
+    amount: -slip.reward_amount,
+    reference_id: slip.id,
+    note: `Jackpot payout for slip ${slipId}`,
+  })
+
+  return { success: true, amount: slip.reward_amount }
+}

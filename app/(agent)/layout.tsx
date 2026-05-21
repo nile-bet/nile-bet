@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   Users,
   User,
-  Swords,
   CreditCard,
   Ticket,
   BarChart3,
@@ -39,16 +38,7 @@ const agentNav: NavItem[] = [
     label: 'Bettors',
     icon: User,
   },
-  {
-    href: '/agent-jackpot',
-    label: 'Jackpot',
-    icon: Trophy,
-  },
-  {
-    href: '/agent-place-bet',
-    label: 'Place Bet',
-    icon: Swords,
-  },
+
   {
     href: '/agent-credits',
     label: 'Credits',
