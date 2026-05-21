@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, Check, X,
-  Loader2 } from 'lucide-react'
+  Loader2, ArrowLeft } from 'lucide-react'
 import { Logo }
   from '@/components/shared/Logo'
 import {
@@ -115,6 +115,13 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-charcoal flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
+        {/* Back button */}
+        <div className="mb-4">
+          <Link href="/" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Betting
+          </Link>
+        </div>
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <Logo size="lg" showTagline />
