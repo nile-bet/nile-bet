@@ -186,7 +186,7 @@ export function JackpotClient({
             <h2 className="text-white font-semibold mb-4">
               Past Jackpots
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {pastJackpots
                 .filter(
                   (j) =>
@@ -348,7 +348,7 @@ export function JackpotClient({
           )}
 
           {/* Games */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {matches.map((match: any) => {
               const sel =
                 selections[match.game_number]
@@ -359,7 +359,7 @@ export function JackpotClient({
                 <div
                   key={match.id}
                   className={cn(
-                    'bg-slate-dark border rounded-xl p-4',
+                    'bg-slate-dark border rounded-xl p-3',
                     isResulted &&
                       result === sel
                       ? 'border-nile-success/40 bg-nile-success/5'
@@ -457,7 +457,7 @@ export function JackpotClient({
                             !isOpen
                           }
                           className={cn(
-                            'flex flex-col items-center py-3 px-2 rounded-xl border transition-all',
+                            'flex flex-col items-center py-2 px-2 rounded-lg border transition-all',
                             isCorrect
                               ? 'bg-nile-success/20 border-nile-success text-nile-success'
                               : isWrong
@@ -469,7 +469,7 @@ export function JackpotClient({
                               'cursor-default'
                           )}
                         >
-                          <span className="text-lg font-bold leading-none">
+                          <span className="text-base font-bold leading-none">
                             {opt.label}
                           </span>
                           <span className="text-xs mt-0.5 opacity-60">
@@ -499,7 +499,7 @@ export function JackpotClient({
 
           {/* Place bet section */}
           {isOpen && (
-            <div className="sticky bottom-4 bg-slate-dark border border-gold/30 rounded-2xl p-4 shadow-2xl">
+            <div className="sticky bottom-2 bg-slate-dark border border-gold/30 rounded-xl p-3 shadow-2xl">
               {!isAuthenticated ? (
                 <div className="text-center">
                   <p className="text-white/60 text-sm mb-3">
@@ -513,7 +513,7 @@ export function JackpotClient({
                   </a>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-white/60">
                       Entry fee:
@@ -712,7 +712,7 @@ export function JackpotClient({
 
       {/* ── HISTORY TAB ── */}
       {activeTab === 'history' && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {pastJackpots.length === 0 ? (
             <p className="text-white/50 text-center py-8">
               No past jackpots

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { lookupCouponByAgent, approveCouponByAgent } from '@/lib/actions/agent'
-import { getSlipById, redeemWinningSlip } from '@/lib/actions/bets'
+import { getSlipById, redeemWinningSlip, redeemJackpotWinningSlip } from '@/lib/actions/bets'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { formatETB, formatCountdown } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
@@ -85,9 +85,12 @@ export function CouponRedeemPanel({ onClose }: Props) {
   const handleRedeemSlip = async () => {
     if (!user || !slipData) return
     setApproving(true)
-    const result = await redeemWinningSlip(slipData.slip_id, user.id)
+    const isJP = slipData.slip_id?.startsWith('JP')
+    const result = isJP
+      ? await redeemJackpotWinningSlip(slipData.slip_id, user.id)
+      : await redeemWinningSlip(slipData.slip_id, user.id)
     if (result.success) {
-      toast.success(`✅ Paid ${formatETB(result.amount!)} — Slip redeemed!`)
+      toast.success(`✅ Paid ${formatETB(result.amount)} — Slip redeemed!`)
       resetState()
       onClose?.()
     } else {
@@ -110,9 +113,10 @@ export function CouponRedeemPanel({ onClose }: Props) {
     setApproving(false)
   }
 
+  const payoutAmount = slipData?.slip_id?.startsWith('JP') ? slipData?.reward_amount : slipData?.net_payout
   const isInsufficient = mode === 'coupon'
     ? lookedUp?.type === 'topup' && (user?.credit_balance ?? 0) < (lookedUp?.amount ?? 0)
-    : slipData?.status === 'won' && (user?.credit_balance ?? 0) < (slipData?.net_payout ?? 0)
+    : ['won','near_win'].includes(slipData?.status) && (user?.credit_balance ?? 0) < (payoutAmount ?? 0)
 
   const slipStatusColor: Record<string, string> = {
     won: 'text-nile-success',
@@ -226,12 +230,12 @@ export function CouponRedeemPanel({ onClose }: Props) {
       {slipData && (
         <div className={cn(
           'border rounded-2xl overflow-hidden',
-          slipData.status === 'won' ? 'border-nile-success/40' : 'border-white/10'
+          ['won','near_win'].includes(slipData.status) ? 'border-nile-success/40' : 'border-white/10'
         )}>
           {/* Status banner */}
           <div className={cn(
             'px-4 py-3 flex items-center justify-between',
-            slipData.status === 'won' ? 'bg-nile-success/10' :
+            ['won','near_win'].includes(slipData.status) ? 'bg-nile-success/10' :
             slipData.status === 'lost' ? 'bg-nile-danger/10' :
             slipData.status === 'paid' ? 'bg-white/5' : 'bg-nile-orange/10'
           )}>
@@ -252,8 +256,8 @@ export function CouponRedeemPanel({ onClose }: Props) {
               </div>
               <div className="text-right">
                 <p className="text-white/40 text-xs">Net Payout</p>
-                <p className={cn('font-mono font-bold text-2xl', slipData.status === 'won' ? 'text-nile-success' : 'text-white/40')}>
-                  {formatETB(slipData.net_payout)}
+                <p className={cn('font-mono font-bold text-2xl', ['won','near_win'].includes(slipData.status) ? 'text-nile-success' : 'text-white/40')}>
+                  {formatETB(payoutAmount ?? slipData.net_payout)}
                 </p>
               </div>
             </div>
@@ -275,7 +279,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
             </div>
 
             {/* Won — show payout action */}
-            {slipData.status === 'won' && (
+            {['won','near_win'].includes(slipData.status) && (
               <>
                 <div className="bg-nile-success/10 border border-nile-success/20 rounded-xl p-3 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-nile-success/20 flex items-center justify-center flex-shrink-0">
@@ -283,7 +287,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
                   </div>
                   <div>
                     <p className="text-nile-success font-bold text-sm">Winning Slip!</p>
-                    <p className="text-white/60 text-xs">Pay bettor {formatETB(slipData.net_payout)} cash</p>
+                    <p className="text-white/60 text-xs">Pay bettor {formatETB(payoutAmount ?? slipData.net_payout)} cash</p>
                   </div>
                 </div>
 
@@ -306,7 +310,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
                     )}
                   >
                     <Check className="w-4 h-4" />
-                    {approving ? 'Processing...' : `Pay ${formatETB(slipData.net_payout)}`}
+                    {approving ? 'Processing...' : `Pay ${formatETB(payoutAmount ?? slipData.net_payout)}`}
                   </button>
                   <button
                     onClick={resetState}

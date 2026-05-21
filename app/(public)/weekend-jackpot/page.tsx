@@ -34,7 +34,7 @@ export default async function JackpotPage() {
       <main className="flex-1">
         {/* Hero banner */}
         <div
-          className="relative py-12 px-4 text-center overflow-hidden"
+          className="relative py-8 px-4 text-center overflow-hidden"
           style={{
             background:
               'linear-gradient(135deg, #1A1A2E 0%, #1B3A6B 50%, #C9A84C20 100%)',
@@ -61,11 +61,11 @@ export default async function JackpotPage() {
 
           <div className="relative z-10">
             <div className="flex justify-center mb-4">
-              <div className="p-4 bg-gold/20 rounded-full border border-gold/30">
-                <Trophy className="w-10 h-10 text-gold" />
+              <div className="p-3 bg-gold/20 rounded-full border border-gold/30">
+                <Trophy className="w-8 h-8 text-gold" />
               </div>
             </div>
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-2">
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-2">
               Weekend Jackpot
             </h1>
             <p className="text-gold text-xl font-semibold mb-4">
@@ -78,33 +78,33 @@ export default async function JackpotPage() {
                   <p className="text-white/50 text-xs uppercase tracking-widest mb-1">
                     Win All 12
                   </p>
-                  <p className="text-gold font-mono text-3xl font-bold">
+                  <p className="text-gold font-mono text-2xl font-bold">
                     {formatETB(
                       jackpot.win_all_reward
                     )}
                   </p>
                 </div>
-                <div className="text-white/30 text-3xl self-center">
+                <div className="text-white/30 text-2xl self-center">
                   |
                 </div>
                 <div className="text-center">
                   <p className="text-white/50 text-xs uppercase tracking-widest mb-1">
                     Miss 1
                   </p>
-                  <p className="text-gold/70 font-mono text-3xl font-bold">
+                  <p className="text-gold/70 font-mono text-2xl font-bold">
                     {formatETB(
                       jackpot.near_win_reward
                     )}
                   </p>
                 </div>
-                <div className="text-white/30 text-3xl self-center">
+                <div className="text-white/30 text-2xl self-center">
                   |
                 </div>
                 <div className="text-center">
                   <p className="text-white/50 text-xs uppercase tracking-widest mb-1">
                     Entry Fee
                   </p>
-                  <p className="text-white font-mono text-3xl font-bold">
+                  <p className="text-white font-mono text-2xl font-bold">
                     {formatETB(
                       jackpot.fixed_stake
                     )}
@@ -121,7 +121,7 @@ export default async function JackpotPage() {
         </div>
 
         {/* Main content */}
-        <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto px-4 py-6">
           <Suspense
             fallback={
               <div className="flex justify-center py-12">
