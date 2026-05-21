@@ -60,7 +60,7 @@ export function PublicNavbar() {
   ]
 
   const JackpotButton = () => (
-    <Link href="/jackpot">
+    <Link href="/weekend-jackpot">
       <button
         className={cn(
           'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold text-charcoal transition-all',
