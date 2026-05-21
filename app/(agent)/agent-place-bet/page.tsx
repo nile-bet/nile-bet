@@ -6,6 +6,7 @@ import {
 } from '@/lib/actions/matches'
 import { AgentPlaceBetClient }
   from '@/components/agent/AgentPlaceBetClient'
+import { Footer } from '@/components/shared/Footer'
 
 export default async function AgentPlaceBetPage() {
   const [
@@ -23,11 +24,14 @@ export default async function AgentPlaceBetPage() {
   ])
 
   return (
-    <AgentPlaceBetClient
-      initialMatches={initialMatches}
-      countries={countries}
-      topLeagues={topLeagues}
-      settings={settings}
-    />
+    <>
+      <AgentPlaceBetClient
+        initialMatches={initialMatches}
+        countries={countries}
+        topLeagues={topLeagues}
+        settings={settings}
+      />
+      <Footer />
+    </>
   )
 }
