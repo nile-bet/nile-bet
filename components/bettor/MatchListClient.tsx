@@ -38,6 +38,7 @@ interface MatchListClientProps {
   topLeagues: League[]
   settings: PlatformSettings
   basePath?: string
+  onPlaceBet?: () => void
 }
 
 export function MatchListClient({

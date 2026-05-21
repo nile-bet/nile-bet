@@ -4,6 +4,8 @@ import {
   getTopLeagues,
   getPlatformSettings,
 } from '@/lib/actions/matches'
+import { getActiveJackpot }
+  from '@/lib/actions/jackpot'
 import { CashierPlaceBetClient }
   from '@/components/cashier/CashierPlaceBetClient'
 
@@ -13,6 +15,7 @@ export default async function CashierPlaceBetPage() {
     countries,
     topLeagues,
     settings,
+    jackpot,
   ] = await Promise.all([
     getUpcomingMatches({
       isTopLeagues: true,
@@ -20,6 +23,7 @@ export default async function CashierPlaceBetPage() {
     getCountriesWithLeagues(),
     getTopLeagues(),
     getPlatformSettings(),
+    getActiveJackpot(),
   ])
 
   return (
@@ -28,6 +32,7 @@ export default async function CashierPlaceBetPage() {
       countries={countries}
       topLeagues={topLeagues}
       settings={settings}
+      jackpot={jackpot}
     />
   )
 }

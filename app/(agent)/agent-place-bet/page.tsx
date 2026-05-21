@@ -4,6 +4,8 @@ import {
   getTopLeagues,
   getPlatformSettings,
 } from '@/lib/actions/matches'
+import { getActiveJackpot }
+  from '@/lib/actions/jackpot'
 import { AgentPlaceBetClient }
   from '@/components/agent/AgentPlaceBetClient'
 import { Footer } from '@/components/shared/Footer'
@@ -14,6 +16,7 @@ export default async function AgentPlaceBetPage() {
     countries,
     topLeagues,
     settings,
+    jackpot,
   ] = await Promise.all([
     getUpcomingMatches({
       isTopLeagues: true,
@@ -21,6 +24,7 @@ export default async function AgentPlaceBetPage() {
     getCountriesWithLeagues(),
     getTopLeagues(),
     getPlatformSettings(),
+    getActiveJackpot(),
   ])
 
   return (
@@ -30,6 +34,7 @@ export default async function AgentPlaceBetPage() {
         countries={countries}
         topLeagues={topLeagues}
         settings={settings}
+        jackpot={jackpot}
       />
       <Footer />
     </>

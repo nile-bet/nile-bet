@@ -2,49 +2,42 @@
 
 import { createClient }
   from '@/lib/supabase/server'
-import type { JackpotWithMatches }
-  from '@/types/database.types'
 
-export async function getActiveJackpot(): Promise<JackpotWithMatches | null> {
+// ─── PUBLIC: Get active jackpot ───────
+
+export async function getActiveJackpot() {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('jackpots')
-    .select(`
+    .select(
+      `
       *,
       jackpot_matches (*)
-    `)
-    .eq('status', 'open')
-    .gt('closes_at', new Date().toISOString())
-    .order('created_at', { ascending: false })
+    `
+    )
+    .in('status', ['open', 'closed'])
+    .order('created_at', {
+      ascending: false,
+    })
     .limit(1)
     .single()
 
-  if (error || !data) return null
-
-  const result = {
-    ...data,
-    jackpot_matches: (
-      data.jackpot_matches ?? []
-    ).sort(
-      (a: any, b: any) =>
-        a.game_number - b.game_number
-    ),
-  }
-
-  return result as unknown as JackpotWithMatches
+  return data ?? null
 }
 
-export async function placeJackpotBet(input: {
+// ─── PUBLIC: Place jackpot bet ────────
+
+export async function placeJackpotBet(data: {
   jackpotId: string
   bettorId: string
   placedById: string
+  isAnonymous: boolean
   selections: {
-    jackpotMatchId: string
     gameNumber: number
     selection: 'home' | 'draw' | 'away'
+    odd: number
   }[]
-  isAnonymous: boolean
 }): Promise<{
   success: boolean
   slipId?: string
@@ -52,58 +45,94 @@ export async function placeJackpotBet(input: {
 }> {
   const supabase = await createClient()
 
-  const {
-    jackpotId,
-    bettorId,
-    placedById,
-    selections,
-    isAnonymous,
-  } = input
+  // Validate jackpot is open
+  const { data: jackpot } = await supabase
+    .from('jackpots')
+    .select('*')
+    .eq('id', data.jackpotId)
+    .single()
 
-  // Validate 12 selections
-  if (selections.length !== 12) {
+  if (!jackpot) {
+    return {
+      success: false,
+      error: 'Jackpot not found',
+    }
+  }
+
+  if (jackpot.status !== 'open') {
+    return {
+      success: false,
+      error: 'Jackpot is not open for betting',
+    }
+  }
+
+  if (
+    new Date(jackpot.closes_at) < new Date()
+  ) {
+    return {
+      success: false,
+      error: 'Jackpot betting has closed',
+    }
+  }
+
+  // Validate all 12 selections
+  if (data.selections.length !== 12) {
     return {
       success: false,
       error: 'You must select all 12 games',
     }
   }
 
-  // Check jackpot open
-  const { data: jackpot } = await supabase
-    .from('jackpots')
-    .select('*')
-    .eq('id', jackpotId)
-    .eq('status', 'open')
-    .single()
-
-  if (!jackpot) {
+  const gameNumbers = data.selections.map(
+    (s) => s.gameNumber
+  )
+  const uniqueGames = new Set(gameNumbers)
+  if (uniqueGames.size !== 12) {
     return {
       success: false,
-      error: 'Jackpot is not available',
+      error: 'Each game must have exactly one selection',
     }
   }
 
-  // Check balance <
-  const stake = jackpot.fixed_stake ?? 50
-
-  const { data: placer } = await supabase
+  // Validate balance
+  const { data: bettor } = await supabase
     .from('profiles')
     .select('credit_balance')
-    .eq('id', placedById)
+    .eq('id', data.bettorId)
     .single()
 
-  if (!placer || placer.credit_balance < stake) {
+  if (!bettor) {
     return {
       success: false,
-      error: `Insufficient balance. You need ETB ${stake} to enter the jackpot.`,
+      error: 'Bettor not found',
     }
   }
 
-  // Generate JP slip ID
-  const { data: slipIdData } = await supabase
-    .rpc('generate_jackpot_slip_id')
+  const stake = jackpot.fixed_stake ?? 50
 
-  const slipId = slipIdData as string
+  if (bettor.credit_balance < stake) {
+    return {
+      success: false,
+      error: `Insufficient balance. Need ETB ${stake}`,
+    }
+  }
+
+  // Generate slip ID (JP + 8 digits)
+  const slipId =
+    'JP' +
+    Math.floor(
+      10000000 +
+        Math.random() * 90000000
+    ).toString()
+
+  // Deduct balance
+  await supabase
+    .from('profiles')
+    .update({
+      credit_balance:
+        bettor.credit_balance - stake,
+    })
+    .eq('id', data.bettorId)
 
   // Insert jackpot slip
   const { data: slip, error: slipError } =
@@ -111,60 +140,196 @@ export async function placeJackpotBet(input: {
       .from('jackpot_slips')
       .insert({
         slip_id: slipId,
-        jackpot_id: jackpotId,
-        bettor_id: bettorId,
-        placed_by: placedById,
+        jackpot_id: data.jackpotId,
+        bettor_id: data.bettorId,
+        placed_by: data.placedById,
+        is_anonymous: data.isAnonymous,
         stake,
         status: 'pending',
-        is_anonymous: isAnonymous,
       })
       .select('id')
       .single()
 
   if (slipError || !slip) {
+    // Refund balance
+    await supabase
+      .from('profiles')
+      .update({
+        credit_balance:
+          bettor.credit_balance,
+      })
+      .eq('id', data.bettorId)
+
     return {
       success: false,
-      error: 'Failed to create jackpot slip',
+      error: 'Failed to place jackpot bet',
     }
   }
 
   // Insert selections
-  const rows = selections.map((s) => ({
-    jackpot_slip_id: slip.id,
-    jackpot_match_id: s.jackpotMatchId,
-    game_number: s.gameNumber,
-    selection: s.selection,
-    result: 'pending',
-  }))
-
   await supabase
     .from('jackpot_slip_selections')
-    .insert(rows)
+    .insert(
+      data.selections.map((sel) => ({
+        jackpot_slip_id: slip.id,
+        game_number: sel.gameNumber,
+        selection: sel.selection,
+        odd: sel.odd,
+        result: 'pending',
+      }))
+    )
 
-  // Deduct balance <
+  // Activity log
   await supabase
-    .from('profiles')
-    .update({
-      credit_balance:
-        placer.credit_balance - stake,
+    .from('activity_logs')
+    .insert({
+      user_id: data.placedById,
+      action: 'jackpot_bet_placed',
+      details: {
+        jackpot_id: data.jackpotId,
+        slip_id: slipId,
+        stake,
+        bettor_id: data.bettorId,
+      },
     })
-    .eq('id', placedById)
-
-  // Log transaction
-  await supabase.from('transactions').insert({
-    from_user_id: placedById,
-    amount: stake,
-    type: 'bet_placed',
-    reference_id: slip.id,
-    note: `Jackpot entry: ${slipId}`,
-  })
-
-  // Log activity
-  await supabase.from('activity_logs').insert({
-    user_id: placedById,
-    action: 'jackpot_bet_placed',
-    details: { slip_id: slipId, stake },
-  })
 
   return { success: true, slipId }
+}
+
+// ─── Get jackpot slip by ID ───────────
+
+export async function getJackpotSlipById(
+  slipId: string
+) {
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from('jackpot_slips')
+    .select(
+      `
+      *,
+      jackpots (
+        name,
+        status,
+        fixed_stake,
+        win_all_reward,
+        near_win_reward,
+        closes_at
+      ),
+      jackpot_slip_selections (
+        *,
+        jackpot_matches (
+          game_number,
+          home_team,
+          away_team,
+          kick_off_time,
+          result,
+          home_odd,
+          draw_odd,
+          away_odd
+        )
+      ),
+      bettor:profiles!jackpot_slips_bettor_id_fkey (
+        username
+      )
+    `
+    )
+    .eq('slip_id', slipId.toUpperCase())
+    .single()
+
+  return data ?? null
+}
+
+// ─── Get bettor's jackpot slips ───────
+
+export async function getMyJackpotSlips(
+  bettorId: string
+) {
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from('jackpot_slips')
+    .select(
+      `
+      *,
+      jackpots (name, status),
+      jackpot_slip_selections (
+        game_number,
+        selection,
+        odd,
+        result,
+        jackpot_matches (
+          home_team,
+          away_team,
+          result
+        )
+      )
+    `
+    )
+    .eq('bettor_id', bettorId)
+    .order('created_at', {
+      ascending: false,
+    })
+    .limit(20)
+
+  return data ?? []
+}
+
+// ─── Get jackpot leaderboard ──────────
+
+export async function getJackpotLeaderboard(
+  jackpotId: string
+) {
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from('jackpot_slips')
+    .select(
+      `
+      slip_id,
+      correct_count,
+      status,
+      reward_amount,
+      is_anonymous,
+      bettor:profiles!jackpot_slips_bettor_id_fkey (
+        username
+      )
+    `
+    )
+    .eq('jackpot_id', jackpotId)
+    .not('correct_count', 'is', null)
+    .order('correct_count', {
+      ascending: false,
+    })
+    .limit(20)
+
+  return data ?? []
+}
+
+// ─── Get all jackpots (public) ────────
+
+export async function getAllJackpotsPublic() {
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from('jackpots')
+    .select(
+      `
+      id,
+      name,
+      status,
+      fixed_stake,
+      win_all_reward,
+      near_win_reward,
+      opens_at,
+      closes_at,
+      created_at
+    `
+    )
+    .order('created_at', {
+      ascending: false,
+    })
+    .limit(10)
+
+  return data ?? []
 }
