@@ -541,3 +541,56 @@ export async function copySlip(
     },
   }
 }
+export async function redeemWinningSlip(
+  slipId: string,
+  cashierId: string
+): Promise<{ success: boolean; amount?: number; error?: string }> {
+  const supabase = await createClient()
+
+  // Fetch slip
+  const { data: slip } = await supabase
+    .from('slips')
+    .select('id, slip_id, status, net_payout, bettor_id, placed_by')
+    .eq('slip_id', slipId)
+    .single()
+
+  if (!slip) return { success: false, error: 'Slip not found' }
+  if (slip.status !== 'won') return { success: false, error: `Slip is ${slip.status} — only won slips can be redeemed` }
+
+  // Fetch cashier balance
+  const { data: cashier } = await supabase
+    .from('profiles')
+    .select('credit_balance')
+    .eq('id', cashierId)
+    .single()
+
+  if (!cashier) return { success: false, error: 'Cashier not found' }
+  if (cashier.credit_balance < slip.net_payout) {
+    return { success: false, error: `Insufficient balance. You need ${slip.net_payout.toLocaleString()} but have ${cashier.credit_balance.toLocaleString()}` }
+  }
+
+  // Mark slip as paid
+  const { error: slipErr } = await supabase
+    .from('slips')
+    .update({ status: 'paid' })
+    .eq('id', slip.id)
+
+  if (slipErr) return { success: false, error: 'Failed to update slip status' }
+
+  // Deduct from cashier
+  await supabase
+    .from('profiles')
+    .update({ credit_balance: cashier.credit_balance - slip.net_payout })
+    .eq('id', cashierId)
+
+  // Log transaction
+  await supabase.from('transactions').insert({
+    profile_id: cashierId,
+    type: 'winning_payout',
+    amount: -slip.net_payout,
+    reference_id: slip.id,
+    note: `Winning payout for slip ${slipId}`,
+  })
+
+  return { success: true, amount: slip.net_payout }
+}
