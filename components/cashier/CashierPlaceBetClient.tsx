@@ -18,13 +18,14 @@ interface Props {
   countries: CountryWithLeagues[]
   topLeagues: League[]
   settings: PlatformSettings
+  jackpot?: any
 }
-
 export function CashierPlaceBetClient({
   initialMatches,
   countries,
   topLeagues,
   settings,
+  jackpot,
 }: Props) {
   const [showPlaceBet, setShowPlaceBet] =
     useState(false)
