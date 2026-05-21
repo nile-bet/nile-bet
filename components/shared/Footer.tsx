@@ -92,7 +92,7 @@ export function Footer() {
                 { label: 'Top-up', href: '/bettor-profile?tab=topup' },
                 { label: 'Withdraw', href: '/bettor-profile?tab=withdraw' },
                 { label: 'Check Slip', href: '/check-slip' },
-                { label: 'Weekend Jackpot', href: '/jackpot' },
+                { label: 'Weekend Jackpot', href: '/weekend-jackpot' },
                 { label: 'About NILE Betting', href: '/about' },
                 { label: 'Rules & Regulations', href: '/rules' },
                 { label: 'Privacy Policy', href: '/privacy' },

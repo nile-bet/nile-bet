@@ -6,8 +6,8 @@
   --color-nile-blue: #1B3A6B;
   --color-gold: #C9A84C;
   --color-gold-light: #D4AF70;
-  --color-charcoal: #1A1A2E;
-  --color-slate-dark: #16213E;
+  --color-charcoal: #222444;
+  --color-slate-dark: #1E2D50;
   --color-nile-white: #F0F0F0;
   --color-nile-success: #2ECC71;
   --color-nile-danger: #E74C3C;
@@ -52,7 +52,7 @@
   }
 
   body {
-    background-color: #1A1A2E;
+    background-color: #222444;
     color: #F0F0F0;
     font-family: "Inter", sans-serif;
     -webkit-font-smoothing: antialiased;
