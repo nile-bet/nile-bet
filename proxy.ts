@@ -109,6 +109,37 @@ export async function proxy(
     return NextResponse.redirect(url)
   }
 
+  // Redirect non-bettors away from bettor homepage
+  if (pathname === '/' && role !== 'bettor') {
+    const url = request.nextUrl.clone()
+    url.pathname =
+      role === 'admin'
+        ? '/dashboard'
+        : role === 'agent'
+        ? '/agent-dashboard'
+        : role === 'cashier'
+        ? '/cashier-dashboard'
+        : '/'
+    return NextResponse.redirect(url)
+  }
+
+  // Redirect bettors away from admin/agent/cashier routes
+  if (
+    role === 'bettor' && (
+      pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/agent-') ||
+      pathname.startsWith('/cashier-') ||
+      pathname.startsWith('/matches') ||
+      pathname.startsWith('/users') ||
+      pathname.startsWith('/reports') ||
+      pathname.startsWith('/broadcast')
+    )
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url)
+  }
+
   // Protect admin routes
   if (
     (pathname.startsWith('/dashboard') ||
