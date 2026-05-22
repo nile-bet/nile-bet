@@ -92,36 +92,12 @@ export async function proxy(
     return NextResponse.redirect(url)
   }
 
-  // Redirect from login/register
-  if (
-    pathname === '/login' ||
-    pathname === '/register'
-  ) {
-    const url = request.nextUrl.clone()
-    url.pathname =
-      role === 'admin'
-        ? '/dashboard'
-        : role === 'agent'
-        ? '/agent-dashboard'
-        : role === 'cashier'
-        ? '/cashier-dashboard'
-        : '/'
-    return NextResponse.redirect(url)
+  // Allow access to login/register always
+  if (pathname === '/login' || pathname === '/register') {
+    return supabaseResponse
   }
 
-  // Redirect non-bettors away from bettor homepage
-  if (pathname === '/' && role !== 'bettor') {
-    const url = request.nextUrl.clone()
-    url.pathname =
-      role === 'admin'
-        ? '/dashboard'
-        : role === 'agent'
-        ? '/agent-dashboard'
-        : role === 'cashier'
-        ? '/cashier-dashboard'
-        : '/'
-    return NextResponse.redirect(url)
-  }
+  // Non-bettors can view public homepage but navbar will show their role
 
   // Redirect bettors away from admin/agent/cashier routes
   if (
