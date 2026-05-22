@@ -34,7 +34,7 @@ const nextConfig: NextConfig = {
   // Bundle optimization
   experimental: {
     serverActions: {
-      allowedOrigins: ['*.app.github.dev', 'localhost:3000'],
+      allowedOrigins: ['*.app.github.dev', 'localhost:3000', 'nilebetting.vercel.app'],
     },
     optimizePackageImports: [
       'lucide-react',
@@ -48,8 +48,6 @@ const nextConfig: NextConfig = {
 
 
   turbopack: {},
-  // Output
-  output: 'standalone',
 
   // Headers for SW
   async headers() {
