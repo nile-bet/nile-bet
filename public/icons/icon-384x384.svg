@@ -1,0 +1,6 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="28.799999999999997" fill="#1A1A2E"/>
+  <rect x="15.36" y="15.36" width="161.28" height="161.28" rx="19.200000000000003" fill="#1B3A6B"/>
+  <text x="50%" y="58%" font-family="serif" font-size="76.80000000000001" font-weight="bold" fill="#C9A84C" text-anchor="middle" dominant-baseline="middle">N</text>
+  <line x1="38.400000000000006" y1="157.44" x2="153.60000000000002" y2="157.44" stroke="#C9A84C" stroke-width="7.68" stroke-linecap="round"/>
+</svg>
