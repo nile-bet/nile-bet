@@ -117,6 +117,8 @@ export function useAuth() {
 
   useEffect(() => {
     const loadUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { logout(); return }
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser()
