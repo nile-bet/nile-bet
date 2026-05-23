@@ -84,6 +84,5 @@
       "destination": "/sw.js"
     }
   ],
-  "regions": ["cdg1", "iad1"],
   "framework": "nextjs"
 }
