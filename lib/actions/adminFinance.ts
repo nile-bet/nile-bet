@@ -190,15 +190,58 @@ export async function getAgentProfitReport(filters?: DateFilters) {
 
 export async function getTopUsersReport(role?: string, filters?: DateFilters) {
   const supabase = await createClient()
+
   let query = supabase
     .from('slips')
-    .select('bettor_id, placed_by, stake, net_payout, status, created_at')
-    .order('stake', { ascending: false })
-    .limit(500)
+    .select('bettor_id, placed_by, stake, net_payout, status, created_at, profiles!slips_bettor_id_fkey(username)')
+    .order('created_at', { ascending: false })
+    .limit(1000)
+
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
   if (filters?.endDate) query = query.lte('created_at', filters.endDate)
+
   const { data } = await query
-  return data ?? []
+  const slips = data ?? []
+
+  if (role === 'cashiers') {
+    // Group by placed_by (cashier username)
+    const map: Record<string, any> = {}
+    for (const slip of slips) {
+      const key = slip.placed_by ?? 'unknown'
+      if (!map[key]) {
+        map[key] = { username: key, slipCount: 0, totalStaked: 0, totalPaid: 0, netProfit: 0 }
+      }
+      map[key].slipCount += 1
+      map[key].totalStaked += slip.stake ?? 0
+      if (slip.status === 'won') {
+        map[key].totalPaid += slip.net_payout ?? 0
+      }
+    }
+    return Object.values(map)
+      .map((r) => ({ ...r, netProfit: r.totalStaked - r.totalPaid }))
+      .sort((a, b) => b.netProfit - a.netProfit)
+      .slice(0, 20)
+  } else {
+    // Group by bettor username
+    const map: Record<string, any> = {}
+    for (const slip of slips) {
+      const username = (slip.profiles as any)?.username ?? slip.bettor_id ?? 'unknown'
+      if (!map[username]) {
+        map[username] = { username, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, winRate: 0 }
+      }
+      map[username].slipCount += 1
+      map[username].totalStaked += slip.stake ?? 0
+      if (slip.status === 'won') map[username].wonBets += 1
+      if (slip.status === 'lost') map[username].lostBets += 1
+    }
+    return Object.values(map)
+      .map((r) => ({
+        ...r,
+        winRate: r.slipCount > 0 ? (r.wonBets / r.slipCount) * 100 : 0,
+      }))
+      .sort((a, b) => b.totalStaked - a.totalStaked)
+      .slice(0, 20)
+  }
 }
 
 export async function getPlatformProfitReport(granularity?: string, filters?: DateFilters) {
