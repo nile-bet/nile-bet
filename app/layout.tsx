@@ -192,6 +192,21 @@ export default function RootLayout({
                     });
                 });
               }
+
+              // Clear session on window close (not refresh)
+              (function() {
+                var key = 'sb-session-active';
+                if (!sessionStorage.getItem(key)) {
+                  // New tab/window - clear supabase auth
+                  var keys = Object.keys(localStorage);
+                  keys.forEach(function(k) {
+                    if (k.startsWith('sb-') || k.includes('supabase')) {
+                      localStorage.removeItem(k);
+                    }
+                  });
+                }
+                sessionStorage.setItem(key, '1');
+              })();
             `,
           }}
         />
