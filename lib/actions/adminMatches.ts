@@ -194,21 +194,49 @@ export async function createMatch(data: {
     }
   }
 
-  // Insert players (for scorers markets)
-  if (
-    data.players &&
-    data.players.length > 0
-  ) {
-    await supabase
-      .from('match_players')
-      .insert(
-        data.players.map((p) => ({
-          match_id: matchId,
-          player_name: p.name,
-          team: p.team,
-          added_by: data.createdBy,
-        }))
-      )
+  // Insert players and their odds into scorer markets
+  if (data.players && data.players.length > 0) {
+    // Insert players
+    await supabase.from('match_players').insert(
+      data.players.map((p) => ({
+        match_id: matchId,
+        player_name: p.name,
+        team: p.team,
+        added_by: data.createdBy,
+      }))
+    )
+
+    // Get scorer market IDs for this match
+    const { data: scorerTemplates } = await supabase
+      .from('market_templates')
+      .select('id')
+      .in('name', ['Anytime Scorer', 'First Scorer', 'Last Scorer'])
+
+    const scorerTemplateIds = scorerTemplates?.map((t: any) => t.id) ?? []
+
+    const { data: scorerMarkets } = await supabase
+      .from('match_markets')
+      .select('id')
+      .eq('match_id', matchId)
+      .in('market_template_id', scorerTemplateIds)
+
+    if (scorerMarkets?.length) {
+      const playerOdds: any[] = []
+      for (const market of scorerMarkets) {
+        for (const player of data.players) {
+          playerOdds.push({
+            match_market_id: market.id,
+            selection: player.name,
+            odd_value: 2.00,
+            original_odd: 2.00,
+            last_updated_by: data.createdBy,
+          })
+        }
+      }
+      if (playerOdds.length > 0) {
+        await supabase.from('match_market_odds').insert(playerOdds)
+      }
+    }
   }
 
   await supabase
@@ -1734,6 +1762,32 @@ export async function addPlayerToScorers(
   const supabase = await createClient()
 
   // Insert player
+  // Ensure scorer markets exist for this match
+  const { data: scorerTemplates } = await supabase
+    .from('market_templates')
+    .select('id, name')
+    .in('name', ['Anytime Scorer', 'First Scorer', 'Last Scorer'])
+
+  if (scorerTemplates?.length) {
+    for (const tmpl of scorerTemplates) {
+      const { data: existing } = await supabase
+        .from('match_markets')
+        .select('id')
+        .eq('match_id', matchId)
+        .eq('market_template_id', tmpl.id)
+        .single()
+
+      if (!existing) {
+        await supabase.from('match_markets').insert({
+          match_id: matchId,
+          market_template_id: tmpl.id,
+          is_enabled: true,
+          status: 'open',
+        })
+      }
+    }
+  }
+
   const { error: playerError } = await supabase
     .from('match_players')
     .insert({ match_id: matchId, player_name: playerName, team, added_by: addedBy })

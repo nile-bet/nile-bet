@@ -181,8 +181,8 @@ export function MatchWizard({
       const template = templates.find(
         (t) => t.id === templateId
       )
-      if (!template || template.is_dynamic)
-        continue
+      if (!template) continue
+      if (template.is_dynamic) continue // scorer odds added separately via players
       const sels: string[] =
         template.selections ?? []
       for (const sel of sels) {

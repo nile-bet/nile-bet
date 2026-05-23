@@ -82,11 +82,13 @@ export async function getUpcomingMatches(options: {
           flag_emoji
         )
       ),
+      match_players (*),
       match_markets (
         *,
         market_templates (
           id,
           name,
+          is_dynamic,
           market_categories (id, name, display_order)
         ),
         match_market_odds (*)
