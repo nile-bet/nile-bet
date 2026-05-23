@@ -102,6 +102,25 @@ export function useAuth() {
       })
 
       setUser(profile)
+
+      // Redirect to correct section based on role
+      const currentPath = window.location.pathname
+      const roleRedirect = ROLE_REDIRECTS[profile.role as string] ?? '/'
+
+      const rolePaths: Record<string, string[]> = {
+        admin: ['/dashboard', '/matches', '/users', '/credits', '/coupons', '/reports', '/broadcast', '/activity', '/settings', '/jackpot'],
+        agent: ['/agent-'],
+        cashier: ['/cashier-'],
+        bettor: ['/bettor-', '/check-slip', '/slip-lookup', '/results', '/match/'],
+      }
+
+      const allowedPrefixes = rolePaths[profile.role as string] ?? ['/']
+      const isOnCorrectSection = allowedPrefixes.some(p => currentPath.startsWith(p)) || (profile.role === 'bettor' && (currentPath === '/' || currentPath.startsWith('/match')))
+      const isOnPublicPage = ['/login', '/register', '/suspended', '/offline', '/maintenance'].includes(currentPath)
+
+      if (!isOnPublicPage && !isOnCorrectSection) {
+        router.replace(roleRedirect)
+      }
     }
 
     initAuth()
