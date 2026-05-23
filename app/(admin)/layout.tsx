@@ -2,6 +2,9 @@
 
 import { useAuth }
   from '@/lib/hooks/useAuth'
+import { useAuthStore } from '@/lib/stores/authStore'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { OfflineBanner }
   from '@/components/shared/OfflineBanner'
 import {
@@ -76,6 +79,16 @@ const adminNav: NavItem[] = [
 
 function AdminInitializer() {
   useAuth()
+  const { user, isLoading } = useAuthStore()
+  const router = useRouter()
+  useEffect(() => {
+    if (!isLoading && user && user.role !== 'admin') {
+      router.replace('/login')
+    }
+    if (!isLoading && !user) {
+      router.replace('/login')
+    }
+  }, [user, isLoading, router])
   return null
 }
 

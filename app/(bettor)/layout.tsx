@@ -1,7 +1,10 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth }
   from '@/lib/hooks/useAuth'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { useRealtimeBettor }
   from '@/lib/hooks/useRealtimeBettor'
 import { OfflineBanner }
@@ -12,6 +15,16 @@ import { BroadcastBanner }
 function BettorInitializer() {
   useAuth()
   useRealtimeBettor()
+  const { user, isLoading } = useAuthStore()
+  const router = useRouter()
+  useEffect(() => {
+    if (!isLoading && user && user.role !== 'bettor') {
+      router.replace('/login')
+    }
+    if (!isLoading && !user) {
+      router.replace('/login')
+    }
+  }, [user, isLoading, router])
   return null
 }
 
