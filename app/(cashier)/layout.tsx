@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { useAuth }
   from '@/lib/hooks/useAuth'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { useRealtimeCashier }
   from '@/lib/hooks/useRealtimeCashier'
 import { useKeyboardShortcuts }
@@ -83,6 +85,15 @@ function CashierInitializer({
   useRealtimeCashier()
   const router = useRouter()
   const { clearSlip } = useBetSlipStore()
+  const { user, isLoading } = useAuthStore()
+  useEffect(() => {
+    if (!isLoading && user && user.role !== 'cashier') {
+      router.replace('/login')
+    }
+    if (!isLoading && !user) {
+      router.replace('/login')
+    }
+  }, [user, isLoading, router])
 
   useKeyboardShortcuts({
     onRedeemSlip: onRedeem,

@@ -1,7 +1,10 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth }
   from '@/lib/hooks/useAuth'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { useRealtimeAgent }
   from '@/lib/hooks/useRealtimeAgent'
 import { OfflineBanner }
@@ -69,6 +72,16 @@ const agentNav: NavItem[] = [
 function AgentInitializer() {
   useAuth()
   useRealtimeAgent()
+  const { user, isLoading } = useAuthStore()
+  const router = useRouter()
+  useEffect(() => {
+    if (!isLoading && user && user.role !== 'agent') {
+      router.replace('/login')
+    }
+    if (!isLoading && !user) {
+      router.replace('/login')
+    }
+  }, [user, isLoading, router])
   return null
 }
 
