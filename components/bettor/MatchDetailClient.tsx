@@ -156,77 +156,112 @@ export function MatchDetailClient({
         ) : (
           <div className="space-y-4">
             {activeMarkets.map((mm) => {
-              const template =
-                mm.market_templates as any
-              const odds =
-                mm.match_market_odds ?? []
-              const selections: string[] =
-                template?.selections ?? []
-              const isDynamic =
-                template?.is_dynamic ?? false
-              const marketName =
-                template?.name ?? ''
-              const catName =
-                template?.market_categories
-                  ?.name ?? activeCategory
-
-              const dynamicSelections =
-                isDynamic
-                  ? match.match_players?.map(
-                      (p) => p.player_name
-                    ) ?? []
-                  : selections
+              const template = mm.market_templates as any
+              const odds = mm.match_market_odds ?? []
+              const selections: string[] = template?.selections ?? []
+              const isDynamic = template?.is_dynamic ?? false
+              const marketName = template?.name ?? ''
+              const catName = template?.market_categories?.name ?? activeCategory
 
               return (
-                <div
-                  key={mm.id}
-                  className="border-b border-gold/10 pb-4"
-                >
+                <div key={mm.id} className="border-b border-gold/10 pb-4">
                   <p className="text-[13px] text-white/60 font-medium mb-2">
                     {marketName}
                   </p>
 
-                  {dynamicSelections.length ===
-                  0 ? (
+                  {isDynamic ? (
+                    (() => {
+                      const homePlayers = match.match_players?.filter(p => p.team === 'home') ?? []
+                      const awayPlayers = match.match_players?.filter(p => p.team === 'away') ?? []
+                      const hasPlayers = homePlayers.length > 0 || awayPlayers.length > 0
+                      if (!hasPlayers) {
+                        return (
+                          <div className="flex items-center gap-2 text-white/25 text-xs">
+                            <AlertTriangle className="w-3 h-3" />
+                            No players added for this market
+                          </div>
+                        )
+                      }
+                      return (
+                        <div className="space-y-3">
+                          {homePlayers.length > 0 && (
+                            <div>
+                              <p className="text-[11px] text-nile-blue-light uppercase tracking-widest mb-1.5">
+                                {match.home_team}
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {homePlayers.map((player) => {
+                                  const oddRow = odds.find(o => o.selection === player.player_name)
+                                  if (!oddRow) return null
+                                  return (
+                                    <OddButton
+                                      key={player.id}
+                                      {...commonProps}
+                                      label={player.player_name}
+                                      odd={oddRow.odd_value ?? null}
+                                      matchMarketId={mm.id}
+                                      selection={player.player_name}
+                                      marketName={marketName}
+                                      categoryName={catName}
+                                      size="lg"
+                                    />
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )}
+                          {awayPlayers.length > 0 && (
+                            <div>
+                              <p className="text-[11px] text-nile-orange uppercase tracking-widest mb-1.5">
+                                {match.away_team}
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {awayPlayers.map((player) => {
+                                  const oddRow = odds.find(o => o.selection === player.player_name)
+                                  if (!oddRow) return null
+                                  return (
+                                    <OddButton
+                                      key={player.id}
+                                      {...commonProps}
+                                      label={player.player_name}
+                                      odd={oddRow.odd_value ?? null}
+                                      matchMarketId={mm.id}
+                                      selection={player.player_name}
+                                      marketName={marketName}
+                                      categoryName={catName}
+                                      size="lg"
+                                    />
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()
+                  ) : selections.length === 0 ? (
                     <div className="flex items-center gap-2 text-white/25 text-xs">
                       <AlertTriangle className="w-3 h-3" />
-                      Unavailable for this
-                      match
+                      Unavailable for this match
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      {dynamicSelections.map(
-                        (sel) => {
-                          const oddRow =
-                            odds.find(
-                              (o) =>
-                                o.selection ===
-                                sel
-                            )
-                          return (
-                            <OddButton
-                              key={sel}
-                              {...commonProps}
-                              label={sel}
-                              odd={
-                                oddRow?.odd_value ??
-                                null
-                              }
-                              matchMarketId={
-                                mm.id
-                              }
-                              selection={sel}
-                              marketName={
-                                marketName
-                              }
-                              categoryName={
-                                catName
-                              }
-                              size="lg"
-                            />
-                          )
-                        }
-                      )}
+                      {selections.map((sel) => {
+                        const oddRow = odds.find(o => o.selection === sel)
+                        return (
+                          <OddButton
+                            key={sel}
+                            {...commonProps}
+                            label={sel}
+                            odd={oddRow?.odd_value ?? null}
+                            matchMarketId={mm.id}
+                            selection={sel}
+                            marketName={marketName}
+                            categoryName={catName}
+                            size="lg"
+                          />
+                        )
+                      })}
                     </div>
                   )}
                 </div>

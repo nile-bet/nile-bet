@@ -138,22 +138,52 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                   </span>
                   <ChevronUp className="w-3 h-3 text-white/30" />
                 </div>
-                <div className="grid px-4 py-2 gap-y-1.5" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-                  {market.match_market_odds?.map((odd) => (
-                    <div key={odd.id} className="flex items-center justify-between pr-2">
-                      <span className="text-[10px] text-white/50">{odd.selection}</span>
-                      <OddButton
-                        {...commonProps}
-                        label={String(odd.odd_value)}
-                        odd={odd.odd_value}
-                        matchMarketId={market.id}
-                        selection={odd.selection}
-                        marketName={market.market_templates?.name ?? ''}
-                        categoryName={(market.market_templates as any)?.market_categories?.name ?? 'MAIN'}
-                      />
+                {(() => {
+                  const isDynamic = (market.market_templates as any)?.is_dynamic ?? false
+                  const odds = market.match_market_odds ?? []
+                  if (isDynamic) {
+                    // Scorer market — show player name + odd button per row
+                    return (
+                      <div className="px-4 py-2 space-y-1.5">
+                        {odds.map((odd) => (
+                          <div key={odd.id} className="flex items-center justify-between">
+                            <span className="text-[11px] text-white/70 flex-1">{odd.selection}</span>
+                            <OddButton
+                              {...commonProps}
+                              label={String(odd.odd_value?.toFixed(2))}
+                              odd={odd.odd_value}
+                              matchMarketId={market.id}
+                              selection={odd.selection}
+                              marketName={market.market_templates?.name ?? ''}
+                              categoryName={(market.market_templates as any)?.market_categories?.name ?? 'MAIN'}
+                            />
+                          </div>
+                        ))}
+                        {odds.length === 0 && (
+                          <p className="text-[10px] text-white/25">No players added</p>
+                        )}
+                      </div>
+                    )
+                  }
+                  return (
+                    <div className="grid px-4 py-2 gap-y-1.5" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                      {odds.map((odd) => (
+                        <div key={odd.id} className="flex items-center justify-between pr-2">
+                          <span className="text-[10px] text-white/50">{odd.selection}</span>
+                          <OddButton
+                            {...commonProps}
+                            label={String(odd.odd_value)}
+                            odd={odd.odd_value}
+                            matchMarketId={market.id}
+                            selection={odd.selection}
+                            marketName={market.market_templates?.name ?? ''}
+                            categoryName={(market.market_templates as any)?.market_categories?.name ?? 'MAIN'}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  )
+                })()}
               </div>
             ))}
           </div>
