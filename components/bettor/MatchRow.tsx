@@ -88,24 +88,25 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
         </button>
       </div>
 
+      {/* Main odds row — all 8 in one row with partitions */}
+
       {/* Main odds row */}
-      <div className="flex items-center gap-1 px-4 pb-2 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-1 flex-shrink-0">
-          <OddButton {...commonProps} label="1" odd={getOdd(market1x2, 'Home')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-1`} selection="Home" marketName="1X2 (Full Time Result)" categoryName="MAIN" />
-          <OddButton {...commonProps} label="X" odd={getOdd(market1x2, 'Draw')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-x`} selection="Draw" marketName="1X2 (Full Time Result)" categoryName="MAIN" />
-          <OddButton {...commonProps} label="2" odd={getOdd(market1x2, 'Away')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-2`} selection="Away" marketName="1X2 (Full Time Result)" categoryName="MAIN" />
-        </div>
-        <div className="w-px h-8 bg-gold/20 flex-shrink-0 mx-1" />
-        <div className="flex gap-1 flex-shrink-0">
-          <OddButton {...commonProps} label="1X" odd={getOdd(marketDC, '1X')} matchMarketId={marketDC?.id ?? `${match.id}-dc-1x`} selection="1X" marketName="Double Chance" categoryName="MAIN" />
-          <OddButton {...commonProps} label="12" odd={getOdd(marketDC, '12')} matchMarketId={marketDC?.id ?? `${match.id}-dc-12`} selection="12" marketName="Double Chance" categoryName="MAIN" />
-          <OddButton {...commonProps} label="X2" odd={getOdd(marketDC, 'X2')} matchMarketId={marketDC?.id ?? `${match.id}-dc-x2`} selection="X2" marketName="Double Chance" categoryName="MAIN" />
-        </div>
-        <div className="w-px h-8 bg-gold/20 flex-shrink-0 mx-1" />
-        <div className="flex gap-1 flex-shrink-0">
-          <OddButton {...commonProps} label="Yes" odd={getOdd(marketBTTS, 'Yes')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-y`} selection="Yes" marketName="Both Teams to Score" categoryName="MAIN" />
-          <OddButton {...commonProps} label="No" odd={getOdd(marketBTTS, 'No')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-n`} selection="No" marketName="Both Teams to Score" categoryName="MAIN" />
-        </div>
+      <div className="grid border-b border-nile-blue/20" style={{gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr'}}>
+        <OddButton {...commonProps} label="1" odd={getOdd(market1x2, 'Home')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-1`} selection="Home" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
+        <div className="bg-nile-blue/20" />
+        <OddButton {...commonProps} label="X" odd={getOdd(market1x2, 'Draw')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-x`} selection="Draw" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
+        <div className="bg-nile-blue/20" />
+        <OddButton {...commonProps} label="2" odd={getOdd(market1x2, 'Away')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-2`} selection="Away" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
+        <div className="bg-gold/20" />
+        <OddButton {...commonProps} label="1X" odd={getOdd(marketDC, '1X')} matchMarketId={marketDC?.id ?? `${match.id}-dc-1x`} selection="1X" marketName="Double Chance" categoryName="MAIN" size="col" />
+        <div className="bg-nile-blue/20" />
+        <OddButton {...commonProps} label="12" odd={getOdd(marketDC, '12')} matchMarketId={marketDC?.id ?? `${match.id}-dc-12`} selection="12" marketName="Double Chance" categoryName="MAIN" size="col" />
+        <div className="bg-nile-blue/20" />
+        <OddButton {...commonProps} label="X2" odd={getOdd(marketDC, 'X2')} matchMarketId={marketDC?.id ?? `${match.id}-dc-x2`} selection="X2" marketName="Double Chance" categoryName="MAIN" size="col" />
+        <div className="bg-gold/20" />
+        <OddButton {...commonProps} label="Yes" odd={getOdd(marketBTTS, 'Yes')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-y`} selection="Yes" marketName="Both Teams to Score" categoryName="MAIN" size="col" />
+        <div className="bg-nile-blue/20" />
+        <OddButton {...commonProps} label="No" odd={getOdd(marketBTTS, 'No')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-n`} selection="No" marketName="Both Teams to Score" categoryName="MAIN" size="col" />
       </div>
 
       {/* Expanded markets panel */}

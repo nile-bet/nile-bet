@@ -169,15 +169,15 @@ export function MatchListClient({
         {/* Match List */}
         <div className="flex-1 overflow-y-auto">
           {/* Column headers */}
-          <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 px-4 py-2 hidden md:flex items-center justify-between">
-            <div className="flex items-center gap-4 text-[11px] text-white/40 uppercase tracking-wide">
+          <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 px-4 py-2.5 hidden md:flex items-center justify-between">
+            <div className="flex items-center gap-4 text-[13px] text-white font-extrabold uppercase tracking-widest">
               <span className="w-[158px]">Match Result</span>
-              <span className="mx-2 text-gold/20">|</span>
+              <span className="mx-2 text-gold/40">|</span>
               <span className="w-[158px]">Double Chance</span>
-              <span className="mx-2 text-gold/20">|</span>
+              <span className="mx-2 text-gold/40">|</span>
               <span>Both Score</span>
             </div>
-            <span className="text-[11px] text-white/30 pr-2">
+            <span className="text-[12px] text-white/50 font-bold pr-2 uppercase tracking-widest">
               More
             </span>
           </div>
