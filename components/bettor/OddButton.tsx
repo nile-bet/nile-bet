@@ -1,12 +1,8 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { useBetSlipStore }
-  from '@/lib/stores/betSlipStore'
-import type {
-  BetSlipSelection,
-  MatchStatus,
-} from '@/types/database.types'
+import { useBetSlipStore } from '@/lib/stores/betSlipStore'
+import type { BetSlipSelection, MatchStatus } from '@/types/database.types'
 
 interface OddButtonProps {
   label: string
@@ -22,7 +18,7 @@ interface OddButtonProps {
   categoryName: string
   kickOffTime: string
   matchStatus: MatchStatus
-  size?: 'sm' | 'lg'
+  size?: 'sm' | 'lg' | 'row' | 'col'
   disabled?: boolean
 }
 
@@ -43,44 +39,82 @@ export function OddButton({
   size = 'sm',
   disabled = false,
 }: OddButtonProps) {
-  const {
-    addSelection,
-    removeSelection,
-    isSelectionAdded,
-  } = useBetSlipStore()
-
-  const isSelected = isSelectionAdded(
-    matchMarketId,
-    selection
-  )
-
+  const { addSelection, removeSelection, isSelectionAdded } = useBetSlipStore()
+  const isSelected = isSelectionAdded(matchMarketId, selection)
   const isUnavailable = !odd || disabled
 
   const handleClick = () => {
     if (isUnavailable) return
-
     if (isSelected) {
-      removeSelection(
-        matchMarketId,
-        selection
-      )
+      removeSelection(matchMarketId, selection)
     } else {
       const s: BetSlipSelection = {
-        matchId,
-        matchMarketId,
-        homeTeam,
-        awayTeam,
-        leagueName,
-        countryFlag,
-        marketName,
-        categoryName,
-        selection,
-        odd: odd!,
-        kickOffTime,
-        matchStatus,
+        matchId, matchMarketId, homeTeam, awayTeam,
+        leagueName, countryFlag, marketName, categoryName,
+        selection, odd: odd!, kickOffTime, matchStatus,
       }
       addSelection(s)
     }
+  }
+
+  if (size === 'col') {
+    return (
+      <button
+        onClick={handleClick}
+        disabled={isUnavailable}
+        className={cn(
+          'flex items-center justify-between px-3 py-3 transition-all duration-150 w-full',
+          isSelected
+            ? 'bg-gold cursor-pointer'
+            : isUnavailable
+            ? 'opacity-30 cursor-not-allowed bg-transparent'
+            : 'hover:bg-nile-blue/30 cursor-pointer'
+        )}
+      >
+        <span className={cn(
+          'text-[11px] truncate flex-1 text-left',
+          isSelected ? 'text-charcoal' : 'text-white/50'
+        )}>
+          {label}
+        </span>
+        <span className={cn(
+          'font-mono text-[15px] font-bold ml-2 flex-shrink-0',
+          isSelected ? 'text-charcoal' : isUnavailable ? 'text-white/20' : 'text-gold'
+        )}>
+          {odd ? odd.toFixed(2) : '—'}
+        </span>
+      </button>
+    )
+  }
+
+  if (size === 'row') {
+    return (
+      <button
+        onClick={handleClick}
+        disabled={isUnavailable}
+        className={cn(
+          'w-full flex items-center justify-between px-4 py-3 transition-all duration-150 border-b border-white/5 last:border-0',
+          isSelected
+            ? 'bg-gold cursor-pointer'
+            : isUnavailable
+            ? 'opacity-30 cursor-not-allowed bg-transparent'
+            : 'bg-nile-blue/20 hover:bg-nile-blue/40 cursor-pointer'
+        )}
+      >
+        <span className={cn(
+          'text-sm font-medium flex-1 text-left',
+          isSelected ? 'text-charcoal font-bold' : 'text-white/80'
+        )}>
+          {label}
+        </span>
+        <span className={cn(
+          'font-mono text-sm font-bold',
+          isSelected ? 'text-charcoal' : isUnavailable ? 'text-white/20' : 'text-gold'
+        )}>
+          {odd ? odd.toFixed(2) : '—'}
+        </span>
+      </button>
+    )
   }
 
   if (size === 'lg') {
@@ -97,28 +131,16 @@ export function OddButton({
             : 'bg-slate-dark border-nile-blue/40 hover:border-gold/40 hover:bg-gold/10 cursor-pointer'
         )}
       >
-        <span
-          className={cn(
-            'text-[11px] mb-1',
-            isSelected
-              ? 'text-charcoal'
-              : isUnavailable
-              ? 'text-white/20'
-              : 'text-white/50'
-          )}
-        >
+        <span className={cn(
+          'text-[11px] mb-1',
+          isSelected ? 'text-charcoal' : isUnavailable ? 'text-white/20' : 'text-white/50'
+        )}>
           {label}
         </span>
-        <span
-          className={cn(
-            'font-mono text-[15px] font-medium',
-            isSelected
-              ? 'text-charcoal font-bold'
-              : isUnavailable
-              ? 'text-white/20'
-              : 'text-gold'
-          )}
-        >
+        <span className={cn(
+          'font-mono text-[15px] font-medium',
+          isSelected ? 'text-charcoal font-bold' : isUnavailable ? 'text-white/20' : 'text-gold'
+        )}>
           {odd ? odd.toFixed(2) : '—'}
         </span>
       </button>
@@ -138,28 +160,16 @@ export function OddButton({
           : 'bg-slate-dark border-nile-blue/40 hover:border-gold/40 hover:bg-gold/10 cursor-pointer'
       )}
     >
-      <span
-        className={cn(
-          'text-[10px] mb-0.5',
-          isSelected
-            ? 'text-charcoal'
-            : isUnavailable
-            ? 'text-white/20'
-            : 'text-white/50'
-        )}
-      >
+      <span className={cn(
+        'text-[10px] mb-0.5',
+        isSelected ? 'text-charcoal' : isUnavailable ? 'text-white/20' : 'text-white/50'
+      )}>
         {label}
       </span>
-      <span
-        className={cn(
-          'font-mono text-[13px] font-medium',
-          isSelected
-            ? 'text-charcoal font-bold'
-            : isUnavailable
-            ? 'text-white/20'
-            : 'text-gold'
-        )}
-      >
+      <span className={cn(
+        'font-mono text-[13px] font-medium',
+        isSelected ? 'text-charcoal font-bold' : isUnavailable ? 'text-white/20' : 'text-gold'
+      )}>
         {odd ? odd.toFixed(2) : '—'}
       </span>
     </button>
