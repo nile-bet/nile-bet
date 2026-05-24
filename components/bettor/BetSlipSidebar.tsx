@@ -9,7 +9,8 @@ import {
   formatETB,
 } from '@/lib/utils/formatCurrency'
 import { cn } from '@/lib/utils'
-import { saveAnonymousSlip, getSlipById } from '@/lib/actions/bets'
+import { getSlipById } from '@/lib/actions/bets'
+import { AnonymousSlipModal } from './AnonymousSlipModal'
 import type { PlatformSettings }
   from '@/types/database.types'
 
@@ -32,6 +33,8 @@ export function BetSlipSidebar({
   const [generatingCode, setGeneratingCode] = useState(false)
   const [loadingSlip, setLoadingSlip] = useState(false)
   const [loadError, setLoadError] = useState('')
+  const [showSlipModal, setShowSlipModal] = useState(false)
+  const [generatedSlipData, setGeneratedSlipData] = useState<any>(null)
   const {
     selections,
     stake,
@@ -347,40 +350,41 @@ export function BetSlipSidebar({
 
           {/* Buttons */}
           {/* Slip code display */}
-          {slipCode && (
-            <div className="bg-gold/10 border border-gold/40 rounded-lg p-3">
-              <p className="text-[10px] text-white/50 mb-1 text-center uppercase tracking-widest">Slip Code</p>
-              <p className="text-gold font-mono text-3xl font-bold tracking-widest text-center mb-2">{slipCode}</p>
-              <div className="space-y-1 mb-2 border-t border-gold/20 pt-2">
-                {selections.map((s, i) => (
-                  <div key={i} className="flex justify-between text-[10px]">
-                    <span className="text-white/60 truncate flex-1">{s.homeTeam} vs {s.awayTeam}</span>
-                    <span className="text-gold font-mono ml-1">{s.odd.toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between text-[11px] border-t border-gold/20 pt-2">
-                <span className="text-white/50">Stake: {formatETB(stake)}</span>
-                <span className="text-gold font-bold">Net: {formatETB(calculation.netPayout)}</span>
-              </div>
-              <p className="text-[10px] text-white/40 mt-2 text-center">Show this code to the cashier to place your bet</p>
-              <button
-                onClick={() => navigator.clipboard.writeText(slipCode)}
-                className="w-full text-[10px] text-gold/60 hover:text-gold mt-1 text-center"
-              >
-                📋 Copy code
-              </button>
-            </div>
-          )}
+
 
           {!isAuthenticated ? (
             <button
               onClick={async () => {
                 setGeneratingCode(true)
                 try {
-                  const result = await saveAnonymousSlip({ selections, stake })
+                  const res = await fetch('/api/anonymous-slip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ selections, stake }),
+                  })
+                  const result = await res.json()
                   if (result.success && result.slipCode) {
                     setSlipCode(result.slipCode)
+                    const totalOdds = selections.reduce((a, s) => a * s.odd, 1)
+                    const maxPayout = stake * totalOdds
+                    const winningTax = maxPayout * 0.15
+                    const netPayout = maxPayout - winningTax
+                    setGeneratedSlipData({
+                      slipCode: result.slipCode,
+                      stake,
+                      totalOdds,
+                      maxPayout,
+                      winningTax,
+                      netPayout,
+                      selections: selections.map(s => ({
+                        homeTeam: s.homeTeam,
+                        awayTeam: s.awayTeam,
+                        marketName: s.marketName,
+                        selection: s.selection,
+                        odd: s.odd,
+                      }))
+                    })
+                    setShowSlipModal(true)
                   } else {
                     alert(result.error ?? 'Failed to generate code')
                   }
@@ -424,6 +428,26 @@ export function BetSlipSidebar({
           )}
         </div>
       )}
+    {generatedSlipData && (
+      <AnonymousSlipModal
+        isOpen={showSlipModal}
+        onClose={() => setShowSlipModal(false)}
+        slipCode={generatedSlipData.slipCode}
+        stake={generatedSlipData.stake}
+        totalOdds={generatedSlipData.totalOdds}
+        maxPayout={generatedSlipData.maxPayout}
+        winningTax={generatedSlipData.winningTax}
+        netPayout={generatedSlipData.netPayout}
+        selections={generatedSlipData.selections}
+        onOk={() => {
+          clearSlip()
+          setStake(0)
+          setSlipCode('')
+          setGeneratedSlipData(null)
+          setShowSlipModal(false)
+        }}
+      />
+    )}
     </div>
   )
 }
