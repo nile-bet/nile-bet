@@ -2,14 +2,14 @@
 
 import { useState } from 'react'
 import { X, Ticket, AlertTriangle } from 'lucide-react'
-import { useBetSlipStore }
-  from '@/lib/stores/betSlipStore'
+import { useBetSlipStore } from '@/lib/stores/betSlipStore'
 import { useAuthStore }
   from '@/lib/stores/authStore'
 import {
   formatETB,
 } from '@/lib/utils/formatCurrency'
 import { cn } from '@/lib/utils'
+import { saveAnonymousSlip, getSlipById } from '@/lib/actions/bets'
 import type { PlatformSettings }
   from '@/types/database.types'
 
@@ -28,6 +28,10 @@ export function BetSlipSidebar({
 }: BetSlipSidebarProps) {
   const [copySlipId, setCopySlipId] =
     useState('')
+  const [slipCode, setSlipCode] = useState('')
+  const [generatingCode, setGeneratingCode] = useState(false)
+  const [loadingSlip, setLoadingSlip] = useState(false)
+  const [loadError, setLoadError] = useState('')
   const {
     selections,
     stake,
@@ -83,8 +87,50 @@ export function BetSlipSidebar({
             className="flex-1 bg-charcoal border border-gold/20 rounded-md px-2 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-gold/40 font-mono"
             maxLength={10}
           />
-          <button className="text-xs bg-nile-blue text-white px-2 py-1.5 rounded-md hover:bg-nile-blue/80 transition-colors">
-            Load
+          <button
+            onClick={async () => {
+              if (!copySlipId.trim()) return
+              setLoadingSlip(true)
+              setLoadError('')
+              const slip = await getSlipById(copySlipId.trim())
+              if (!slip) {
+                setLoadError('Slip not found')
+                setLoadingSlip(false)
+                return
+              }
+              // Load selections into bet slip
+              clearSlip()
+              const sels = (slip as any).slip_selections ?? []
+              sels.forEach((s: any) => {
+                const match = s.matches as any
+                const market = s.match_markets as any
+                const template = market?.market_templates as any
+                const category = template?.market_categories as any
+                const leagues = match?.leagues as any
+                const countries = leagues?.countries as any
+                useBetSlipStore.getState().addSelection({
+                  matchId: s.match_id,
+                  matchMarketId: s.match_market_id,
+                  homeTeam: match?.home_team ?? '',
+                  awayTeam: match?.away_team ?? '',
+                  leagueName: leagues?.name ?? '',
+                  countryFlag: countries?.flag_emoji ?? '🏳️',
+                  marketName: template?.name ?? '',
+                  categoryName: category?.name ?? '',
+                  selection: s.selection,
+                  odd: s.odd_at_placement,
+                  kickOffTime: match?.kick_off_time ?? '',
+                  matchStatus: match?.status ?? 'upcoming',
+                })
+              })
+              if ((slip as any).stake) setStake((slip as any).stake)
+              setCopySlipId('')
+              setLoadingSlip(false)
+            }}
+            disabled={loadingSlip || !copySlipId.trim()}
+            className="text-xs bg-nile-blue text-white px-2 py-1.5 rounded-md hover:bg-nile-blue/80 transition-colors disabled:opacity-50"
+          >
+            {loadingSlip ? '...' : 'Load'}
           </button>
         </div>
       </div>
@@ -300,35 +346,82 @@ export function BetSlipSidebar({
           )}
 
           {/* Buttons */}
-          <button
-            onClick={onPlaceBet}
-            disabled={
-              !canPlace ||
-              hasStarted ||
-              !isAuthenticated
-            }
-            className={cn(
-              'w-full py-2.5 rounded-lg font-semibold text-sm transition-colors',
-              canPlace &&
-                !hasStarted &&
-                isAuthenticated
-                ? 'bg-gold text-charcoal hover:bg-gold-light'
-                : 'bg-white/10 text-white/30 cursor-not-allowed'
-            )}
-          >
-            {!isAuthenticated
-              ? 'Login to Place Bet'
-              : hasStarted
-              ? 'Remove started matches'
-              : 'Place Bet'}
-          </button>
+          {/* Slip code display */}
+          {slipCode && (
+            <div className="bg-gold/10 border border-gold/40 rounded-lg p-3">
+              <p className="text-[10px] text-white/50 mb-1 text-center uppercase tracking-widest">Slip Code</p>
+              <p className="text-gold font-mono text-3xl font-bold tracking-widest text-center mb-2">{slipCode}</p>
+              <div className="space-y-1 mb-2 border-t border-gold/20 pt-2">
+                {selections.map((s, i) => (
+                  <div key={i} className="flex justify-between text-[10px]">
+                    <span className="text-white/60 truncate flex-1">{s.homeTeam} vs {s.awayTeam}</span>
+                    <span className="text-gold font-mono ml-1">{s.odd.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between text-[11px] border-t border-gold/20 pt-2">
+                <span className="text-white/50">Stake: {formatETB(stake)}</span>
+                <span className="text-gold font-bold">Net: {formatETB(calculation.netPayout)}</span>
+              </div>
+              <p className="text-[10px] text-white/40 mt-2 text-center">Show this code to the cashier to place your bet</p>
+              <button
+                onClick={() => navigator.clipboard.writeText(slipCode)}
+                className="w-full text-[10px] text-gold/60 hover:text-gold mt-1 text-center"
+              >
+                📋 Copy code
+              </button>
+            </div>
+          )}
 
-          <button
-            onClick={onTopup}
-            className="w-full py-2 rounded-lg font-medium text-sm border border-nile-blue text-nile-blue-light hover:bg-nile-blue/20 transition-colors"
-          >
-            Request Top-up
-          </button>
+          {!isAuthenticated ? (
+            <button
+              onClick={async () => {
+                setGeneratingCode(true)
+                try {
+                  const result = await saveAnonymousSlip({ selections, stake })
+                  if (result.success && result.slipCode) {
+                    setSlipCode(result.slipCode)
+                  } else {
+                    alert(result.error ?? 'Failed to generate code')
+                  }
+                } catch(e) {
+                  alert('Error: ' + String(e))
+                }
+                setGeneratingCode(false)
+              }}
+              disabled={selections.length === 0 || generatingCode}
+              className={cn(
+                'w-full py-2.5 rounded-lg font-semibold text-sm transition-colors',
+                selections.length > 0 && !generatingCode
+                  ? 'bg-gold text-charcoal hover:bg-gold-light'
+                  : 'bg-white/10 text-white/30 cursor-not-allowed'
+              )}
+            >
+              {generatingCode ? 'Generating...' : slipCode ? '🔄 Regenerate Code' : '🎟️ Get Slip Code (Cash)'}
+            </button>
+          ) : (
+            <button
+              onClick={onPlaceBet}
+              disabled={!canPlace || hasStarted}
+              className={cn(
+                'w-full py-2.5 rounded-lg font-semibold text-sm transition-colors',
+                canPlace && !hasStarted
+                  ? 'bg-gold text-charcoal hover:bg-gold-light'
+                  : 'bg-white/10 text-white/30 cursor-not-allowed'
+              )}
+            >
+              {hasStarted ? 'Remove started matches' : 'Place Bet'}
+            </button>
+          )}
+
+          {isAuthenticated && (
+            <button
+              onClick={onTopup}
+              className="w-full py-2 rounded-lg font-medium text-sm border border-nile-blue text-nile-blue-light hover:bg-nile-blue/20 transition-colors"
+            >
+              Request Top-up
+            </button>
+          )}
         </div>
       )}
     </div>
