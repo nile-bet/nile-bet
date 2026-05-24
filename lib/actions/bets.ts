@@ -638,3 +638,69 @@ export async function redeemJackpotWinningSlip(
 
   return { success: true, amount: slip.reward_amount }
 }
+
+export async function saveAnonymousSlip(input: {
+  selections: BetSlipSelection[]
+  stake: number
+}): Promise<{
+  success: boolean
+  slipCode?: string
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  const { selections, stake } = input
+
+  // Generate 8-digit code
+  const slipCode = Math.floor(10000000 + Math.random() * 90000000).toString()
+
+  // Calculate odds
+  const totalOdds = selections.reduce((acc, s) => acc * s.odd, 1)
+  const maxPayout = stake * totalOdds
+  const winningTax = maxPayout * 0.15
+  const netPayout = maxPayout - winningTax
+
+  // Insert anonymous slip
+  const { data: slip, error: slipError } = await supabase
+    .from('slips')
+    .insert({
+      slip_id: slipCode,
+      bettor_id: null,
+      placed_by: null,
+      stake,
+      total_odds: parseFloat(totalOdds.toFixed(2)),
+      max_payout: parseFloat(maxPayout.toFixed(2)),
+      winning_tax: parseFloat(winningTax.toFixed(2)),
+      net_payout: parseFloat(netPayout.toFixed(2)),
+      status: 'pending',
+      is_anonymous: true,
+      cancellation_deadline: null,
+    })
+    .select('id')
+    .single()
+
+  if (slipError || !slip) {
+    return { success: false, error: 'Failed to save slip' }
+  }
+
+  // Insert selections
+  const selectionRows = selections.map((s) => ({
+    slip_id: slip.id,
+    match_id: s.matchId,
+    match_market_id: s.matchMarketId,
+    selection: s.selection,
+    odd_at_placement: s.odd,
+    result: 'pending',
+  }))
+
+  const { error: selError } = await supabase
+    .from('slip_selections')
+    .insert(selectionRows)
+
+  if (selError) {
+    await supabase.from('slips').delete().eq('id', slip.id)
+    return { success: false, error: 'Failed to save selections' }
+  }
+
+  return { success: true, slipCode }
+}
