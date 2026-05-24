@@ -133,51 +133,29 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
             {currentMarkets?.map((market) => (
               <div key={market.id}>
                 <div className="flex items-center justify-between px-4 py-1.5 bg-nile-blue/5">
-                  <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                  <span className="text-[13px] font-extrabold text-white uppercase tracking-wide">
                     {market.market_templates?.name}
                   </span>
                   <ChevronUp className="w-3 h-3 text-white/30" />
                 </div>
                 {(() => {
-                  const isDynamic = (market.market_templates as any)?.is_dynamic ?? false
                   const odds = market.match_market_odds ?? []
-                  if (isDynamic) {
-                    // Scorer market — show player name + odd button per row
-                    return (
-                      <div className="px-4 py-2 space-y-1.5">
-                        {odds.map((odd) => (
-                          <div key={odd.id} className="flex items-center justify-between">
-                            <span className="text-[11px] text-white/70 flex-1">{odd.selection}</span>
-                            <OddButton
-                              {...commonProps}
-                              label={String(odd.odd_value?.toFixed(2))}
-                              odd={odd.odd_value}
-                              matchMarketId={market.id}
-                              selection={odd.selection}
-                              marketName={market.market_templates?.name ?? ''}
-                              categoryName={(market.market_templates as any)?.market_categories?.name ?? 'MAIN'}
-                            />
-                          </div>
-                        ))}
-                        {odds.length === 0 && (
-                          <p className="text-[10px] text-white/25">No players added</p>
-                        )}
-                      </div>
-                    )
+                  if (odds.length === 0) {
+                    return <p className="text-[10px] text-white/25 px-4 py-2">No odds available</p>
                   }
                   return (
-                    <div className="grid px-4 py-2 gap-y-1.5" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-                      {odds.map((odd) => (
-                        <div key={odd.id} className="flex items-center justify-between pr-2">
-                          <span className="text-[10px] text-white/50">{odd.selection}</span>
+                    <div className="grid border-t border-white/5" style={{ gridTemplateColumns: `repeat(${Math.min(odds.length, 3)}, 1fr)` }}>
+                      {odds.map((odd, i) => (
+                        <div key={odd.id} className={i % 3 !== 2 ? 'border-r border-white/5' : ''}>
                           <OddButton
                             {...commonProps}
-                            label={String(odd.odd_value)}
+                            label={odd.selection}
                             odd={odd.odd_value}
                             matchMarketId={market.id}
                             selection={odd.selection}
                             marketName={market.market_templates?.name ?? ''}
                             categoryName={(market.market_templates as any)?.market_categories?.name ?? 'MAIN'}
+                            size="col"
                           />
                         </div>
                       ))}
