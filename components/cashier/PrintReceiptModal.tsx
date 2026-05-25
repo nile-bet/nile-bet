@@ -116,7 +116,7 @@ export function PrintReceiptModal({
       open={isOpen}
       onOpenChange={onClose}
     >
-      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-sm">
+      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-lg w-full" style={{ maxHeight: "90vh", overflowY: "auto" }}>
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Printer className="w-5 h-5 text-gold" />
@@ -175,7 +175,7 @@ export function PrintReceiptModal({
         {/* Receipt preview */}
         <div
           className="border border-dashed border-nile-blue/30 rounded-lg overflow-hidden"
-          style={{ maxHeight: '400px', overflowY: 'auto' }}
+          style={{ maxHeight: '55vh', overflowY: 'auto' }}
         >
           <div
             style={{
