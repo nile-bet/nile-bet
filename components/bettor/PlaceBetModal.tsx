@@ -166,7 +166,7 @@ export function PlaceBetModal({
         open={isOpen}
         onOpenChange={onClose}
       >
-        <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-md">
+        <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-lg w-full" style={{ maxHeight: "90vh", overflowY: "auto" }}>
           <DialogHeader>
             <DialogTitle className="text-white">
               Place Bet
