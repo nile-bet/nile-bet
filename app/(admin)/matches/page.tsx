@@ -10,6 +10,7 @@ import {
   cancelMatch,
   toggleFeatured,
   cloneMatch,
+  deleteMatches,
 } from '@/lib/actions/adminMatches'
 import { DataTable }
   from '@/components/shared/DataTable'
@@ -33,6 +34,7 @@ import {
   Ban,
   BarChart3,
   Trophy,
+  Trash2,
 } from 'lucide-react'
 
 const STATUS_TABS = [
@@ -98,6 +100,29 @@ export default function MatchesPage() {
       )
       setSelected([])
       loadMatches()
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (!user || selected.length === 0) return
+    const result = await deleteMatches(selected, user.id)
+    if (result.success) {
+      toast.success(`${result.deleted} matches deleted`)
+      setSelected([])
+      loadMatches()
+    } else {
+      toast.error(result.error ?? 'Failed to delete')
+    }
+  }
+
+  const handleDeleteSingle = async (matchId: string) => {
+    if (!user) return
+    const result = await deleteMatches([matchId], user.id)
+    if (result.success) {
+      toast.success('Match deleted')
+      loadMatches()
+    } else {
+      toast.error(result.error ?? 'Failed to delete')
     }
   }
 
@@ -337,6 +362,13 @@ export default function MatchesPage() {
             ✅ Publish Selected
           </button>
           <button
+            onClick={() => setConfirmData({ type: 'bulkDelete' })}
+            className="bg-nile-danger text-white text-xs px-3 py-1.5 rounded-lg hover:bg-nile-danger/80 flex items-center gap-1"
+          >
+            <Trash2 className="w-3 h-3" />
+            Delete Selected
+          </button>
+          <button
             onClick={() => setSelected([])}
             className="text-white/40 text-xs hover:text-white"
           >
@@ -405,6 +437,34 @@ export default function MatchesPage() {
           }}
         />
       )}
+
+      {/* Delete confirm */}
+      <ConfirmModal
+        isOpen={confirmData?.type === 'delete'}
+        onClose={() => setConfirmData(null)}
+        onConfirm={() => {
+          handleDeleteSingle(confirmData.id)
+          setConfirmData(null)
+        }}
+        title="Delete Match?"
+        message={`Permanently delete "${confirmData?.name}"? This cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
+
+      {/* Bulk delete confirm */}
+      <ConfirmModal
+        isOpen={confirmData?.type === 'bulkDelete'}
+        onClose={() => setConfirmData(null)}
+        onConfirm={() => {
+          handleBulkDelete()
+          setConfirmData(null)
+        }}
+        title={`Delete ${selected.length} Matches?`}
+        message="This will permanently delete all selected matches and their data. This cannot be undone."
+        confirmText="Delete All"
+        variant="danger"
+      />
 
       {/* Cancel confirm */}
       <ConfirmModal

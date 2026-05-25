@@ -1857,3 +1857,40 @@ export async function removePlayerFromScorers(
 
   return { success: true }
 }
+
+export async function deleteMatches(
+  matchIds: string[],
+  deletedBy: string
+): Promise<{ success: boolean; deleted?: number; error?: string }> {
+  const supabase = await createClient()
+
+  if (!matchIds.length) return { success: false, error: 'No matches selected' }
+
+  // Delete related data first
+  for (const matchId of matchIds) {
+    // Delete slip selections related to this match
+    await supabase.from('slip_selections').delete().eq('match_id', matchId)
+    // Delete match market odds
+    const { data: markets } = await supabase.from('match_markets').select('id').eq('match_id', matchId)
+    if (markets?.length) {
+      for (const m of markets) {
+        await supabase.from('match_market_odds').delete().eq('match_market_id', m.id)
+      }
+    }
+    await supabase.from('match_markets').delete().eq('match_id', matchId)
+    await supabase.from('match_players').delete().eq('match_id', matchId)
+    await supabase.from('match_results').delete().eq('match_id', matchId)
+  }
+
+  const { error } = await supabase.from('matches').delete().in('id', matchIds)
+
+  if (error) return { success: false, error: error.message }
+
+  await supabase.from('activity_logs').insert({
+    user_id: deletedBy,
+    action: 'matches_deleted',
+    details: { match_ids: matchIds, count: matchIds.length },
+  })
+
+  return { success: true, deleted: matchIds.length }
+}
