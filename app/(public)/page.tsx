@@ -22,9 +22,11 @@ export default async function HomePage() {
   ])
 
   return (
-    <div className="flex flex-col min-h-screen bg-charcoal">
-      <PublicNavbar />
-      <div className="flex flex-col flex-1" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col bg-charcoal">
+      <div className="sticky top-0 z-50">
+        <PublicNavbar />
+      </div>
+      <div className="flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
         <MatchListClient
           initialMatches={initialMatches}
           countries={countries}

@@ -169,7 +169,7 @@ export function MatchListClient({
         </div>
 
         {/* Match List */}
-        <div className="flex-1 overflow-y-auto overscroll-contain" style={{ height: "calc(100vh - 110px)" }}>
+        <div className="flex-1 overflow-y-auto overscroll-auto" style={{ height: "calc(100vh - 110px)" }}>
           {/* Column headers */}
           <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 hidden md:flex items-stretch">
             <div className="flex-1">
