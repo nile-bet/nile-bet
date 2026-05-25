@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
+import { FlagImage } from '@/components/shared/FlagImage'
 import { ChevronRight, Search, Star } from 'lucide-react'
 import type { League, CountryWithLeagues } from '@/types/database.types'
 
@@ -115,7 +116,7 @@ export function LeagueSidebar({
               )}
             >
               <span className="flex-shrink-0">
-                {(league as any).flag_emoji ?? '🏳️'}
+                <FlagImage emoji={(league as any).flag_emoji ?? '🏳️'} />
               </span>
               <span className="truncate">{league.name}</span>
             </button>
@@ -153,7 +154,7 @@ export function LeagueSidebar({
                   className="w-full text-left px-3 py-2 flex items-center justify-between text-white/70 hover:text-white hover:bg-gold/5 transition-colors"
                 >
                   <span className="flex items-center gap-2 text-[13px]">
-                    <span>{country.flag_emoji}</span>
+                    <FlagImage emoji={country.flag_emoji} />
                     <span className="truncate">{country.name}</span>
                   </span>
                   <ChevronRight

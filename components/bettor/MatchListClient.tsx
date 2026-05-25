@@ -24,6 +24,7 @@ import {
 import { formatKickOff }
   from '@/lib/utils/formatCurrency'
 import { Swords } from 'lucide-react'
+import { FlagImage } from '@/components/shared/FlagImage'
 import type {
   MatchWithLeague,
   CountryWithLeagues,
@@ -231,7 +232,7 @@ export function MatchListClient({
                     <div key={key}>
                       <div className="flex items-center justify-between px-4 py-1.5 bg-slate-dark/80 border-b border-gold/10">
                         <span className="text-[11px] text-gold/60">
-                          {first.flag_emoji}{' '}
+                          <FlagImage emoji={first.flag_emoji ?? '🏳️'} />{' '}
                           {first.country_name} -{' '}
                           {first.league_name}
                         </span>

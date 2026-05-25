@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, AlertTriangle, ChevronUp, ChevronDown } from 'lucide-react'
 import { OddButton } from './OddButton'
 import { formatKickOff } from '@/lib/utils/formatCurrency'
+import { FlagImage } from '@/components/shared/FlagImage'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { cn } from '@/lib/utils'
 import type { MatchWithMarkets } from '@/types/database.types'
@@ -152,7 +153,7 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-display font-semibold text-white">{match.home_team} V {match.away_team}</h1>
-            <p className="text-[12px] text-gold/60 mt-0.5">{countryFlag} {countryName} - {leagueName} • {formatKickOff(match.kick_off_time)}</p>
+            <p className="text-[12px] text-gold/60 mt-0.5"><FlagImage emoji={countryFlag} /> {countryName} - {leagueName} • {formatKickOff(match.kick_off_time)}</p>
           </div>
           {match.status !== 'upcoming' && <StatusBadge status={match.status} type="match" />}
         </div>
