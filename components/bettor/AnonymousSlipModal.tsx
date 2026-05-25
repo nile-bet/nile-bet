@@ -52,7 +52,7 @@ export function AnonymousSlipModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-sm">
+      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-lg w-full" style={{ maxHeight: "90vh", overflowY: "auto" }}>
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Ticket className="w-5 h-5 text-gold" />
@@ -81,7 +81,7 @@ export function AnonymousSlipModal({
         </div>
 
         {/* Receipt preview */}
-        <div className="border border-dashed border-nile-blue/30 rounded-lg overflow-hidden">
+        <div className="border border-dashed border-nile-blue/30 rounded-lg overflow-hidden" style={{ maxHeight: "45vh", overflowY: "auto" }}>
           <div className="bg-white text-black font-mono text-[11px] p-4" style={{ lineHeight: '1.5' }}>
             {/* Header */}
             <div className="text-center border-b border-dashed border-black pb-2 mb-3">
