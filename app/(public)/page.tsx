@@ -22,11 +22,11 @@ export default async function HomePage() {
   ])
 
   return (
-    <div className="flex flex-col bg-charcoal">
+    <div className="flex flex-col min-h-screen bg-charcoal">
       <div className="sticky top-0 z-50">
         <PublicNavbar />
       </div>
-      <div className="flex flex-col mx-2 mt-2" style={{ height: 'calc(100vh - 70px)' }}>
+      <div className="flex-1 mx-2 mt-2">
         <MatchListClient
           initialMatches={initialMatches}
           countries={countries}
@@ -34,7 +34,7 @@ export default async function HomePage() {
           settings={settings}
         />
       </div>
-      <div className="mt-4 mx-2 mb-2">
+      <div className="mx-2 mt-2 mb-2">
         <Footer />
       </div>
     </div>
