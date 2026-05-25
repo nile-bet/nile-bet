@@ -171,15 +171,19 @@ export function MatchListClient({
         {/* Match List */}
         <div className="flex-1 overflow-y-auto overscroll-contain" style={{ height: "calc(100vh - 110px)" }}>
           {/* Column headers */}
-          <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 hidden md:flex items-center">
-            <div className="flex-1 grid text-[11px] text-white font-extrabold uppercase tracking-widest" style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}>
-              <div className="flex items-center justify-center py-2 col-span-3">Match Result</div>
-              <div className="bg-gold/20" />
-              <div className="flex items-center justify-center py-2 col-span-3">Double Chance</div>
-              <div className="bg-gold/20" />
-              <div className="flex items-center justify-center py-2 col-span-2">Both Score</div>
+          <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 hidden md:flex items-stretch">
+            <div className="flex-1">
+              {/* Top group labels */}
+              <div className="grid border-b border-gold/10 text-[10px] text-white/50 font-bold uppercase tracking-widest" style={{ gridTemplateColumns: '3fr 1px 3fr 1px 2fr' }}>
+                <div className="flex items-center justify-center py-1">Match Result</div>
+                <div className="bg-gold/20" />
+                <div className="flex items-center justify-center py-1">Double Chance</div>
+                <div className="bg-gold/20" />
+                <div className="flex items-center justify-center py-1">Both Score</div>
+              </div>
+
             </div>
-            <div className="px-3 py-2 text-[11px] text-white/50 font-bold uppercase tracking-widest flex-shrink-0">
+            <div className="px-3 text-[11px] text-white/50 font-bold uppercase tracking-widest flex-shrink-0 flex items-center border-l border-gold/10">
               More
             </div>
           </div>
