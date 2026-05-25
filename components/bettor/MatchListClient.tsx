@@ -158,16 +158,18 @@ export function MatchListClient({
 
       <div className="flex flex-1 min-h-0">
         {/* League Sidebar */}
-        <LeagueSidebar
-          countries={countries}
-          topLeagues={topLeagues}
-          selectedLeagueId={selectedLeagueId}
-          onLeagueSelect={handleLeagueSelect}
-          className="hidden md:flex flex-col"
-        />
+        <div className="hidden md:flex flex-col flex-shrink-0" style={{ height: "calc(100vh - 110px)", overflowY: "auto" }}>
+          <LeagueSidebar
+            countries={countries}
+            topLeagues={topLeagues}
+            selectedLeagueId={selectedLeagueId}
+            onLeagueSelect={handleLeagueSelect}
+            className="flex flex-col"
+          />
+        </div>
 
         {/* Match List */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+        <div className="flex-1 overflow-y-auto overscroll-contain" style={{ height: "calc(100vh - 110px)" }}>
           {/* Column headers */}
           <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 px-4 py-2.5 hidden md:flex items-center justify-between">
             <div className="flex items-center gap-4 text-[13px] text-white font-extrabold uppercase tracking-widest">
