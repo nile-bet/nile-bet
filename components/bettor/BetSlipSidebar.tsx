@@ -60,7 +60,7 @@ export function BetSlipSidebar({
   )
 
   return (
-    <div className="w-[240px] flex-shrink-0 bg-slate-dark border border-nile-blue/20 rounded-xl flex flex-col" style={{ minHeight: "200px", maxHeight: "calc(100vh - 120px)", overflowY: "auto", fontSize: "78%", position: "sticky", top: "60px" }}>
+    <div className="w-[240px] flex-shrink-0 bg-slate-dark border border-nile-blue/20 rounded-xl flex flex-col" style={{ fontSize: "78%", position: "sticky", top: "60px" }}>
       {/* Header */}
       <div className="px-4 py-3 border-b border-gold/10 flex items-center justify-between">
         <h3 className="font-semibold text-white text-sm flex items-center gap-2">
