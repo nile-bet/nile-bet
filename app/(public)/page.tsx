@@ -34,7 +34,7 @@ export default async function HomePage() {
           settings={settings}
         />
       </div>
-      <div className="mt-2">
+      <div className="mt-4 mx-2 mb-2">
         <Footer />
       </div>
     </div>
