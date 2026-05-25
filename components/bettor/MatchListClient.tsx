@@ -150,13 +150,13 @@ export function MatchListClient({
   )
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
+    <div className="flex flex-col flex-1 min-h-0">
       <FilterBar
         onFilterChange={handleFilterChange}
         matchCount={matches.length}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         {/* League Sidebar */}
         <LeagueSidebar
           countries={countries}
@@ -167,7 +167,7 @@ export function MatchListClient({
         />
 
         {/* Match List */}
-        <div className="flex-1 overflow-y-scroll overscroll-contain">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
           {/* Column headers */}
           <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 px-4 py-2.5 hidden md:flex items-center justify-between">
             <div className="flex items-center gap-4 text-[13px] text-white font-extrabold uppercase tracking-widest">
