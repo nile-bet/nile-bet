@@ -171,17 +171,17 @@ export function MatchListClient({
         {/* Match List */}
         <div className="flex-1 overflow-y-auto overscroll-contain" style={{ height: "calc(100vh - 110px)" }}>
           {/* Column headers */}
-          <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 px-4 py-2.5 hidden md:flex items-center justify-between">
-            <div className="flex items-center gap-4 text-[13px] text-white font-extrabold uppercase tracking-widest">
-              <span className="w-[158px]">Match Result</span>
-              <span className="mx-2 text-gold/40">|</span>
-              <span className="w-[158px]">Double Chance</span>
-              <span className="mx-2 text-gold/40">|</span>
-              <span>Both Score</span>
+          <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 hidden md:flex items-center">
+            <div className="flex-1 grid text-[11px] text-white font-extrabold uppercase tracking-widest" style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}>
+              <div className="flex items-center justify-center py-2 col-span-3">Match Result</div>
+              <div className="bg-gold/20" />
+              <div className="flex items-center justify-center py-2 col-span-3">Double Chance</div>
+              <div className="bg-gold/20" />
+              <div className="flex items-center justify-center py-2 col-span-2">Both Score</div>
             </div>
-            <span className="text-[12px] text-white/50 font-bold pr-2 uppercase tracking-widest">
+            <div className="px-3 py-2 text-[11px] text-white/50 font-bold uppercase tracking-widest flex-shrink-0">
               More
-            </span>
+            </div>
           </div>
 
           {isLoading ? (
