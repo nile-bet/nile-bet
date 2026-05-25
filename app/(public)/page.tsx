@@ -26,7 +26,7 @@ export default async function HomePage() {
       <div className="sticky top-0 z-50">
         <PublicNavbar />
       </div>
-      <div className="flex flex-col mx-2 mt-2 rounded-xl overflow-hidden border border-nile-blue/20" style={{ height: 'calc(100vh - 70px)' }}>
+      <div className="flex flex-col mx-2 mt-2" style={{ height: 'calc(100vh - 70px)' }}>
         <MatchListClient
           initialMatches={initialMatches}
           countries={countries}
