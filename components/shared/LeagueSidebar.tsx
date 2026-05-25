@@ -124,19 +124,14 @@ export function LeagueSidebar({
         </button>
       </div>
 
-      {/* Backdrop blur overlay */}
+      {/* Backdrop blur overlay - portal to body */}
       {showCountriesPanel && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-          onClick={() => setShowCountriesPanel(false)}
-        />
-      )}
-
-      {/* Slide-in Countries Panel */}
-      <div className={cn(
-        'fixed top-0 left-0 h-full w-[280px] bg-slate-dark z-50 flex flex-col transition-transform duration-300 shadow-2xl border-r border-gold/20',
-        showCountriesPanel ? 'translate-x-0' : '-translate-x-full'
-      )}>
+        <>
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[99]"
+            onClick={() => setShowCountriesPanel(false)}
+          />
+          <div className="fixed top-0 left-0 h-full w-[280px] bg-slate-dark z-[100] flex flex-col shadow-2xl border-r border-gold/20 transition-transform duration-300 translate-x-0">
         {/* Panel Header */}
         <div className="flex items-center justify-between px-3 py-3 border-b border-gold/20 flex-shrink-0">
           <div className="flex items-center gap-2">
@@ -233,7 +228,9 @@ export function LeagueSidebar({
             </div>
           ))}
         </div>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
