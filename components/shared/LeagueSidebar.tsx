@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { FlagImage } from '@/components/shared/FlagImage'
-import { ChevronRight, Search, Star } from 'lucide-react'
+import { ChevronRight, Search, Star, X, Globe } from 'lucide-react'
 import type { League, CountryWithLeagues } from '@/types/database.types'
 
 interface LeagueSidebarProps {
@@ -22,52 +22,41 @@ export function LeagueSidebar({
   className,
 }: LeagueSidebarProps) {
   const [search, setSearch] = useState('')
+  const [showCountriesPanel, setShowCountriesPanel] = useState(false)
   const [openCountry, setOpenCountry] = useState<string | null>(null)
-  const [showAllCountries, setShowAllCountries] = useState(false)
+  const [countrySearch, setCountrySearch] = useState('')
 
-  // Sort countries A-Z
   const sortedCountries = useMemo(() =>
     [...countries].sort((a, b) => a.name.localeCompare(b.name)),
     [countries]
   )
 
-  const filtered = useMemo(() => {
-    if (!search.trim()) return sortedCountries
-    const q = search.toLowerCase()
-    return sortedCountries
-      .map((c) => ({
-        ...c,
-        leagues: c.leagues.filter((l) =>
-          l.name.toLowerCase().includes(q)
-        ),
-      }))
-      .filter(
-        (c) =>
-          c.name.toLowerCase().includes(q) ||
-          c.leagues.length > 0
-      )
-  }, [sortedCountries, search])
-
   const filteredTop = useMemo(() => {
     if (!search.trim()) return topLeagues
     const q = search.toLowerCase()
-    return topLeagues.filter((l) =>
-      l.name.toLowerCase().includes(q)
-    )
+    return topLeagues.filter((l) => l.name.toLowerCase().includes(q))
   }, [topLeagues, search])
 
-  // Show countries if searching or if toggled
-  const shouldShowCountries = showAllCountries || search.trim().length > 0
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch.trim()) return sortedCountries
+    const q = countrySearch.toLowerCase()
+    return sortedCountries
+      .map((c) => ({
+        ...c,
+        leagues: c.leagues.filter((l) => l.name.toLowerCase().includes(q)),
+      }))
+      .filter((c) => c.name.toLowerCase().includes(q) || c.leagues.length > 0)
+  }, [sortedCountries, countrySearch])
+
+  const handleLeagueSelect = (id: string | 'top') => {
+    onLeagueSelect(id)
+    setShowCountriesPanel(false)
+  }
 
   return (
-    <div
-      className={cn(
-        'w-[200px] flex-shrink-0 bg-slate-dark border-r border-gold/10 flex flex-col overflow-hidden',
-        className
-      )}
-    >
+    <div className={cn('w-[200px] flex-shrink-0 bg-slate-dark border-r border-gold/10 flex flex-col overflow-hidden relative', className)}>
       {/* Search */}
-      <div className="p-3 border-b border-gold/10">
+      <div className="p-3 border-b border-gold/10 flex-shrink-0">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
           <input
@@ -85,14 +74,11 @@ export function LeagueSidebar({
         <div className="pt-2">
           <div className="px-3 py-1 flex items-center gap-1.5">
             <Star className="w-3 h-3 text-gold/60" />
-            <span className="text-[10px] text-gold/60 tracking-widest uppercase font-medium">
-              Top Leagues
-            </span>
+            <span className="text-[10px] text-gold/60 tracking-widest uppercase font-medium">Top Leagues</span>
           </div>
 
-          {/* All Top Leagues option */}
           <button
-            onClick={() => onLeagueSelect('top')}
+            onClick={() => handleLeagueSelect('top')}
             className={cn(
               'w-full text-left px-3 py-1.5 text-[13px] flex items-center gap-2 transition-colors',
               selectedLeagueId === 'top'
@@ -107,7 +93,7 @@ export function LeagueSidebar({
           {filteredTop.map((league) => (
             <button
               key={league.id}
-              onClick={() => onLeagueSelect(league.id)}
+              onClick={() => handleLeagueSelect(league.id)}
               className={cn(
                 'w-full text-left px-3 py-1.5 text-[12px] flex items-center gap-2 transition-colors',
                 selectedLeagueId === league.id
@@ -123,75 +109,130 @@ export function LeagueSidebar({
           ))}
         </div>
 
-        {/* Divider + View All Countries button */}
         <div className="mx-3 my-2 border-t border-gold/10" />
 
+        {/* View All Countries Button */}
         <button
-          onClick={() => setShowAllCountries(!showAllCountries)}
-          className="w-full px-3 py-2 flex items-center justify-between text-gold/60 hover:text-gold text-[11px] transition-colors"
+          onClick={() => setShowCountriesPanel(true)}
+          className="w-full px-3 py-2.5 flex items-center justify-between text-gold hover:bg-gold/10 transition-colors border border-gold/20 mx-0 rounded-none"
         >
-          <span className="tracking-widest uppercase font-medium">
-            {shouldShowCountries ? 'Hide Countries' : 'View All Countries →'}
-          </span>
-          <ChevronRight className={cn(
-            'w-3.5 h-3.5 transition-transform',
-            shouldShowCountries && 'rotate-90'
-          )} />
-        </button>
-
-        {/* All Countries - shown when toggled or searching */}
-        {shouldShowCountries && (
-          <div className="max-h-64 overflow-y-auto">
-            {filtered.map((country) => (
-              <div key={country.id}>
-                {/* Country header */}
-                <button
-                  onClick={() =>
-                    setOpenCountry(
-                      openCountry === country.id ? null : country.id
-                    )
-                  }
-                  className="w-full text-left px-3 py-2 flex items-center justify-between text-white/70 hover:text-white hover:bg-gold/5 transition-colors"
-                >
-                  <span className="flex items-center gap-2 text-[13px]">
-                    <FlagImage emoji={country.flag_emoji} />
-                    <span className="truncate">{country.name}</span>
-                  </span>
-                  <ChevronRight
-                    className={cn(
-                      'w-3.5 h-3.5 text-white/30 transition-transform flex-shrink-0',
-                      openCountry === country.id && 'rotate-90'
-                    )}
-                  />
-                </button>
-
-                {/* Leagues */}
-                {openCountry === country.id && (
-                  <div className="bg-charcoal/30">
-                    {country.leagues.length === 0 ? (
-                      <p className="text-xs text-white/30 px-8 py-2">No leagues</p>
-                    ) : (
-                      country.leagues.map((league) => (
-                        <button
-                          key={league.id}
-                          onClick={() => onLeagueSelect(league.id)}
-                          className={cn(
-                            'w-full text-left px-8 py-1.5 text-[12px] transition-colors',
-                            selectedLeagueId === league.id
-                              ? 'text-gold bg-gold/10'
-                              : 'text-white/50 hover:text-white hover:bg-gold/5'
-                          )}
-                        >
-                          {league.name}
-                        </button>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="flex items-center gap-2">
+            <Globe className="w-3.5 h-3.5" />
+            <span className="text-[11px] tracking-widest uppercase font-bold">All Countries</span>
           </div>
-        )}
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* Backdrop blur overlay */}
+      {showCountriesPanel && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+          onClick={() => setShowCountriesPanel(false)}
+        />
+      )}
+
+      {/* Slide-in Countries Panel */}
+      <div className={cn(
+        'fixed top-0 left-0 h-full w-[280px] bg-slate-dark z-50 flex flex-col transition-transform duration-300 shadow-2xl border-r border-gold/20',
+        showCountriesPanel ? 'translate-x-0' : '-translate-x-full'
+      )}>
+        {/* Panel Header */}
+        <div className="flex items-center justify-between px-3 py-3 border-b border-gold/20 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-gold" />
+            <span className="text-white font-bold text-sm">Select League</span>
+          </div>
+          <button
+            onClick={() => setShowCountriesPanel(false)}
+            className="text-white/50 hover:text-white"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Country Search */}
+        <div className="p-3 border-b border-gold/10 flex-shrink-0">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
+            <input
+              type="text"
+              placeholder="Search leagues..."
+              value={countrySearch}
+              onChange={(e) => setCountrySearch(e.target.value)}
+              className="w-full bg-charcoal border border-gold/20 rounded-md pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-gold/40"
+            />
+          </div>
+        </div>
+
+        {/* Top Leagues in panel */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide">
+          <div className="px-3 py-1.5">
+            <span className="text-[10px] text-gold/60 tracking-widest uppercase font-medium">Top Leagues</span>
+          </div>
+          {topLeagues.map((league) => (
+            <button
+              key={league.id}
+              onClick={() => handleLeagueSelect(league.id)}
+              className={cn(
+                'w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors border-l-2',
+                selectedLeagueId === league.id
+                  ? 'bg-gold/10 text-gold border-gold'
+                  : 'text-white/70 hover:bg-gold/5 hover:text-white border-transparent'
+              )}
+            >
+              <FlagImage emoji={(league as any).flag_emoji ?? '🏳️'} />
+              <span className="truncate">{league.name}</span>
+            </button>
+          ))}
+
+          <div className="mx-3 my-2 border-t border-gold/10" />
+
+          {/* All Countries */}
+          <div className="px-3 py-1.5">
+            <span className="text-[10px] text-gold/60 tracking-widest uppercase font-medium">All Countries</span>
+          </div>
+          {filteredCountries.map((country) => (
+            <div key={country.id}>
+              <button
+                onClick={() => setOpenCountry(openCountry === country.id ? null : country.id)}
+                className="w-full text-left px-3 py-2 flex items-center justify-between text-white/70 hover:text-white hover:bg-gold/5 transition-colors"
+              >
+                <span className="flex items-center gap-2 text-[13px]">
+                  <FlagImage emoji={country.flag_emoji} />
+                  <span className="truncate">{country.name}</span>
+                </span>
+                <ChevronRight className={cn(
+                  'w-3.5 h-3.5 text-white/30 transition-transform flex-shrink-0',
+                  openCountry === country.id && 'rotate-90'
+                )} />
+              </button>
+
+              {openCountry === country.id && (
+                <div className="bg-charcoal/30">
+                  {country.leagues.length === 0 ? (
+                    <p className="text-xs text-white/30 px-8 py-2">No leagues</p>
+                  ) : (
+                    country.leagues.map((league) => (
+                      <button
+                        key={league.id}
+                        onClick={() => handleLeagueSelect(league.id)}
+                        className={cn(
+                          'w-full text-left px-8 py-1.5 text-[12px] transition-colors',
+                          selectedLeagueId === league.id
+                            ? 'text-gold bg-gold/10'
+                            : 'text-white/50 hover:text-white hover:bg-gold/5'
+                        )}
+                      >
+                        {league.name}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
