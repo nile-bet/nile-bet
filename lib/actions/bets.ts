@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient }
+import { createClient, createAdminClient }
   from '@/lib/supabase/server'
 import type {
   BetSlipSelection,
@@ -385,7 +385,7 @@ export async function cancelBet(
 export async function getSlipById(
   slipId: string
 ): Promise<SlipWithSelections | null> {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // Check if jackpot slip
   if (slipId.startsWith('JP')) {
