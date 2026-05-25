@@ -157,9 +157,9 @@ export function MatchListClient({
         matchCount={matches.length}
       />
 
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 min-h-0 gap-2 px-2 pb-2">
         {/* League Sidebar */}
-        <div className="hidden md:flex flex-col flex-shrink-0" style={{ height: "calc(100vh - 110px)", overflowY: "auto" }}>
+        <div className="hidden md:flex flex-col flex-shrink-0 rounded-xl overflow-hidden border border-nile-blue/20" style={{ height: "calc(100vh - 110px)", overflowY: "auto" }}>
           <LeagueSidebar
             countries={countries}
             topLeagues={topLeagues}
@@ -170,7 +170,7 @@ export function MatchListClient({
         </div>
 
         {/* Match List */}
-        <div className="flex-1 overflow-y-auto overscroll-auto" style={{ height: "calc(100vh - 110px)" }}>
+        <div className="flex-1 overflow-y-auto overscroll-auto rounded-xl border border-nile-blue/20" style={{ height: "calc(100vh - 110px)" }}>
           {/* Column headers */}
           <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 hidden md:flex items-stretch">
             <div className="flex-1">
