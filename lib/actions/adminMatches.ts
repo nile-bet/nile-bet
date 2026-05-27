@@ -10,6 +10,10 @@ export async function getMatchesForAdmin(
     status?: string
     search?: string
     leagueId?: string
+    countryId?: string
+    dateFrom?: string
+    dateTo?: string
+    isFeatured?: boolean
     page?: number
     limit?: number
   } = {}
@@ -20,6 +24,10 @@ export async function getMatchesForAdmin(
     status,
     search,
     leagueId,
+    countryId,
+    dateFrom,
+    dateTo,
+    isFeatured,
     page = 1,
     limit = 20,
   } = filters
@@ -59,6 +67,27 @@ export async function getMatchesForAdmin(
 
   if (leagueId) {
     query = query.eq('league_id', leagueId)
+  }
+  if (dateFrom) {
+    query = query.gte('kick_off_time', dateFrom)
+  }
+  if (dateTo) {
+    query = query.lte('kick_off_time', dateTo)
+  }
+  if (isFeatured !== undefined) {
+    query = query.eq('is_featured', isFeatured)
+  }
+  if (countryId) {
+    query = query.eq('leagues.countries.id', countryId)
+  }
+  if (dateFrom) {
+    query = query.gte('kick_off_time', dateFrom)
+  }
+  if (dateTo) {
+    query = query.lte('kick_off_time', dateTo)
+  }
+  if (isFeatured !== undefined) {
+    query = query.eq('is_featured', isFeatured)
   }
 
   const { data, count } = await query

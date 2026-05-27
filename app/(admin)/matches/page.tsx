@@ -35,7 +35,11 @@ import {
   BarChart3,
   Trophy,
   Trash2,
+  Filter,
+  X,
+  Calendar,
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const STATUS_TABS = [
   { key: 'all', label: 'All' },
@@ -66,20 +70,40 @@ export default function MatchesPage() {
     useState(false)
   const [confirmData, setConfirmData] =
     useState<any>(null)
+  const [showFilters, setShowFilters] = useState(false)
+  const [countries, setCountries] = useState<any[]>([])
+  const [leagues, setLeagues] = useState<any[]>([])
+  const [filterCountry, setFilterCountry] = useState('')
+  const [filterLeague, setFilterLeague] = useState('')
+  const [filterDateFrom, setFilterDateFrom] = useState('')
+  const [filterDateTo, setFilterDateTo] = useState('')
+  const [filterFeatured, setFilterFeatured] = useState<string>('')
 
   useEffect(() => {
     loadMatches()
-  }, [page, statusFilter, search])
+  }, [page, statusFilter, search, filterCountry, filterLeague, filterDateFrom, filterDateTo, filterFeatured])
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from('countries').select('id, name, flag_emoji').order('name').then(({ data }) => {
+      if (data) setCountries(data)
+    })
+    supabase.from('leagues').select('id, name, country_id').order('name').then(({ data }) => {
+      if (data) setLeagues(data)
+    })
+  }, [])
 
   const loadMatches = async () => {
     setLoading(true)
     const { matches: data, total: t } =
       await getMatchesForAdmin({
-        status:
-          statusFilter === 'all'
-            ? undefined
-            : statusFilter,
+        status: statusFilter === 'all' ? undefined : statusFilter,
         search: search || undefined,
+        leagueId: filterLeague || undefined,
+        countryId: filterCountry || undefined,
+        dateFrom: filterDateFrom || undefined,
+        dateTo: filterDateTo || undefined,
+        isFeatured: filterFeatured === 'featured' ? true : filterFeatured === 'normal' ? false : undefined,
         page,
         limit: 20,
       })
@@ -377,20 +401,142 @@ export default function MatchesPage() {
         </div>
       )}
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value)
-            setPage(1)
-          }}
-          placeholder="Search team names..."
-          className="w-full bg-slate-dark border border-nile-blue/30 rounded-lg pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:border-gold/40"
-        />
+      {/* Search + Filter */}
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+            placeholder="Search team names..."
+            className="w-full bg-slate-dark border border-nile-blue/30 rounded-lg pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:border-gold/40"
+          />
+        </div>
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className={cn(
+            'flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm border transition-colors',
+            showFilters || filterCountry || filterLeague || filterDateFrom || filterDateTo || filterFeatured
+              ? 'bg-gold/20 border-gold text-gold'
+              : 'bg-slate-dark border-nile-blue/30 text-white/60 hover:text-white'
+          )}
+        >
+          <Filter className="w-4 h-4" />
+          Filters
+          {(filterCountry || filterLeague || filterDateFrom || filterDateTo || filterFeatured) && (
+            <span className="bg-gold text-charcoal text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+              {[filterCountry, filterLeague, filterDateFrom, filterFeatured].filter(Boolean).length}
+            </span>
+          )}
+        </button>
       </div>
+
+      {/* Filter Panel */}
+      {showFilters && (
+        <div className="bg-slate-dark border border-gold/20 rounded-xl p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-white font-medium text-sm">Filters</span>
+            <button
+              onClick={() => {
+                setFilterCountry('')
+                setFilterLeague('')
+                setFilterDateFrom('')
+                setFilterDateTo('')
+                setFilterFeatured('')
+                setPage(1)
+              }}
+              className="text-xs text-white/40 hover:text-white flex items-center gap-1"
+            >
+              <X className="w-3 h-3" /> Clear all
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* Country */}
+            <div>
+              <label className="text-xs text-white/50 block mb-1">Country</label>
+              <select
+                value={filterCountry}
+                onChange={(e) => { setFilterCountry(e.target.value); setFilterLeague(''); setPage(1) }}
+                className="w-full bg-charcoal border border-nile-blue/30 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-gold/40"
+              >
+                <option value="">All Countries</option>
+                {countries.map((c) => (
+                  <option key={c.id} value={c.id}>{c.flag_emoji} {c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* League */}
+            <div>
+              <label className="text-xs text-white/50 block mb-1">League</label>
+              <select
+                value={filterLeague}
+                onChange={(e) => { setFilterLeague(e.target.value); setPage(1) }}
+                className="w-full bg-charcoal border border-nile-blue/30 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-gold/40"
+              >
+                <option value="">All Leagues</option>
+                {(filterCountry
+                  ? leagues.filter(l => l.country_id === filterCountry)
+                  : leagues
+                ).map((l) => (
+                  <option key={l.id} value={l.id}>{l.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Date From */}
+            <div>
+              <label className="text-xs text-white/50 block mb-1 flex items-center gap-1">
+                <Calendar className="w-3 h-3" /> From
+              </label>
+              <input
+                type="date"
+                value={filterDateFrom}
+                onChange={(e) => { setFilterDateFrom(e.target.value ? new Date(e.target.value).toISOString() : ''); setPage(1) }}
+                className="w-full bg-charcoal border border-nile-blue/30 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-gold/40"
+              />
+            </div>
+
+            {/* Date To */}
+            <div>
+              <label className="text-xs text-white/50 block mb-1 flex items-center gap-1">
+                <Calendar className="w-3 h-3" /> To
+              </label>
+              <input
+                type="date"
+                value={filterDateTo}
+                onChange={(e) => { setFilterDateTo(e.target.value ? new Date(e.target.value + 'T23:59:59').toISOString() : ''); setPage(1) }}
+                className="w-full bg-charcoal border border-nile-blue/30 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-gold/40"
+              />
+            </div>
+          </div>
+
+          {/* Featured filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-white/50">Featured:</span>
+            {[
+              { key: '', label: 'All' },
+              { key: 'featured', label: '⭐ Featured Only' },
+              { key: 'normal', label: 'Normal Only' },
+            ].map((f) => (
+              <button
+                key={f.key}
+                onClick={() => { setFilterFeatured(f.key); setPage(1) }}
+                className={cn(
+                  'px-3 py-1 rounded-lg text-xs border transition-colors',
+                  filterFeatured === f.key
+                    ? 'bg-gold/20 border-gold text-gold'
+                    : 'border-nile-blue/30 text-white/50 hover:text-white'
+                )}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Table */}
       <DataTable
