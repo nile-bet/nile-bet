@@ -65,6 +65,7 @@ export function JackpotClient({
   const [guestSlipCode, setGuestSlipCode] = useState('')
   const [generatingGuestCode, setGeneratingGuestCode] = useState(false)
   const [copiedGuestCode, setCopiedGuestCode] = useState(false)
+  const [showGuestSlipModal, setShowGuestSlipModal] = useState(false)
 
   const matches =
     jackpot?.jackpot_matches?.sort(
@@ -238,6 +239,52 @@ export function JackpotClient({
     jackpot.status === 'settled'
 
   return (
+    <div>
+      {/* Guest Jackpot Slip Modal */}
+    {showGuestSlipModal && guestSlipCode && (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-slate-dark border border-gold/30 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+          <div className="text-center mb-4">
+            <div className="text-3xl mb-2">🏆</div>
+            <h3 className="text-white font-bold text-lg">Your Jackpot Slip Code</h3>
+            <p className="text-white/50 text-xs mt-1">Show this code to the cashier to place your bet</p>
+          </div>
+
+          <div className="bg-charcoal/50 rounded-xl p-4 text-center mb-4">
+            <p className="text-[10px] text-white/40 uppercase tracking-widest mb-2">Slip Code</p>
+            <div className="flex items-center justify-center gap-3">
+              <p className="text-gold font-mono text-4xl font-bold tracking-widest">{guestSlipCode}</p>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(guestSlipCode)
+                  setCopiedGuestCode(true)
+                  setTimeout(() => setCopiedGuestCode(false), 2000)
+                }}
+                className="text-white/50 hover:text-gold transition-colors"
+              >
+                {copiedGuestCode ? <Check className="w-5 h-5 text-nile-success" /> : <Copy className="w-5 h-5" />}
+              </button>
+            </div>
+            {copiedGuestCode && <p className="text-nile-success text-xs mt-1">✅ Copied!</p>}
+          </div>
+
+          <p className="text-white/40 text-xs text-center mb-4">
+            The cashier will use this code to find your selections and place the bet for you.
+          </p>
+
+          <button
+            onClick={() => {
+              setShowGuestSlipModal(false)
+              setSelections({})
+              setGuestSlipCode('')
+            }}
+            className="w-full bg-gold text-charcoal py-3 rounded-xl font-bold text-sm hover:bg-gold-light"
+          >
+            OK — Done
+          </button>
+        </div>
+      </div>
+    )}
     <div className="space-y-6">
       {/* Jackpot info bar */}
       <div className="bg-slate-dark border border-gold/20 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
@@ -507,19 +554,7 @@ export function JackpotClient({
             <div className="sticky bottom-2 bg-slate-dark border border-gold/30 rounded-xl p-3 shadow-2xl">
               {!isAuthenticated ? (
                 <div className="space-y-3">
-                  {guestSlipCode && (
-                    <div className="bg-gold/10 border border-gold/40 rounded-lg p-3 text-center">
-                      <p className="text-[10px] text-white/50 uppercase tracking-widest mb-1">Your Jackpot Slip Code</p>
-                      <div className="flex items-center justify-center gap-2">
-                        <p className="text-gold font-mono text-2xl font-bold tracking-widest">{guestSlipCode}</p>
-                        <button onClick={() => { navigator.clipboard.writeText(guestSlipCode); setCopiedGuestCode(true); setTimeout(() => setCopiedGuestCode(false), 2000) }}>
-                          {copiedGuestCode ? <Check className="w-4 h-4 text-nile-success" /> : <Copy className="w-4 h-4 text-white/50 hover:text-gold" />}
-                        </button>
-                      </div>
-                      {copiedGuestCode && <p className="text-[10px] text-nile-success mt-1">Copied!</p>}
-                      <p className="text-[10px] text-white/40 mt-1">Show this code to the cashier to place your jackpot bet</p>
-                    </div>
-                  )}
+
                   <button
                     onClick={async () => {
                       if (!allSelected || generatingGuestCode) return
@@ -541,6 +576,7 @@ export function JackpotClient({
                         const result = await res.json()
                         if (result.success) {
                           setGuestSlipCode(result.slipCode)
+                          setShowGuestSlipModal(true)
                           toast.success('Slip code generated! Show it to the cashier.')
                         } else {
                           toast.error(result.error ?? 'Failed to generate code')
@@ -856,6 +892,7 @@ export function JackpotClient({
           jackpot={jackpot}
         />
       )}
+    </div>
     </div>
   )
 }
