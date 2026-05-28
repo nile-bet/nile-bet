@@ -2,8 +2,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/lib/stores/authStore'
-import { placeJackpotBet } from '@/lib/actions/jackpot'
-import { Trophy, Loader2, Lock, Unlock, User, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { placeJackpotBet, getJackpotSlipById } from '@/lib/actions/jackpot'
+import { Trophy, Loader2, Lock, Unlock, User, CheckCircle, XCircle, ChevronDown, ChevronUp, Search, X } from 'lucide-react'
 import { formatETB } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -21,6 +21,10 @@ export default function CashierJackpotPage() {
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [bettorName, setBettorName] = useState('')
   const [activeTab, setActiveTab] = useState<Tab>('pick')
+  const [slipSearchId, setSlipSearchId] = useState('')
+  const [searchingSlip, setSearchingSlip] = useState(false)
+  const [loadedSlip, setLoadedSlip] = useState<any>(null)
+  const [slipSearchError, setSlipSearchError] = useState('')
   const [slips, setSlips] = useState<any[]>([])
   const [loadingSlips, setLoadingSlips] = useState(false)
   const supabase = createClient()
@@ -95,6 +99,34 @@ export default function CashierJackpotPage() {
       toast.error(result.error ?? 'Failed')
     }
     setPlacing(false)
+  }
+
+  const handleSearchSlip = async () => {
+    if (!slipSearchId.trim()) return
+    setSearchingSlip(true)
+    setSlipSearchError('')
+    setLoadedSlip(null)
+    const slip = await getJackpotSlipById(slipSearchId.trim().toUpperCase())
+    if (!slip) {
+      setSlipSearchError('Slip not found')
+    } else {
+      // Load selections into state regardless of status
+      const sels: Record<number, Selection> = {}
+      const slipSelections = (slip as any).jackpot_slip_selections ?? []
+      slipSelections.forEach((s: any) => {
+        sels[s.game_number] = s.selection as Selection
+      })
+      setSelections(sels)
+      if ((slip as any).status !== 'pending') {
+        // Already placed — copy the selections but will get a new slip ID on place
+        setLoadedSlip({ ...(slip as any), _isCopy: true })
+        toast.success('Selections copied! A new slip ID will be assigned on place.')
+      } else {
+        setLoadedSlip(slip)
+        toast.success('Slip loaded! Review and place the bet.')
+      }
+    }
+    setSearchingSlip(false)
   }
 
   if (loading) return (
@@ -176,6 +208,43 @@ export default function CashierJackpotPage() {
 
           {/* Left — matches */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            {/* Slip ID Search */}
+            <div className="bg-nile-blue/20 border border-gold/20 rounded-xl p-3 mb-3">
+              <p className="text-xs text-white/60 mb-2 font-medium">📋 Load Customer Slip by ID</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={slipSearchId}
+                  onChange={(e) => setSlipSearchId(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearchSlip()}
+                  placeholder="Enter JP slip code (e.g. JP12345678)"
+                  className="flex-1 bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-gold/40"
+                />
+                <button
+                  onClick={handleSearchSlip}
+                  disabled={searchingSlip || !slipSearchId.trim()}
+                  className="bg-gold text-charcoal px-3 py-2 rounded-lg text-xs font-bold hover:bg-gold-light disabled:opacity-50 flex items-center gap-1"
+                >
+                  {searchingSlip ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
+                  Load
+                </button>
+                {loadedSlip && (
+                  <button
+                    onClick={() => { setLoadedSlip(null); setSlipSearchId(''); setSelections({}) }}
+                    className="text-white/40 hover:text-white px-2"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              {slipSearchError && <p className="text-nile-danger text-xs mt-1">{slipSearchError}</p>}
+              {loadedSlip && (
+                <div className="mt-2 bg-nile-success/10 border border-nile-success/30 rounded-lg px-3 py-2">
+                  <p className="text-nile-success text-xs font-medium">✅ Slip #{loadedSlip.slip_id} loaded — {Object.keys(selections).length} selections pre-filled</p>
+                  <p className="text-white/40 text-[10px] mt-0.5">A NEW unique slip ID will be generated when you place the bet</p>
+                </div>
+              )}
+            </div>
             <div className="flex items-center gap-2 mb-1">
               <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
                 <div className="h-full bg-gold rounded-full transition-all duration-300"
@@ -255,6 +324,65 @@ export default function CashierJackpotPage() {
 
           {/* Right — bettor + summary */}
           <div className="w-60 border-l border-gold/10 bg-slate-dark flex flex-col p-3 gap-3 overflow-y-auto">
+            {/* Slip ID Search */}
+            <div className="space-y-2">
+              <p className="text-[10px] text-white/40 uppercase tracking-widest">Load Slip Code</p>
+              <div className="flex gap-1.5">
+                <input
+                  type="text"
+                  value={slipSearchId}
+                  onChange={e => { setSlipSearchId(e.target.value.toUpperCase()); setSlipSearchError(''); setLoadedSlip(null) }}
+                  onKeyDown={e => e.key === 'Enter' && handleSearchSlip()}
+                  placeholder="JP12345678"
+                  className="flex-1 bg-charcoal border border-gold/20 rounded-lg px-2.5 py-2 text-white text-xs font-mono focus:outline-none focus:border-gold/50 placeholder:text-white/20"
+                />
+                <button
+                  onClick={handleSearchSlip}
+                  disabled={searchingSlip || !slipSearchId.trim()}
+                  className="px-2.5 py-2 rounded-lg bg-gold/20 border border-gold/30 text-gold hover:bg-gold/30 disabled:opacity-40 transition-all">
+                  {searchingSlip ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+                </button>
+                {(loadedSlip || slipSearchId) && (
+                  <button onClick={() => { setSlipSearchId(''); setLoadedSlip(null); setSlipSearchError(''); setSelections({}) }}
+                    className="px-2 py-2 rounded-lg border border-white/10 text-white/30 hover:text-white/60 transition-all">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              {slipSearchError && (
+                <p className="text-nile-danger text-[10px] flex items-center gap-1">
+                  <XCircle className="w-3 h-3" /> {slipSearchError}
+                </p>
+              )}
+              {loadedSlip && (
+                <div className={cn(
+                  "border rounded-lg px-3 py-2 space-y-0.5",
+                  loadedSlip._isCopy
+                    ? "bg-nile-orange/10 border-nile-orange/30"
+                    : "bg-nile-success/10 border-nile-success/30"
+                )}>
+                  <p className={cn(
+                    "text-[10px] font-semibold flex items-center gap-1",
+                    loadedSlip._isCopy ? "text-nile-orange" : "text-nile-success"
+                  )}>
+                    <CheckCircle className="w-3 h-3" />
+                    {loadedSlip._isCopy ? "Copying selections" : "Slip loaded"}
+                  </p>
+                  <p className="text-white/60 text-[10px] font-mono">
+                    {loadedSlip._isCopy ? `Copied from #${loadedSlip.slip_id}` : `#${loadedSlip.slip_id}`}
+                  </p>
+                  <p className="text-white/40 text-[10px]">
+                    {loadedSlip._isCopy
+                      ? "New slip ID will be assigned on place"
+                      : `${loadedSlip.jackpot_slip_selections?.length ?? 0} selections pre-filled`}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="h-px bg-white/10" />
+
+            {/* Slip ID Search */}
             <p className="text-[10px] text-white/40 uppercase tracking-widest">Place For</p>
 
             <button onClick={() => { setIsAnonymous(!isAnonymous); setBettorName('') }}

@@ -20,6 +20,8 @@ import {
   CheckCircle,
   XCircle,
   Star,
+  Copy,
+  Check,
 } from 'lucide-react'
 import { JackpotPrintReceiptModal }
   from './JackpotPrintReceiptModal'
@@ -60,6 +62,9 @@ export function JackpotClient({
     useState(false)
   const [receiptSlipId, setReceiptSlipId] =
     useState('')
+  const [guestSlipCode, setGuestSlipCode] = useState('')
+  const [generatingGuestCode, setGeneratingGuestCode] = useState(false)
+  const [copiedGuestCode, setCopiedGuestCode] = useState(false)
 
   const matches =
     jackpot?.jackpot_matches?.sort(
@@ -501,15 +506,69 @@ export function JackpotClient({
           {isOpen && (
             <div className="sticky bottom-2 bg-slate-dark border border-gold/30 rounded-xl p-3 shadow-2xl">
               {!isAuthenticated ? (
-                <div className="text-center">
-                  <p className="text-white/60 text-sm mb-3">
-                    Login to enter the jackpot
-                  </p>
-                  <a
-                    href="/login"
-                    className="bg-gold text-charcoal px-6 py-2.5 rounded-xl text-sm font-bold inline-block hover:bg-gold-light"
+                <div className="space-y-3">
+                  {guestSlipCode && (
+                    <div className="bg-gold/10 border border-gold/40 rounded-lg p-3 text-center">
+                      <p className="text-[10px] text-white/50 uppercase tracking-widest mb-1">Your Jackpot Slip Code</p>
+                      <div className="flex items-center justify-center gap-2">
+                        <p className="text-gold font-mono text-2xl font-bold tracking-widest">{guestSlipCode}</p>
+                        <button onClick={() => { navigator.clipboard.writeText(guestSlipCode); setCopiedGuestCode(true); setTimeout(() => setCopiedGuestCode(false), 2000) }}>
+                          {copiedGuestCode ? <Check className="w-4 h-4 text-nile-success" /> : <Copy className="w-4 h-4 text-white/50 hover:text-gold" />}
+                        </button>
+                      </div>
+                      {copiedGuestCode && <p className="text-[10px] text-nile-success mt-1">Copied!</p>}
+                      <p className="text-[10px] text-white/40 mt-1">Show this code to the cashier to place your jackpot bet</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={async () => {
+                      if (!allSelected || generatingGuestCode) return
+                      setGeneratingGuestCode(true)
+                      try {
+                        const sels = matches.map((m: any) => ({
+                          matchId: m.id,
+                          gameNumber: m.game_number,
+                          selection: selections[m.game_number]!,
+                          odd: selections[m.game_number] === 'home' ? m.home_odd
+                            : selections[m.game_number] === 'draw' ? m.draw_odd
+                            : m.away_odd,
+                        }))
+                        const res = await fetch('/api/anonymous-jackpot-slip', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ jackpotId: jackpot.id, selections: sels }),
+                        })
+                        const result = await res.json()
+                        if (result.success) {
+                          setGuestSlipCode(result.slipCode)
+                          toast.success('Slip code generated! Show it to the cashier.')
+                        } else {
+                          toast.error(result.error ?? 'Failed to generate code')
+                        }
+                      } catch (e) {
+                        toast.error('Error generating code')
+                      }
+                      setGeneratingGuestCode(false)
+                    }}
+                    disabled={!allSelected || generatingGuestCode}
+                    className={cn(
+                      'w-full py-3 rounded-xl text-sm font-bold transition-colors',
+                      allSelected && !generatingGuestCode
+                        ? 'bg-gold text-charcoal hover:bg-gold-light'
+                        : 'bg-white/10 text-white/30 cursor-not-allowed'
+                    )}
                   >
-                    Login to Play
+                    {generatingGuestCode ? 'Generating...' :
+                      !allSelected ? `Select ${12 - selectedCount} more game${12 - selectedCount !== 1 ? 's' : ''}` :
+                      guestSlipCode ? '🔄 Regenerate Slip Code' : '🎟️ Get Jackpot Slip Code'}
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-px bg-white/10" />
+                    <span className="text-white/30 text-xs">or</span>
+                    <div className="flex-1 h-px bg-white/10" />
+                  </div>
+                  <a href="/login" className="block w-full text-center bg-nile-blue/30 border border-nile-blue/40 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-nile-blue/50">
+                    Login to Play Directly
                   </a>
                 </div>
               ) : (
