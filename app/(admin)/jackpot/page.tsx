@@ -6,6 +6,7 @@ import {
   createJackpot,
   publishJackpot,
   settleJackpot,
+  deleteJackpot,
 } from '@/lib/actions/adminMatches'
 import { StatusBadge }
   from '@/components/shared/StatusBadge'
@@ -17,7 +18,7 @@ import { useAuthStore }
   from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { Plus, Trophy } from 'lucide-react'
+import { Plus, Trophy, Trash2 } from 'lucide-react'
 
 export default function AdminJackpotPage() {
   const { user } = useAuthStore()
@@ -35,6 +36,12 @@ export default function AdminJackpotPage() {
   const [publishing, setPublishing] =
     useState(false)
   const [showPublishConfirm, setShowPublishConfirm] =
+    useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] =
+    useState(false)
+  const [deletingId, setDeletingId] =
+    useState<string | null>(null)
+  const [deleting, setDeleting] =
     useState(false)
 
   // Create form
@@ -70,6 +77,21 @@ export default function AdminJackpotPage() {
   useEffect(() => {
     loadJackpots()
   }, [])
+
+  const handleDelete = async () => {
+    if (!deletingId) return
+    setDeleting(true)
+    const result = await deleteJackpot(deletingId)
+    if (result.success) {
+      toast.success('Jackpot deleted!')
+      setShowDeleteConfirm(false)
+      setDeletingId(null)
+      loadJackpots()
+    } else {
+      toast.error(result.error ?? 'Failed to delete')
+    }
+    setDeleting(false)
+  }
 
   const loadJackpots = async () => {
     setLoading(true)
@@ -263,6 +285,31 @@ export default function AdminJackpotPage() {
                     className="bg-gold text-charcoal text-xs px-3 py-1.5 rounded-lg font-semibold"
                   >
                     Enter Results
+                  </button>
+                )}
+                {jp.status !== 'open' && (
+                  <button
+                    onClick={() => {
+                      setDeletingId(jp.id)
+                      setShowDeleteConfirm(true)
+                    }}
+                    className="bg-nile-danger/20 text-nile-danger border border-nile-danger/30 text-xs px-3 py-1.5 rounded-lg hover:bg-nile-danger/30 flex items-center gap-1"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Delete
+                  </button>
+                )}
+                {jp.status === 'open' && (
+                  <button
+                    onClick={() => {
+                      setDeletingId(jp.id)
+                      setShowDeleteConfirm(true)
+                    }}
+                    className="bg-nile-danger/20 text-nile-danger border border-nile-danger/30 text-xs px-3 py-1.5 rounded-lg hover:bg-nile-danger/30 flex items-center gap-1 opacity-60"
+                    title="Warning: Jackpot is open - deleting will affect active bets"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Force Delete
                   </button>
                 )}
               </div>
@@ -580,6 +627,16 @@ export default function AdminJackpotPage() {
         </div>
       )}
 
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => { setShowDeleteConfirm(false); setDeletingId(null) }}
+        onConfirm={handleDelete}
+        title="Delete Jackpot?"
+        message="This will permanently delete the jackpot and all its data. This cannot be undone."
+        confirmText="Yes, Delete"
+        variant="danger"
+        isLoading={deleting}
+      />
       <ConfirmModal
         isOpen={showPublishConfirm}
         onClose={() =>

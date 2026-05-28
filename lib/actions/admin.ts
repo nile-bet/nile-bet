@@ -856,3 +856,40 @@ export async function getAdminProfile() {
 
   return profile
 }
+export async function deleteUser(
+  userId: string,
+  deletedBy: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const adminClient = await createAdminClient()
+
+  // Get user info first
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('username, role')
+    .eq('id', userId)
+    .single()
+
+  if (!profile) return { success: false, error: 'User not found' }
+  if (profile.role === 'admin') return { success: false, error: 'Cannot delete admin users' }
+
+  // Delete related data
+  await supabase.from('notifications').delete().eq('to_user_id', userId)
+  await supabase.from('activity_logs').delete().eq('user_id', userId)
+  await supabase.from('credit_assignments').delete().or(`from_user_id.eq.${userId},to_user_id.eq.${userId}`)
+
+  // Delete profile
+  await supabase.from('profiles').delete().eq('id', userId)
+
+  // Delete auth user
+  await adminClient.auth.admin.deleteUser(userId)
+
+  // Log the deletion
+  await supabase.from('activity_logs').insert({
+    user_id: deletedBy,
+    action: 'user_deleted',
+    details: { deleted_user_id: userId, username: profile.username, role: profile.role },
+  })
+
+  return { success: true }
+}

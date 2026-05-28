@@ -1923,3 +1923,39 @@ export async function deleteMatches(
 
   return { success: true, deleted: matchIds.length }
 }
+
+export async function deleteJackpot(
+  jackpotId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  // Delete related data first
+  await supabase
+    .from('jackpot_slip_selections')
+    .delete()
+    .in('jackpot_slip_id',
+      (await supabase
+        .from('jackpot_slips')
+        .select('id')
+        .eq('jackpot_id', jackpotId)
+      ).data?.map((s: any) => s.id) ?? []
+    )
+
+  await supabase
+    .from('jackpot_slips')
+    .delete()
+    .eq('jackpot_id', jackpotId)
+
+  await supabase
+    .from('jackpot_matches')
+    .delete()
+    .eq('jackpot_id', jackpotId)
+
+  const { error } = await supabase
+    .from('jackpots')
+    .delete()
+    .eq('id', jackpotId)
+
+  if (error) return { success: false, error: error.message }
+  return { success: true }
+}
