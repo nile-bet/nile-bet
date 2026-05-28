@@ -8,6 +8,7 @@ import {
   forceLogout,
   getHierarchyTree,
   createUser,
+  deleteUser,
 } from '@/lib/actions/admin'
 import { DataTable }
   from '@/components/shared/DataTable'
@@ -27,6 +28,7 @@ import {
   Plus, Search, ChevronRight,
   ChevronDown, Eye, EyeOff,
   RefreshCw,
+  Trash2,
 } from 'lucide-react'
 import {
   Dialog,
@@ -260,6 +262,17 @@ export default function UsersPage() {
     setShowConfirm(false)
   }
 
+  const handleDeleteUser = async (targetUser: any) => {
+    if (!user) return
+    const result = await deleteUser(targetUser.id, user.id)
+    if (result.success) {
+      toast.success(`@${targetUser.username} deleted`)
+      loadUsers()
+    } else {
+      toast.error(result.error ?? 'Failed to delete')
+    }
+  }
+
   const handleForceLogout = async (
     targetUser: any
   ) => {
@@ -417,6 +430,17 @@ export default function UsersPage() {
           >
             🚪
           </button>
+          <button
+            onClick={() => {
+              setSelectedUser(row)
+              setConfirmData({ action: 'delete', user: row })
+              setShowConfirm(true)
+            }}
+            className="text-xs border border-nile-danger/40 text-nile-danger px-2 py-1 rounded hover:bg-nile-danger/10"
+            title="Delete user"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
         </div>
       ),
     },
@@ -551,18 +575,24 @@ export default function UsersPage() {
         onClose={() => setShowConfirm(false)}
         onConfirm={() => {
           if (!confirmData) return
-          handleStatusChange(
-            confirmData.user,
-            confirmData.action === 'suspend'
-              ? 'suspended'
-              : 'active'
-          )
+          if (confirmData.action === 'delete') {
+            handleDeleteUser(confirmData.user)
+          } else {
+            handleStatusChange(
+              confirmData.user,
+              confirmData.action === 'suspend' ? 'suspended' : 'active'
+            )
+          }
+          setShowConfirm(false)
         }}
         title={
-          confirmData?.action === 'suspend'
+          confirmData?.action === 'delete'
+            ? 'Delete User?'
+            : confirmData?.action === 'suspend'
             ? 'Suspend User?'
             : 'Activate User?'
         }
+        variant={confirmData?.action === 'delete' ? 'danger' : 'warning'}
         message={
           confirmData?.action === 'suspend'
             ? `Suspend @${confirmData?.user?.username}? They will be logged out.`
@@ -572,11 +602,6 @@ export default function UsersPage() {
           confirmData?.action === 'suspend'
             ? 'Yes, Suspend'
             : 'Yes, Activate'
-        }
-        variant={
-          confirmData?.action === 'suspend'
-            ? 'danger'
-            : 'warning'
         }
       />
 
