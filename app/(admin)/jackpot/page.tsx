@@ -49,6 +49,7 @@ export default function AdminJackpotPage() {
     useState('Weekend Jackpot')
   const [opensAt, setOpensAt] = useState('')
   const [closesAt, setClosesAt] = useState('')
+  const [gamesFinishAt, setGamesFinishAt] = useState('')
   const [stake, setStake] = useState('50')
   const [winAll, setWinAll] =
     useState('250000')
@@ -122,17 +123,22 @@ export default function AdminJackpotPage() {
       )
       return
     }
-
+    if (!closesAt && !gamesFinishAt) {
+      toast.error('Please set the betting close date/time')
+      return
+    }
     const result = await createJackpot({
       name: jackpotName,
       opensAt: opensAt || new Date().toISOString(),
-      closesAt,
+      closesAt: closesAt || gamesFinishAt,
+      gamesFinishAt: gamesFinishAt || closesAt,
       fixedStake: parseFloat(stake) || 50,
       winAllReward: parseFloat(winAll) || 250000,
       nearWinReward: parseFloat(nearWin) || 25000,
       matches: matchesData,
       createdBy: user.id,
     })
+    console.log('result:', result)
 
     if (result.success) {
       toast.success('Jackpot created!')
@@ -166,6 +172,18 @@ export default function AdminJackpotPage() {
 
   const handleSettle = async () => {
     if (!user || !activeJackpot) return
+    const matchCount = activeJackpot.jackpot_matches?.length ?? 12
+    const enteredCount = Object.keys(results).length
+    if (enteredCount < matchCount) {
+      toast.error(`Enter results for all ${matchCount} games. Only ${enteredCount} entered.`)
+      return
+    }
+    const matches = activeJackpot.jackpot_matches ?? []
+    const missingResults = matches.filter((m: any) => !results[m.game_number])
+    if (missingResults.length > 0) {
+      toast.error(`Please enter results for all ${matches.length} games. Missing: ${missingResults.map((m: any) => `Game ${m.game_number}`).join(', ')}`)
+      return
+    }
 
     const resultArray = activeJackpot.jackpot_matches.map(
       (m: any) => ({
@@ -264,29 +282,37 @@ export default function AdminJackpotPage() {
                     Publish
                   </button>
                 )}
-                {jp.status === 'closed' && (
-                  <button
-                    onClick={() => {
-                      setActiveJackpot(jp)
-                      setShowSettle(true)
-                      const initial: Record<
-                        number,
-                        'home' | 'draw' | 'away'
-                      > = {}
-                      jp.jackpot_matches?.forEach(
-                        (m: any) => {
-                          initial[
-                            m.game_number
-                          ] = 'home'
-                        }
-                      )
-                      setResults(initial)
-                    }}
-                    className="bg-gold text-charcoal text-xs px-3 py-1.5 rounded-lg font-semibold"
-                  >
-                    Enter Results
-                  </button>
-                )}
+                {(jp.status === 'closed' || jp.status === 'open') && (() => {
+                  const finishTime = jp.closes_at
+                  const canEnterResults = !finishTime || new Date() >= new Date(finishTime)
+                  return (
+                    <div className="flex flex-col items-end gap-1">
+                      {!canEnterResults && finishTime && (
+                        <p className="text-[10px] text-white/40 text-right">
+                          Results after: {new Date(finishTime).toLocaleString()}
+                        </p>
+                      )}
+                      <button
+                        onClick={() => {
+                          if (!canEnterResults) { toast.error('Games not finished yet!'); return }
+                          setActiveJackpot(jp)
+                          const initial: Record<number, 'home' | 'draw' | 'away'> = {}
+                          jp.jackpot_matches?.forEach((m: any) => {
+                            if (m.result && m.result !== 'pending') initial[m.game_number] = m.result
+                          })
+                          setResults(initial)
+                          setShowSettle(true)
+                        }}
+                        className={cn(
+                          'text-xs px-3 py-1.5 rounded-lg font-semibold',
+                          canEnterResults ? 'bg-gold text-charcoal hover:bg-gold-light' : 'bg-white/10 text-white/30 cursor-not-allowed'
+                        )}
+                      >
+                        {canEnterResults ? '📊 Enter Results' : '⏳ Waiting for games'}
+                      </button>
+                    </div>
+                  )
+                })()}
                 {jp.status !== 'open' && (
                   <button
                     onClick={() => {
@@ -373,7 +399,7 @@ export default function AdminJackpotPage() {
               </div>
               <div>
                 <label className="text-xs text-white/60 block mb-1">
-                  Closes At
+                  Betting Closes At
                 </label>
                 <input
                   type="datetime-local"
@@ -383,6 +409,29 @@ export default function AdminJackpotPage() {
                   }
                   className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
                 />
+              </div>
+              <div>
+                <label className="text-xs text-white/60 block mb-1">
+                  All Games Finish At (for result entry)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={gamesFinishAt}
+                  onChange={(e) => setGamesFinishAt(e.target.value)}
+                  className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-white/60 block mb-1">
+                  All Games Finish At 🕐 (results unlock)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={gamesFinishAt}
+                  onChange={(e) => setGamesFinishAt(e.target.value)}
+                  className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
+                />
+                <p className="text-[10px] text-white/30 mt-1">Admin can enter results after this time</p>
               </div>
               <div>
                 <label className="text-xs text-white/60 block mb-1">
