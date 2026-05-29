@@ -1473,6 +1473,7 @@ export async function createJackpot(data: {
   name: string
   opensAt: string
   closesAt: string
+  gamesFinishAt?: string
   fixedStake: number
   winAllReward: number
   nearWinReward: number
@@ -1510,16 +1511,17 @@ export async function createJackpot(data: {
         win_all_reward: data.winAllReward,
         near_win_reward: data.nearWinReward,
         opens_at: data.opensAt,
-        closes_at: data.closesAt,
+        closes_at: data.gamesFinishAt || data.closesAt,
         created_by: data.createdBy,
       })
       .select('id')
       .single()
 
   if (error || !jackpot) {
+    console.error('Jackpot insert error:', error)
     return {
       success: false,
-      error: 'Failed to create jackpot',
+      error: error?.message ?? 'Failed to create jackpot',
     }
   }
 
