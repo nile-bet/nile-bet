@@ -471,3 +471,66 @@ export async function generateCashierReportData(
 
   return { stats, payouts, recentSlips }
 }
+// ─── SLIP HISTORY ─────────────────────
+export async function getCashierSlipHistory(
+  cashierId: string,
+  filters: {
+    page?: number
+    limit?: number
+    category?: 'all' | 'normal' | 'jackpot'
+    status?: string
+    dateFrom?: string
+    dateTo?: string
+  } = {}
+) {
+  const supabase = await createClient()
+  const { page = 1, limit = 20, category = 'all', status, dateFrom, dateTo } = filters
+  const offset = (page - 1) * limit
+
+  const normalSlips: any[] = []
+  const jackpotSlips: any[] = []
+
+  if (category === 'all' || category === 'normal') {
+    let q = supabase
+      .from('slips')
+      .select(`
+        id, slip_id, stake, total_odds, net_payout, max_payout, winning_tax,
+        status, is_anonymous, created_at,
+        bettor:profiles!slips_bettor_id_fkey (username)
+      `, { count: 'exact' })
+      .eq('placed_by', cashierId)
+      .order('created_at', { ascending: false })
+    if (status && status !== 'all') q = q.eq('status', status)
+    if (dateFrom) q = q.gte('created_at', dateFrom)
+    if (dateTo) q = q.lte('created_at', dateTo + 'T23:59:59')
+    const { data } = await q
+    normalSlips.push(...(data ?? []).map((s: any) => ({ ...s, _type: 'normal' })))
+  }
+
+  if (category === 'all' || category === 'jackpot') {
+    let q = supabase
+      .from('jackpot_slips')
+      .select(`
+        id, slip_id, stake, status, is_anonymous, created_at, correct_count, reward_amount,
+        bettor:profiles!jackpot_slips_bettor_id_fkey (username),
+        jackpots (name, fixed_stake, win_all_reward)
+      `, { count: 'exact' })
+      .eq('placed_by', cashierId)
+      .order('created_at', { ascending: false })
+    if (status && status !== 'all') q = q.eq('status', status)
+    if (dateFrom) q = q.gte('created_at', dateFrom)
+    if (dateTo) q = q.lte('created_at', dateTo + 'T23:59:59')
+    const { data } = await q
+    jackpotSlips.push(...(data ?? []).map((s: any) => ({ ...s, _type: 'jackpot' })))
+  }
+
+  // Merge and sort by date
+  const all = [...normalSlips, ...jackpotSlips].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  )
+
+  const total = all.length
+  const paginated = all.slice(offset, offset + limit)
+
+  return { slips: paginated, total }
+}

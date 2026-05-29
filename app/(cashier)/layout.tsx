@@ -24,6 +24,7 @@ import {
   CreditCard,
   ClipboardList,
   Trophy,
+  History as HistoryIcon,
 } from 'lucide-react'
 import { SidebarLayout }
   from '@/components/shared/SidebarLayout'
@@ -68,6 +69,11 @@ const cashierNav: NavItem[] = [
     href: '/cashier-credits',
     label: 'Credits',
     icon: CreditCard,
+  },
+  {
+    href: '/cashier-slip-history',
+    label: 'Slip History',
+    icon: HistoryIcon,
   },
   {
     href: '/cashier-activity',
