@@ -296,6 +296,7 @@ export async function createCashierByAgent(data: {
   userId?: string
   error?: string
 }> {
+  try {
   const supabase = await createClient()
   const adminClient = await createAdminClient()
 
@@ -351,7 +352,7 @@ export async function createCashierByAgent(data: {
 
   // Create profile
   const { error: profileError } =
-    await supabase.from('profiles').insert({
+    await adminClient.from('profiles').insert({
       id: authData.user.id,
       username: data.username,
       role: 'cashier',
@@ -423,6 +424,10 @@ export async function createCashierByAgent(data: {
   return {
     success: true,
     userId: authData.user.id,
+  }
+  } catch (e: any) {
+    console.error('createCashierByAgent error:', e)
+    return { success: false, error: e?.message ?? 'Unexpected error' }
   }
 }
 
