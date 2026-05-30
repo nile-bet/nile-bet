@@ -893,3 +893,45 @@ export async function deleteUser(
 
   return { success: true }
 }
+
+// ─── DIRECT MESSAGE ───────────────────
+export async function sendDirectMessage(data: {
+  usernames: string[]
+  message: string
+  priority: 'normal' | 'urgent'
+  sentBy: string
+}): Promise<{ success: boolean; sent: number; notFound: string[]; error?: string }> {
+  const supabase = await createClient()
+  const normalized = data.usernames.map(u => u.trim().replace(/^@/, '').toLowerCase()).filter(Boolean)
+  if (!normalized.length) return { success: false, sent: 0, notFound: [], error: 'No usernames provided' }
+
+  const { data: users } = await supabase
+    .from('profiles')
+    .select('id, username')
+    .in('username', normalized)
+
+  const foundUsernames = (users ?? []).map((u: any) => u.username.toLowerCase())
+  const notFound = normalized.filter(u => !foundUsernames.includes(u))
+
+  if (!users?.length) return { success: false, sent: 0, notFound, error: 'No users found' }
+
+  const notifications = users.map((u: any) => ({
+    to_user_id: u.id,
+    from_user_id: data.sentBy,
+    message: data.message,
+    type: 'broadcast',
+    priority: data.priority,
+  }))
+
+  for (let i = 0; i < notifications.length; i += 100) {
+    await supabase.from('notifications').insert(notifications.slice(i, i + 100))
+  }
+
+  await supabase.from('activity_logs').insert({
+    user_id: data.sentBy,
+    action: 'direct_message_sent',
+    details: { usernames: normalized, sent: users.length, notFound, priority: data.priority },
+  })
+
+  return { success: true, sent: users.length, notFound }
+}
