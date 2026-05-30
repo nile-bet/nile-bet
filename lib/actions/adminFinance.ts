@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 
 // =====================
 // COUPONS
@@ -137,6 +137,8 @@ export async function getCreditRequests({
 
 export async function approveCreditRequest(requestId: string, adminId?: string) {
   const supabase = await createClient()
+  const adminClient = await createAdminClient()
+
   const { data: req } = await supabase
     .from('credit_requests')
     .select('*')
@@ -144,10 +146,46 @@ export async function approveCreditRequest(requestId: string, adminId?: string) 
     .single()
   if (!req || req.status !== 'pending') return { success: false, error: 'Invalid request' }
 
-  await supabase.from('credit_requests').update({
+  // Get current balance of requester
+  const { data: profile } = await adminClient
+    .from('profiles')
+    .select('credit_balance, username')
+    .eq('id', req.requester_id)
+    .single()
+  if (!profile) return { success: false, error: 'User not found' }
+
+  const newBalance = (profile.credit_balance ?? 0) + Number(req.amount)
+
+  // Add credits to requester balance using admin client to bypass RLS
+  const { error: balanceError } = await adminClient
+    .from('profiles')
+    .update({ credit_balance: newBalance })
+    .eq('id', req.requester_id)
+  if (balanceError) return { success: false, error: 'Failed to update balance: ' + balanceError.message }
+
+  // Mark request approved
+  await adminClient.from('credit_requests').update({
     status: 'approved',
     updated_at: new Date().toISOString()
   }).eq('id', requestId)
+
+  // Log transaction
+  await adminClient.from('transactions').insert({
+    from_user_id: adminId ?? req.to_user_id,
+    to_user_id: req.requester_id,
+    amount: req.amount,
+    type: 'credit_assigned',
+    note: 'Credit request approved' + (req.note ? ': ' + req.note : ''),
+  })
+
+  // Notify requester
+  await adminClient.from('notifications').insert({
+    to_user_id: req.requester_id,
+    from_user_id: adminId ?? req.to_user_id,
+    message: 'Your credit request of ETB ' + Number(req.amount).toLocaleString() + ' has been approved!',
+    type: 'balance_updated',
+    priority: 'normal',
+  })
 
   return { success: true }
 }
