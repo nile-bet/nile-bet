@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
-import { useReactToPrint } from 'react-to-print'
+import { usePrint } from '@/lib/hooks/usePrint'
 import {
   Dialog,
   DialogContent,
@@ -70,12 +70,12 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
     }).catch(console.error)
   }, [isOpen, slipId, isJackpot])
 
-  const handlePrint = useReactToPrint({
-    contentRef: receiptRef,
+  const handlePrint = usePrint(receiptRef, {
+    
     documentTitle: `NILE-Reprint-${slipId}`,
     onAfterPrint: () => toast.success('Receipt re-printed!'),
-    onPrintError: (_loc, err) => {
-      console.error(err)
+    onPrintError: () => {
+      console.error("Print failed")
       toast.error('Print failed. Check printer connection.')
     },
     pageStyle: `

@@ -48,9 +48,10 @@ export function PublicNavbar() {
       })
   }, [])
 
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/login')
+    router.push('/')
     router.refresh()
   }
 
@@ -80,6 +81,7 @@ export function PublicNavbar() {
   )
 
   return (
+    <>
     <nav className="bg-slate-dark border-b border-gold/20 sticky top-0 z-50 h-14">
       <div className="h-full px-4 md:px-6 flex items-center justify-between">
         {/* Left: Logo */}
@@ -206,7 +208,7 @@ export function PublicNavbar() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-nile-blue/20" />
                   <DropdownMenuItem
-                    onClick={handleLogout}
+                    onClick={() => setShowLogoutConfirm(true)}
                     className="text-nile-danger cursor-pointer focus:text-nile-danger"
                   >
                     Logout
@@ -275,7 +277,7 @@ export function PublicNavbar() {
                         Profile
                       </Link>
                       <button
-                        onClick={handleLogout}
+                        onClick={() => setShowLogoutConfirm(true)}
                         className="text-nile-danger text-left py-2"
                       >
                         Logout
@@ -312,5 +314,28 @@ export function PublicNavbar() {
         </div>
       </div>
     </nav>
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-dark border border-nile-blue/40 rounded-xl p-6 w-full max-w-sm mx-4 shadow-xl">
+            <h3 className="text-white font-semibold text-lg mb-2">Logout</h3>
+            <p className="text-white/50 text-sm mb-6">Are you sure you want to logout?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 border border-white/20 text-white/60 py-2.5 rounded-lg text-sm hover:text-white hover:border-white/40 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex-1 bg-nile-danger text-white py-2.5 rounded-lg text-sm font-semibold hover:opacity-80 transition-colors"
+              >
+                Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

@@ -249,7 +249,7 @@ export default function CashierSlipHistoryPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 justify-end">
                           <a
-                            href={`/slip/${slip.slip_id}`}
+                            href={"/slip/" + slip.slip_id}
                             target="_blank"
                             rel="noopener noreferrer"
                             title="Preview slip"

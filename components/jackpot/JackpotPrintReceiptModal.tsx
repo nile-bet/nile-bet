@@ -1,8 +1,8 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
-import { useReactToPrint }
-  from 'react-to-print'
+
+import { usePrint } from '@/lib/hooks/usePrint'
 import {
   Dialog,
   DialogContent,
@@ -86,8 +86,8 @@ export function JackpotPrintReceiptModal({
       .catch(console.error)
   }, [isOpen, slipId])
 
-  const handlePrint = useReactToPrint({
-    contentRef: receiptRef,
+  const handlePrint = usePrint(receiptRef, {
+    
     documentTitle: `NILE-Jackpot-${slipId}`,
     onAfterPrint: () =>
       toast.success('Receipt printed!'),
