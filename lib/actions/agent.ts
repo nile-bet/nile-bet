@@ -746,6 +746,7 @@ export async function approveCouponByAgent(
   error?: string
 }> {
   const supabase = await createClient()
+  const adminClient = await createAdminClient()
 
   const lookup =
     await lookupCouponByAgent(code)
@@ -796,7 +797,7 @@ export async function approveCouponByAgent(
   }
 
   // Update coupon
-  await supabase
+  await adminClient
     .from('coupons')
     .update({
       status: 'redeemed',
@@ -807,7 +808,7 @@ export async function approveCouponByAgent(
 
   if (isTopup) {
     // Agent pays bettor
-    await supabase
+    await adminClient
       .from('profiles')
       .update({
         credit_balance:
@@ -815,7 +816,7 @@ export async function approveCouponByAgent(
       })
       .eq('id', agentId)
 
-    await supabase
+    await adminClient
       .from('profiles')
       .update({
         credit_balance:
@@ -830,7 +831,7 @@ export async function approveCouponByAgent(
     ).catch(() => {})
   } else {
     // Withdrawal: release bettor reserved, agent receives
-    await supabase
+    await adminClient
       .from('profiles')
       .update({
         reserved_balance: Math.max(
@@ -841,7 +842,7 @@ export async function approveCouponByAgent(
       })
       .eq('id', coupon.bettor_id)
 
-    await supabase
+    await adminClient
       .from('profiles')
       .update({
         credit_balance:

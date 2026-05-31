@@ -54,50 +54,80 @@ export async function getCouponStats() {
 }
 
 export async function lookupCoupon(code: string) {
-  const supabase = await createClient()
-  const { data, error } = await supabase
+  const adminClient = await createAdminClient()
+  const { data, error } = await adminClient
     .from('coupons')
-    .select(`*, profiles!coupons_bettor_id_fkey (username)`)
-    .eq('code', code)
+    .select(`*, bettor:profiles!coupons_bettor_id_fkey (username)`)
+    .eq('code', code.trim())
     .maybeSingle()
-  if (error || !data) return { success: false, error: 'Coupon not found' }
+  if (error) return { success: false, error: 'DB error: ' + error.message }
+  if (!data) return { success: false, error: 'Coupon not found' }
+  if (data.status !== 'pending') return { success: false, error: 'Coupon already ' + data.status }
   return { success: true, coupon: data }
 }
 
 export async function approveTopupByAdmin(couponId: string, adminId?: string) {
-  const supabase = await createClient()
-  const { data: coupon } = await supabase
-    .from('coupons')
-    .select('*')
-    .eq('id', couponId)
-    .single()
-  if (!coupon || coupon.status !== 'pending') return { success: false, error: 'Invalid coupon' }
+  const adminClient = await createAdminClient()
+  const { data: coupon, error } = await adminClient
+    .from('coupons').select('*')
+    .eq('code', couponId.trim())
+    .maybeSingle()
+  if (error) return { success: false, error: 'DB error: ' + error.message }
+  if (!coupon) return { success: false, error: 'Coupon not found' }
+  if (coupon.status !== 'pending') return { success: false, error: 'Coupon already ' + coupon.status }
 
-  await supabase.from('profiles').update({
-    credit_balance: supabase.rpc('increment', { x: coupon.amount })
-  }).eq('id', coupon.bettor_id)
+  const { data: bettor } = await adminClient
+    .from('profiles').select('credit_balance').eq('id', coupon.bettor_id).single()
+  if (!bettor) return { success: false, error: 'Bettor not found' }
 
-  await supabase.from('coupons').update({
-    status: 'redeemed',
-    updated_at: new Date().toISOString()
-  }).eq('id', couponId)
+  const { error: balErr } = await adminClient
+    .from('profiles')
+    .update({ credit_balance: (bettor.credit_balance ?? 0) + Number(coupon.amount) })
+    .eq('id', coupon.bettor_id)
+  if (balErr) return { success: false, error: 'Failed to update balance: ' + balErr.message }
+
+  await adminClient.from('coupons').update({
+    status: 'redeemed', redeemed_by: adminId ?? null, updated_at: new Date().toISOString()
+  }).eq('id', coupon.id)
+
+  await adminClient.from('notifications').insert({
+    to_user_id: coupon.bettor_id, from_user_id: adminId ?? null,
+    message: 'Your top-up of ETB ' + Number(coupon.amount).toLocaleString() + ' has been credited!',
+    type: 'balance_updated', priority: 'normal',
+  })
 
   return { success: true }
 }
 
 export async function approveWithdrawalByAdmin(couponId: string, adminId?: string) {
-  const supabase = await createClient()
-  const { data: coupon } = await supabase
-    .from('coupons')
-    .select('*')
-    .eq('id', couponId)
-    .single()
-  if (!coupon || coupon.status !== 'pending') return { success: false, error: 'Invalid coupon' }
+  const adminClient = await createAdminClient()
+  const { data: coupon, error } = await adminClient
+    .from('coupons').select('*')
+    .eq('code', couponId.trim())
+    .maybeSingle()
+  if (error) return { success: false, error: 'DB error: ' + error.message }
+  if (!coupon) return { success: false, error: 'Coupon not found' }
+  if (coupon.status !== 'pending') return { success: false, error: 'Coupon already ' + coupon.status }
 
-  await supabase.from('coupons').update({
-    status: 'redeemed',
-    updated_at: new Date().toISOString()
-  }).eq('id', couponId)
+  const { data: bettor } = await adminClient
+    .from('profiles').select('credit_balance, reserved_balance').eq('id', coupon.bettor_id).single()
+  if (!bettor) return { success: false, error: 'Bettor not found' }
+
+  const { error: balErr } = await adminClient
+    .from('profiles')
+    .update({ reserved_balance: Math.max(0, (bettor.reserved_balance ?? 0) - Number(coupon.amount)) })
+    .eq('id', coupon.bettor_id)
+  if (balErr) return { success: false, error: 'Failed to update balance: ' + balErr.message }
+
+  await adminClient.from('coupons').update({
+    status: 'redeemed', redeemed_by: adminId ?? null, updated_at: new Date().toISOString()
+  }).eq('id', coupon.id)
+
+  await adminClient.from('notifications').insert({
+    to_user_id: coupon.bettor_id, from_user_id: adminId ?? null,
+    message: 'Your withdrawal of ETB ' + Number(coupon.amount).toLocaleString() + ' has been processed!',
+    type: 'balance_updated', priority: 'normal',
+  })
 
   return { success: true }
 }
