@@ -115,7 +115,10 @@ export async function approveWithdrawalByAdmin(couponId: string, adminId?: strin
 
   const { error: balErr } = await adminClient
     .from('profiles')
-    .update({ reserved_balance: Math.max(0, (bettor.reserved_balance ?? 0) - Number(coupon.amount)) })
+    .update({
+      reserved_balance: Math.max(0, (bettor.reserved_balance ?? 0) - Number(coupon.amount)),
+      credit_balance: Math.max(0, (bettor.credit_balance ?? 0) - Number(coupon.amount)),
+    })
     .eq('id', coupon.bettor_id)
   if (balErr) return { success: false, error: 'Failed to update balance: ' + balErr.message }
 

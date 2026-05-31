@@ -830,15 +830,12 @@ export async function approveCouponByAgent(
       coupon.amount
     ).catch(() => {})
   } else {
-    // Withdrawal: release bettor reserved, agent receives
+    // Withdrawal: release bettor reserved AND deduct credit_balance, agent receives
     await adminClient
       .from('profiles')
       .update({
-        reserved_balance: Math.max(
-          0,
-          (bettor.reserved_balance ?? 0) -
-            coupon.amount
-        ),
+        reserved_balance: Math.max(0, (bettor.reserved_balance ?? 0) - coupon.amount),
+        credit_balance: Math.max(0, (bettor.credit_balance ?? 0) - coupon.amount),
       })
       .eq('id', coupon.bettor_id)
 
@@ -1052,4 +1049,49 @@ export async function getAgentActivityLog(
     logs: data ?? [],
     total: count ?? 0,
   }
+}
+export async function declineCouponByAgent(
+  code: string,
+  agentId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const adminClient = await createAdminClient()
+
+  const lookup = await lookupCouponByAgent(code)
+  if (!lookup.success || !lookup.coupon) {
+    return { success: false, error: lookup.error }
+  }
+
+  const coupon = lookup.coupon
+  if (coupon.status !== 'pending') {
+    return { success: false, error: 'Coupon already ' + coupon.status }
+  }
+
+  // Mark as expired/declined
+  await adminClient.from('coupons').update({
+    status: 'expired',
+    updated_at: new Date().toISOString(),
+  }).eq('id', coupon.id)
+
+  // Release reserved balance if withdrawal
+  if (coupon.type === 'withdrawal') {
+    const { data: bettor } = await supabase
+      .from('profiles').select('credit_balance, reserved_balance').eq('id', coupon.bettor_id).single()
+    if (bettor) {
+      await adminClient.from('profiles').update({
+        reserved_balance: Math.max(0, (bettor.reserved_balance ?? 0) - coupon.amount),
+        credit_balance: (bettor.credit_balance ?? 0) + coupon.amount,
+      }).eq('id', coupon.bettor_id)
+    }
+  }
+
+  await supabase.from('notifications').insert({
+    to_user_id: coupon.bettor_id,
+    message: coupon.type === 'withdrawal'
+      ? `Your withdrawal of ETB ${coupon.amount.toLocaleString()} was declined. Balance restored.`
+      : `Your top-up request of ETB ${coupon.amount.toLocaleString()} was declined.`,
+    type: 'balance_updated',
+  })
+
+  return { success: true }
 }
