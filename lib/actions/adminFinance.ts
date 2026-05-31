@@ -309,3 +309,30 @@ export async function getTaxReport(filters?: DateFilters) {
   const { data } = await query
   return data ?? []
 }
+
+// ─── COUPON HISTORY BY USER ───────────
+export async function getCouponHistoryByUser(
+  userId: string,
+  filters: { page?: number; limit?: number; type?: string; status?: string } = {}
+) {
+  const supabase = await createClient()
+  const { page = 1, limit = 20, type, status } = filters
+  const offset = (page - 1) * limit
+
+  let q = supabase
+    .from('coupons')
+    .select(`
+      *,
+      bettor:profiles!coupons_bettor_id_fkey (username),
+      redeemer:profiles!coupons_redeemed_by_fkey (username)
+    `, { count: 'exact' })
+    .eq('redeemed_by', userId)
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (type && type !== 'all') q = q.eq('type', type)
+  if (status && status !== 'all') q = q.eq('status', status)
+
+  const { data, count } = await q
+  return { coupons: data ?? [], total: count ?? 0 }
+}
