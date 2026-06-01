@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Menu, X, Search } from 'lucide-react'
+import { Menu, X, Search, Home, Trophy, BarChart2, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import {
@@ -59,8 +59,9 @@ export function PublicNavbar() {
   }
 
   const navLinks = [
-    { href: '/', label: 'Sports' },
-    { href: '/results', label: 'Results' },
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/', label: 'Sports', icon: Globe },
+    { href: '/results', label: 'Results', icon: BarChart2 },
   ]
 
   const JackpotButton = () => (
@@ -98,8 +99,9 @@ export function PublicNavbar() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-white/70 hover:text-gold transition-colors"
+              className="flex items-center gap-1.5 text-sm text-white/70 hover:text-gold transition-colors"
             >
+              <link.icon className="w-4 h-4" />
               {link.label}
             </Link>
           ))}
@@ -242,11 +244,10 @@ export function PublicNavbar() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      onClick={() =>
-                        setMobileOpen(false)
-                      }
-                      className="text-white/70 hover:text-gold py-2 border-b border-nile-blue/20"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 text-white/70 hover:text-gold py-2 border-b border-nile-blue/20"
                     >
+                      <link.icon className="w-4 h-4" />
                       {link.label}
                     </Link>
                   ))}
