@@ -19,6 +19,7 @@ import {
   ClipboardList,
   Search,
   Trophy,
+  ScanLine,
 } from 'lucide-react'
 import { SidebarLayout }
   from '@/components/shared/SidebarLayout'
@@ -56,6 +57,11 @@ const agentNav: NavItem[] = [
     href: '/agent-check-slip',
     label: 'Check Slip',
     icon: Search,
+  },
+  {
+    href: '/agent-redeem-slip',
+    label: 'Redeem Slip',
+    icon: ScanLine,
   },
   {
     href: '/agent-reports',

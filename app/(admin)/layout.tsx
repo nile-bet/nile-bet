@@ -18,6 +18,7 @@ import {
   Megaphone,
   ClipboardList,
   Settings,
+  ScanLine,
 } from 'lucide-react'
 import { SidebarLayout }
   from '@/components/shared/SidebarLayout'
@@ -54,6 +55,11 @@ const adminNav: NavItem[] = [
     href: '/coupons',
     label: 'Coupons',
     icon: Ticket,
+  },
+  {
+    href: '/redeem-slip',
+    label: 'Redeem Slip',
+    icon: ScanLine,
   },
   {
     href: '/reports',
