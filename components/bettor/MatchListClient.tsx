@@ -171,7 +171,7 @@ export function MatchListClient({
 
       <div className="flex gap-2 px-2 pb-2 items-start">
         {/* League Sidebar */}
-        <div className="hidden md:flex flex-col flex-shrink-0 rounded-xl overflow-hidden border border-nile-blue/20" style={{ position: "sticky", top: "60px", alignSelf: "flex-start" }}>
+        <div className="hidden md:flex flex-col flex-shrink-0 rounded-xl border border-nile-blue/20" style={{ position: "sticky", top: "60px", alignSelf: "flex-start" }}>
           <LeagueSidebar
             countries={countries}
             topLeagues={topLeagues}
