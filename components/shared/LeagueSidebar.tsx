@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { FlagImage } from '@/components/shared/FlagImage'
 import { ChevronRight, Search, Star, X, Globe } from 'lucide-react'
@@ -12,6 +12,7 @@ interface LeagueSidebarProps {
   selectedLeagueId: string | 'top' | null
   onLeagueSelect: (id: string | 'top') => void
   className?: string
+  openPanelRef?: React.MutableRefObject<(() => void) | null>
 }
 
 export function LeagueSidebar({
@@ -20,6 +21,7 @@ export function LeagueSidebar({
   selectedLeagueId,
   onLeagueSelect,
   className,
+  openPanelRef,
 }: LeagueSidebarProps) {
   const [search, setSearch] = useState('')
   const [showCountriesPanel, setShowCountriesPanel] = useState(false)
@@ -47,6 +49,11 @@ export function LeagueSidebar({
       }))
       .filter((c) => c.name.toLowerCase().includes(q) || c.leagues.length > 0)
   }, [sortedCountries, countrySearch])
+
+  // Expose openPanel to parent via ref
+  if (openPanelRef) {
+    openPanelRef.current = () => setShowCountriesPanel(true)
+  }
 
   const handleLeagueSelect = (id: string | 'top') => {
     onLeagueSelect(id)

@@ -60,9 +60,13 @@ export function PublicNavbar() {
 
   const navLinks = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/', label: 'Sports', icon: Globe },
     { href: '/results', label: 'Results', icon: BarChart2 },
   ]
+
+  const handleSportsClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    window.dispatchEvent(new CustomEvent('open-countries-panel'))
+  }
 
   const JackpotButton = () => (
     <Link href="/weekend-jackpot">
@@ -95,6 +99,13 @@ export function PublicNavbar() {
 
         {/* Center: Nav links (desktop) */}
         <div className="hidden md:flex items-center gap-6">
+          <button
+            onClick={handleSportsClick}
+            className="flex items-center gap-1.5 text-sm text-white/70 hover:text-gold transition-colors"
+          >
+            <Globe className="w-4 h-4" />
+            Sports
+          </button>
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -240,7 +251,14 @@ export function PublicNavbar() {
               <div className="flex flex-col gap-4 mt-6">
                 <Logo size="md" showTagline />
                 <div className="flex flex-col gap-2 mt-4">
-                  {navLinks.map((link) => (
+                  <button
+                    onClick={(e) => { handleSportsClick(e); setMobileOpen(false) }}
+                    className="flex items-center gap-2 text-base text-white/70 hover:text-gold py-2"
+                  >
+                    <Globe className="w-4 h-4" />
+                    Sports
+                  </button>
+                                    {navLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}

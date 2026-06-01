@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect,
-  useCallback } from 'react'
+  useCallback, useRef } from 'react'
 import { createClient }
   from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -40,6 +40,7 @@ interface MatchListClientProps {
   settings: PlatformSettings
   basePath?: string
   onPlaceBet?: () => void
+  onSportsNavReady?: (openFn: () => void) => void
 }
 
 export function MatchListClient({
@@ -48,6 +49,7 @@ export function MatchListClient({
   topLeagues,
   settings,
   basePath = '',
+  onSportsNavReady,
 }: MatchListClientProps) {
   const [matches, setMatches] =
     useState<MatchWithLeague[]>(initialMatches)
@@ -59,7 +61,17 @@ export function MatchListClient({
     useState<FilterType | null>(null)
   const [showPlaceBet, setShowPlaceBet] =
     useState(false)
+  const openCountriesPanelRef = useRef<(() => void) | null>(null)
   const supabase = createClient()
+
+  // Listen for Sports nav click from PublicNavbar
+  useEffect(() => {
+    const handler = () => {
+      if (openCountriesPanelRef.current) openCountriesPanelRef.current()
+    }
+    window.addEventListener('open-countries-panel', handler)
+    return () => window.removeEventListener('open-countries-panel', handler)
+  }, [])
 
   const loadMatches = useCallback(
     async (
@@ -166,6 +178,7 @@ export function MatchListClient({
             selectedLeagueId={selectedLeagueId}
             onLeagueSelect={handleLeagueSelect}
             className="flex flex-col"
+            openPanelRef={openCountriesPanelRef}
           />
         </div>
 
