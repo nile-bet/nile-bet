@@ -51,8 +51,11 @@ export function PublicNavbar() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    sessionStorage.clear()
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith('sb-') || k.includes('supabase')) localStorage.removeItem(k)
+    })
+    window.location.href = '/'
   }
 
   const navLinks = [

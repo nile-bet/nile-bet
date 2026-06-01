@@ -47,8 +47,13 @@ export function DashboardNavbar({
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    // Clear sessionStorage to prevent auto-login
+    sessionStorage.clear()
+    // Clear all supabase keys from localStorage
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith('sb-') || k.includes('supabase')) localStorage.removeItem(k)
+    })
+    window.location.href = '/login'
   }
 
   const dashboardLink =
