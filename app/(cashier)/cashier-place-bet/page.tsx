@@ -8,7 +8,7 @@ import { getActiveJackpot }
   from '@/lib/actions/jackpot'
 import { CashierPlaceBetClient }
   from '@/components/cashier/CashierPlaceBetClient'
-import { Footer } from '@/components/shared/Footer'
+import { CashierFooter } from '@/components/shared/CashierFooter'
 
 export default async function CashierPlaceBetPage() {
   const [
@@ -36,7 +36,7 @@ export default async function CashierPlaceBetPage() {
         settings={settings}
         jackpot={jackpot}
       />
-      <Footer />
+      <CashierFooter />
     </>
   )
 }
