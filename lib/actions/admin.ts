@@ -811,34 +811,30 @@ export async function getActivityLogs(
 export async function updatePlatformSettings(
   settings: Record<string, string>,
   updatedBy: string
-): Promise<{ success: boolean }> {
-  const supabase = await createClient()
-
-  const updates = Object.entries(settings)
-    .map(([key, value]) =>
-      supabase
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const adminClient = await createAdminClient()
+    const updates = Object.entries(settings).map(([key, value]) =>
+      adminClient
         .from('platform_settings')
-        .update({
-          value,
-          updated_by: updatedBy,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('key', key)
+        .upsert({ key, value, updated_by: updatedBy, updated_at: new Date().toISOString() }, { onConflict: 'key' })
     )
-
-  await Promise.all(updates)
-
-  await supabase
-    .from('activity_logs')
-    .insert({
+    const results = await Promise.all(updates)
+    const errors = results.filter((r: any) => r.error)
+    if (errors.length > 0) {
+      console.error('Settings update errors:', errors)
+      return { success: false, error: 'Some settings failed to update' }
+    }
+    await adminClient.from('activity_logs').insert({
       user_id: updatedBy,
       action: 'settings_updated',
-      details: {
-        keys: Object.keys(settings),
-      },
+      details: { keys: Object.keys(settings) },
     })
-
-  return { success: true }
+    return { success: true }
+  } catch (e: any) {
+    console.error('updatePlatformSettings error:', e)
+    return { success: false, error: e.message }
+  }
 }
 
 export async function getAdminProfile() {
