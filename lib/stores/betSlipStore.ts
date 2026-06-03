@@ -1,8 +1,16 @@
 import { create } from 'zustand'
+import { useAuthStore } from '@/lib/stores/authStore'
 import {
   calculateSlip,
   getValidationErrors,
 } from '@/lib/utils/calculateSlip'
+
+function getTaxRate(): number {
+  try {
+    const s = useAuthStore.getState().settings
+    return s?.winningTaxPercent ?? 15
+  } catch { return 15 }
+}
 import type {
   BetSlipSelection,
   SlipCalculation,
@@ -75,8 +83,7 @@ export const useBetSlipStore =
       )
       const newSelections = [...filtered, s]
       const calc = calculateSlip(
-        get().stake,
-        newSelections.map((sel) => sel.odd)
+        get().stake, newSelections.map((sel) => sel.odd), getTaxRate()
       )
       set({
         selections: newSelections,
@@ -98,8 +105,7 @@ export const useBetSlipStore =
             )
         )
       const calc = calculateSlip(
-        get().stake,
-        newSelections.map((s) => s.odd)
+        get().stake, newSelections.map((s) => s.odd), getTaxRate()
       )
       set({
         selections: newSelections,
@@ -109,8 +115,7 @@ export const useBetSlipStore =
 
     setStake: (amount) => {
       const calc = calculateSlip(
-        amount,
-        get().selections.map((s) => s.odd)
+        amount, get().selections.map((s) => s.odd), getTaxRate()
       )
       set({ stake: amount, calculation: calc })
     },
@@ -148,8 +153,7 @@ export const useBetSlipStore =
 
     calculateSlipTotals: () => {
       const calc = calculateSlip(
-        get().stake,
-        get().selections.map((s) => s.odd)
+        get().stake, get().selections.map((s) => s.odd), getTaxRate()
       )
       set({ calculation: calc })
     },

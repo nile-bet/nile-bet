@@ -1,37 +1,26 @@
-import type { SlipCalculation }
-  from '@/types/database.types'
+import type { SlipCalculation } from '@/types/database.types'
 
 export function calculateSlip(
   stake: number,
-  odds: number[]
+  odds: number[],
+  winningTaxPercent: number = 15
 ): SlipCalculation {
   if (!odds.length || stake <= 0) {
-    return {
-      stake,
-      totalOdds: 0,
-      maxPayout: 0,
-      winningTax: 0,
-      netPayout: 0,
-    }
+    return { stake, totalOdds: 0, maxPayout: 0, winningTax: 0, netPayout: 0 }
   }
 
-  const totalOdds = odds.reduce(
-    (acc, odd) => acc * odd, 1
-  )
+  const totalOdds = odds.reduce((acc, odd) => acc * odd, 1)
   const maxPayout = stake * totalOdds
-  const winningTax = maxPayout * 0.15
+  const taxRate = winningTaxPercent / 100
+  const winningTax = maxPayout * taxRate
   const netPayout = maxPayout - winningTax
 
   return {
     stake,
-    totalOdds:
-      parseFloat(totalOdds.toFixed(2)),
-    maxPayout:
-      parseFloat(maxPayout.toFixed(2)),
-    winningTax:
-      parseFloat(winningTax.toFixed(2)),
-    netPayout:
-      parseFloat(netPayout.toFixed(2)),
+    totalOdds: parseFloat(totalOdds.toFixed(2)),
+    maxPayout: parseFloat(maxPayout.toFixed(2)),
+    winningTax: parseFloat(winningTax.toFixed(2)),
+    netPayout: parseFloat(netPayout.toFixed(2)),
   }
 }
 
@@ -45,56 +34,34 @@ export function getValidationErrors(
     maxOddPerSelection: number
     maxTotalOdds: number
     maxPayout: number
+    winningTaxPercent?: number
   }
 ): string[] {
   const errors: string[] = []
+  const taxRate = (settings.winningTaxPercent ?? 15) / 100
 
-  if (selections.length <
-    settings.minSelections) {
-    errors.push(
-      `Minimum ${settings.minSelections} selections required (${selections.length} selected)`
-    )
+  if (selections.length < settings.minSelections) {
+    errors.push(`Minimum ${settings.minSelections} selections required (${selections.length} selected)`)
   }
-
   if (stake < settings.minStake) {
-    errors.push(
-      `Minimum stake is ETB ${settings.minStake}`
-    )
+    errors.push(`Minimum stake is ETB ${settings.minStake}`)
   }
-
   if (stake > settings.maxStakePerSlip) {
-    errors.push(
-      `Maximum stake is ETB ${settings.maxStakePerSlip.toLocaleString()}`
-    )
+    errors.push(`Maximum stake is ETB ${settings.maxStakePerSlip.toLocaleString()}`)
   }
-
-  const highOdd = selections.find(
-    s => s.odd > settings.maxOddPerSelection
-  )
+  const highOdd = selections.find(s => s.odd > settings.maxOddPerSelection)
   if (highOdd) {
-    errors.push(
-      `Maximum odd per selection is ${settings.maxOddPerSelection}`
-    )
+    errors.push(`Maximum odd per selection is ${settings.maxOddPerSelection}`)
   }
-
   if (selections.length > 0 && stake > 0) {
-    const totalOdds = selections.reduce(
-      (acc, s) => acc * s.odd, 1
-    )
+    const totalOdds = selections.reduce((acc, s) => acc * s.odd, 1)
     if (totalOdds > settings.maxTotalOdds) {
-      errors.push(
-        `Total odds exceed maximum (${settings.maxTotalOdds.toLocaleString()})`
-      )
+      errors.push(`Total odds exceed maximum (${settings.maxTotalOdds.toLocaleString()})`)
     }
-
-    const netPayout =
-      stake * totalOdds * 0.85
+    const netPayout = stake * totalOdds * (1 - taxRate)
     if (netPayout > settings.maxPayout) {
-      errors.push(
-        `Net payout exceeds maximum (ETB ${settings.maxPayout.toLocaleString()})`
-      )
+      errors.push(`Net payout exceeds maximum (ETB ${settings.maxPayout.toLocaleString()})`)
     }
   }
-
   return errors
 }

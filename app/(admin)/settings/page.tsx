@@ -1,69 +1,87 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient }
-  from '@/lib/supabase/client'
-import { updatePlatformSettings }
-  from '@/lib/actions/admin'
-import { useAuthStore }
-  from '@/lib/stores/authStore'
+import { createClient } from '@/lib/supabase/client'
+import { updatePlatformSettings } from '@/lib/actions/admin'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
+function parseSettingsMap(sm: Record<string, string>) {
+  return {
+    minStake: parseFloat(sm.min_stake ?? '10'),
+    maxStakePerSlip: parseFloat(sm.max_stake_per_slip ?? '50000'),
+    maxStakePerMarket: parseFloat(sm.max_stake_per_market ?? '10000'),
+    maxOddPerSelection: parseFloat(sm.max_odd_per_selection ?? '50'),
+    maxTotalOdds: parseFloat(sm.max_total_odds ?? '5000'),
+    minSelections: parseInt(sm.min_selections ?? '4'),
+    winningTaxPercent: parseFloat(sm.winning_tax_percent ?? '15'),
+    maxPayout: parseFloat(sm.max_payout ?? '500000'),
+    maxInstantRedemption: parseFloat(sm.max_instant_redemption ?? '150000'),
+    cashierProfitPercent: parseFloat(sm.cashier_profit_percent ?? '40'),
+    agentProfitPercent: parseFloat(sm.agent_profit_percent ?? '60'),
+    topupExpiryHours: parseInt(sm.topup_expiry_hours ?? '6'),
+    withdrawalExpiryHours: parseInt(sm.withdrawal_expiry_hours ?? '6'),
+    loginAttemptLimit: parseInt(sm.login_attempt_limit ?? '5'),
+    sessionTimeoutHours: parseInt(sm.session_timeout_hours ?? '8'),
+    cancellationWindowMins: parseInt(sm.cancellation_window_mins ?? '5'),
+    insuranceMinSelections: parseInt(sm.insurance_min_selections ?? '10'),
+    insurance1LossPct: parseFloat(sm.insurance_1_loss_pct ?? '2'),
+    insurance2LossPct: parseFloat(sm.insurance_2_loss_pct ?? '1'),
+    insurance3LossRefund: sm.insurance_3_loss_refund === 'true',
+    welcomeBonusEnabled: sm.welcome_bonus_enabled === 'true',
+    welcomeBonusMinTopup: parseFloat(sm.welcome_bonus_min_topup ?? '500'),
+    welcomeBonusAmount: parseFloat(sm.welcome_bonus_amount ?? '50'),
+    jackpotFixedStake: parseFloat(sm.jackpot_fixed_stake ?? '50'),
+    jackpotWinAllReward: parseFloat(sm.jackpot_win_all_reward ?? '250000'),
+    jackpotNearWinReward: parseFloat(sm.jackpot_near_win_reward ?? '25000'),
+  }
+}
+
 export default function SettingsPage() {
-  const { user } = useAuthStore()
-  const [settings, setSettings] =
-    useState<Record<string, string>>({})
-  const [loading, setLoading] =
-    useState(true)
-  const [saving, setSaving] =
-    useState<string | null>(null)
+  const { user, setSettings: setStoreSettings } = useAuthStore()
+  const [settings, setSettings] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState<string | null>(null)
+
+  const loadSettings = async () => {
+    const supabase = createClient()
+    const { data } = await supabase.from('platform_settings').select('key, value')
+    if (data) {
+      const map: Record<string, string> = {}
+      data.forEach((s: any) => { map[s.key] = s.value })
+      setSettings(map)
+      return map
+    }
+    return {}
+  }
 
   useEffect(() => {
-    const supabase = createClient()
-    supabase
-      .from('platform_settings')
-      .select('key, value')
-      .then(({ data }) => {
-        if (data) {
-          const map: Record<string, string> = {}
-          data.forEach((s: any) => {
-            map[s.key] = s.value
-          })
-          setSettings(map)
-        }
-        setLoading(false)
-      })
+    loadSettings().then(() => setLoading(false))
   }, [])
 
-  const get = (k: string) =>
-    settings[k] ?? ''
+  const get = (k: string) => settings[k] ?? ''
   const set = (k: string, v: string) =>
-    setSettings((prev) => ({
-      ...prev,
-      [k]: v,
-    }))
+    setSettings((prev) => ({ ...prev, [k]: v }))
 
-  const saveSection = async (
-    sectionKey: string,
-    keys: string[]
-  ) => {
+  const saveSection = async (sectionKey: string, keys: string[]) => {
     if (!user) return
     setSaving(sectionKey)
-    const subset = Object.fromEntries(
-      keys.map((k) => [k, settings[k] ?? ''])
-    )
-    const result =
-      await updatePlatformSettings(
-        subset,
-        user.id
-      )
+    const subset = Object.fromEntries(keys.map((k) => [k, settings[k] ?? '']))
+    const result = await updatePlatformSettings(subset, user.id)
     if (result.success) {
-      toast.success(
-        'Settings saved successfully'
-      )
+      toast.success('Settings saved successfully')
+      // Re-fetch ALL settings and update the store immediately
+      const supabase = createClient()
+      const { data } = await supabase.from('platform_settings').select('key, value')
+      if (data) {
+        const fullMap: Record<string, string> = {}
+        data.forEach((s: any) => { fullMap[s.key] = s.value })
+        setSettings(fullMap)
+        setStoreSettings(parseSettingsMap(fullMap))
+      }
     } else {
-      toast.error('Failed to save settings')
+      toast.error(result.error ?? 'Failed to save settings')
     }
     setSaving(null)
   }

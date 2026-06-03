@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Ticket, AlertTriangle } from 'lucide-react'
 import { useBetSlipStore } from '@/lib/stores/betSlipStore'
 import { useAuthStore }
@@ -22,11 +22,62 @@ interface BetSlipSidebarProps {
 }
 
 export function BetSlipSidebar({
-  settings,
+  settings: settingsProp,
   role,
   onPlaceBet,
   onTopup,
 }: BetSlipSidebarProps) {
+  const { settings: liveSettings, setSettings } = useAuthStore()
+  const [freshSettings, setFreshSettings] = useState<any>(null)
+  const settings = freshSettings ?? liveSettings ?? settingsProp
+
+  // Fetch fresh settings from DB on mount and on settings-updated event
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch('/api/settings')
+        const json = await res.json()
+        if (json.success && json.settings) {
+          const sm: Record<string, string> = json.settings
+          if (true) {
+          const parsed = {
+            minStake: parseFloat(sm.min_stake ?? '10'),
+            maxStakePerSlip: parseFloat(sm.max_stake_per_slip ?? '50000'),
+            maxStakePerMarket: parseFloat(sm.max_stake_per_market ?? '10000'),
+            maxOddPerSelection: parseFloat(sm.max_odd_per_selection ?? '50'),
+            maxTotalOdds: parseFloat(sm.max_total_odds ?? '5000'),
+            minSelections: parseInt(sm.min_selections ?? '4'),
+            winningTaxPercent: parseFloat(sm.winning_tax_percent ?? '15'),
+            maxPayout: parseFloat(sm.max_payout ?? '500000'),
+            maxInstantRedemption: parseFloat(sm.max_instant_redemption ?? '150000'),
+            cashierProfitPercent: parseFloat(sm.cashier_profit_percent ?? '40'),
+            agentProfitPercent: parseFloat(sm.agent_profit_percent ?? '60'),
+            topupExpiryHours: parseInt(sm.topup_expiry_hours ?? '6'),
+            withdrawalExpiryHours: parseInt(sm.withdrawal_expiry_hours ?? '6'),
+            loginAttemptLimit: parseInt(sm.login_attempt_limit ?? '5'),
+            sessionTimeoutHours: parseInt(sm.session_timeout_hours ?? '8'),
+            cancellationWindowMins: parseInt(sm.cancellation_window_mins ?? '5'),
+            insuranceMinSelections: parseInt(sm.insurance_min_selections ?? '10'),
+            insurance1LossPct: parseFloat(sm.insurance_1_loss_pct ?? '2'),
+            insurance2LossPct: parseFloat(sm.insurance_2_loss_pct ?? '1'),
+            insurance3LossRefund: sm.insurance_3_loss_refund === 'true',
+            welcomeBonusEnabled: sm.welcome_bonus_enabled === 'true',
+            welcomeBonusMinTopup: parseFloat(sm.welcome_bonus_min_topup ?? '500'),
+            welcomeBonusAmount: parseFloat(sm.welcome_bonus_amount ?? '50'),
+            jackpotFixedStake: parseFloat(sm.jackpot_fixed_stake ?? '50'),
+            jackpotWinAllReward: parseFloat(sm.jackpot_win_all_reward ?? '250000'),
+            jackpotNearWinReward: parseFloat(sm.jackpot_near_win_reward ?? '25000'),
+          }
+          setFreshSettings(parsed)
+          setSettings(parsed)
+          }
+        }
+      } catch (e) { console.error('Failed to fetch settings:', e) }
+    }
+    fetchSettings()
+    window.addEventListener('platform-settings-updated', fetchSettings)
+    return () => window.removeEventListener('platform-settings-updated', fetchSettings)
+  }, [])
   const [copySlipId, setCopySlipId] =
     useState('')
   const [slipCode, setSlipCode] = useState('')
@@ -367,7 +418,8 @@ export function BetSlipSidebar({
                     setSlipCode(result.slipCode)
                     const totalOdds = selections.reduce((a, s) => a * s.odd, 1)
                     const maxPayout = stake * totalOdds
-                    const winningTax = maxPayout * 0.15
+                    const taxRate = (settings.winningTaxPercent ?? 15) / 100
+                    const winningTax = maxPayout * taxRate
                     const netPayout = maxPayout - winningTax
                     setGeneratedSlipData({
                       slipCode: result.slipCode,
