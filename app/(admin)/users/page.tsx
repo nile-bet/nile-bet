@@ -9,6 +9,7 @@ import {
   getHierarchyTree,
   createUser,
   deleteUser,
+  changeUserPassword,
 } from '@/lib/actions/admin'
 import { DataTable }
   from '@/components/shared/DataTable'
@@ -29,6 +30,7 @@ import {
   ChevronDown, Eye, EyeOff,
   RefreshCw,
   Trash2,
+  KeyRound,
 } from 'lucide-react'
 import {
   Dialog,
@@ -171,6 +173,10 @@ export default function UsersPage() {
     useState(false)
   const [confirmData, setConfirmData] =
     useState<any>(null)
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [passwordUser, setPasswordUser] = useState<any>(null)
+  const [changePassword, setChangePassword] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
   const [showAddCredits, setShowAddCredits] =
     useState(false)
   const [selectedUser, setSelectedUser] =
@@ -262,6 +268,25 @@ export default function UsersPage() {
     setShowConfirm(false)
   }
 
+  const handleChangePassword = async () => {
+    if (!user || !passwordUser || !newPassword.trim()) return
+    if (changePassword.length < 6) {
+      toast.error('Password must be at least 6 characters')
+      return
+    }
+    setChangingPassword(true)
+    const result = await changeUserPassword(passwordUser.id, changePassword, user.id)
+    if (result.success) {
+      toast.success(`Password changed for @${passwordUser.username}`)
+      setShowPasswordModal(false)
+      setChangePassword('')
+      setPasswordUser(null)
+    } else {
+      toast.error(result.error ?? 'Failed to change password')
+    }
+    setChangingPassword(false)
+  }
+
   const handleDeleteUser = async (targetUser: any) => {
     if (!user) return
     const result = await deleteUser(targetUser.id, user.id)
@@ -313,7 +338,7 @@ export default function UsersPage() {
       )
       setShowCreate(false)
       setNewUsername('')
-      setNewPassword('')
+      setChangePassword('')
       setNewBalance('')
       setNewAgentId('')
       loadUsers()
@@ -429,6 +454,17 @@ export default function UsersPage() {
             className="text-xs border border-nile-danger/30 text-nile-danger px-2 py-1 rounded hover:bg-nile-danger/10"
           >
             🚪
+          </button>
+          <button
+            onClick={() => {
+              setPasswordUser(row)
+              setChangePassword('')
+              setShowPasswordModal(true)
+            }}
+            className="text-xs border border-nile-blue/40 text-nile-blue-light px-2 py-1 rounded hover:bg-nile-blue/10"
+            title="Change password"
+          >
+            <KeyRound className="w-3 h-3" />
           </button>
           <button
             onClick={() => {

@@ -931,3 +931,25 @@ export async function sendDirectMessage(data: {
 
   return { success: true, sent: users.length, notFound }
 }
+
+export async function changeUserPassword(
+  userId: string,
+  newPassword: string,
+  changedBy: string
+): Promise<{ success: boolean; error?: string }> {
+  const adminClient = await createAdminClient()
+
+  const { error } = await adminClient.auth.admin.updateUserById(userId, {
+    password: newPassword,
+  })
+
+  if (error) return { success: false, error: error.message }
+
+  await adminClient.from('activity_logs').insert({
+    user_id: changedBy,
+    action: 'password_changed',
+    details: { target_user_id: userId },
+  })
+
+  return { success: true }
+}
