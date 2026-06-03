@@ -269,7 +269,7 @@ export default function UsersPage() {
   }
 
   const handleChangePassword = async () => {
-    if (!user || !passwordUser || !newPassword.trim()) return
+    if (!user || !passwordUser || !changePassword.trim()) return
     if (changePassword.length < 6) {
       toast.error('Password must be at least 6 characters')
       return
@@ -605,6 +605,39 @@ export default function UsersPage() {
         </div>
       )}
 
+      {/* Change Password Modal */}
+      {showPasswordModal && passwordUser && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-dark border border-nile-blue/40 rounded-2xl p-6 w-full max-w-sm">
+            <h3 className="text-white font-bold text-lg mb-1">Change Password</h3>
+            <p className="text-white/50 text-sm mb-4">@{passwordUser.username} ({passwordUser.role})</p>
+            <input
+              type="password"
+              value={changePassword}
+              onChange={(e) => setChangePassword(e.target.value)}
+              placeholder="Enter new password (min 6 chars)"
+              className="w-full bg-charcoal border border-gold/20 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-gold/50 mb-4"
+              onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+              autoFocus
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowPasswordModal(false); setChangePassword('') }}
+                className="flex-1 border border-white/20 text-white/60 py-2.5 rounded-lg text-sm hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleChangePassword}
+                disabled={changingPassword || changePassword.length < 6}
+                className="flex-1 bg-gold text-charcoal py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 hover:bg-gold-light"
+              >
+                {changingPassword ? 'Changing...' : 'Change Password'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Confirm modal */}
       <ConfirmModal
         isOpen={showConfirm}
