@@ -93,23 +93,24 @@ export function OddButton({
         onClick={handleClick}
         disabled={isUnavailable}
         className={cn(
-          'w-full flex items-center justify-between px-4 py-3 transition-all duration-150 border-b border-white/5 last:border-0',
+          'w-full flex items-center justify-between px-4 py-2.5 transition-all duration-150',
           isSelected
             ? 'bg-gold cursor-pointer'
             : isUnavailable
-            ? 'opacity-30 cursor-not-allowed bg-transparent'
-            : 'bg-nile-blue/20 hover:bg-nile-blue/40 cursor-pointer'
+            ? 'opacity-30 cursor-not-allowed'
+            : 'hover:bg-white/5 cursor-pointer'
         )}
+        style={{ backgroundColor: isSelected ? undefined : '#131929' }}
       >
         <span className={cn(
-          'text-sm font-medium flex-1 text-left',
-          isSelected ? 'text-charcoal font-bold' : 'text-white/80'
+          'text-[13px] font-medium flex-1 text-left',
+          isSelected ? 'text-charcoal font-bold' : 'text-white/75'
         )}>
           {label}
         </span>
         <span className={cn(
-          'font-mono text-sm font-bold',
-          isSelected ? 'text-charcoal' : isUnavailable ? 'text-white/20' : 'text-gold'
+          'font-mono text-[13px] font-bold ml-4',
+          isSelected ? 'text-charcoal' : isUnavailable ? 'text-white/20' : 'text-nile-success'
         )}>
           {odd ? odd.toFixed(2) : '—'}
         </span>
