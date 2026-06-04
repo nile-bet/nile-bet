@@ -180,9 +180,10 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
 
       <div className="flex-1 overflow-y-auto p-4">
         {activeMarkets.length === 0 ? (
-          <div className="flex items-center gap-2 text-white/30 text-sm py-8">
-            <AlertTriangle className="w-4 h-4" />
-            <span>No markets available for {activeCategory}</span>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <span className="text-4xl mb-3">📋</span>
+            <p className="text-white/30 text-sm font-medium">No lists here</p>
+            <p className="text-white/20 text-xs mt-1">{activeCategory} markets are not available for this match</p>
           </div>
         ) : (
           <div>
