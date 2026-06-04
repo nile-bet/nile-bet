@@ -187,18 +187,13 @@ export function MatchListClient({
           {/* Column headers */}
           <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 hidden md:flex items-stretch">
             <div className="flex-1">
-              {/* Top group labels */}
-              <div className="grid text-[13px] text-white font-extrabold uppercase tracking-widest" style={{ gridTemplateColumns: '3fr 1px 3fr 1px 2fr' }}>
-                <div className="flex items-center justify-center py-3 bg-nile-blue/40">Match Result</div>
-                <div className="bg-gold/30" />
-                <div className="flex items-center justify-center py-3 bg-nile-blue/30">Double Chance</div>
-                <div className="bg-gold/30" />
-                <div className="flex items-center justify-center py-3 bg-nile-blue/20">Both Score</div>
+              <div className="grid text-[13px] font-extrabold uppercase tracking-widest" style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}>
+                <div className="flex items-center justify-center py-3 bg-indigo-900/60 text-indigo-200 col-span-5">Match Result</div>
+                <div className="bg-gold/20" />
+                <div className="flex items-center justify-center py-3 bg-emerald-900/50 text-emerald-300 col-span-5">Double Chance</div>
+                <div className="bg-gold/20" />
+                <div className="flex items-center justify-center py-3 bg-amber-900/50 text-amber-300 col-span-3">Both Score</div>
               </div>
-
-            </div>
-            <div className="px-3 text-[11px] text-white/50 font-bold uppercase tracking-widest flex-shrink-0 flex items-center border-l border-gold/10">
-              More
             </div>
           </div>
 
