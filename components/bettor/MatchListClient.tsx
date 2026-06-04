@@ -185,7 +185,7 @@ export function MatchListClient({
         {/* Match List */}
         <div className="flex-1 overflow-y-auto overscroll-auto rounded-xl border border-nile-blue/20" style={{ height: "calc(100vh - 120px)" }}>
           {/* Column headers */}
-          <div className="sticky top-0 z-10 bg-slate-dark border-b border-gold/10 hidden md:flex items-stretch">
+          <div className="sticky top-0 z-10 bg-[#1e1e1e] border-b border-[#333333]/50 hidden md:flex items-stretch">
             <div className="flex-1">
               <div className="grid text-[13px] font-extrabold uppercase tracking-widest" style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}>
                 <div className="flex items-center justify-center py-3 bg-indigo-900/60 text-indigo-200 col-span-5">Match Result</div>
@@ -238,7 +238,7 @@ export function MatchListClient({
                   const first = groupMatches[0] as any
                   return (
                     <div key={key}>
-                      <div className="flex items-center justify-between px-4 py-1.5 bg-slate-dark/80 border-b border-gold/10">
+                      <div className="flex items-center justify-between px-4 py-1.5 bg-[#1e1e1e]/90 border-b border-[#333333]/40">
                         <span className="text-[11px] text-gold/60">
                           <FlagImage emoji={first.flag_emoji ?? '🏳️'} />{' '}
                           {first.country_name} -{' '}

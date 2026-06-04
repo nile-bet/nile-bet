@@ -95,22 +95,30 @@ export function OddButton({
         className={cn(
           'w-full flex items-center justify-between px-4 py-2.5 transition-all duration-150',
           isSelected
-            ? 'bg-gold cursor-pointer'
+            ? 'cursor-pointer'
             : isUnavailable
             ? 'opacity-30 cursor-not-allowed'
-            : 'hover:bg-white/5 cursor-pointer'
+            : 'cursor-pointer'
         )}
-        style={{ backgroundColor: isSelected ? undefined : '#131929' }}
+        style={{
+          backgroundColor: isSelected ? '#c9a227' : '#1e1e1e',
+        }}
+        onMouseEnter={e => { if (!isSelected && !isUnavailable) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#2a2a2a' }}
+        onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = isSelected ? '#c9a227' : '#1e1e1e' }}
       >
         <span className={cn(
           'text-[13px] font-medium flex-1 text-left',
-          isSelected ? 'text-charcoal font-bold' : 'text-white/75'
+          isSelected ? 'text-charcoal font-bold' : 'text-white/80'
         )}>
           {label}
         </span>
         <span className={cn(
-          'font-mono text-[13px] font-bold ml-4',
-          isSelected ? 'text-charcoal' : isUnavailable ? 'text-white/20' : 'text-nile-success'
+          'font-mono text-[13px] font-bold ml-4 px-2 py-0.5 rounded',
+          isSelected
+            ? 'text-charcoal bg-transparent'
+            : isUnavailable
+            ? 'text-white/20'
+            : 'text-[#4ade80] bg-[#1a2e1a]'
         )}>
           {odd ? odd.toFixed(2) : '—'}
         </span>
@@ -129,7 +137,7 @@ export function OddButton({
             ? 'bg-gold border-gold'
             : isUnavailable
             ? 'bg-transparent border-transparent cursor-not-allowed'
-            : 'bg-slate-dark border-nile-blue/40 hover:border-gold/40 hover:bg-gold/10 cursor-pointer'
+            : 'bg-[#1e1e1e] border-nile-blue/40 hover:border-gold/40 hover:bg-gold/10 cursor-pointer'
         )}
       >
         <span className={cn(
@@ -158,7 +166,7 @@ export function OddButton({
           ? 'bg-gold border-gold'
           : isUnavailable
           ? 'bg-transparent border-transparent cursor-not-allowed'
-          : 'bg-slate-dark border-nile-blue/40 hover:border-gold/40 hover:bg-gold/10 cursor-pointer'
+          : 'bg-[#1e1e1e] border-nile-blue/40 hover:border-gold/40 hover:bg-gold/10 cursor-pointer'
       )}
     >
       <span className={cn(

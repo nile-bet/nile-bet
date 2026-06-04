@@ -34,7 +34,7 @@ function MarketBlock({ mm, match, commonProps, activeCategory }: any) {
       const allPlayers = [...homePlayers, ...awayPlayers]
       if (allPlayers.length === 0) {
         return (
-          <div className="flex items-center gap-2 text-white/25 text-xs px-4 py-3 bg-charcoal/40">
+          <div className="flex items-center gap-2 text-white/25 text-xs px-4 py-3 bg-[#181818]/40">
             <AlertTriangle className="w-3 h-3" />
             No players added for this market
           </div>
@@ -65,7 +65,7 @@ function MarketBlock({ mm, match, commonProps, activeCategory }: any) {
 
     if (selections.length === 0) {
       return (
-        <div className="flex items-center gap-2 text-white/25 text-xs px-4 py-3 bg-charcoal/40">
+        <div className="flex items-center gap-2 text-white/25 text-xs px-4 py-3 bg-[#181818]/40">
           <AlertTriangle className="w-3 h-3" />
           Unavailable for this match
         </div>
@@ -114,7 +114,7 @@ function MarketBlock({ mm, match, commonProps, activeCategory }: any) {
       {/* Market title */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="w-full flex items-center justify-between px-4 py-2.5 bg-[#1e2d4a] hover:bg-[#223355] transition-colors"
+        className="w-full flex items-center justify-between px-4 py-2.5 bg-[#1e1e1e] hover:bg-[#222222] transition-colors"
       >
         <span className="text-[11px] font-bold text-white/90 uppercase tracking-widest">{marketName}</span>
         {collapsed
@@ -161,9 +161,9 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
   const activeMarkets = byCategory.get(activeCategory) ?? []
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: '#0d1120' }}>
+    <div className="flex flex-col h-full" style={{ backgroundColor: '#181818' }}>
       {/* Match header */}
-      <div className="sticky top-0 z-20 border-b border-white/10 px-4 py-3" style={{ backgroundColor: '#0d1120' }}>
+      <div className="sticky top-0 z-20 border-b border-white/10 px-4 py-3" style={{ backgroundColor: '#181818' }}>
         <button onClick={() => router.back()} className="flex items-center gap-1 text-white/50 hover:text-white text-xs mb-2">
           <ArrowLeft className="w-3.5 h-3.5" />
           Back
@@ -181,8 +181,8 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
 
       {/* Category tabs */}
       <div
-        className="sticky top-[80px] z-10 border-b border-white/10 overflow-x-auto scrollbar-hide"
-        style={{ backgroundColor: '#0d1120' }}
+        className="sticky top-[80px] z-10 border-b border-[#2a1a4a]/60 overflow-x-auto scrollbar-hide"
+        style={{ backgroundColor: '#181818' }}
       >
         <div className="flex min-w-max">
           {categories.map((cat) => {
@@ -194,13 +194,13 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
                 className={cn(
                   'px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-colors',
                   activeCategory === cat
-                    ? 'text-gold border-gold'
+                    ? 'text-gold border-gold bg-[#1e1040]'
                     : hasMarkets
-                    ? 'text-white/60 border-transparent hover:text-white'
-                    : 'text-white/25 border-transparent hover:text-white/50'
+                    ? 'text-white/50 border-transparent hover:text-white hover:border-gold/30'
+                    : 'text-white/20 border-transparent hover:text-white/40'
                 )}
               >
-                {cat}
+                {cat}{!hasMarkets ? ' (0)' : ` (${byCategory.get(cat)?.length ?? 0})`}
               </button>
             )
           })}

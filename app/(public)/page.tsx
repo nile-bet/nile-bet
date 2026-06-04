@@ -22,7 +22,7 @@ export default async function HomePage() {
   ])
 
   return (
-    <div className="flex flex-col min-h-screen bg-charcoal">
+    <div className="flex flex-col min-h-screen bg-[#181818]">
       <div className="sticky top-0 z-50">
         <PublicNavbar />
       </div>

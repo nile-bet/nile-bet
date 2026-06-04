@@ -78,7 +78,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
     <div
       className={cn(
         'border-b border-nile-blue/20 transition-colors',
-        isEven ? 'bg-charcoal' : 'bg-charcoal/60',
+        isEven ? 'bg-[#1e1e1e]' : 'bg-[#1a1a1a]',
         match.is_featured && 'border border-gold/30 bg-gold/5'
       )}
     >
@@ -130,10 +130,10 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
 
       {/* Expanded markets panel */}
       {expanded && (
-        <div className="border-t border-nile-blue/30 bg-slate-dark">
+        <div className="border-t border-nile-blue/30 bg-[#1e1e1e]">
 
           {/* ── Category tab bar — ALL 15 always shown ── */}
-          <div className="overflow-x-auto scrollbar-hide border-b border-nile-blue/20">
+          <div className="overflow-x-auto scrollbar-hide border-b border-[#2a1a4a]/60" style={{ backgroundColor: '#150d2e' }}>
             <div className="flex min-w-max">
               {CATEGORY_ORDER.map((cat) => {
                 const count = marketsByCategory[cat]?.length ?? 0
@@ -142,19 +142,18 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                   <button
                     key={cat}
                     onClick={() => handleCategoryChange(cat)}
+                    style={{ backgroundColor: activeCategory === cat ? '#1e1040' : 'transparent' }}
                     className={cn(
                       'text-[9px] px-3 py-2 font-bold tracking-widest uppercase whitespace-nowrap transition-colors flex-shrink-0 border-b-2',
                       activeCategory === cat
                         ? 'text-gold border-gold'
                         : isEmpty
                         ? 'text-white/20 border-transparent hover:text-white/40'
-                        : 'text-white/40 border-transparent hover:text-white/70 hover:border-gold/30'
+                        : 'text-white/50 border-transparent hover:text-white hover:border-gold/30'
                     )}
                   >
                     {cat}
-                    <span className="ml-1 opacity-60">
-                      ({count})
-                    </span>
+                    <span className="ml-1 opacity-50">({count})</span>
                   </button>
                 )
               })}
