@@ -101,10 +101,10 @@ export function OddButton({
             : 'cursor-pointer'
         )}
         style={{
-          backgroundColor: isSelected ? '#c9a227' : '#1e1e1e',
+          backgroundColor: isSelected ? '#c9a227' : '#120a28',
         }}
-        onMouseEnter={e => { if (!isSelected && !isUnavailable) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#2a2a2a' }}
-        onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = isSelected ? '#c9a227' : '#1e1e1e' }}
+        onMouseEnter={e => { if (!isSelected && !isUnavailable) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#1e1040' }}
+        onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = isSelected ? '#c9a227' : '#120a28' }}
       >
         <span className={cn(
           'text-[13px] font-medium flex-1 text-left',

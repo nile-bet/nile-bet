@@ -130,7 +130,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
 
       {/* Expanded markets panel */}
       {expanded && (
-        <div className="border-t border-nile-blue/30 bg-[#1e1e1e]">
+        <div className="border-t border-[#2a1a4a]/40" style={{ backgroundColor: "#120a28" }}>
 
           {/* ── Category tab bar — ALL 15 always shown ── */}
           <div className="overflow-x-auto scrollbar-hide border-b border-[#2a1a4a]/60" style={{ backgroundColor: '#150d2e' }}>
