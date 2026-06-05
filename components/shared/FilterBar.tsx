@@ -85,7 +85,7 @@ export function FilterBar({
     >
       <div className="px-4 py-2.5 flex items-center gap-2 flex-wrap">
         {/* Date label */}
-        <span className="text-[10px] text-gold/60 tracking-widest uppercase font-medium mr-1">
+        <span className="text-[11px] text-gold font-extrabold tracking-widest uppercase mr-1">
           Date
         </span>
 
@@ -100,7 +100,7 @@ export function FilterBar({
               'text-xs px-3 py-1.5 rounded-full border transition-all duration-150',
               active === f.key
                 ? 'bg-gold border-gold text-charcoal font-semibold'
-                : 'border-gold/20 text-white/60 hover:border-gold/40 hover:text-white'
+                : 'border-gold/30 text-white font-semibold hover:border-gold hover:text-white'
             )}
           >
             {f.label}
@@ -111,7 +111,7 @@ export function FilterBar({
         <div className="h-5 w-px bg-gold/20 mx-1" />
 
         {/* Time label */}
-        <span className="text-[10px] text-gold/60 tracking-widest uppercase font-medium mr-1">
+        <span className="text-[11px] text-gold font-extrabold tracking-widest uppercase mr-1">
           Kick-off
         </span>
 
@@ -130,7 +130,7 @@ export function FilterBar({
                   : 'bg-gold border-gold text-charcoal font-semibold'
                 : f.urgent
                 ? 'border-nile-orange/30 text-nile-orange/70 hover:border-nile-orange/60 hover:text-nile-orange'
-                : 'border-gold/20 text-white/60 hover:border-gold/40 hover:text-white'
+                : 'border-gold/30 text-white font-semibold hover:border-gold hover:text-white'
             )}
           >
             {f.label}
