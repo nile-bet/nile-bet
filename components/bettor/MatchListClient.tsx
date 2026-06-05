@@ -163,15 +163,15 @@ export function MatchListClient({
   )
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full">
       <FilterBar
         onFilterChange={handleFilterChange}
         matchCount={matches.length}
       />
 
-      <div className="flex gap-2 px-2 pb-2 items-start">
+      <div className="flex items-start">
         {/* League Sidebar */}
-        <div className="hidden md:flex flex-col flex-shrink-0 rounded-xl border border-nile-blue/20" style={{ position: "sticky", top: "60px", alignSelf: "flex-start" }}>
+        <div className="hidden md:flex flex-col flex-shrink-0 border-r border-nile-blue/20" style={{ position: "sticky", top: "60px", alignSelf: "flex-start" }}>
           <LeagueSidebar
             countries={countries}
             topLeagues={topLeagues}
@@ -183,7 +183,7 @@ export function MatchListClient({
         </div>
 
         {/* Match List */}
-        <div className="flex-1 overflow-y-auto overscroll-auto rounded-xl border border-nile-blue/20" style={{ height: "calc(100vh - 120px)" }}>
+        <div className="flex-1 overflow-y-auto overscroll-auto border-r border-nile-blue/20" style={{ height: "calc(100vh - 120px)" }}>
           {/* Column headers */}
           <div className="sticky top-0 z-10 bg-[#1e1e1e] border-b border-[#333333]/50 hidden md:flex items-stretch">
             <div className="flex-1">
