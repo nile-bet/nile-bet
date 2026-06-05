@@ -78,7 +78,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
     <div
       className={cn(
         'border-b border-nile-blue/20 transition-colors',
-        isEven ? 'bg-[#1e1e1e]' : 'bg-[#1a1a1a]',
+        isEven ? 'bg-[#1e1e26]' : 'bg-[#1e1e26]',
         match.is_featured && 'border border-gold/30 bg-gold/5'
       )}
     >
@@ -206,7 +206,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                 if (overUnderMarkets.length > 0) {
                   rendered.push(
                     <div key="over-under-group">
-                      <div className="flex items-center justify-between px-4 py-1.5 bg-nile-blue/5">
+                      <div className="flex items-center justify-between px-4 py-1.5 bg-[#1e1e26]">
                         <span className="text-[13px] font-extrabold text-white uppercase tracking-wide">
                           Goals Over/Under
                         </span>
@@ -262,7 +262,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                   if (group.length === 0) return
                   rendered.push(
                     <div key={key}>
-                      <div className="flex items-center justify-between px-4 py-1.5 bg-nile-blue/5">
+                      <div className="flex items-center justify-between px-4 py-1.5 bg-[#1e1e26]">
                         <span className="text-[13px] font-extrabold text-white uppercase tracking-wide">
                           {label}
                         </span>
@@ -316,7 +316,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                   if (group.length === 0) return
                   rendered.push(
                     <div key={key}>
-                      <div className="flex items-center justify-between px-4 py-1.5 bg-nile-blue/5">
+                      <div className="flex items-center justify-between px-4 py-1.5 bg-[#1e1e26]">
                         <span className="text-[13px] font-extrabold text-white uppercase tracking-wide">
                           {label}
                         </span>
@@ -372,7 +372,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                   if (group.length === 0) return
                   rendered.push(
                     <div key={key}>
-                      <div className="flex items-center justify-between px-4 py-1.5 bg-nile-blue/5">
+                      <div className="flex items-center justify-between px-4 py-1.5 bg-[#1e1e26]">
                         <span className="text-[13px] font-extrabold text-white uppercase tracking-wide">
                           {label}
                         </span>
@@ -421,7 +421,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                   const odds = market.match_market_odds ?? []
                   rendered.push(
                     <div key={market.id}>
-                      <div className="flex items-center justify-between px-4 py-1.5 bg-nile-blue/5">
+                      <div className="flex items-center justify-between px-4 py-1.5 bg-[#1e1e26]">
                         <span className="text-[13px] font-extrabold text-white uppercase tracking-wide">
                           {market.market_templates?.name}
                         </span>

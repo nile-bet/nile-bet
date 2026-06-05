@@ -188,11 +188,11 @@ export function MatchListClient({
           <div className="sticky top-0 z-10 bg-[#1e1e1e] border-b border-[#333333]/50 hidden md:flex items-stretch">
             <div className="flex-1">
               <div className="grid text-[13px] font-extrabold uppercase tracking-widest" style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}>
-                <div className="flex items-center justify-center py-3 bg-indigo-900/60 text-indigo-200 col-span-5">Match Result</div>
+                <div className="flex items-center justify-center py-3 bg-[#1e1e26] text-white/70 col-span-5">Match Result</div>
                 <div className="bg-gold/20" />
-                <div className="flex items-center justify-center py-3 bg-emerald-900/50 text-emerald-300 col-span-5">Double Chance</div>
+                <div className="flex items-center justify-center py-3 bg-[#1e1e26] text-white/70 col-span-5">Double Chance</div>
                 <div className="bg-gold/20" />
-                <div className="flex items-center justify-center py-3 bg-amber-900/50 text-amber-300 col-span-3">Both Score</div>
+                <div className="flex items-center justify-center py-3 bg-[#1e1e26] text-white/70 col-span-3">Both Score</div>
               </div>
             </div>
           </div>
