@@ -26,7 +26,7 @@ export default async function HomePage() {
       <div className="sticky top-0 z-50">
         <PublicNavbar />
       </div>
-      <div className="flex-1 mx-2 mt-2 mb-2">
+      <div className="flex-1">
         <MatchListClient
           initialMatches={initialMatches}
           countries={countries}

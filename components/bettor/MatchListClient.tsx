@@ -163,13 +163,13 @@ export function MatchListClient({
   )
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full" style={{ margin: 0, padding: 0 }}>
       <FilterBar
         onFilterChange={handleFilterChange}
         matchCount={matches.length}
       />
 
-      <div className="flex items-start">
+      <div className="flex items-start w-full">
         {/* League Sidebar */}
         <div className="hidden md:flex flex-col flex-shrink-0 border-r border-nile-blue/20" style={{ position: "sticky", top: "60px", alignSelf: "flex-start" }}>
           <LeagueSidebar
