@@ -20,6 +20,7 @@ interface OddButtonProps {
   matchStatus: MatchStatus
   size?: 'sm' | 'lg' | 'row' | 'col'
   disabled?: boolean
+  darker?: boolean
 }
 
 export function OddButton({
@@ -38,6 +39,7 @@ export function OddButton({
   matchStatus,
   size = 'sm',
   disabled = false,
+  darker = false,
 }: OddButtonProps) {
   const { addSelection, removeSelection, isSelectionAdded } = useBetSlipStore()
   const isSelected = isSelectionAdded(matchMarketId, selection)
@@ -68,7 +70,7 @@ export function OddButton({
             ? 'bg-gold cursor-pointer'
             : isUnavailable
             ? 'opacity-30 cursor-not-allowed bg-transparent'
-            : 'bg-black/30 hover:bg-black/50 cursor-pointer'
+            : darker ? 'bg-[#252535] hover:bg-[#2e2e42] cursor-pointer' : 'bg-transparent hover:bg-[#172540] cursor-pointer'
         )}
       >
         <span className={cn(

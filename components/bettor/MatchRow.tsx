@@ -77,26 +77,26 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
   return (
     <div
       className={cn(
-        'border-b border-[rgba(212,175,55,0.15)] transition-all duration-200 hover:bg-[#303A85] group',
-        isEven ? 'bg-[#222A63]' : 'bg-[#1C2155]',
+        'border-b border-[rgba(255,255,255,0.08)] transition-all duration-200 hover:bg-[#172540] group',
+        isEven ? 'bg-[#0D1526]' : 'bg-[#111C31]',
         match.is_featured && 'border border-gold/30 bg-gold/5'
       )}
     >
       {/* Match name row */}
-      <div className="flex items-center justify-between px-4 py-1.5 hover:bg-[#303A85]/40 transition-colors">
+      <div className="flex items-center justify-between px-4 py-1.5">
         <div className="flex items-center gap-2">
           {match.is_featured && (
             <span className="text-[10px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded font-medium">
               ⭐ FEATURED
             </span>
           )}
-          <span className="text-[14px] font-medium text-white">
-            {match.home_team} V {match.away_team}
+          <span className="text-[13px] font-semibold text-white tracking-wide">
+            {match.home_team} <span className="text-white/30 mx-1">vs</span> {match.away_team}
           </span>
         </div>
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-nile-blue-light text-xs bg-nile-blue/20 border border-nile-blue/40 px-2 py-1 rounded hover:bg-nile-blue/30 transition-colors flex-shrink-0 ml-2 flex items-center gap-1"
+          className="text-[#A9B4D0] text-[11px] bg-[#172540] border border-white/10 px-2 py-0.5 rounded hover:bg-[#1A2945] transition-colors flex-shrink-0 ml-2 flex items-center gap-1"
         >
           +{totalMarkets} more
           {expanded
@@ -108,32 +108,32 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
 
       {/* Quick odds row — 1X2 + DC + BTTS */}
       <div
-        className="grid border-b border-nile-blue/20"
+        className="grid border-t border-[rgba(255,255,255,0.04)] mt-1"
         style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}
       >
         <OddButton {...commonProps} label="1" odd={getOdd(market1x2, 'Home')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-1`} selection="Home" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
-        <div className="bg-[rgba(212,175,55,0.10)]" />
+        <div className="bg-[rgba(255,255,255,0.06)]" />
         <OddButton {...commonProps} label="X" odd={getOdd(market1x2, 'Draw')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-x`} selection="Draw" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
-        <div className="bg-[rgba(212,175,55,0.10)]" />
+        <div className="bg-[rgba(255,255,255,0.06)]" />
         <OddButton {...commonProps} label="2" odd={getOdd(market1x2, 'Away')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-2`} selection="Away" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
-        <div className="bg-gold/15" />
+        <div className="bg-[rgba(255,255,255,0.06)]" />
         <OddButton {...commonProps} label="1X" odd={getOdd(marketDC, '1X')} matchMarketId={marketDC?.id ?? `${match.id}-dc-1x`} selection="1X" marketName="Double Chance" categoryName="MAIN" size="col" />
-        <div className="bg-[rgba(212,175,55,0.10)]" />
+        <div className="bg-[rgba(255,255,255,0.06)]" />
         <OddButton {...commonProps} label="12" odd={getOdd(marketDC, '12')} matchMarketId={marketDC?.id ?? `${match.id}-dc-12`} selection="12" marketName="Double Chance" categoryName="MAIN" size="col" />
-        <div className="bg-[rgba(212,175,55,0.10)]" />
+        <div className="bg-[rgba(255,255,255,0.06)]" />
         <OddButton {...commonProps} label="X2" odd={getOdd(marketDC, 'X2')} matchMarketId={marketDC?.id ?? `${match.id}-dc-x2`} selection="X2" marketName="Double Chance" categoryName="MAIN" size="col" />
-        <div className="bg-gold/15" />
+        <div className="bg-[rgba(255,255,255,0.06)]" />
         <OddButton {...commonProps} label="Yes" odd={getOdd(marketBTTS, 'Yes')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-y`} selection="Yes" marketName="Both Teams to Score" categoryName="MAIN" size="col" />
-        <div className="bg-[rgba(212,175,55,0.10)]" />
+        <div className="bg-[rgba(255,255,255,0.06)]" />
         <OddButton {...commonProps} label="No" odd={getOdd(marketBTTS, 'No')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-n`} selection="No" marketName="Both Teams to Score" categoryName="MAIN" size="col" />
       </div>
 
       {/* Expanded markets panel */}
       {expanded && (
-        <div className="border-t border-[#2a1a4a]/40" style={{ backgroundColor: "#171C46" }}>
+        <div className="border-t border-[rgba(255,255,255,0.06)]" style={{ backgroundColor: "#1E1E26" }}>
 
           {/* ── Category tab bar — ALL 15 always shown ── */}
-          <div className="overflow-x-auto scrollbar-hide border-b border-[#2a1a4a]/60" style={{ backgroundColor: '#1A1F4D' }}>
+          <div className="overflow-x-auto scrollbar-hide border-b border-[rgba(255,255,255,0.06)]" style={{ backgroundColor: '#1E1E26' }}>
             <div className="flex min-w-max">
               {CATEGORY_ORDER.map((cat) => {
                 const count = marketsByCategory[cat]?.length ?? 0
@@ -142,14 +142,14 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                   <button
                     key={cat}
                     onClick={() => handleCategoryChange(cat)}
-                    style={{ backgroundColor: activeCategory === cat ? '#1e1040' : 'transparent' }}
+                    style={{ backgroundColor: '#1E1E26' }}
                     className={cn(
                       'text-[9px] px-3 py-2 font-bold tracking-widest uppercase whitespace-nowrap transition-colors flex-shrink-0 border-b-2',
                       activeCategory === cat
-                        ? 'text-gold border-gold'
+                        ? 'text-gold border-gold bg-[#1E1E26]'
                         : isEmpty
-                        ? 'text-white/20 border-transparent hover:text-white/40'
-                        : 'text-white/50 border-transparent hover:text-white hover:border-gold/30'
+                        ? 'text-white/20 border-transparent hover:text-white/40 bg-[#1E1E26]'
+                        : 'text-white/50 border-transparent hover:text-white hover:border-gold/30 bg-[#1E1E26]'
                     )}
                   >
                     {cat}
@@ -220,7 +220,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                           const overOdd = odds.find(o => /over/i.test(o.selection))
                           const underOdd = odds.find(o => /under/i.test(o.selection))
                           return (
-                            <div key={market.id} className="grid border-b border-white/5 last:border-0" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
+                            <div key={market.id} className="grid border-b border-white/5 last:border-0 bg-[#1E1E26]" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
                               <OddButton
                                 {...commonProps}
                                 label={`Over ${line}`}
@@ -230,8 +230,9 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 marketName={market.market_templates?.name ?? ''}
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'GOALS'}
                                 size="col"
+                              darker={true}
                               />
-                              <div className="bg-[rgba(212,175,55,0.10)]" />
+                              <div className="bg-[rgba(255,255,255,0.06)]" />
                               <OddButton
                                 {...commonProps}
                                 label={`Under ${line}`}
@@ -241,6 +242,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 marketName={market.market_templates?.name ?? ''}
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'GOALS'}
                                 size="col"
+                              darker={true}
                               />
                             </div>
                           )
@@ -276,7 +278,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                           const overOdd = odds.find(o => /over/i.test(o.selection))
                           const underOdd = odds.find(o => /under/i.test(o.selection))
                           return (
-                            <div key={market.id} className="grid border-b border-white/5 last:border-0" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
+                            <div key={market.id} className="grid border-b border-white/5 last:border-0 bg-[#1E1E26]" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
                               <OddButton
                                 {...commonProps}
                                 label={`Over ${line}`}
@@ -286,8 +288,9 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 marketName={market.market_templates?.name ?? ''}
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CORNERS'}
                                 size="col"
+                              darker={true}
                               />
-                              <div className="bg-[rgba(212,175,55,0.10)]" />
+                              <div className="bg-[rgba(255,255,255,0.06)]" />
                               <OddButton
                                 {...commonProps}
                                 label={`Under ${line}`}
@@ -297,6 +300,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 marketName={market.market_templates?.name ?? ''}
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CORNERS'}
                                 size="col"
+                              darker={true}
                               />
                             </div>
                           )
@@ -330,7 +334,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                           const overOdd = odds.find(o => /over/i.test(o.selection))
                           const underOdd = odds.find(o => /under/i.test(o.selection))
                           return (
-                            <div key={market.id} className="grid border-b border-white/5 last:border-0" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
+                            <div key={market.id} className="grid border-b border-white/5 last:border-0 bg-[#1E1E26]" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
                               <OddButton
                                 {...commonProps}
                                 label={`Over ${line}`}
@@ -340,8 +344,9 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 marketName={market.market_templates?.name ?? ''}
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'TEAM GOALS'}
                                 size="col"
+                              darker={true}
                               />
-                              <div className="bg-[rgba(212,175,55,0.10)]" />
+                              <div className="bg-[rgba(255,255,255,0.06)]" />
                               <OddButton
                                 {...commonProps}
                                 label={`Under ${line}`}
@@ -351,6 +356,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 marketName={market.market_templates?.name ?? ''}
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'TEAM GOALS'}
                                 size="col"
+                              darker={true}
                               />
                             </div>
                           )
@@ -386,7 +392,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                           const overOdd = odds.find(o => /over/i.test(o.selection))
                           const underOdd = odds.find(o => /under/i.test(o.selection))
                           return (
-                            <div key={market.id} className="grid border-b border-white/5 last:border-0" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
+                            <div key={market.id} className="grid border-b border-white/5 last:border-0 bg-[#1E1E26]" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
                               <OddButton
                                 {...commonProps}
                                 label={`Over ${line}`}
@@ -396,8 +402,9 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 marketName={market.market_templates?.name ?? ''}
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CARDS'}
                                 size="col"
+                              darker={true}
                               />
-                              <div className="bg-[rgba(212,175,55,0.10)]" />
+                              <div className="bg-[rgba(255,255,255,0.06)]" />
                               <OddButton
                                 {...commonProps}
                                 label={`Under ${line}`}
@@ -407,6 +414,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 marketName={market.market_templates?.name ?? ''}
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CARDS'}
                                 size="col"
+                              darker={true}
                               />
                             </div>
                           )
@@ -430,7 +438,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                       {odds.length === 0 ? (
                         <p className="text-[10px] text-white/25 px-4 py-2">No odds available</p>
                       ) : (
-                        <div className="grid border-t border-white/5" style={{ gridTemplateColumns: `repeat(${Math.min(odds.length, 3)}, 1fr)` }}>
+                        <div className="grid border-t border-white/5 bg-[#1E1E26]" style={{ gridTemplateColumns: `repeat(${Math.min(odds.length, 3)}, 1fr)` }}>
                           {odds.map((odd, i) => (
                             <div key={odd.id} className={i % 3 !== 2 ? 'border-r border-white/5' : ''}>
                               <OddButton
@@ -442,6 +450,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 marketName={market.market_templates?.name ?? ''}
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'MAIN'}
                                 size="col"
+                              darker={true}
                               />
                             </div>
                           ))}

@@ -183,16 +183,16 @@ export function MatchListClient({
         </div>
 
         {/* Match List */}
-        <div className="flex-1 overflow-y-auto overscroll-auto border-r border-nile-blue/20" style={{ height: "calc(100vh - 120px)", backgroundColor: "#222A63" }}>
+        <div className="flex-1 overflow-y-auto overscroll-auto border-r border-nile-blue/20" style={{ height: "calc(100vh - 120px)", backgroundColor: "#0D1526" }}>
           {/* Column headers */}
-          <div className="sticky top-0 z-10 bg-[#171C46] border-b border-gold/20 hidden md:flex items-stretch">
+          <div className="sticky top-0 z-10 bg-[#141F36] border-b border-gold/20 hidden md:flex items-stretch">
             <div className="flex-1">
               <div className="grid text-[13px] font-extrabold uppercase tracking-widest" style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}>
-                <div className="flex items-center justify-center py-3 bg-[#171C46] text-white/60 col-span-5 border-b-2 border-indigo-500/40">Match Result</div>
-                <div className="bg-gold/15" />
-                <div className="flex items-center justify-center py-3 bg-[#171C46] text-white/60 col-span-5 border-b-2 border-emerald-500/40">Double Chance</div>
-                <div className="bg-gold/15" />
-                <div className="flex items-center justify-center py-3 bg-[#171C46] text-white/60 col-span-3 border-b-2 border-amber-500/40">Both Score</div>
+                <div className="flex items-center justify-center py-3 bg-[#141F36] text-white/60 col-span-5 border-b-2 border-indigo-500/40">Match Result</div>
+                <div className="bg-[rgba(255,255,255,0.06)]" />
+                <div className="flex items-center justify-center py-3 bg-[#141F36] text-white/60 col-span-5 border-b-2 border-emerald-500/40">Double Chance</div>
+                <div className="bg-[rgba(255,255,255,0.06)]" />
+                <div className="flex items-center justify-center py-3 bg-[#141F36] text-white/60 col-span-3 border-b-2 border-amber-500/40">Both Score</div>
               </div>
             </div>
           </div>
@@ -238,16 +238,15 @@ export function MatchListClient({
                   const first = groupMatches[0] as any
                   return (
                     <div key={key}>
-                      <div className="flex items-center justify-between px-4 py-1.5 bg-[#1e1e1e]/90 border-b border-[#333333]/40">
-                        <span className="text-[11px] text-gold/60">
-                          <FlagImage emoji={first.flag_emoji ?? '🏳️'} />{' '}
-                          {first.country_name} -{' '}
-                          {first.league_name}
+                      <div className="flex items-center justify-between px-4 py-2 bg-[#111C31] border-b border-[rgba(255,255,255,0.06)]">
+                        <span className="text-[11px] text-[#A9B4D0] font-medium flex items-center gap-1.5">
+                          <FlagImage emoji={first.flag_emoji ?? '🏳️'} />
+                          <span className="text-[#7D89A8]">{first.country_name}</span>
+                          <span className="text-[#7D89A8]/50">·</span>
+                          <span>{first.league_name}</span>
                         </span>
-                        <span className="text-[11px] text-nile-blue-light">
-                          {formatKickOff(
-                            groupMatches[0].kick_off_time
-                          )}
+                        <span className="text-[11px] text-[#7D89A8]">
+                          {formatKickOff(groupMatches[0].kick_off_time)}
                         </span>
                       </div>
                       {groupMatches.map(
