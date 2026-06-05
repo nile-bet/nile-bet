@@ -181,12 +181,24 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                 )
                 const isCornerOU = (name: string) =>
                   /Corners?\s*O\/U|Corners?\s*Over.?Under/i.test(name)
+                const isCardOU = (name: string) =>
+                  /Cards?\s*O\/U|Cards?\s*Over.?Under/i.test(name)
+                const isTeamGoalOU = (name: string) =>
+                  /Home Team O\/U|Away Team O\/U/i.test(name)
                 const cornerOUMarkets = currentMarkets.filter(m =>
                   isCornerOU(m.market_templates?.name ?? '')
                 )
+                const cardOUMarkets = currentMarkets.filter(m =>
+                  isCardOU(m.market_templates?.name ?? '')
+                )
+                const teamGoalOUMarkets = currentMarkets.filter(m =>
+                  isTeamGoalOU(m.market_templates?.name ?? '')
+                )
                 const otherMarkets = currentMarkets.filter(m =>
                   !/over.?under/i.test(m.market_templates?.name ?? '') &&
-                  !isCornerOU(m.market_templates?.name ?? '')
+                  !isCornerOU(m.market_templates?.name ?? '') &&
+                  !isCardOU(m.market_templates?.name ?? '') &&
+                  !isTeamGoalOU(m.market_templates?.name ?? '')
                 )
                 const rendered: React.ReactNode[] = []
 
@@ -203,8 +215,8 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                       <div className="border-t border-white/5">
                         {overUnderMarkets.map((market) => {
                           const odds = market.match_market_odds ?? []
-                          const lineMatch = (market.market_templates?.name ?? '').match(/[\d.]+/)
-                          const line = lineMatch ? lineMatch[0] : ''
+                          const allNums = (market.market_templates?.name ?? '').match(/[\d.]+/g) ?? []
+                          const line = allNums[allNums.length - 1] ?? ''
                           const overOdd = odds.find(o => /over/i.test(o.selection))
                           const underOdd = odds.find(o => /under/i.test(o.selection))
                           return (
@@ -284,6 +296,116 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 selection={underOdd?.selection ?? ''}
                                 marketName={market.market_templates?.name ?? ''}
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CORNERS'}
+                                size="col"
+                              />
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })
+
+                // Render Team Goals Over/Under groups
+                const teamGoalGroups = [
+                  { key: 'home-team-ou', label: 'Home Team Goals Over/Under', regex: /Home Team O\/U/i },
+                  { key: 'away-team-ou', label: 'Away Team Goals Over/Under', regex: /Away Team O\/U/i },
+                ]
+                teamGoalGroups.forEach(({ key, label, regex }) => {
+                  const group = teamGoalOUMarkets.filter(m => regex.test(m.market_templates?.name ?? ''))
+                  if (group.length === 0) return
+                  rendered.push(
+                    <div key={key}>
+                      <div className="flex items-center justify-between px-4 py-1.5 bg-nile-blue/5">
+                        <span className="text-[13px] font-extrabold text-white uppercase tracking-wide">
+                          {label}
+                        </span>
+                        <ChevronUp className="w-3 h-3 text-white/30" />
+                      </div>
+                      <div className="border-t border-white/5">
+                        {group.map((market) => {
+                          const odds = market.match_market_odds ?? []
+                          const allNums = (market.market_templates?.name ?? '').match(/[\d.]+/g) ?? []
+                          const line = allNums[allNums.length - 1] ?? ''
+                          const overOdd = odds.find(o => /over/i.test(o.selection))
+                          const underOdd = odds.find(o => /under/i.test(o.selection))
+                          return (
+                            <div key={market.id} className="grid border-b border-white/5 last:border-0" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
+                              <OddButton
+                                {...commonProps}
+                                label={`Over ${line}`}
+                                odd={overOdd?.odd_value ?? null}
+                                matchMarketId={market.id}
+                                selection={overOdd?.selection ?? ''}
+                                marketName={market.market_templates?.name ?? ''}
+                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'TEAM GOALS'}
+                                size="col"
+                              />
+                              <div className="bg-nile-blue/20" />
+                              <OddButton
+                                {...commonProps}
+                                label={`Under ${line}`}
+                                odd={underOdd?.odd_value ?? null}
+                                matchMarketId={market.id}
+                                selection={underOdd?.selection ?? ''}
+                                marketName={market.market_templates?.name ?? ''}
+                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'TEAM GOALS'}
+                                size="col"
+                              />
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })
+
+                // Render Card Over/Under groups
+                const cardGroups = [
+                  { key: 'total-cards-ou',  label: 'Total Cards Over/Under',    regex: /Total Cards/i },
+                  { key: 'home-cards-ou',   label: 'Home Cards Over/Under',     regex: /Home Cards/i },
+                  { key: 'away-cards-ou',   label: 'Away Cards Over/Under',     regex: /Away Cards/i },
+                  { key: 'half-cards-ou',   label: '1st Half Cards Over/Under', regex: /1st Half Cards/i },
+                ]
+                cardGroups.forEach(({ key, label, regex }) => {
+                  const group = cardOUMarkets.filter(m => regex.test(m.market_templates?.name ?? ''))
+                  if (group.length === 0) return
+                  rendered.push(
+                    <div key={key}>
+                      <div className="flex items-center justify-between px-4 py-1.5 bg-nile-blue/5">
+                        <span className="text-[13px] font-extrabold text-white uppercase tracking-wide">
+                          {label}
+                        </span>
+                        <ChevronUp className="w-3 h-3 text-white/30" />
+                      </div>
+                      <div className="border-t border-white/5">
+                        {group.map((market) => {
+                          const odds = market.match_market_odds ?? []
+                          const allNums = (market.market_templates?.name ?? '').match(/[\d.]+/g) ?? []
+                          const line = allNums[allNums.length - 1] ?? ''
+                          const overOdd = odds.find(o => /over/i.test(o.selection))
+                          const underOdd = odds.find(o => /under/i.test(o.selection))
+                          return (
+                            <div key={market.id} className="grid border-b border-white/5 last:border-0" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
+                              <OddButton
+                                {...commonProps}
+                                label={`Over ${line}`}
+                                odd={overOdd?.odd_value ?? null}
+                                matchMarketId={market.id}
+                                selection={overOdd?.selection ?? ''}
+                                marketName={market.market_templates?.name ?? ''}
+                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CARDS'}
+                                size="col"
+                              />
+                              <div className="bg-nile-blue/20" />
+                              <OddButton
+                                {...commonProps}
+                                label={`Under ${line}`}
+                                odd={underOdd?.odd_value ?? null}
+                                matchMarketId={market.id}
+                                selection={underOdd?.selection ?? ''}
+                                marketName={market.market_templates?.name ?? ''}
+                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CARDS'}
                                 size="col"
                               />
                             </div>
