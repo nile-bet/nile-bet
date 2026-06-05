@@ -62,7 +62,7 @@ export function LeagueSidebar({
   }
 
   return (
-    <div className={cn('w-[200px] flex-shrink-0 bg-slate-dark border-r border-gold/10 flex flex-col relative', className)}>
+    <div className={cn('w-[200px] flex-shrink-0 bg-[#1C2155] border-r border-[rgba(212,175,55,0.15)] flex flex-col relative', className)}>
       {/* Search */}
       <div className="p-3 border-b border-gold/10 flex-shrink-0">
         <div className="relative">

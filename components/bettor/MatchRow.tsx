@@ -77,13 +77,13 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
   return (
     <div
       className={cn(
-        'border-b border-nile-blue/20 transition-colors',
-        isEven ? 'bg-[#1e1e26]' : 'bg-[#1e1e26]',
+        'border-b border-[rgba(212,175,55,0.15)] transition-all duration-200 hover:bg-[#303A85] group',
+        isEven ? 'bg-[#222A63]' : 'bg-[#1C2155]',
         match.is_featured && 'border border-gold/30 bg-gold/5'
       )}
     >
       {/* Match name row */}
-      <div className="flex items-center justify-between px-4 py-1.5">
+      <div className="flex items-center justify-between px-4 py-1.5 hover:bg-[#303A85]/40 transition-colors">
         <div className="flex items-center gap-2">
           {match.is_featured && (
             <span className="text-[10px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded font-medium">
@@ -112,28 +112,28 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
         style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}
       >
         <OddButton {...commonProps} label="1" odd={getOdd(market1x2, 'Home')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-1`} selection="Home" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
-        <div className="bg-nile-blue/20" />
+        <div className="bg-[rgba(212,175,55,0.10)]" />
         <OddButton {...commonProps} label="X" odd={getOdd(market1x2, 'Draw')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-x`} selection="Draw" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
-        <div className="bg-nile-blue/20" />
+        <div className="bg-[rgba(212,175,55,0.10)]" />
         <OddButton {...commonProps} label="2" odd={getOdd(market1x2, 'Away')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-2`} selection="Away" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
-        <div className="bg-gold/20" />
+        <div className="bg-gold/15" />
         <OddButton {...commonProps} label="1X" odd={getOdd(marketDC, '1X')} matchMarketId={marketDC?.id ?? `${match.id}-dc-1x`} selection="1X" marketName="Double Chance" categoryName="MAIN" size="col" />
-        <div className="bg-nile-blue/20" />
+        <div className="bg-[rgba(212,175,55,0.10)]" />
         <OddButton {...commonProps} label="12" odd={getOdd(marketDC, '12')} matchMarketId={marketDC?.id ?? `${match.id}-dc-12`} selection="12" marketName="Double Chance" categoryName="MAIN" size="col" />
-        <div className="bg-nile-blue/20" />
+        <div className="bg-[rgba(212,175,55,0.10)]" />
         <OddButton {...commonProps} label="X2" odd={getOdd(marketDC, 'X2')} matchMarketId={marketDC?.id ?? `${match.id}-dc-x2`} selection="X2" marketName="Double Chance" categoryName="MAIN" size="col" />
-        <div className="bg-gold/20" />
+        <div className="bg-gold/15" />
         <OddButton {...commonProps} label="Yes" odd={getOdd(marketBTTS, 'Yes')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-y`} selection="Yes" marketName="Both Teams to Score" categoryName="MAIN" size="col" />
-        <div className="bg-nile-blue/20" />
+        <div className="bg-[rgba(212,175,55,0.10)]" />
         <OddButton {...commonProps} label="No" odd={getOdd(marketBTTS, 'No')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-n`} selection="No" marketName="Both Teams to Score" categoryName="MAIN" size="col" />
       </div>
 
       {/* Expanded markets panel */}
       {expanded && (
-        <div className="border-t border-[#2a1a4a]/40" style={{ backgroundColor: "#120a28" }}>
+        <div className="border-t border-[#2a1a4a]/40" style={{ backgroundColor: "#171C46" }}>
 
           {/* ── Category tab bar — ALL 15 always shown ── */}
-          <div className="overflow-x-auto scrollbar-hide border-b border-[#2a1a4a]/60" style={{ backgroundColor: '#150d2e' }}>
+          <div className="overflow-x-auto scrollbar-hide border-b border-[#2a1a4a]/60" style={{ backgroundColor: '#1A1F4D' }}>
             <div className="flex min-w-max">
               {CATEGORY_ORDER.map((cat) => {
                 const count = marketsByCategory[cat]?.length ?? 0
@@ -231,7 +231,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'GOALS'}
                                 size="col"
                               />
-                              <div className="bg-nile-blue/20" />
+                              <div className="bg-[rgba(212,175,55,0.10)]" />
                               <OddButton
                                 {...commonProps}
                                 label={`Under ${line}`}
@@ -287,7 +287,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CORNERS'}
                                 size="col"
                               />
-                              <div className="bg-nile-blue/20" />
+                              <div className="bg-[rgba(212,175,55,0.10)]" />
                               <OddButton
                                 {...commonProps}
                                 label={`Under ${line}`}
@@ -341,7 +341,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'TEAM GOALS'}
                                 size="col"
                               />
-                              <div className="bg-nile-blue/20" />
+                              <div className="bg-[rgba(212,175,55,0.10)]" />
                               <OddButton
                                 {...commonProps}
                                 label={`Under ${line}`}
@@ -397,7 +397,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                                 categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CARDS'}
                                 size="col"
                               />
-                              <div className="bg-nile-blue/20" />
+                              <div className="bg-[rgba(212,175,55,0.10)]" />
                               <OddButton
                                 {...commonProps}
                                 label={`Under ${line}`}
