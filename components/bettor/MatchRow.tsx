@@ -176,10 +176,17 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
               {(() => {
                 // Group Over/Under markets together under one header
                 const overUnderMarkets = currentMarkets.filter(m =>
-                  /over.?under/i.test(m.market_templates?.name ?? '')
+                  /over.?under/i.test(m.market_templates?.name ?? '') &&
+                  !/corner/i.test(m.market_templates?.name ?? '')
+                )
+                const isCornerOU = (name: string) =>
+                  /Corners?\s*O\/U|Corners?\s*Over.?Under/i.test(name)
+                const cornerOUMarkets = currentMarkets.filter(m =>
+                  isCornerOU(m.market_templates?.name ?? '')
                 )
                 const otherMarkets = currentMarkets.filter(m =>
-                  !/over.?under/i.test(m.market_templates?.name ?? '')
+                  !/over.?under/i.test(m.market_templates?.name ?? '') &&
+                  !isCornerOU(m.market_templates?.name ?? '')
                 )
                 const rendered: React.ReactNode[] = []
 
@@ -230,6 +237,62 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                     </div>
                   )
                 }
+
+                // Render Corner Over/Under groups
+                const cornerGroups = [
+                  { key: 'total-corners-ou', label: 'Total Corners Over/Under', regex: /Total Corners/i },
+                  { key: 'home-corners-ou',  label: 'Home Corners Over/Under',  regex: /Home Corners/i },
+                  { key: 'away-corners-ou',  label: 'Away Corners Over/Under',  regex: /Away Corners/i },
+                  { key: 'half-corners-ou',  label: '1st Half Corners Over/Under', regex: /1st Half Corners/i },
+                ]
+                cornerGroups.forEach(({ key, label, regex }) => {
+                  const group = cornerOUMarkets.filter(m => regex.test(m.market_templates?.name ?? ''))
+                  if (group.length === 0) return
+                  rendered.push(
+                    <div key={key}>
+                      <div className="flex items-center justify-between px-4 py-1.5 bg-nile-blue/5">
+                        <span className="text-[13px] font-extrabold text-white uppercase tracking-wide">
+                          {label}
+                        </span>
+                        <ChevronUp className="w-3 h-3 text-white/30" />
+                      </div>
+                      <div className="border-t border-white/5">
+                        {group.map((market) => {
+                          const odds = market.match_market_odds ?? []
+                          const lineMatch = (market.market_templates?.name ?? '').match(/O\/U\s*([\d.]+)/i)
+                          const line = lineMatch ? lineMatch[1] : ''
+                          const overOdd = odds.find(o => /over/i.test(o.selection))
+                          const underOdd = odds.find(o => /under/i.test(o.selection))
+                          return (
+                            <div key={market.id} className="grid border-b border-white/5 last:border-0" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
+                              <OddButton
+                                {...commonProps}
+                                label={`Over ${line}`}
+                                odd={overOdd?.odd_value ?? null}
+                                matchMarketId={market.id}
+                                selection={overOdd?.selection ?? ''}
+                                marketName={market.market_templates?.name ?? ''}
+                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CORNERS'}
+                                size="col"
+                              />
+                              <div className="bg-nile-blue/20" />
+                              <OddButton
+                                {...commonProps}
+                                label={`Under ${line}`}
+                                odd={underOdd?.odd_value ?? null}
+                                matchMarketId={market.id}
+                                selection={underOdd?.selection ?? ''}
+                                marketName={market.market_templates?.name ?? ''}
+                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CORNERS'}
+                                size="col"
+                              />
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })
 
                 // Render non-Over/Under markets after
                 otherMarkets.forEach((market) => {
