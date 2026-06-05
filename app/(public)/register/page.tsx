@@ -1,50 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Eye, EyeOff, Check, X,
-  Loader2, ArrowLeft } from 'lucide-react'
-import { Logo }
-  from '@/components/shared/Logo'
-import {
-  registerBettor,
-  checkUsernameAvailable,
-} from '@/lib/actions/auth'
+import { Eye, EyeOff, Check, X, Loader2, User, Lock, Shield, ArrowLeft } from 'lucide-react'
+import { Logo } from '@/components/shared/Logo'
+import { registerBettor, checkUsernameAvailable } from '@/lib/actions/auth'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 export default function RegisterPage() {
-  const [username, setUsername] =
-    useState('')
-  const [password, setPassword] =
-    useState('')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [showPw, setShowPw] = useState(false)
-  const [loading, setLoading] =
-    useState(false)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [agreed, setAgreed] = useState(false)
+  const [checking, setChecking] = useState(false)
+  const [available, setAvailable] = useState<boolean | null>(null)
 
-  // Username availability
-  const [checking, setChecking] =
-    useState(false)
-  const [available, setAvailable] = useState<
-    boolean | null
-  >(null)
-
-  const router = useRouter()
-
-  // Debounced username check
   useEffect(() => {
-    if (username.length < 3) {
-      setAvailable(null)
-      return
-    }
+    if (username.length < 3) { setAvailable(null); return }
     const timer = setTimeout(async () => {
       setChecking(true)
-      const ok =
-        await checkUsernameAvailable(username)
+      const ok = await checkUsernameAvailable(username)
       setAvailable(ok)
       setChecking(false)
     }, 500)
@@ -59,305 +38,214 @@ export default function RegisterPage() {
     if (password.length >= 12) score++
     return score
   }
-
   const strength = pwStrength()
-  const strengthLabel = [
-    '',
-    'Weak',
-    'Fair',
-    'Good',
-    'Strong',
-  ][strength]
-  const strengthColor = [
-    '',
-    'bg-nile-danger',
-    'bg-nile-orange',
-    'bg-yellow-400',
-    'bg-nile-success',
-  ][strength]
+  const strengthLabel = ['', 'Weak', 'Fair', 'Good', 'Strong'][strength]
+  const strengthColor = ['', '#ef4444', '#f97316', '#eab308', '#22c55e'][strength]
 
-  const canSubmit =
-    username.length >= 3 &&
-    available === true &&
-    password.length >= 8 &&
-    password === confirm &&
-    agreed &&
-    !loading
+  const canSubmit = username.length >= 3 && available === true && password.length >= 8 && password === confirm && agreed && !loading
 
-  const handleSubmit = async (
-    e: React.FormEvent
-  ) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!canSubmit) return
-
     setLoading(true)
     setError('')
-
-    const result = await registerBettor(
-      username.trim(),
-      password
-    )
-
+    const result = await registerBettor(username.trim(), password)
     if (result.success) {
-      toast.success(
-        '🌊 Welcome to NILE Bet! Top up to start betting.'
-      )
-      router.push('/')
+      toast.success('🌊 Welcome to NILE Bet!')
+      window.location.href = '/'
     } else {
-      setError(
-        result.error ?? 'Registration failed'
-      )
+      setError(result.error ?? 'Registration failed')
     }
-
     setLoading(false)
   }
 
+  const inputStyle = {
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.08)',
+  }
+
   return (
-    <div className="min-h-screen bg-charcoal flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
-        {/* Back button */}
-        <div className="mb-4">
-          <Link href="/" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Betting
-          </Link>
-        </div>
-        {/* Logo */}
-        <div className="flex justify-center mb-8">
-          <Logo size="lg" showTagline />
+    <div
+      className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #0D1526 0%, #141F36 50%, #1a1040 100%)' }}
+    >
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-10 pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #D4AF37 0%, transparent 70%)' }} />
+
+      <div className="w-full max-w-md relative z-10">
+        <Link href="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors text-sm mb-8 group">
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Back to Betting
+        </Link>
+
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <Logo size="lg" showTagline />
+          </div>
+          <div className="h-px w-24 mx-auto mb-4" style={{ background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)' }} />
+          <p className="text-white/40 text-sm">Create your account and start winning</p>
         </div>
 
-        {/* Card */}
-        <div className="bg-slate-dark border border-nile-blue/40 rounded-2xl p-8">
-          <h1 className="font-display text-2xl font-bold text-white mb-1">
-            Create Account
-          </h1>
-          <p className="text-white/50 text-sm mb-8">
-            Join NILE Bet today
-          </p>
+        <div className="rounded-2xl p-8" style={{
+          background: 'linear-gradient(145deg, #141F36, #1E2A45)',
+          border: '1px solid rgba(212,175,55,0.15)',
+          boxShadow: '0 25px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)'
+        }}>
+          <h1 className="font-display text-2xl font-bold text-white mb-1">Create Account</h1>
+          <p className="mb-7 text-sm" style={{ color: '#A9B4D0' }}>Join thousands of winners on NILE Bet</p>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Username */}
             <div>
-              <label className="text-sm text-white/70 block mb-1.5">
-                Username
-              </label>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#A9B4D0' }}>Username</label>
               <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#D4AF37', opacity: 0.6 }} />
                 <input
                   type="text"
                   value={username}
-                  onChange={(e) =>
-                    setUsername(
-                      e.target.value
-                        .toLowerCase()
-                        .replace(
-                          /[^a-z0-9_]/g,
-                          ''
-                        )
-                    )
-                  }
+                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                   placeholder="e.g. john_bettor"
                   maxLength={20}
-                  className={cn(
-                    'w-full bg-charcoal border rounded-lg px-4 py-3 pr-10 text-white placeholder:text-white/30 focus:outline-none text-sm',
-                    available === true
-                      ? 'border-nile-success/50'
-                      : available === false
-                      ? 'border-nile-danger/50'
-                      : 'border-gold/20 focus:border-gold/50'
-                  )}
                   disabled={loading}
+                  className="w-full pl-10 pr-10 py-3.5 rounded-xl text-white text-sm placeholder:text-white/20 focus:outline-none transition-all"
+                  style={{
+                    ...inputStyle,
+                    borderColor: available === true ? 'rgba(34,197,94,0.5)' : available === false ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)'
+                  }}
+                  onFocus={e => { if (available === null) e.target.style.borderColor = 'rgba(212,175,55,0.5)' }}
+                  onBlur={e => { if (available === null) e.target.style.borderColor = 'rgba(255,255,255,0.08)' }}
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {checking ? (
-                    <Loader2 className="w-4 h-4 text-white/40 animate-spin" />
-                  ) : available === true ? (
-                    <Check className="w-4 h-4 text-nile-success" />
-                  ) : available === false ? (
-                    <X className="w-4 h-4 text-nile-danger" />
-                  ) : null}
+                <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                  {checking ? <Loader2 className="w-4 h-4 text-white/30 animate-spin" /> :
+                   available === true ? <Check className="w-4 h-4" style={{ color: '#22c55e' }} /> :
+                   available === false ? <X className="w-4 h-4" style={{ color: '#ef4444' }} /> : null}
                 </div>
               </div>
-              {available === true && (
-                <p className="text-nile-success text-xs mt-1">
-                  ✓ Username available
-                </p>
-              )}
-              {available === false && (
-                <p className="text-nile-danger text-xs mt-1">
-                  ✗ Username already taken
-                </p>
-              )}
-              <p className="text-white/30 text-xs mt-1">
-                Letters, numbers and underscores only (3-20 chars)
-              </p>
+              {available === true && <p className="text-xs mt-1" style={{ color: '#22c55e' }}>✓ Username available</p>}
+              {available === false && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>✗ Username already taken</p>}
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>Letters, numbers and underscores (3-20 chars)</p>
             </div>
 
             {/* Password */}
             <div>
-              <label className="text-sm text-white/70 block mb-1.5">
-                Password
-              </label>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#A9B4D0' }}>Password</label>
               <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#D4AF37', opacity: 0.6 }} />
                 <input
-                  type={
-                    showPw ? 'text' : 'password'
-                  }
+                  type={showPw ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) =>
-                    setPassword(e.target.value)
-                  }
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min 8 characters"
-                  className="w-full bg-charcoal border border-gold/20 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-white/30 focus:outline-none focus:border-gold/50 text-sm"
                   disabled={loading}
+                  className="w-full pl-10 pr-12 py-3.5 rounded-xl text-white text-sm placeholder:text-white/20 focus:outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => e.target.style.borderColor = 'rgba(212,175,55,0.5)'}
+                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
                 />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowPw(!showPw)
-                  }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
-                >
-                  {showPw ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                <button type="button" onClick={() => setShowPw(!showPw)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2"
+                  style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {/* Strength bar */}
               {password.length > 0 && (
                 <div className="mt-2">
                   <div className="flex gap-1">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className={cn(
-                          'h-1 flex-1 rounded-full transition-colors',
-                          i <= strength
-                            ? strengthColor
-                            : 'bg-white/10'
-                        )}
-                      />
+                    {[1,2,3,4].map(i => (
+                      <div key={i} className="h-1 flex-1 rounded-full transition-all"
+                        style={{ background: i <= strength ? strengthColor : 'rgba(255,255,255,0.08)' }} />
                     ))}
                   </div>
-                  <p className="text-xs text-white/40 mt-1">
-                    {strengthLabel}
-                  </p>
+                  <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>{strengthLabel}</p>
                 </div>
               )}
             </div>
 
             {/* Confirm password */}
             <div>
-              <label className="text-sm text-white/70 block mb-1.5">
-                Confirm Password
-              </label>
-              <input
-                type={showPw ? 'text' : 'password'}
-                value={confirm}
-                onChange={(e) =>
-                  setConfirm(e.target.value)
-                }
-                placeholder="Repeat password"
-                className={cn(
-                  'w-full bg-charcoal border rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:outline-none text-sm',
-                  confirm.length > 0
-                    ? password === confirm
-                      ? 'border-nile-success/50'
-                      : 'border-nile-danger/50'
-                    : 'border-gold/20 focus:border-gold/50'
-                )}
-                disabled={loading}
-              />
-              {confirm.length > 0 &&
-                password !== confirm && (
-                  <p className="text-nile-danger text-xs mt-1">
-                    Passwords do not match
-                  </p>
-                )}
+              <label className="block text-sm font-medium mb-2" style={{ color: '#A9B4D0' }}>Confirm Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#D4AF37', opacity: 0.6 }} />
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  placeholder="Repeat password"
+                  disabled={loading}
+                  className="w-full pl-10 pr-4 py-3.5 rounded-xl text-white text-sm placeholder:text-white/20 focus:outline-none transition-all"
+                  style={{
+                    ...inputStyle,
+                    borderColor: confirm.length > 0 ? (password === confirm ? 'rgba(34,197,94,0.5)' : 'rgba(239,68,68,0.5)') : 'rgba(255,255,255,0.08)'
+                  }}
+                  onFocus={e => { if (!confirm.length) e.target.style.borderColor = 'rgba(212,175,55,0.5)' }}
+                  onBlur={e => { if (!confirm.length) e.target.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                />
+              </div>
+              {confirm.length > 0 && password !== confirm && (
+                <p className="text-xs mt-1" style={{ color: '#ef4444' }}>Passwords do not match</p>
+              )}
             </div>
 
-            {/* Terms checkbox */}
+            {/* Terms */}
             <div className="flex items-start gap-3">
-              <div
-                onClick={() =>
-                  setAgreed(!agreed)
-                }
-                className={cn(
-                  'w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center cursor-pointer mt-0.5 transition-colors',
-                  agreed
-                    ? 'bg-gold border-gold'
-                    : 'border-gold/30 hover:border-gold/60'
-                )}
-              >
-                {agreed && (
-                  <Check className="w-3 h-3 text-charcoal" />
-                )}
-              </div>
-              <p className="text-white/50 text-xs leading-relaxed">
+              <button type="button" onClick={() => setAgreed(!agreed)}
+                className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center mt-0.5 transition-all"
+                style={{
+                  background: agreed ? 'linear-gradient(135deg, #D4AF37, #FFD700)' : 'transparent',
+                  border: agreed ? '1px solid #D4AF37' : '1px solid rgba(212,175,55,0.3)'
+                }}>
+                {agreed && <Check className="w-3 h-3" style={{ color: '#0D1526' }} />}
+              </button>
+              <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                 I agree to the{' '}
-                <Link
-                  href="/terms"
-                  className="text-gold hover:text-gold-light"
-                  target="_blank"
-                >
-                  Terms & Conditions
-                </Link>{' '}
-                and{' '}
-                <Link
-                  href="/rules"
-                  className="text-gold hover:text-gold-light"
-                  target="_blank"
-                >
-                  Rules & Regulations
-                </Link>
+                <Link href="/terms" target="_blank" style={{ color: '#D4AF37' }}>Terms & Conditions</Link>
+                {' '}and{' '}
+                <Link href="/rules" target="_blank" style={{ color: '#D4AF37' }}>Rules & Regulations</Link>
               </p>
             </div>
 
-            {/* Error */}
             {error && (
-              <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg px-4 py-3">
-                <p className="text-nile-danger text-sm">
-                  {error}
-                </p>
+              <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}>
+                <p className="text-red-400 text-sm">⚠️ {error}</p>
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={!canSubmit}
-              className={cn(
-                'w-full py-3 rounded-lg font-semibold text-sm transition-colors',
-                canSubmit
-                  ? 'bg-gold text-charcoal hover:bg-gold-light'
-                  : 'bg-white/10 text-white/30 cursor-not-allowed'
-              )}
+              className="w-full py-3.5 rounded-xl font-bold text-sm transition-all duration-200"
+              style={{
+                background: canSubmit ? 'linear-gradient(135deg, #D4AF37, #FFD700)' : 'rgba(255,255,255,0.06)',
+                color: canSubmit ? '#0D1526' : 'rgba(255,255,255,0.2)',
+                cursor: canSubmit ? 'pointer' : 'not-allowed',
+                boxShadow: canSubmit ? '0 4px 15px rgba(212,175,55,0.3)' : 'none',
+              }}
             >
-              {loading
-                ? 'Creating account...'
-                : 'Create Account'}
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 
-          <p className="text-center text-white/40 text-sm mt-6">
-            Already have an account?{' '}
-            <Link
-              href="/login"
-              className="text-gold hover:text-gold-light"
-            >
-              Sign in
-            </Link>
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <span className="text-xs" style={{ color: '#A9B4D0' }}>Already have an account?</span>
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+          </div>
+
+          <Link href="/login"
+            className="block w-full py-3.5 rounded-xl font-semibold text-sm text-center transition-all"
+            style={{ border: '1px solid rgba(212,175,55,0.3)', color: '#D4AF37' }}>
+            Sign In
+          </Link>
+
+          <div className="flex items-center justify-center gap-2 mt-6">
+            <Shield className="w-3.5 h-3.5" style={{ color: '#D4AF37', opacity: 0.6 }} />
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Secure & Trusted Betting Platform</span>
+          </div>
+
+          <p className="text-center text-xs mt-4" style={{ color: 'rgba(255,255,255,0.25)' }}>
+            Cashiers contact <span style={{ color: 'rgba(212,175,55,0.7)' }}>AGENTS</span> or email{' '}
+            <a href="mailto:nilebetting@gmail.com" style={{ color: 'rgba(212,175,55,0.7)' }}>nilebetting@gmail.com</a>
           </p>
-          <p className="text-center text-white/30 text-xs mt-4 leading-relaxed">
-            Cashiers talk to <span className="text-gold/60">AGENTS</span> or contact us via<br/>
-            ✉ <a href="mailto:nilebetting@gmail.com" className="text-gold/60 hover:text-gold">nilebetting@gmail.com</a>
-          </p>
-          
         </div>
       </div>
     </div>
