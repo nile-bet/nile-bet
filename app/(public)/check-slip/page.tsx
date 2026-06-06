@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search } from 'lucide-react'
 import { PublicNavbar }
   from '@/components/shared/PublicNavbar'
@@ -15,8 +15,12 @@ import { LoadingSpinner }
 import { getSlipById }
   from '@/lib/actions/bets'
 import { cn } from '@/lib/utils'
+import { Clock, Trash2 } from 'lucide-react'
 import type { SlipWithSelections }
   from '@/types/database.types'
+
+const HISTORY_KEY = 'nilebet_slip_history_public'
+const MAX_HISTORY = 10
 
 export default function CheckSlipPage() {
   const [slipId, setSlipId] = useState('')
@@ -26,6 +30,25 @@ export default function CheckSlipPage() {
     useState<SlipWithSelections | null>(null)
   const [notFound, setNotFound] =
     useState(false)
+  const [history, setHistory] = useState<string[]>([])
+
+  useEffect(() => {
+    const stored = localStorage.getItem(HISTORY_KEY)
+    if (stored) setHistory(JSON.parse(stored))
+  }, [])
+
+  const addToHistory = (id: string) => {
+    setHistory(prev => {
+      const updated = [id, ...prev.filter(i => i !== id)].slice(0, MAX_HISTORY)
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }
+
+  const clearHistory = () => {
+    localStorage.removeItem(HISTORY_KEY)
+    setHistory([])
+  }
 
   const handleCheck = async () => {
     if (!slipId.trim()) return
@@ -39,6 +62,7 @@ export default function CheckSlipPage() {
 
     if (data) {
       setSlip(data)
+      addToHistory(slipId.trim().toUpperCase())
     } else {
       setNotFound(true)
     }
@@ -131,6 +155,29 @@ export default function CheckSlipPage() {
               slip={slip}
               showShareOptions
             />
+          )}
+
+          {/* Recent History */}
+          {history.length > 0 && (
+            <div className="mt-8 bg-slate-dark border border-gold/10 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-gold/60" />
+                  <span className="text-sm font-semibold text-white/70">Recent Slips</span>
+                </div>
+                <button onClick={clearHistory} className="flex items-center gap-1 text-xs text-nile-danger/70 hover:text-nile-danger transition-colors">
+                  <Trash2 className="w-3 h-3" /> Clear
+                </button>
+              </div>
+              <div className="space-y-2">
+                {history.map(id => (
+                  <button key={id} onClick={() => { setSlipId(id); handleCheck() }} className="w-full flex items-center justify-between px-3 py-2 bg-charcoal/50 hover:bg-charcoal rounded-lg border border-gold/10 hover:border-gold/30 transition-all">
+                    <span className="font-mono text-sm text-white">{id}</span>
+                    <Search className="w-3 h-3 text-white/30" />
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </main>

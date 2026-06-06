@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getSlipById }
   from '@/lib/actions/bets'
 import { SlipDetailCard }
@@ -9,7 +9,7 @@ import { LoadingSpinner }
   from '@/components/shared/LoadingSpinner'
 import { QRScanner }
   from '@/components/cashier/QRScanner'
-import { Search, Camera } from 'lucide-react'
+import { Search, Camera, Clock, Trash2 } from 'lucide-react'
 import type { SlipWithSelections }
   from '@/types/database.types'
 
@@ -23,6 +23,25 @@ export default function CashierCheckSlipPage() {
     useState(false)
   const [showScanner, setShowScanner] =
     useState(false)
+  const [history, setHistory] = useState<string[]>([])
+
+  useEffect(() => {
+    const stored = localStorage.getItem('nilebet_slip_history_cashier')
+    if (stored) setHistory(JSON.parse(stored))
+  }, [])
+
+  const addToHistory = (id: string) => {
+    setHistory(prev => {
+      const updated = [id, ...prev.filter(i => i !== id)].slice(0, 10)
+      localStorage.setItem('nilebet_slip_history_cashier', JSON.stringify(updated))
+      return updated
+    })
+  }
+
+  const clearHistory = () => {
+    localStorage.removeItem('nilebet_slip_history_cashier')
+    setHistory([])
+  }
 
   const handleCheck = async (id?: string) => {
     const checkId = (
@@ -37,6 +56,7 @@ export default function CashierCheckSlipPage() {
     const data = await getSlipById(checkId)
     if (data) {
       setSlip(data)
+      addToHistory(checkId)
     } else {
       setNotFound(true)
     }
@@ -139,6 +159,28 @@ export default function CashierCheckSlipPage() {
           slip={slip}
           showShareOptions
         />
+      )}
+
+      {history.length > 0 && (
+        <div className="mt-6 bg-slate-dark border border-gold/10 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-gold/60" />
+              <span className="text-sm font-semibold text-white/70">Recent Slips</span>
+            </div>
+            <button onClick={clearHistory} className="flex items-center gap-1 text-xs text-nile-danger/70 hover:text-nile-danger transition-colors">
+              <Trash2 className="w-3 h-3" /> Clear
+            </button>
+          </div>
+          <div className="space-y-2">
+            {history.map(id => (
+              <button key={id} onClick={() => { setSlipId(id); handleCheck(id) }} className="w-full flex items-center justify-between px-3 py-2 bg-charcoal/50 hover:bg-charcoal rounded-lg border border-gold/10 hover:border-gold/30 transition-all">
+                <span className="font-mono text-sm text-white">{id}</span>
+                <Search className="w-3 h-3 text-white/30" />
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )
