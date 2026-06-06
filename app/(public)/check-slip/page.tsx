@@ -15,7 +15,7 @@ import { LoadingSpinner }
 import { getSlipById }
   from '@/lib/actions/bets'
 import { cn } from '@/lib/utils'
-import { Clock, Trash2 } from 'lucide-react'
+import { Clock, Trash2, Info } from 'lucide-react'
 import type { SlipWithSelections }
   from '@/types/database.types'
 
@@ -181,6 +181,30 @@ export default function CheckSlipPage() {
           )}
         </div>
       </main>
+
+          {/* Information Card */}
+          <div className="mt-8 bg-slate-dark border border-gold/15 rounded-xl p-6 w-full max-w-xl mx-auto">
+            <div className="flex items-center gap-2 mb-4">
+              <Info className="w-5 h-5 text-gold flex-shrink-0" />
+              <h2 className="text-white font-bold text-base tracking-wide">Information</h2>
+            </div>
+            <ul className="space-y-2.5">
+              {[
+                'Verify the authenticity and status of your betting slip using your unique Slip ID.',
+                'Newly placed bets may require a short processing period before appearing in the system.',
+                'Keep your Slip ID safe, as it serves as proof of your wager.',
+                'Winning payouts are subject to applicable taxes, regulations, and verification procedures.',
+                'Only officially confirmed Nile Betting records are considered valid for settlement.',
+                'For support, disputes, or payout inquiries, contact an authorized Nile Betting Shop.',
+                'Nile Betting is committed to providing secure, transparent, and reliable betting services.',
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-[#A9B4D0] leading-relaxed">
+                  <span className="text-gold mt-0.5 flex-shrink-0">•</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
       <Footer />
     </div>
