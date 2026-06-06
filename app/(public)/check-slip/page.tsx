@@ -73,17 +73,17 @@ export default function CheckSlipPage() {
     <div className="min-h-screen flex flex-col">
       <PublicNavbar />
 
-      <main className="flex-1 flex flex-col items-center px-4 py-12">
+      <main className="flex-1 flex flex-col items-center px-4 py-8">
         <div className="w-full max-w-xl">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
+          <div className="text-center mb-4">
+            <div className="flex justify-center mb-2">
               <Logo size="lg" showTagline />
             </div>
-            <h1 className="font-display text-3xl font-bold text-white mb-2">
+            <h1 className="font-display text-xl font-bold text-white mb-1">
               Check Your Slip
             </h1>
-            <p className="text-white/50 text-sm">
+            <p className="text-white/40 text-xs">
               Enter your slip ID to see the
               current status
             </p>
@@ -129,7 +129,7 @@ export default function CheckSlipPage() {
 
           {/* Result */}
           {loading && (
-            <div className="flex justify-center py-12">
+            <div className="flex justify-center py-8">
               <LoadingSpinner
                 size="md"
                 color="gold"
@@ -143,7 +143,7 @@ export default function CheckSlipPage() {
               <p className="text-nile-danger font-semibold">
                 ❌ Slip not found
               </p>
-              <p className="text-white/50 text-sm mt-1">
+              <p className="text-white/40 text-xs mt-1">
                 Please check the ID and try
                 again
               </p>
