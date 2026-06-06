@@ -35,11 +35,11 @@ export default function LoginPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #0D1526 0%, #141F36 50%, #1a1040 100%)' }}
+      style={{ background: '#0D1526' }}
     >
       {/* Background glow effects */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-10 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #D4AF37 0%, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, #FFD700 0%, transparent 70%)' }} />
       <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5 pointer-events-none"
         style={{ background: 'radial-gradient(circle, #4f46e5 0%, transparent 70%)' }} />
 
@@ -61,8 +61,8 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="rounded-2xl p-8 relative" style={{
-          background: 'linear-gradient(145deg, #141F36, #1E2A45)',
-          border: '1px solid rgba(212,175,55,0.15)',
+          background: '#1A1F4D',
+          border: '1px solid rgba(255,255,255,0.10)',
           boxShadow: '0 25px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.05)'
         }}>
           <h1 className="font-display text-2xl font-bold text-white mb-1">Welcome Back</h1>
@@ -83,11 +83,11 @@ export default function LoginPage() {
                   autoComplete="username"
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl text-white text-sm placeholder:text-white/20 focus:outline-none transition-all"
                   style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: '#141F36',
+                    border: '1px solid rgba(255,255,255,0.10)',
                   }}
-                  onFocus={e => e.target.style.borderColor = 'rgba(212,175,55,0.5)'}
-                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+                  onFocus={e => e.target.style.borderColor = '#FFD700'}
+                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.10)'}
                 />
               </div>
             </div>
@@ -106,11 +106,11 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   className="w-full pl-10 pr-12 py-3.5 rounded-xl text-white text-sm placeholder:text-white/20 focus:outline-none transition-all"
                   style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: '#141F36',
+                    border: '1px solid rgba(255,255,255,0.10)',
                   }}
-                  onFocus={e => e.target.style.borderColor = 'rgba(212,175,55,0.5)'}
-                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+                  onFocus={e => e.target.style.borderColor = '#FFD700'}
+                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.10)'}
                 />
                 <button type="button" onClick={() => setShowPw(!showPw)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
@@ -147,14 +147,14 @@ export default function LoginPage() {
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
             <span className="text-xs" style={{ color: '#A9B4D0' }}>New to NILE Bet?</span>
-            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
           </div>
 
           <Link href="/register"
             className="block w-full py-3.5 rounded-xl font-semibold text-sm text-center transition-all"
-            style={{ border: '1px solid rgba(212,175,55,0.3)', color: '#D4AF37' }}>
+            style={{ border: '1px solid rgba(255,215,0,0.4)', color: '#FFD700' }}>
             Create Account
           </Link>
 

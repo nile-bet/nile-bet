@@ -60,17 +60,17 @@ export default function RegisterPage() {
   }
 
   const inputStyle = {
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.08)',
+    background: '#141F36',
+    border: '1px solid rgba(255,255,255,0.10)',
   }
 
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #0D1526 0%, #141F36 50%, #1a1040 100%)' }}
+      style={{ background: '#0D1526' }}
     >
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-10 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #D4AF37 0%, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, #FFD700 0%, transparent 70%)' }} />
 
       <div className="w-full max-w-md relative z-10">
         <Link href="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors text-sm mb-8 group">
@@ -87,8 +87,8 @@ export default function RegisterPage() {
         </div>
 
         <div className="rounded-2xl p-8" style={{
-          background: 'linear-gradient(145deg, #141F36, #1E2A45)',
-          border: '1px solid rgba(212,175,55,0.15)',
+          background: '#1A1F4D',
+          border: '1px solid rgba(255,255,255,0.10)',
           boxShadow: '0 25px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)'
         }}>
           <h1 className="font-display text-2xl font-bold text-white mb-1">Create Account</h1>
@@ -112,8 +112,8 @@ export default function RegisterPage() {
                     ...inputStyle,
                     borderColor: available === true ? 'rgba(34,197,94,0.5)' : available === false ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)'
                   }}
-                  onFocus={e => { if (available === null) e.target.style.borderColor = 'rgba(212,175,55,0.5)' }}
-                  onBlur={e => { if (available === null) e.target.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                  onFocus={e => { if (available === null) e.target.style.borderColor = '#FFD700' }}
+                  onBlur={e => { if (available === null) e.target.style.borderColor = 'rgba(255,255,255,0.10)' }}
                 />
                 <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
                   {checking ? <Loader2 className="w-4 h-4 text-white/30 animate-spin" /> :
@@ -139,8 +139,8 @@ export default function RegisterPage() {
                   disabled={loading}
                   className="w-full pl-10 pr-12 py-3.5 rounded-xl text-white text-sm placeholder:text-white/20 focus:outline-none transition-all"
                   style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = 'rgba(212,175,55,0.5)'}
-                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+                  onFocus={e => e.target.style.borderColor = '#FFD700'}
+                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.10)'}
                 />
                 <button type="button" onClick={() => setShowPw(!showPw)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2"
@@ -177,8 +177,8 @@ export default function RegisterPage() {
                     ...inputStyle,
                     borderColor: confirm.length > 0 ? (password === confirm ? 'rgba(34,197,94,0.5)' : 'rgba(239,68,68,0.5)') : 'rgba(255,255,255,0.08)'
                   }}
-                  onFocus={e => { if (!confirm.length) e.target.style.borderColor = 'rgba(212,175,55,0.5)' }}
-                  onBlur={e => { if (!confirm.length) e.target.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                  onFocus={e => { if (!confirm.length) e.target.style.borderColor = '#FFD700' }}
+                  onBlur={e => { if (!confirm.length) e.target.style.borderColor = 'rgba(255,255,255,0.10)' }}
                 />
               </div>
               {confirm.length > 0 && password !== confirm && (
@@ -226,14 +226,14 @@ export default function RegisterPage() {
           </form>
 
           <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
             <span className="text-xs" style={{ color: '#A9B4D0' }}>Already have an account?</span>
-            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
           </div>
 
           <Link href="/login"
             className="block w-full py-3.5 rounded-xl font-semibold text-sm text-center transition-all"
-            style={{ border: '1px solid rgba(212,175,55,0.3)', color: '#D4AF37' }}>
+            style={{ border: '1px solid rgba(255,215,0,0.4)', color: '#FFD700' }}>
             Sign In
           </Link>
 
