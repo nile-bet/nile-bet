@@ -1122,15 +1122,12 @@ export async function agentApproveCreditRequest(
       .from('profiles').select('credit_balance').eq('id', req.requester_id).single()
     if (!cashier) return { success: false, error: 'Cashier not found' }
 
-    // Deduct from agent
-    await adminClient.from('profiles')
-      .update({ credit_balance: (agent.credit_balance ?? 0) - req.amount })
-      .eq('id', agentId)
-
-    // Add to cashier
-    await adminClient.from('profiles')
-      .update({ credit_balance: (cashier.credit_balance ?? 0) + req.amount })
-      .eq('id', req.requester_id)
+    // Deduct from agent atomically
+    const { error: agentErr } = await adminClient.rpc('increment_balance', { user_id: agentId, delta: -(req.amount) })
+    if (agentErr) throw new Error('Failed to deduct: ' + agentErr.message)
+    // Add to cashier atomically
+    const { error: cashierErr } = await adminClient.rpc('increment_balance', { user_id: req.requester_id, delta: req.amount })
+    if (cashierErr) throw new Error('Failed to credit: ' + cashierErr.message)
 
     // Mark approved
     await adminClient.from('credit_requests')
