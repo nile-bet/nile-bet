@@ -40,6 +40,40 @@ export default function CashierCreditsPage() {
     if (user) loadRequests()
   }, [user])
 
+  // Realtime: refresh balance + requests when credit_request status changes
+  useEffect(() => {
+    if (!user) return
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`cashier-credits-page-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'credit_requests',
+          filter: `requester_id=eq.${user.id}`,
+        },
+        async (payload) => {
+          const updated = payload.new as any
+          loadRequests()
+          if (updated.status === 'approved') {
+            // Force refresh balance from DB
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('credit_balance')
+              .eq('id', user.id)
+              .single()
+            if (profile) {
+              useAuthStore.getState().updateBalance(profile.credit_balance)
+            }
+          }
+        }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [user])
+
   const loadRequests = async () => {
     if (!user) return
     const supabase = createClient()
