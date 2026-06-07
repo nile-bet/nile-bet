@@ -830,12 +830,11 @@ export async function approveCouponByAgent(
       coupon.amount
     ).catch(() => {})
   } else {
-    // Withdrawal: release bettor reserved AND deduct credit_balance, agent receives
+    // Withdrawal: credit_balance already deducted on creation, only release reserved_balance
     await adminClient
       .from('profiles')
       .update({
         reserved_balance: Math.max(0, (bettor.reserved_balance ?? 0) - coupon.amount),
-        credit_balance: Math.max(0, (bettor.credit_balance ?? 0) - coupon.amount),
       })
       .eq('id', coupon.bettor_id)
 
