@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import {
   requestCreditsFromAdmin,
   getAgentCreditHistory,
+  agentApproveCreditRequest,
+  agentDeclineCreditRequest,
 } from '@/lib/actions/agent'
 import { createClient }
   from '@/lib/supabase/client'
@@ -377,6 +379,60 @@ export default function AgentCreditsPage() {
           )}
         </div>
       )}
+
+      {activeTab === 'cashiers' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-white font-semibold">Cashier Credit Requests</h3>
+              <span className="text-white/40 text-xs">{cashierRequests.length} total</span>
+            </div>
+            {cashierRequests.length === 0 ? (
+              <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-8 text-center">
+                <p className="text-white/40 text-sm">No cashier requests yet</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {cashierRequests.map((req) => (
+                  <div key={req.id} className={cn(
+                    'bg-slate-dark border rounded-xl p-4',
+                    req.status === 'pending' ? 'border-gold/30' :
+                    req.status === 'approved' ? 'border-nile-success/30' : 'border-nile-danger/20'
+                  )}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-white font-semibold text-sm">@{req.requester?.username ?? '—'}</p>
+                        <p className="text-white/40 text-xs">{formatDate(req.created_at)}</p>
+                        {req.note && <p className="text-white/50 text-xs mt-0.5">{req.note}</p>}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-gold font-mono font-bold text-lg">{formatETB(req.amount)}</p>
+                        <StatusBadge status={req.status} type="request" />
+                      </div>
+                    </div>
+                    {req.status === 'pending' && (
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => handleApproveCashierRequest(req.id, req.amount, req.requester_id)}
+                          disabled={approvingId === req.id}
+                          className="flex-1 bg-nile-success text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-nile-success/80 disabled:opacity-50 transition-colors"
+                        >
+                          {approvingId === req.id ? 'Processing...' : '✓ Approve'}
+                        </button>
+                        <button
+                          onClick={() => handleDeclineCashierRequest(req.id, req.requester_id)}
+                          disabled={approvingId === req.id}
+                          className="flex-1 border border-nile-danger/40 text-nile-danger py-2.5 rounded-lg text-sm hover:bg-nile-danger/10 disabled:opacity-50 transition-colors"
+                        >
+                          ✗ Decline
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
       {activeTab === 'history' && (
         <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">

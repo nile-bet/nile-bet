@@ -1094,3 +1094,125 @@ export async function declineCouponByAgent(
 
   return { success: true }
 }
+
+// ─── AGENT APPROVE/DECLINE CASHIER CREDIT REQUEST ─────────────────────────
+export async function agentApproveCreditRequest(
+  requestId: string,
+  agentId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const adminClient = await createAdminClient()
+
+    const { data: req } = await adminClient
+      .from('credit_requests')
+      .select('*')
+      .eq('id', requestId)
+      .eq('to_user_id', agentId)
+      .single()
+    if (!req || req.status !== 'pending') return { success: false, error: 'Invalid request' }
+
+    // Check agent balance
+    const { data: agent } = await adminClient
+      .from('profiles').select('credit_balance, username').eq('id', agentId).single()
+    if (!agent) return { success: false, error: 'Agent not found' }
+    if ((agent.credit_balance ?? 0) < req.amount) return { success: false, error: 'Insufficient balance' }
+
+    // Get cashier balance
+    const { data: cashier } = await adminClient
+      .from('profiles').select('credit_balance').eq('id', req.requester_id).single()
+    if (!cashier) return { success: false, error: 'Cashier not found' }
+
+    // Deduct from agent
+    await adminClient.from('profiles')
+      .update({ credit_balance: (agent.credit_balance ?? 0) - req.amount })
+      .eq('id', agentId)
+
+    // Add to cashier
+    await adminClient.from('profiles')
+      .update({ credit_balance: (cashier.credit_balance ?? 0) + req.amount })
+      .eq('id', req.requester_id)
+
+    // Mark approved
+    await adminClient.from('credit_requests')
+      .update({ status: 'approved', updated_at: new Date().toISOString() })
+      .eq('id', requestId)
+
+    // Log transaction
+    await adminClient.from('transactions').insert({
+      from_user_id: agentId,
+      to_user_id: req.requester_id,
+      amount: req.amount,
+      type: 'credit_assigned',
+      note: 'Agent approved cashier credit request',
+    })
+
+    // Notify cashier
+    await adminClient.from('notifications').insert({
+      to_user_id: req.requester_id,
+      from_user_id: agentId,
+      message: `✅ Your credit request of ETB ${Number(req.amount).toLocaleString()} has been approved by your agent @${agent.username}!`,
+      type: 'balance_updated',
+      priority: 'normal',
+    })
+
+    // Log activity
+    await adminClient.from('activity_logs').insert({
+      user_id: agentId,
+      action: 'credit_request_approved',
+      details: { requester_id: req.requester_id, amount: req.amount },
+    })
+
+    return { success: true }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+export async function agentDeclineCreditRequest(
+  requestId: string,
+  agentId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const adminClient = await createAdminClient()
+    const { data: req } = await adminClient
+      .from('credit_requests').select('requester_id').eq('id', requestId).single()
+
+    await adminClient.from('credit_requests')
+      .update({ status: 'declined', updated_at: new Date().toISOString() })
+      .eq('id', requestId)
+
+    if (req?.requester_id) {
+      await adminClient.from('notifications').insert({
+        to_user_id: req.requester_id,
+        from_user_id: agentId,
+        message: `❌ Your credit request has been declined by your agent.`,
+        type: 'balance_updated',
+        priority: 'normal',
+      })
+    }
+
+    return { success: true }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// ─── DEBUG: Test agent credit approval ────────────────────────────────────
+export async function debugAgentApproval(requestId: string, agentId: string) {
+  const adminClient = await createAdminClient()
+  
+  const { data: req, error: reqErr } = await adminClient
+    .from('credit_requests').select('*').eq('id', requestId).single()
+  
+  const { data: agent, error: agentErr } = await adminClient
+    .from('profiles').select('id, credit_balance').eq('id', agentId).single()
+  
+  const { data: cashier, error: cashierErr } = req ? await adminClient
+    .from('profiles').select('id, credit_balance').eq('id', req.requester_id).single() : { data: null, error: null }
+
+  return {
+    req, reqErr: reqErr?.message,
+    agent, agentErr: agentErr?.message,
+    cashier, cashierErr: cashierErr?.message,
+  }
+}
