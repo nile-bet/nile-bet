@@ -35,15 +35,88 @@ export default function AgentCreditsPage() {
     useState<any[]>([])
   const [activeTab, setActiveTab] =
     useState('request')
+  const [cashierRequests, setCashierRequests] =
+    useState<any[]>([])
+  const [approvingId, setApprovingId] =
+    useState<string | null>(null)
 
   useEffect(() => {
     if (user) {
       loadRequests()
-      getAgentCreditHistory(user.id).then(
-        setHistory
-      )
+      loadCashierRequests()
+      getAgentCreditHistory(user.id).then(setHistory)
     }
   }, [user])
+
+  const loadCashierRequests = async () => {
+    if (!user) return
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('credit_requests')
+      .select('*, requester:profiles!credit_requests_requester_id_fkey(username, credit_balance)')
+      .eq('to_user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(50)
+    setCashierRequests(data ?? [])
+  }
+
+  const handleApproveCashierRequest = async (reqId: string, amount: number, requesterId: string) => {
+    if (!user) return
+    setApprovingId(reqId)
+    try {
+      const supabase = createClient()
+      // Check agent balance
+      if ((user.credit_balance ?? 0) < amount) {
+        toast.error('Insufficient balance to approve this request')
+        return
+      }
+      // Deduct from agent
+      await supabase.from('profiles').update({
+        credit_balance: (user.credit_balance ?? 0) - amount
+      }).eq('id', user.id)
+      // Add to cashier
+      const { data: cashier } = await supabase.from('profiles').select('credit_balance').eq('id', requesterId).single()
+      await supabase.from('profiles').update({
+        credit_balance: (cashier?.credit_balance ?? 0) + amount
+      }).eq('id', requesterId)
+      // Mark approved
+      await supabase.from('credit_requests').update({
+        status: 'approved', updated_at: new Date().toISOString()
+      }).eq('id', reqId)
+      // Notify cashier
+      await supabase.from('notifications').insert({
+        to_user_id: requesterId,
+        from_user_id: user.id,
+        message: `✅ Your credit request of ETB ${amount.toLocaleString()} has been approved by your agent!`,
+        type: 'balance_updated',
+        priority: 'normal',
+      })
+      toast.success('Request approved!')
+      loadCashierRequests()
+    } catch (e: any) {
+      toast.error(e.message ?? 'Failed to approve')
+    }
+    setApprovingId(null)
+  }
+
+  const handleDeclineCashierRequest = async (reqId: string, requesterId: string) => {
+    if (!user) return
+    setApprovingId(reqId)
+    const supabase = createClient()
+    await supabase.from('credit_requests').update({
+      status: 'declined', updated_at: new Date().toISOString()
+    }).eq('id', reqId)
+    await supabase.from('notifications').insert({
+      to_user_id: requesterId,
+      from_user_id: user.id,
+      message: `❌ Your credit request has been declined by your agent.`,
+      type: 'balance_updated',
+      priority: 'normal',
+    })
+    toast.success('Request declined')
+    loadCashierRequests()
+    setApprovingId(null)
+  }
 
   const loadRequests = async () => {
     if (!user) return
@@ -168,6 +241,7 @@ export default function AgentCreditsPage() {
       <div className="flex gap-2">
         {[
           { key: 'request', label: 'Request Credits' },
+          { key: 'cashiers', label: `Cashier Requests${cashierRequests.filter(r => r.status === 'pending').length > 0 ? ` (${cashierRequests.filter(r => r.status === 'pending').length})` : ''}` },
           { key: 'history', label: 'History' },
         ].map((t) => (
           <button

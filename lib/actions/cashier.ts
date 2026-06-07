@@ -349,25 +349,25 @@ export async function requestCreditsByCashier(
       error: 'Cashier not found',
     }
   }
+  // Find admin first
+  const { data: admin } = await supabase
+    .from('profiles').select('id').eq('role', 'admin').limit(1).single()
 
-  let toUserId = cashier.created_by
+  let toUserId: string | null = null
 
-  // If not to agent, find admin
-  if (!toAgent) {
-    const { data: admin } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('role', 'admin')
-      .limit(1)
-      .single()
-    toUserId = admin?.id ?? cashier.created_by
-  }
-
-  if (!toUserId) {
-    return {
-      success: false,
-      error: 'No recipient found',
+  if (toAgent) {
+    // Verify created_by is actually an agent
+    if (cashier.created_by) {
+      const { data: creator } = await supabase
+        .from('profiles').select('id, role').eq('id', cashier.created_by).single()
+      if (creator?.role === 'agent') {
+        toUserId = creator.id
+      }
     }
+    // Fallback to admin if no agent found
+    if (!toUserId) toUserId = admin?.id ?? null
+  } else {
+    toUserId = admin?.id ?? cashier.created_by
   }
 
   await supabase
@@ -390,24 +390,13 @@ export async function requestCreditsByCashier(
       priority: 'normal',
     })
 
-  // Also notify admin if request to agent
-  if (toAgent) {
-    const { data: admin } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('role', 'admin')
-      .limit(1)
-      .single()
-
-    if (admin) {
-      await supabase
-        .from('notifications')
-        .insert({
-          to_user_id: admin.id,
-          message: `Cashier @${cashier.username} requested ETB ${amount.toLocaleString()} from their agent`,
-          type: 'broadcast',
-        })
-    }
+  // Also notify admin if request went to agent (not to admin directly)
+  if (toAgent && admin && toUserId !== admin.id) {
+    await supabase.from('notifications').insert({
+      to_user_id: admin.id,
+      message: `Cashier @${cashier.username} requested ETB ${amount.toLocaleString()} from their agent`,
+      type: 'broadcast',
+    })
   }
 
   await supabase
