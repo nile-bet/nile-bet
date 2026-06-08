@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { DateRangeFilter, type DateFilterValue } from '@/components/shared/DateRangeFilter'
 import { getAgentReport }
   from '@/lib/actions/agent'
 import { StatsCard }
@@ -26,13 +27,12 @@ export default function AgentReportsPage() {
     useState<any>(null)
   const [loading, setLoading] =
     useState(true)
-  const [datePreset, setDatePreset] =
-    useState('month')
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'monthly' })
 
   useEffect(() => {
     if (!user) return
     loadReport()
-  }, [user, datePreset])
+  }, [user, dateFilter])
 
   const loadReport = async () => {
     if (!user) return
@@ -42,27 +42,23 @@ export default function AgentReportsPage() {
     let startDate: string | undefined
     let endDate: string | undefined
 
-    if (datePreset === 'month') {
-      const s = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        1
-      )
+    if (dateFilter.type === 'custom') {
+      startDate = dateFilter.startDate
+      endDate = dateFilter.endDate
+    } else if (dateFilter.type === 'monthly') {
+      const s = new Date(now.getFullYear(), now.getMonth(), 1)
       startDate = s.toISOString()
       endDate = now.toISOString()
-    } else if (datePreset === 'lastmonth') {
-      const s = new Date(
-        now.getFullYear(),
-        now.getMonth() - 1,
-        1
-      )
-      const e = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        0
-      )
+    } else if (dateFilter.type === 'weekly') {
+      const s = new Date(now)
+      s.setDate(now.getDate() - 7)
       startDate = s.toISOString()
-      endDate = e.toISOString()
+      endDate = now.toISOString()
+    } else if (dateFilter.type === 'daily') {
+      const s = new Date(now)
+      s.setHours(0,0,0,0)
+      startDate = s.toISOString()
+      endDate = now.toISOString()
     } else {
       const s = new Date(
         now.getFullYear(),
@@ -116,29 +112,7 @@ export default function AgentReportsPage() {
         </button>
       </div>
 
-      {/* Date presets */}
-      <div className="flex gap-2">
-        {[
-          { key: 'month', label: 'This Month' },
-          { key: 'lastmonth', label: 'Last Month' },
-          { key: 'year', label: 'This Year' },
-        ].map((p) => (
-          <button
-            key={p.key}
-            onClick={() =>
-              setDatePreset(p.key)
-            }
-            className={cn(
-              'px-4 py-2 rounded-lg text-sm font-medium',
-              datePreset === p.key
-                ? 'bg-gold text-charcoal'
-                : 'bg-slate-dark border border-nile-blue/30 text-white/60 hover:text-white'
-            )}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
+      <DateRangeFilter value={dateFilter} onChange={setDateFilter} />
 
       {loading ? (
         <p className="text-white/50 text-center py-12">

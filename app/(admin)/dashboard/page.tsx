@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { DateRangeFilter, type DateFilterValue } from '@/components/shared/DateRangeFilter'
 import { createClient }
   from '@/lib/supabase/client'
 import {
@@ -43,12 +44,6 @@ import {
 } from 'recharts'
 import { cn } from '@/lib/utils'
 
-const DATE_FILTERS = [
-  { key: 'lifetime', label: 'Lifetime' },
-  { key: 'daily', label: 'Daily' },
-  { key: 'weekly', label: 'Weekly' },
-  { key: 'monthly', label: 'Monthly' },
-]
 
 const PIE_COLORS = {
   pending: '#4A90D9',
@@ -60,8 +55,7 @@ const PIE_COLORS = {
 
 export default function AdminDashboard() {
   const { user } = useAuthStore()
-  const [dateFilter, setDateFilter] =
-    useState('daily')
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'daily' })
   const [stats, setStats] =
     useState<any>(null)
   const [revenueData, setRevenueData] =
@@ -123,10 +117,10 @@ export default function AdminDashboard() {
       slipCounts,
       agentData,
     ] = await Promise.all([
-      getPlatformStats(dateFilter),
+      getPlatformStats(dateFilter as any),
       getRevenueByDay(30),
       getSlipStatusCounts(),
-      getAgentPerformance(dateFilter),
+      getAgentPerformance(dateFilter as any),
     ])
 
     setStats(statsData)
@@ -198,35 +192,9 @@ export default function AdminDashboard() {
   return (
     <div className="p-6 space-y-6">
       {/* Date filter */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {DATE_FILTERS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() =>
-              setDateFilter(f.key)
-            }
-            className={cn(
-              'px-4 py-1.5 rounded-lg text-sm font-medium transition-colors',
-              dateFilter === f.key
-                ? 'bg-gold text-charcoal'
-                : 'bg-slate-dark border border-nile-blue/30 text-white/60 hover:text-white'
-            )}
-          >
-            {f.label}
-            {f.key === 'daily' && (
-              <span className="ml-1 w-1.5 h-1.5 rounded-full bg-nile-success inline-block" />
-            )}
-          </button>
-        ))}
-
-        <div className="ml-auto text-xs text-white/40 bg-nile-blue/20 border border-gold/20 px-3 py-1.5 rounded-lg">
-          📅 Showing:{' '}
-          {DATE_FILTERS.find(
-            (f) => f.key === dateFilter
-          )?.label}{' '}
-          data •{' '}
-          {stats?.totalSlipsToday ?? 0} slips
-        </div>
+      <DateRangeFilter value={dateFilter} onChange={setDateFilter} />
+      <div className="text-xs text-white/40 bg-nile-blue/20 border border-gold/20 px-3 py-1.5 rounded-lg w-fit">
+        Showing: {dateFilter.type} data • {stats?.totalSlipsToday ?? 0} slips
       </div>
 
       {/* Stats Row 1 */}

@@ -35,18 +35,11 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import * as XLSX from 'xlsx'
-
-const DATE_FILTERS = [
-  { key: 'lifetime', label: 'Lifetime' },
-  { key: 'daily', label: 'Daily' },
-  { key: 'weekly', label: 'Weekly' },
-  { key: 'monthly', label: 'Monthly' },
-]
+import { DateRangeFilter, type DateFilterValue } from '@/components/shared/DateRangeFilter'
 
 export default function CashierDashboard() {
   const { user } = useAuthStore()
-  const [dateFilter, setDateFilter] =
-    useState('daily')
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'daily' })
   const [stats, setStats] =
     useState<any>(null)
   const [payouts, setPayouts] =
@@ -70,9 +63,7 @@ export default function CashierDashboard() {
     if (!user) return
     setLoading(true)
 
-    const filter = {
-      type: dateFilter as any,
-    }
+    const filter = dateFilter
 
     const [statsData, payoutsData] =
       await Promise.all([
@@ -106,10 +97,7 @@ export default function CashierDashboard() {
     if (!user) return
 
     const reportData =
-      await generateCashierReportData(
-        user.id,
-        { type: dateFilter as any }
-      )
+      await generateCashierReportData(user.id, dateFilter)
 
     const wb = XLSX.utils.book_new()
 
@@ -189,7 +177,7 @@ export default function CashierDashboard() {
 
     XLSX.writeFile(
       wb,
-      `cashier-report-${dateFilter}.xlsx`
+      `cashier-report-${dateFilter.type}.xlsx`
     )
   }
 
@@ -351,40 +339,19 @@ export default function CashierDashboard() {
 
       {/* Header + Date filter */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex gap-2 flex-wrap">
-          {DATE_FILTERS.map((f) => (
-            <button
-              key={f.key}
-              onClick={() =>
-                setDateFilter(f.key)
-              }
-              className={cn(
-                'px-4 py-1.5 rounded-lg text-sm font-medium',
-                dateFilter === f.key
-                  ? 'bg-gold text-charcoal'
-                  : 'bg-slate-dark border border-nile-blue/30 text-white/60 hover:text-white'
-              )}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-        <button
-          onClick={handleExportExcel}
-          disabled={loading}
-          className="border border-gold/30 text-gold px-4 py-2 rounded-lg text-sm hover:bg-gold/10 disabled:opacity-40 flex items-center gap-2"
-        >
-          📊 Export Excel
-        </button>
+        <DateRangeFilter
+          value={dateFilter}
+          onChange={setDateFilter}
+          onExport={handleExportExcel}
+          exportLoading={loading}
+        />
       </div>
 
       {/* Data banner */}
       {!loading && stats && (
         <div className="bg-nile-blue/20 border border-gold/20 rounded-lg px-4 py-2 text-xs text-white/50">
           📅 Showing:{' '}
-          {DATE_FILTERS.find(
-            (f) => f.key === dateFilter
-          )?.label}{' '}
+          {dateFilter.type === 'custom' ? `${dateFilter.startDate?.slice(0,10)} → ${dateFilter.endDate?.slice(0,10)}` : dateFilter.type}{' '}
           data • {stats.totalSlips} total slips
         </div>
       )}

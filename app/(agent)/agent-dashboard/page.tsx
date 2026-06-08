@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient }
   from '@/lib/supabase/client'
+import { DateRangeFilter, type DateFilterValue } from '@/components/shared/DateRangeFilter'
 import { getAgentStats }
   from '@/lib/actions/agent'
 import { StatsCard }
@@ -36,17 +37,10 @@ import { cn } from '@/lib/utils'
 import { getAgentReport }
   from '@/lib/actions/agent'
 
-const DATE_FILTERS = [
-  { key: 'lifetime', label: 'Lifetime' },
-  { key: 'daily', label: 'Daily' },
-  { key: 'weekly', label: 'Weekly' },
-  { key: 'monthly', label: 'Monthly' },
-]
 
 export default function AgentDashboard() {
   const { user } = useAuthStore()
-  const [dateFilter, setDateFilter] =
-    useState('daily')
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'daily' })
   const [stats, setStats] =
     useState<any>(null)
   const [report, setReport] =
@@ -84,7 +78,7 @@ export default function AgentDashboard() {
 
     const [statsData, reportData] =
       await Promise.all([
-        getAgentStats(user.id, dateFilter),
+        getAgentStats(user.id, dateFilter as any),
         getAgentReport(user.id),
       ])
 
@@ -123,27 +117,7 @@ export default function AgentDashboard() {
       )}
 
       {/* Date filter */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {DATE_FILTERS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() =>
-              setDateFilter(f.key)
-            }
-            className={cn(
-              'px-4 py-1.5 rounded-lg text-sm font-medium',
-              dateFilter === f.key
-                ? 'bg-gold text-charcoal'
-                : 'bg-slate-dark border border-nile-blue/30 text-white/60 hover:text-white'
-            )}
-          >
-            {f.label}
-            {f.key === 'daily' && (
-              <span className="ml-1 w-1.5 h-1.5 rounded-full bg-nile-success inline-block" />
-            )}
-          </button>
-        ))}
-      </div>
+      <DateRangeFilter value={dateFilter} onChange={setDateFilter} />
 
       {/* Stats grid */}
       {loading ? (

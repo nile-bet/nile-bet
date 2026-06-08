@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { DateRangeFilter, type DateFilterValue } from '@/components/shared/DateRangeFilter'
 import {
   getAgentProfitReport,
   getTopUsersReport,
@@ -98,8 +99,7 @@ const tooltipStyle = {
 export default function ReportsPage() {
   const [activeTab, setActiveTab] =
     useState('agent')
-  const [datePreset, setDatePreset] =
-    useState('month')
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'monthly' })
   const [loading, setLoading] =
     useState(true)
 
@@ -121,13 +121,13 @@ export default function ReportsPage() {
 
   useEffect(() => {
     loadData()
-  }, [activeTab, datePreset, granularity])
+  }, [activeTab, dateFilter, granularity])
 
   const loadData = async () => {
     setLoading(true)
-    const { startDate, endDate } =
-      getDateRange(datePreset)
-    const filters = { startDate, endDate }
+    const filters = dateFilter.type === 'custom'
+      ? { startDate: dateFilter.startDate, endDate: dateFilter.endDate }
+      : getDateRange(dateFilter.type)
 
     if (activeTab === 'agent') {
       const data =
@@ -259,24 +259,9 @@ export default function ReportsPage() {
         ))}
       </div>
 
-      {/* Date presets */}
+      {/* Date filter */}
       <div className="flex items-center gap-3 flex-wrap">
-        {DATE_PRESETS.map((p) => (
-          <button
-            key={p.key}
-            onClick={() =>
-              setDatePreset(p.key)
-            }
-            className={cn(
-              'px-3 py-1.5 rounded-lg text-xs border',
-              datePreset === p.key
-                ? 'bg-nile-blue border-nile-blue text-white'
-                : 'border-nile-blue/30 text-white/50 hover:text-white'
-            )}
-          >
-            {p.label}
-          </button>
-        ))}
+        <DateRangeFilter value={dateFilter} onChange={setDateFilter} />
         <button
           onClick={() =>
             exportExcel(
