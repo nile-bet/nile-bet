@@ -1100,80 +1100,81 @@ export async function agentApproveCreditRequest(
   requestId: string,
   agentId: string
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    const adminClient = await createAdminClient()
+  const supabase = await createClient()
+  const adminClient = await createAdminClient()
 
-    const { data: req, error: reqFetchErr } = await adminClient
-      .from('credit_requests')
-      .select('*')
-      .eq('id', requestId)
-      .single()
-    if (reqFetchErr) return { success: false, error: 'Request not found: ' + reqFetchErr.message }
-    if (!req) return { success: false, error: 'Request not found' }
-    if (req.status !== 'pending') return { success: false, error: 'Request is already ' + req.status }
-    // Log for debugging
-    console.log('agentApproveCreditRequest:', { requestId, agentId, req_to_user_id: req.to_user_id, req_requester_id: req.requester_id, req_amount: req.amount })
+  // Fetch request using regular client
+  const { data: req } = await supabase
+    .from('credit_requests')
+    .select('*')
+    .eq('id', requestId)
+    .single()
 
-    // Check agent balance
-    const { data: agent } = await adminClient
-      .from('profiles').select('credit_balance, username').eq('id', agentId).single()
-    if (!agent) return { success: false, error: 'Agent not found' }
-    if ((agent.credit_balance ?? 0) < req.amount) return { success: false, error: 'Insufficient balance' }
+  if (!req || req.status !== 'pending') return { success: false, error: 'Invalid or already processed request' }
 
-    // Get cashier balance
-    const { data: cashier } = await adminClient
-      .from('profiles').select('credit_balance').eq('id', req.requester_id).single()
-    if (!cashier) return { success: false, error: 'Cashier not found' }
+  // Get requester (cashier) current balance using adminClient
+  const { data: cashierProfile } = await adminClient
+    .from('profiles')
+    .select('credit_balance, username')
+    .eq('id', req.requester_id)
+    .single()
+  if (!cashierProfile) return { success: false, error: 'Cashier profile not found' }
 
-    // Deduct from agent
-    const { error: agentErr } = await adminClient
-      .from('profiles')
-      .update({ credit_balance: (agent.credit_balance ?? 0) - Number(req.amount) })
-      .eq('id', agentId)
-    if (agentErr) return { success: false, error: 'Failed to deduct agent balance: ' + agentErr.message }
-    // Add to cashier
-    const newCashierBalance = (cashier.credit_balance ?? 0) + Number(req.amount)
-    const { error: cashierErr } = await adminClient
-      .from('profiles')
-      .update({ credit_balance: newCashierBalance })
-      .eq('id', req.requester_id)
-    if (cashierErr) return { success: false, error: 'Failed to update cashier balance: ' + cashierErr.message }
-
-    // Mark approved
-    await adminClient.from('credit_requests')
-      .update({ status: 'approved', updated_at: new Date().toISOString() })
-      .eq('id', requestId)
-
-    // Log transaction
-    await adminClient.from('transactions').insert({
-      from_user_id: agentId,
-      to_user_id: req.requester_id,
-      amount: req.amount,
-      type: 'credit_assigned',
-      note: 'Agent approved cashier credit request',
-    })
-
-    // Notify cashier
-    await adminClient.from('notifications').insert({
-      to_user_id: req.requester_id,
-      from_user_id: agentId,
-      message: `✅ Your credit request of ETB ${Number(req.amount).toLocaleString()} has been approved by your agent @${agent.username}!`,
-      type: 'balance_updated',
-      priority: 'normal',
-    })
-
-    // Log activity
-    await adminClient.from('activity_logs').insert({
-      user_id: agentId,
-      action: 'credit_request_approved',
-      details: { requester_id: req.requester_id, amount: req.amount },
-    })
-
-    return { success: true }
-  } catch (e: any) {
-    return { success: false, error: e.message }
+  // Get agent current balance
+  const { data: agentProfile } = await adminClient
+    .from('profiles')
+    .select('credit_balance, username')
+    .eq('id', agentId)
+    .single()
+  if (!agentProfile) return { success: false, error: 'Agent profile not found' }
+  if ((agentProfile.credit_balance ?? 0) < Number(req.amount)) {
+    return { success: false, error: 'Insufficient agent balance' }
   }
+
+  const newCashierBalance = (cashierProfile.credit_balance ?? 0) + Number(req.amount)
+  const newAgentBalance = (agentProfile.credit_balance ?? 0) - Number(req.amount)
+
+  // Update cashier balance
+  const { error: cashierUpdateErr } = await adminClient
+    .from('profiles')
+    .update({ credit_balance: newCashierBalance })
+    .eq('id', req.requester_id)
+  if (cashierUpdateErr) return { success: false, error: 'Failed to update cashier balance: ' + cashierUpdateErr.message }
+
+  // Update agent balance
+  const { error: agentUpdateErr } = await adminClient
+    .from('profiles')
+    .update({ credit_balance: newAgentBalance })
+    .eq('id', agentId)
+  if (agentUpdateErr) return { success: false, error: 'Failed to update agent balance: ' + agentUpdateErr.message }
+
+  // Mark request approved
+  await adminClient.from('credit_requests').update({
+    status: 'approved',
+    updated_at: new Date().toISOString(),
+  }).eq('id', requestId)
+
+  // Log transaction
+  await adminClient.from('transactions').insert({
+    from_user_id: agentId,
+    to_user_id: req.requester_id,
+    amount: req.amount,
+    type: 'credit_assigned',
+    note: 'Agent approved cashier credit request: ' + (req.note ?? ''),
+  })
+
+  // Notify cashier
+  await adminClient.from('notifications').insert({
+    to_user_id: req.requester_id,
+    from_user_id: agentId,
+    message: 'Your credit request of ETB ' + Number(req.amount).toLocaleString() + ' has been approved by your agent @' + agentProfile.username + '!',
+    type: 'balance_updated',
+    priority: 'normal',
+  })
+
+  return { success: true }
 }
+
 
 export async function agentDeclineCreditRequest(
   requestId: string,
