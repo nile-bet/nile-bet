@@ -79,11 +79,9 @@ export default function CashierCreditsPage() {
     const supabase = createClient()
     const { data } = await supabase
       .from('credit_requests')
-      .select('*')
+      .select('*, approver:profiles!credit_requests_to_user_id_fkey(username, role)')
       .eq('requester_id', user.id)
-      .order('created_at', {
-        ascending: false,
-      })
+      .order('created_at', { ascending: false })
       .limit(20)
     setRequests(data ?? [])
   }
@@ -357,6 +355,22 @@ export default function CashierCreditsPage() {
                     {formatDate(v)}
                   </span>
                 ),
+              },
+              {
+                key: 'approver',
+                label: 'Approved By',
+                render: (_v: any, row: any) => {
+                  if (row.status === 'pending') return <span className="text-white/30 text-xs">—</span>
+                  const name = row.approver?.username
+                  const role = row.approver?.role
+                  if (!name) return <span className="text-white/30 text-xs">—</span>
+                  return (
+                    <span className="text-xs font-medium">
+                      <span className={role === 'admin' ? 'text-nile-purple' : 'text-gold'}>@{name}</span>
+                      <span className="text-white/30 ml-1">({role})</span>
+                    </span>
+                  )
+                },
               },
             ]}
             data={requests}
