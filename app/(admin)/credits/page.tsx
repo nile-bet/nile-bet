@@ -81,19 +81,10 @@ export default function CreditsPage() {
       return
     }
     const timer = setTimeout(async () => {
-      const { users } = await getAllUsers(
-        'agent',
-        { search, limit: 5 }
-      )
-      const { users: cashiers } =
-        await getAllUsers('cashier', {
-          search,
-          limit: 5,
-        })
-      setSearchResults([
-        ...users,
-        ...cashiers,
-      ])
+      const { users: agents } = await getAllUsers('agent', { search, limit: 5 })
+      const { users: cashiers } = await getAllUsers('cashier', { search, limit: 5 })
+      const { users: bettors } = await getAllUsers('bettor', { search, limit: 5 })
+      setSearchResults([...agents, ...cashiers, ...bettors])
       setShowSearch(true)
     }, 300)
     return () => clearTimeout(timer)
@@ -308,7 +299,7 @@ export default function CreditsPage() {
                       setSelectedUser(null)
                     setSearch(e.target.value)
                   }}
-                  placeholder="Search agent or cashier..."
+                  placeholder="Search agent, cashier or bettor..."
                   className="w-full bg-charcoal border border-gold/20 rounded-lg pl-9 pr-4 py-2.5 text-white text-sm focus:outline-none"
                 />
               </div>

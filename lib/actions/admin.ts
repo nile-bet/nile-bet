@@ -567,23 +567,10 @@ export async function addCreditsToUser(
     }
   }
 
-  // Deduct from admin
-  await supabase
-    .from('profiles')
-    .update({
-      credit_balance:
-        admin.credit_balance - amount,
-    })
-    .eq('id', adminId)
-
-  // Add to target
-  await supabase
-    .from('profiles')
-    .update({
-      credit_balance:
-        target.credit_balance + amount,
-    })
-    .eq('id', targetId)
+  // Deduct from admin atomically
+  await supabase.rpc('increment_balance', { user_id: adminId, delta: -amount })
+  // Add to target atomically
+  await supabase.rpc('increment_balance', { user_id: targetId, delta: amount })
 
   await supabase
     .from('credit_assignments')
