@@ -11,7 +11,6 @@ import { OfflineBanner } from '@/components/shared/OfflineBanner'
 import { ShortcutsHelpModal } from '@/components/cashier/ShortcutsHelpModal'
 import { useBetSlipStore } from '@/lib/stores/betSlipStore'
 import {
-  LayoutDashboard,
   Swords,
   Ticket,
   Search,
@@ -19,9 +18,10 @@ import {
   ClipboardList,
   Trophy,
   History as HistoryIcon,
+  LayoutDashboard,
 } from 'lucide-react'
-import { SidebarLayout } from '@/components/shared/SidebarLayout'
-import type { NavItem } from '@/components/shared/SidebarLayout'
+import { CashierTopLayout } from '@/components/shared/CashierTopLayout'
+import type { NavItem } from '@/components/shared/CashierTopLayout'
 import {
   Dialog,
   DialogContent,
@@ -112,13 +112,13 @@ export default function CashierLayout({ children }: { children: React.ReactNode 
     <>
       <CashierInitializer onRedeem={() => setRedeemOpen(true)} />
       <OfflineBanner />
-      <SidebarLayout
+      <CashierTopLayout
         navItems={cashierNav}
         showRedeemSlip
         onRedeemSlip={() => setRedeemOpen(true)}
       >
         {children}
-      </SidebarLayout>
+      </CashierTopLayout>
 
       {/* Redeem Modal */}
       <Dialog open={redeemOpen} onOpenChange={setRedeemOpen}>
