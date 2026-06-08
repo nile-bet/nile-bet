@@ -173,6 +173,9 @@ export default function LoginPage() {
             Cashiers contact <span style={{ color: 'rgba(212,175,55,0.7)' }}>AGENTS</span> or email{' '}
             <a href="mailto:nilebetting@gmail.com" style={{ color: 'rgba(212,175,55,0.7)' }}>nilebetting@gmail.com</a>
           </p>
+        </div>
+      </div>
+
       {/* Suspended Modal */}
       {showSuspended && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
@@ -199,9 +202,6 @@ export default function LoginPage() {
           </div>
         </div>
       )}
-        </div>
-      </div>
     </div>
-
   )
 }
