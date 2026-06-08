@@ -7,7 +7,8 @@ import { useAuthStore } from '@/lib/stores/authStore'
 import { formatETB, formatCountdown } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { Check, X, Search, Scan, Trophy, Ticket, ArrowRight, AlertTriangle } from 'lucide-react'
+import { Check, X, Search, Scan, Trophy, Ticket, ArrowRight, AlertTriangle, Camera } from 'lucide-react'
+import { QRScanner } from '@/components/cashier/QRScanner'
 
 type Mode = 'slip' | 'coupon'
 
@@ -25,6 +26,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
   const [loading, setLoading] = useState(false)
   const [approving, setApproving] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [showScanner, setShowScanner] = useState(false)
 
   // Auto-focus input and support barcode scanner
   useEffect(() => {
@@ -212,9 +214,32 @@ export function CouponRedeemPanel({ onClose }: Props) {
             <Search className="w-4 h-4" />
             {loading ? '...' : 'Find'}
           </button>
+          <button
+            onClick={() => setShowScanner(!showScanner)}
+            className="border border-nile-blue/30 text-white/60 px-3 py-3 rounded-xl hover:text-white hover:border-gold/30 transition-all"
+            title="Scan QR Code"
+          >
+            <Camera className="w-5 h-5" />
+          </button>
         </div>
+
+        {showScanner && (
+          <QRScanner
+            onScan={(scanned) => {
+              const val = mode === 'slip'
+                ? scanned.replace(/[^0-9A-Za-z]/g, '').toUpperCase().slice(0, 10)
+                : scanned.replace(/[^0-9]/g, '').slice(0, 6)
+              setCode(val)
+              setShowScanner(false)
+              setTimeout(() => handleLookup(), 100)
+            }}
+            onClose={() => setShowScanner(false)}
+            label={mode === 'slip' ? 'Scan Slip QR Code' : 'Scan Coupon QR Code'}
+          />
+        )}
+
         <p className="text-white/30 text-xs mt-1.5 text-center">
-          {mode === 'slip' ? '🔍 Enter 8-digit slip ID or scan barcode' : '🔢 Enter 6-digit coupon code'}
+          {mode === 'slip' ? '🔍 Enter 8-digit slip ID or scan barcode • 📷 Camera QR' : '🔢 Enter 6-digit coupon code • 📷 Camera QR'}
         </p>
       </div>
 
