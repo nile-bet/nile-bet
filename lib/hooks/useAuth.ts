@@ -159,9 +159,33 @@ export function useAuth() {
       })
       .subscribe()
 
+    // Listen for profile status changes — force logout if suspended
+    let profileChannel: ReturnType<typeof supabase.channel> | null = null
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) return
+      profileChannel = supabase
+        .channel(`profile-status-${session.user.id}`)
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${session.user.id}`,
+        }, async (payload) => {
+          const updated = payload.new as any
+          if (updated.status === 'suspended') {
+            await supabase.auth.signOut()
+            logout()
+            window.location.href = '/login?suspended=1'
+          }
+        })
+        .subscribe()
+    })
+
     return () => {
       subscription.unsubscribe()
       supabase.removeChannel(settingsChannel)
+      if (profileChannel) supabase.removeChannel(profileChannel)
     }
   }, [])
 }

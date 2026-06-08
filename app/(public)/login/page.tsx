@@ -14,7 +14,9 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [showSuspended, setShowSuspended] = useState(false)
+  const [showSuspended, setShowSuspended] = useState(
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('suspended') === '1'
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -601,63 +601,92 @@ export async function suspendUserByAgent(
   targetId: string,
   agentId: string,
   suspend: boolean
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{
+  success: boolean
+  error?: string
+}> {
   const supabase = await createClient()
   const adminClient = await createAdminClient()
 
-  const { data: target } = await adminClient
+  const { data: target } = await supabase
     .from('profiles')
     .select('username, created_by, role')
     .eq('id', targetId)
     .single()
-  if (!target) return { success: false, error: 'User not found' }
 
-  const { data: agent } = await adminClient
+  if (!target) {
+    return {
+      success: false,
+      error: 'User not found',
+    }
+  }
+
+  // Verify ownership
+  const { data: agent } = await supabase
     .from('profiles')
     .select('username')
     .eq('id', agentId)
     .single()
 
   if (target.created_by !== agentId) {
-    return { success: false, error: 'Unauthorized: this cashier does not belong to you' }
+    return {
+      success: false,
+      error: 'Unauthorized',
+    }
   }
 
-  const newStatus = suspend ? 'suspended' : 'active'
+  const newStatus = suspend
+    ? 'suspended'
+    : 'active'
 
-  const { error: updateErr } = await adminClient
+  await supabase
     .from('profiles')
     .update({ status: newStatus })
     .eq('id', targetId)
 
-  if (updateErr) return { success: false, error: 'Failed to update status: ' + updateErr.message }
-
   if (suspend) {
-    await adminClient.auth.admin.signOut(targetId, 'global').catch(() => {})
+    await adminClient.auth.admin.signOut(
+      targetId,
+      'global'
+    ).catch(() => {})
   }
 
-  await adminClient.from('notifications').insert({
-    to_user_id: targetId,
-    message: suspend
-      ? 'Your account has been suspended. Contact your agent or admin.'
-      : 'Your account has been reactivated.',
-    type: 'broadcast',
-    priority: 'urgent',
-  })
-
-  const { data: admin } = await adminClient.from('profiles').select('id').eq('role', 'admin').limit(1).single()
-  if (admin) {
-    await adminClient.from('notifications').insert({
-      to_user_id: admin.id,
-      message: `Agent @${agent?.username} ${suspend ? 'suspended' : 'activated'} @${target.username}`,
+  await supabase
+    .from('notifications')
+    .insert({
+      to_user_id: targetId,
+      message: suspend
+        ? 'Your account has been suspended.'
+        : 'Your account has been reactivated.',
       type: 'broadcast',
+      priority: 'urgent',
     })
+
+  // Notify admin
+  const { data: admin } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('role', 'admin')
+    .limit(1)
+    .single()
+
+  if (admin) {
+    await supabase
+      .from('notifications')
+      .insert({
+        to_user_id: admin.id,
+        message: `Agent @${agent?.username} ${suspend ? 'suspended' : 'activated'} @${target.username}`,
+        type: 'broadcast',
+      })
   }
 
-  await adminClient.from('activity_logs').insert({
-    user_id: agentId,
-    action: suspend ? 'user_suspended' : 'user_activated',
-    details: { target: target.username },
-  })
+  await adminClient
+    .from('activity_logs')
+    .insert({
+      user_id: agentId,
+      action: suspend ? 'user_suspended' : 'user_activated',
+      details: { target: target.username },
+    })
 
   return { success: true }
 }
