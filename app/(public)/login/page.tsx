@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showSuspended, setShowSuspended] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,7 +28,11 @@ export default function LoginPage() {
       const dest = role === 'admin' ? '/dashboard' : role === 'agent' ? '/agent-dashboard' : role === 'cashier' ? '/cashier-dashboard' : '/'
       window.location.href = dest
     } else {
-      setError(result.error ?? 'Login failed')
+      if (result.error === 'suspended') {
+        setShowSuspended(true)
+      } else {
+        setError(result.error ?? 'Login failed')
+      }
     }
     setLoading(false)
   }
@@ -168,8 +173,35 @@ export default function LoginPage() {
             Cashiers contact <span style={{ color: 'rgba(212,175,55,0.7)' }}>AGENTS</span> or email{' '}
             <a href="mailto:nilebetting@gmail.com" style={{ color: 'rgba(212,175,55,0.7)' }}>nilebetting@gmail.com</a>
           </p>
+      {/* Suspended Modal */}
+      {showSuspended && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-full max-w-sm rounded-2xl p-8 text-center" style={{ background: '#1A1F4D', border: '1px solid rgba(239,68,68,0.3)', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(239,68,68,0.15)' }}>
+              <span className="text-3xl">🚫</span>
+            </div>
+            <h2 className="text-white font-bold text-xl mb-2">Account Suspended</h2>
+            <p className="text-sm mb-6" style={{ color: '#A9B4D0' }}>
+              Your account has been suspended. Please contact your <span className="text-gold font-semibold">Agent</span> or the <span className="text-gold font-semibold">Admin</span> to resolve this issue.
+            </p>
+            <div className="rounded-xl px-4 py-3 mb-6 text-left" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+              <p className="text-xs" style={{ color: '#A9B4D0' }}>For support, contact:</p>
+              <p className="text-sm text-white font-medium mt-1">📧 nilebetting@gmail.com</p>
+              <p className="text-xs mt-1" style={{ color: '#A9B4D0' }}>or visit your nearest Nile Betting Shop</p>
+            </div>
+            <button
+              onClick={() => setShowSuspended(false)}
+              className="w-full py-3 rounded-xl font-semibold text-sm transition-all"
+              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
         </div>
       </div>
     </div>
+
   )
 }

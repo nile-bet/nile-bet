@@ -628,10 +628,7 @@ export async function suspendUserByAgent(
     .eq('id', agentId)
     .single()
 
-  if (
-    target.created_by !== agentId &&
-    target.role !== 'bettor'
-  ) {
+  if (target.created_by !== agentId) {
     return {
       success: false,
       error: 'Unauthorized',

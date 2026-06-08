@@ -31,6 +31,13 @@ export async function loginUser(
     }
   }
 
+  // Check if suspended
+  if (profile.status === 'suspended') {
+    return {
+      success: false,
+      error: 'suspended',
+    }
+  }
   // Check if locked
   if (profile.locked_until) {
     const lockedUntil = new Date(

@@ -248,15 +248,13 @@ export default function AgentCashiersPage() {
               setShowConfirm(true)
             }}
             className={cn(
-              'text-xs border px-2 py-1 rounded',
+              'text-xs border px-2 py-1 rounded font-medium',
               row.status === 'active'
                 ? 'border-nile-orange/30 text-nile-orange hover:bg-nile-orange/10'
                 : 'border-nile-success/30 text-nile-success hover:bg-nile-success/10'
             )}
           >
-            {row.status === 'active'
-              ? '⏸'
-              : '▶'}
+            {row.status === 'active' ? 'Suspend' : 'Unsuspend'}
           </button>
         </div>
       ),
