@@ -1207,3 +1207,114 @@ export async function debugAgentApproval(requestId: string, agentId: string) {
     cashier, cashierErr: cashierErr?.message,
   }
 }
+
+// ─── AGENT NETWORK STATS ─────────────────────────────────────────────────────
+
+export async function getAgentNetworkStats(
+  agentId: string,
+  dateFilter: {
+    type: 'lifetime' | 'daily' | 'weekly' | 'monthly' | 'custom'
+    startDate?: string
+    endDate?: string
+  }
+) {
+  const supabase = await createClient()
+
+  let startDate: string | null = null
+  let endDate: string | null = null
+  const now = new Date()
+
+  if (dateFilter.type === 'daily') {
+    const d = new Date(now); d.setHours(0,0,0,0)
+    startDate = d.toISOString(); endDate = now.toISOString()
+  } else if (dateFilter.type === 'weekly') {
+    const d = new Date(now); d.setDate(d.getDate() - 7)
+    startDate = d.toISOString(); endDate = now.toISOString()
+  } else if (dateFilter.type === 'monthly') {
+    const d = new Date(now); d.setDate(1); d.setHours(0,0,0,0)
+    startDate = d.toISOString(); endDate = now.toISOString()
+  } else if (dateFilter.type === 'custom') {
+    startDate = dateFilter.startDate ?? null
+    endDate = dateFilter.endDate ?? null
+  }
+
+  // Get agent profile
+  const { data: profile } = await supabase
+    .from('profiles').select('credit_balance, reserved_balance').eq('id', agentId).single()
+
+  // Get all cashiers under agent
+  const { data: cashiers } = await supabase
+    .from('profiles').select('id, username, status, credit_balance').eq('created_by', agentId).eq('role', 'cashier')
+
+  const cashierIds = (cashiers ?? []).map((c) => c.id)
+  const totalCashiers = cashierIds.length
+  const activeCashiers = (cashiers ?? []).filter((c) => c.status === 'active').length
+
+  // Get all bettors under those cashiers
+  let totalBettors = 0
+  if (cashierIds.length > 0) {
+    const { count } = await supabase
+      .from('profiles').select('*', { count: 'exact', head: true }).in('created_by', cashierIds).eq('role', 'bettor')
+    totalBettors = count ?? 0
+  }
+
+  // Fetch all slips via cashier IDs
+  let all: any[] = []
+  if (cashierIds.length > 0) {
+    let q = supabase
+      .from('slips')
+      .select('stake, net_payout, winning_tax, status, insurance_applied, insurance_payout, max_payout, placed_by, created_at')
+      .in('placed_by', cashierIds)
+    if (startDate) q = q.gte('created_at', startDate)
+    if (endDate) q = q.lte('created_at', endDate)
+    const { data } = await q
+    all = data ?? []
+  }
+
+  const totalSlips = all.length
+  const wonSlips = all.filter((s) => s.status === 'won').length
+  const lostSlips = all.filter((s) => s.status === 'lost').length
+  const pendingSlips = all.filter((s) => s.status === 'pending').length
+  const inProgressSlips = all.filter((s) => s.status === 'in_progress').length
+  const insuredSlips = all.filter((s) => s.status === 'near_win' || s.insurance_applied).length
+
+  const totalCollected = all.reduce((a, s) => a + (s.stake ?? 0), 0)
+  const totalPaidOut = all.filter((s) => s.status === 'won' || s.status === 'near_win')
+    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
+  const taxCollected = all.filter((s) => s.status === 'won')
+    .reduce((a, s) => a + (s.winning_tax ?? 0), 0)
+  const pendingLiability = all.filter((s) => s.status === 'pending')
+    .reduce((a, s) => a + (s.max_payout ?? s.net_payout ?? 0), 0)
+
+  const grossProfit = totalCollected - totalPaidOut - taxCollected
+  const agentProfit = grossProfit * 0.6
+  const cashierProfit = grossProfit * 0.4
+
+  // Pending credit requests
+  const { count: pendingRequests } = await supabase
+    .from('credit_requests').select('*', { count: 'exact', head: true }).eq('requester_id', agentId).eq('status', 'pending')
+
+  return {
+    myBalance: profile?.credit_balance ?? 0,
+    reservedBalance: profile?.reserved_balance ?? 0,
+    totalCashiers,
+    activeCashiers,
+    totalBettors,
+    pendingRequests: pendingRequests ?? 0,
+    // Slip counts
+    totalSlips,
+    wonSlips,
+    lostSlips,
+    pendingSlips,
+    inProgressSlips,
+    insuredSlips,
+    // Financial
+    totalCollected,
+    totalPaidOut,
+    taxCollected,
+    pendingLiability,
+    grossProfit,
+    agentProfit,
+    cashierProfit,
+  }
+}
