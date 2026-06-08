@@ -246,73 +246,16 @@ interface DateFilters {
 
 export async function getAgentProfitReport(filters?: DateFilters) {
   const supabase = await createClient()
-
-  // Step 1: Get all agents
-  const { data: agents } = await supabase
-    .from('profiles')
-    .select('id, username')
-    .eq('role', 'agent')
-
-  if (!agents || agents.length === 0) return []
-
-  // Step 2: For each agent, get their cashiers
-  const agentIds = agents.map((a) => a.id)
-  const { data: cashiers } = await supabase
-    .from('profiles')
-    .select('id, created_by')
-    .eq('role', 'cashier')
-    .in('created_by', agentIds)
-
-  const cashiers_ = cashiers ?? []
-
-  // Build cashier -> agent map
-  const cashierToAgent: Record<string, string> = {}
-  for (const c of cashiers_) {
-    cashierToAgent[c.id] = c.created_by
-  }
-
-  const agentMap: Record<string, string> = {}
-  for (const a of agents) {
-    agentMap[a.id] = a.username
-  }
-
-  // Step 3: Fetch slips placed by any of those cashiers
-  const cashierIds = cashiers_.map((c) => c.id)
-  if (cashierIds.length === 0) return []
-
   let query = supabase
-    .from('slips')
-    .select('stake, net_payout, winning_tax, status, placed_by, created_at')
-    .in('placed_by', cashierIds)
+    .from('transactions')
+    .select('from_user_id, to_user_id, amount, type, created_at')
+    .in('type', ['bet_placed', 'payout', 'refund'])
     .order('created_at', { ascending: false })
-    .limit(5000)
+    .limit(500)
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
   if (filters?.endDate) query = query.lte('created_at', filters.endDate)
   const { data } = await query
-  const slips = data ?? []
-
-  // Step 4: Group by agent
-  const map: Record<string, any> = {}
-  for (const slip of slips) {
-    const agentId = cashierToAgent[slip.placed_by ?? '']
-    if (!agentId) continue
-    const username = agentMap[agentId] ?? 'unknown'
-    if (!map[agentId]) {
-      map[agentId] = { username, totalCollected: 0, totalPaidOut: 0, grossProfit: 0, taxCollected: 0, agentShare: 0, cashierShare: 0 }
-    }
-    map[agentId].totalCollected += slip.stake ?? 0
-    if (slip.status === 'won') {
-      map[agentId].totalPaidOut += slip.net_payout ?? 0
-      map[agentId].taxCollected += slip.winning_tax ?? 0
-    }
-  }
-
-  return Object.values(map).map((r: any) => {
-    r.grossProfit = r.totalCollected - r.totalPaidOut - r.taxCollected
-    r.agentShare = r.grossProfit * 0.6
-    r.cashierShare = r.grossProfit * 0.4
-    return r
-  }).sort((a: any, b: any) => b.grossProfit - a.grossProfit)
+  return data ?? []
 }
 
 export async function getTopUsersReport(role?: string, filters?: DateFilters) {
@@ -374,72 +317,29 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
 export async function getPlatformProfitReport(granularity?: string, filters?: DateFilters) {
   const supabase = await createClient()
   let query = supabase
-    .from('slips')
-    .select('stake, net_payout, winning_tax, status, created_at')
+    .from('transactions')
+    .select('amount, type, created_at')
+    .in('type', ['tax', 'bet_placed', 'payout', 'insurance'])
     .order('created_at', { ascending: false })
-    .limit(2000)
+    .limit(500)
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
   if (filters?.endDate) query = query.lte('created_at', filters.endDate)
   const { data } = await query
-  const slips = data ?? []
-
-  // Group by period
-  const map: Record<string, any> = {}
-  for (const slip of slips) {
-    const d = new Date(slip.created_at)
-    let period: string
-    if (granularity === 'weekly') {
-      const week = Math.ceil(d.getDate() / 7)
-      period = `${d.getFullYear()}-W${String(d.getMonth() + 1).padStart(2,'0')}-${week}`
-    } else if (granularity === 'monthly') {
-      period = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    } else {
-      period = slip.created_at.slice(0, 10)
-    }
-    if (!map[period]) {
-      map[period] = { period, slipCount: 0, totalStaked: 0, totalPaidOut: 0, grossProfit: 0, taxCollected: 0 }
-    }
-    map[period].slipCount += 1
-    map[period].totalStaked += slip.stake ?? 0
-    if (slip.status === 'won') {
-      map[period].totalPaidOut += slip.net_payout ?? 0
-      map[period].taxCollected += slip.winning_tax ?? 0
-    }
-  }
-
-  return Object.values(map).map((r) => {
-    r.grossProfit = r.totalStaked - r.totalPaidOut - r.taxCollected
-    return r
-  }).sort((a: any, b: any) => a.period.localeCompare(b.period))
+  return data ?? []
 }
 
 export async function getTaxReport(filters?: DateFilters) {
   const supabase = await createClient()
   let query = supabase
     .from('slips')
-    .select('winning_tax, net_payout, stake, status, created_at')
+    .select('winning_tax, net_payout, status, created_at')
     .eq('status', 'won')
     .order('created_at', { ascending: false })
-    .limit(2000)
+    .limit(500)
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
   if (filters?.endDate) query = query.lte('created_at', filters.endDate)
   const { data } = await query
-  const slips = data ?? []
-
-  // Group by date
-  const map: Record<string, any> = {}
-  for (const slip of slips) {
-    const date = slip.created_at.slice(0, 10)
-    if (!map[date]) {
-      map[date] = { date, winningSlips: 0, grossPayout: 0, taxAmount: 0, netPaidOut: 0 }
-    }
-    map[date].winningSlips += 1
-    map[date].grossPayout += (slip.net_payout ?? 0) + (slip.winning_tax ?? 0)
-    map[date].taxAmount += slip.winning_tax ?? 0
-    map[date].netPaidOut += slip.net_payout ?? 0
-  }
-
-  return Object.values(map).sort((a: any, b: any) => a.date.localeCompare(b.date))
+  return data ?? []
 }
 
 // ─── COUPON HISTORY BY USER ───────────
