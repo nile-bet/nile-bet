@@ -26,7 +26,7 @@ export default function LoginPage() {
     if (result.success) {
       toast.success('Welcome back!')
       const role = result.role
-      const dest = role === 'admin' ? '/dashboard' : role === 'agent' ? '/agent-dashboard' : role === 'cashier' ? '/cashier-dashboard' : '/'
+      const dest = role === 'admin' ? '/dashboard' : role === 'agent' ? '/agent-dashboard' : role === 'cashier' ? '/cashier-place-bet' : '/'
       window.location.href = dest
     } else {
       if (result.error === 'suspended') {

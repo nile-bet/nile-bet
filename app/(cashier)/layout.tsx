@@ -32,14 +32,14 @@ import { CouponRedeemPanel } from '@/components/cashier/CouponRedeemPanel'
 
 const cashierNav: NavItem[] = [
   {
-    href: '/cashier-dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-  },
-  {
     href: '/cashier-place-bet',
     label: 'Place Bet',
     icon: Swords,
+  },
+  {
+    href: '/cashier-dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
   },
   {
     href: '/cashier-jackpot',
@@ -86,6 +86,11 @@ function CashierInitializer({ onRedeem }: { onRedeem: () => void }) {
     }
     if (!isLoading && !user) {
       router.replace('/login')
+    }
+    if (!isLoading && user && user.role === 'cashier') {
+      if (window.location.pathname === '/cashier-dashboard' || window.location.pathname === '/') {
+        router.replace('/cashier-place-bet')
+      }
     }
   }, [user, isLoading, router])
 
