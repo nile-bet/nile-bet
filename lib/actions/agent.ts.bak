@@ -79,27 +79,31 @@ export async function getAgentStats(
     totalBettors = count ?? 0
   }
 
-  // Slips — via cashier IDs under this agent
-  let totalRevenue = 0
-  let activeSlips = 0
-  let paidOut = 0
+  // Slips
+  let slipsQuery = supabase
+    .from('slips')
+    .select('stake, net_payout, status')
+    .eq('placed_by', agentId)
 
-  if (cashierIds.length > 0) {
-    let slipsQuery = supabase
-      .from('slips')
-      .select('stake, net_payout, winning_tax, status')
-      .in('placed_by', cashierIds)
-
-    if (startDate) {
-      slipsQuery = slipsQuery.gte('created_at', startDate)
-    }
-
-    const { data: slips } = await slipsQuery
-    totalRevenue = (slips ?? []).reduce((a, s) => a + (s.stake ?? 0), 0)
-    activeSlips = (slips ?? []).filter((s) => s.status === 'pending').length
-    paidOut = (slips ?? []).filter((s) => s.status === 'won').reduce((a, s) => a + (s.net_payout ?? 0), 0)
+  if (startDate) {
+    slipsQuery = slipsQuery.gte(
+      'created_at',
+      startDate
+    )
   }
 
+  const { data: slips } = await slipsQuery
+
+  const totalRevenue = (slips ?? []).reduce(
+    (a, s) => a + (s.stake ?? 0),
+    0
+  )
+  const activeSlips = (slips ?? []).filter(
+    (s) => s.status === 'pending'
+  ).length
+  const paidOut = (slips ?? [])
+    .filter((s) => s.status === 'won')
+    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
   const grossProfit = totalRevenue - paidOut
   const agentShare = grossProfit * 0.6
 
@@ -901,70 +905,83 @@ export async function placeBetByAgent(data: {
 
 export async function getAgentReport(
   agentId: string,
-  filters: { startDate?: string; endDate?: string } = {}
+  filters: {
+    startDate?: string
+    endDate?: string
+  } = {}
 ) {
   const supabase = await createClient()
 
-  const { data: cashiers } = await supabase
-    .from('profiles')
-    .select('id, username, status, credit_balance')
-    .eq('created_by', agentId)
-    .eq('role', 'cashier')
+  let q = supabase
+    .from('slips')
+    .select('stake, net_payout, winning_tax, status, created_at')
+    .eq('placed_by', agentId)
 
-  const cashierIds = (cashiers ?? []).map((c) => c.id)
-  let allSlips: any[] = []
-
-  if (cashierIds.length > 0) {
-    let q = supabase
-      .from('slips')
-      .select('stake, net_payout, winning_tax, status, created_at, placed_by')
-      .in('placed_by', cashierIds)
-    if (filters.startDate) q = q.gte('created_at', filters.startDate)
-    if (filters.endDate) q = q.lte('created_at', filters.endDate)
-    const { data } = await q
-    allSlips = data ?? []
+  if (filters.startDate) {
+    q = q.gte('created_at', filters.startDate)
+  }
+  if (filters.endDate) {
+    q = q.lte('created_at', filters.endDate)
   }
 
-  const totalCollected = allSlips.reduce((a, s) => a + (s.stake ?? 0), 0)
-  const totalPaid = allSlips
-    .filter((s) => s.status === 'won' || s.status === 'near_win')
-    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
-  const taxCollected = allSlips
+  const { data: slips } = await q
+
+  const totalCollected = (slips ?? [])
+    .reduce((a, s) => a + (s.stake ?? 0), 0)
+  const totalPaid = (slips ?? [])
+    .filter(
+      (s) =>
+        s.status === 'won' ||
+        s.status === 'near_win'
+    )
+    .reduce(
+      (a, s) => a + (s.net_payout ?? 0), 0
+    )
+  const taxCollected = (slips ?? [])
     .filter((s) => s.status === 'won')
-    .reduce((a, s) => a + (s.winning_tax ?? 0), 0)
-  const grossProfit = totalCollected - totalPaid - taxCollected
+    .reduce(
+      (a, s) => a + (s.winning_tax ?? 0), 0
+    )
+
+  const grossProfit = totalCollected - totalPaid
   const agentShare = grossProfit * 0.6
 
   const grouped: Record<string, any> = {}
-  allSlips.forEach((slip) => {
-    const date = slip.created_at.split('T')[0]
-    if (!grouped[date]) grouped[date] = { date, collected: 0, paid: 0, profit: 0 }
+  ;(slips ?? []).forEach((slip) => {
+    const date =
+      slip.created_at.split('T')[0]
+    if (!grouped[date]) {
+      grouped[date] = {
+        date,
+        collected: 0,
+        paid: 0,
+        profit: 0,
+      }
+    }
     grouped[date].collected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'near_win') grouped[date].paid += slip.net_payout ?? 0
-    grouped[date].profit = grouped[date].collected - grouped[date].paid
+    if (
+      slip.status === 'won' ||
+      slip.status === 'near_win'
+    ) {
+      grouped[date].paid += slip.net_payout ?? 0
+    }
+    grouped[date].profit =
+      grouped[date].collected -
+      grouped[date].paid
   })
 
-  const cashierMap: Record<string, any> = {}
-  for (const c of cashiers ?? []) {
-    cashierMap[c.id] = { id: c.id, username: c.username, status: c.status, balance: c.credit_balance ?? 0, slipCount: 0, totalCollected: 0, totalPaid: 0, taxCollected: 0, grossProfit: 0, agentShare: 0 }
-  }
-  for (const slip of allSlips) {
-    const c = cashierMap[slip.placed_by]
-    if (!c) continue
-    c.slipCount += 1
-    c.totalCollected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'near_win') c.totalPaid += slip.net_payout ?? 0
-    if (slip.status === 'won') c.taxCollected += slip.winning_tax ?? 0
-  }
-  for (const c of Object.values(cashierMap) as any[]) {
-    c.grossProfit = c.totalCollected - c.totalPaid - c.taxCollected
-    c.agentShare = c.grossProfit * 0.6
-  }
-
   return {
-    summary: { totalCollected, totalPaid, taxCollected, grossProfit, agentShare, slipCount: allSlips.length },
-    trendData: Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date)),
-    cashierBreakdown: Object.values(cashierMap).sort((a: any, b: any) => b.grossProfit - a.grossProfit),
+    summary: {
+      totalCollected,
+      totalPaid,
+      taxCollected,
+      grossProfit,
+      agentShare,
+      slipCount: slips?.length ?? 0,
+    },
+    trendData: Object.values(grouped).sort(
+      (a, b) => a.date.localeCompare(b.date)
+    ),
   }
 }
 

@@ -6,6 +6,8 @@ import { getAgentReport }
   from '@/lib/actions/agent'
 import { StatsCard }
   from '@/components/shared/StatsCard'
+import { DataTable }
+  from '@/components/shared/DataTable'
 import { formatETB }
   from '@/lib/utils/formatCurrency'
 import { useAuthStore }
@@ -242,6 +244,68 @@ export default function AgentReportsPage() {
               </ResponsiveContainer>
             )}
           </div>
+          {/* Cashier Network Breakdown */}
+          {report.cashierBreakdown && report.cashierBreakdown.length > 0 && (
+            <div>
+              <h2 className="text-white font-semibold text-lg mb-4">📋 My Cashier Network</h2>
+              <DataTable
+                columns={[
+                  {
+                    key: 'username',
+                    label: 'Cashier',
+                    render: (v: any) => <span className="text-gold font-medium">@{v}</span>,
+                  },
+                  {
+                    key: 'status',
+                    label: 'Status',
+                    render: (v: any) => (
+                      <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', v === 'active' ? 'bg-nile-success/20 text-nile-success' : 'bg-nile-danger/20 text-nile-danger')}>
+                        {v}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: 'balance',
+                    label: 'Balance',
+                    render: (v: any) => <span className="text-white/70 font-mono text-xs">{formatETB(v)}</span>,
+                  },
+                  {
+                    key: 'slipCount',
+                    label: 'Slips',
+                    sortable: true,
+                  },
+                  {
+                    key: 'totalCollected',
+                    label: 'Collected',
+                    sortable: true,
+                    render: (v: any) => formatETB(v),
+                  },
+                  {
+                    key: 'totalPaid',
+                    label: 'Paid Out',
+                    render: (v: any) => <span className="text-nile-danger font-mono text-xs">{formatETB(v)}</span>,
+                  },
+                  {
+                    key: 'grossProfit',
+                    label: 'Gross P/L',
+                    sortable: true,
+                    render: (v: any) => (
+                      <span className={cn('font-mono text-xs', v >= 0 ? 'text-nile-success' : 'text-nile-danger')}>
+                        {v >= 0 ? '+' : ''}{formatETB(v)}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: 'agentShare',
+                    label: 'My Share (60%)',
+                    render: (v: any) => <span className="text-nile-blue-light font-mono text-xs">{formatETB(v)}</span>,
+                  },
+                ]}
+                data={report.cashierBreakdown}
+                emptyMessage="No cashier data"
+              />
+            </div>
+          )}
         </>
       )}
     </div>
