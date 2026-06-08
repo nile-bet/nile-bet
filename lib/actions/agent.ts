@@ -1103,13 +1103,16 @@ export async function agentApproveCreditRequest(
   try {
     const adminClient = await createAdminClient()
 
-    const { data: req } = await adminClient
+    const { data: req, error: reqFetchErr } = await adminClient
       .from('credit_requests')
       .select('*')
       .eq('id', requestId)
-      .eq('to_user_id', agentId)
       .single()
-    if (!req || req.status !== 'pending') return { success: false, error: 'Invalid request' }
+    if (reqFetchErr) return { success: false, error: 'Request not found: ' + reqFetchErr.message }
+    if (!req) return { success: false, error: 'Request not found' }
+    if (req.status !== 'pending') return { success: false, error: 'Request is already ' + req.status }
+    // Verify this request belongs to this agent
+    if (req.to_user_id !== agentId) return { success: false, error: 'Not authorized to approve this request' }
 
     // Check agent balance
     const { data: agent } = await adminClient
