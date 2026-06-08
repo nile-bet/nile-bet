@@ -66,35 +66,17 @@ export default function AgentCreditsPage() {
     if (!user) return
     setApprovingId(reqId)
     try {
-      const supabase = createClient()
-      // Check agent balance
-      if ((user.credit_balance ?? 0) < amount) {
-        toast.error('Insufficient balance to approve this request')
-        return
+      const result = await agentApproveCreditRequest(reqId, user.id)
+      if (result.success) {
+        toast.success('Request approved!')
+        // Refresh agent balance
+        const supabase = createClient()
+        const { data: profile } = await supabase.from('profiles').select('credit_balance').eq('id', user.id).single()
+        if (profile) useAuthStore.getState().updateBalance(profile.credit_balance)
+        loadCashierRequests()
+      } else {
+        toast.error(result.error ?? 'Failed to approve')
       }
-      // Deduct from agent
-      await supabase.from('profiles').update({
-        credit_balance: (user.credit_balance ?? 0) - amount
-      }).eq('id', user.id)
-      // Add to cashier
-      const { data: cashier } = await supabase.from('profiles').select('credit_balance').eq('id', requesterId).single()
-      await supabase.from('profiles').update({
-        credit_balance: (cashier?.credit_balance ?? 0) + amount
-      }).eq('id', requesterId)
-      // Mark approved
-      await supabase.from('credit_requests').update({
-        status: 'approved', updated_at: new Date().toISOString()
-      }).eq('id', reqId)
-      // Notify cashier
-      await supabase.from('notifications').insert({
-        to_user_id: requesterId,
-        from_user_id: user.id,
-        message: `✅ Your credit request of ETB ${amount.toLocaleString()} has been approved by your agent!`,
-        type: 'balance_updated',
-        priority: 'normal',
-      })
-      toast.success('Request approved!')
-      loadCashierRequests()
     } catch (e: any) {
       toast.error(e.message ?? 'Failed to approve')
     }

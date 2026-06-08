@@ -390,14 +390,7 @@ export async function requestCreditsByCashier(
       priority: 'normal',
     })
 
-  // Also notify admin if request went to agent (not to admin directly)
-  if (toAgent && admin && toUserId !== admin.id) {
-    await supabase.from('notifications').insert({
-      to_user_id: admin.id,
-      message: `Cashier @${cashier.username} requested ETB ${amount.toLocaleString()} from their agent`,
-      type: 'broadcast',
-    })
-  }
+  // Only notify admin if the request was sent directly to admin
 
   await supabase
     .from('activity_logs')
