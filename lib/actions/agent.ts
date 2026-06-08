@@ -1318,3 +1318,63 @@ export async function getAgentNetworkStats(
     cashierProfit,
   }
 }
+
+// ─── AGENT PAYOUT REPORT ─────────────────────────────────────────────────────
+export async function getAgentPayoutsReport(
+  agentId: string,
+  dateFilter: { type: string; startDate?: string; endDate?: string } | string = 'daily'
+) {
+  const supabase = await createClient()
+  let startDate: string | null = null
+  let endDate: string | null = null
+  const now = new Date()
+  const ft = typeof dateFilter === 'string' ? dateFilter : (dateFilter as any).type
+  if (ft === 'daily') {
+    const d = new Date(now); d.setHours(0,0,0,0)
+    startDate = d.toISOString(); endDate = now.toISOString()
+  } else if (ft === 'weekly') {
+    const d = new Date(now); d.setDate(d.getDate() - 7)
+    startDate = d.toISOString(); endDate = now.toISOString()
+  } else if (ft === 'monthly') {
+    const d = new Date(now); d.setDate(1); d.setHours(0,0,0,0)
+    startDate = d.toISOString(); endDate = now.toISOString()
+  } else if (ft === 'custom' && typeof dateFilter === 'object') {
+    startDate = (dateFilter as any).startDate ?? null
+    endDate = (dateFilter as any).endDate ?? null
+  }
+
+  // Get cashiers under agent
+  const { data: cashiers } = await supabase
+    .from('profiles').select('id, username').eq('created_by', agentId).eq('role', 'cashier')
+  const cashierIds = (cashiers ?? []).map((c) => c.id)
+  if (cashierIds.length === 0) return { slips: [], totals: { grossWinTotal: 0, taxTotal: 0, netPayoutTotal: 0 } }
+
+  // Fetch won slips with bettor + cashier info
+  let q = supabase
+    .from('slips')
+    .select(`
+      slip_id, stake, max_payout, winning_tax, net_payout, status,
+      is_anonymous, created_at, placed_by,
+      bettor:profiles!slips_bettor_id_fkey (username)
+    `)
+    .in('placed_by', cashierIds)
+    .in('status', ['won', 'near_win'])
+    .order('created_at', { ascending: false })
+    .limit(100)
+  if (startDate) q = q.gte('created_at', startDate)
+  if (endDate) q = q.lte('created_at', endDate)
+  const { data: slips } = await q
+
+  // Attach cashier username
+  const cashierMap = Object.fromEntries((cashiers ?? []).map((c) => [c.id, c.username]))
+  const enriched = (slips ?? []).map((s: any) => ({
+    ...s,
+    cashier_username: cashierMap[s.placed_by] ?? '—',
+  }))
+
+  const grossWinTotal = enriched.reduce((a, s) => a + (s.max_payout ?? 0), 0)
+  const taxTotal = enriched.reduce((a, s) => a + (s.winning_tax ?? 0), 0)
+  const netPayoutTotal = enriched.reduce((a, s) => a + (s.net_payout ?? 0), 0)
+
+  return { slips: enriched, totals: { grossWinTotal, taxTotal, netPayoutTotal } }
+}

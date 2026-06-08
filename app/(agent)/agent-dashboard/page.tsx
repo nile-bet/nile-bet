@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { DateRangeFilter, type DateFilterValue } from '@/components/shared/DateRangeFilter'
-import { getAgentNetworkStats, getAgentReport } from '@/lib/actions/agent'
+import { DataTable } from '@/components/shared/DataTable'
+import { StatusBadge } from '@/components/shared/StatusBadge'
+import { getAgentNetworkStats, getAgentReport, getAgentPayoutsReport } from '@/lib/actions/agent'
 import { StatsCard } from '@/components/shared/StatsCard'
 import { SkeletonStatCard } from '@/components/shared/SkeletonCard'
 import { formatETB, formatTimeAgo } from '@/lib/utils/formatCurrency'
@@ -20,7 +22,8 @@ import * as XLSX from 'xlsx'
 
 export default function AgentDashboard() {
   const { user } = useAuthStore()
-  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'daily' })
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'monthly' })
+  const [payouts, setPayouts] = useState<any>(null)
   const [stats, setStats] = useState<any>(null)
   const [report, setReport] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -64,7 +67,9 @@ export default function AgentDashboard() {
       getAgentNetworkStats(user.id, dateFilter as any),
       getAgentReport(user.id, { startDate, endDate }),
     ])
+    const payoutsData = await getAgentPayoutsReport(user.id, dateFilter as any)
     setStats(statsData)
+    setPayouts(payoutsData)
     setReport(reportData)
     setLoading(false)
   }
@@ -233,9 +238,10 @@ export default function AgentDashboard() {
       )}
 
       {/* ── ROW 5: Revenue Trend Chart ── */}
-      {!loading && report && report.trendData?.length > 0 && (
+      {!loading && report && (
         <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
           <h3 className="font-semibold text-white mb-4">Network Revenue Trend</h3>
+          {report?.trendData?.length > 0 ? (
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={report.trendData}>
               <XAxis dataKey="date" tick={{ fill: '#ffffff40', fontSize: 10 }} tickFormatter={(v) => v.slice(5)} />
@@ -245,11 +251,57 @@ export default function AgentDashboard() {
               <Line dataKey="paid" stroke="#E74C3C" strokeWidth={2} dot={false} name="Paid Out" />
               <Line dataKey="profit" stroke="#2ECC71" strokeWidth={2} dot={false} name="Profit" />
             </LineChart>
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-[200px] text-white/30 text-sm">No trend data for this period</div>
+          )}
         </div>
       )}
 
-      {/* ── ROW 6: Recent Activity ── */}
+      {/* ── ROW 6: Payout Report ── */}
+      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
+        <h3 className="font-semibold text-white mb-4 flex items-center gap-2">🏆 Network Payout Report</h3>
+        {payouts && (
+          <>
+            <DataTable
+              columns={[
+                { key: 'slip_id', label: 'Slip ID', render: (v: any) => <span className="text-gold font-mono text-xs">#{v}</span> },
+                { key: 'cashier_username', label: 'Cashier', render: (v: any) => <span className="text-white/60 text-xs">@{v}</span> },
+                { key: 'bettor', label: 'Bettor', render: (v: any, row: any) => <span className="text-white/60 text-xs">{row.is_anonymous ? 'Anonymous' : `@${v?.username ?? '—'}`}</span> },
+                { key: 'stake', label: 'Stake', render: (v: any) => <span className="text-white/70 font-mono text-xs">{formatETB(v)}</span> },
+                { key: 'max_payout', label: 'Gross Win', render: (v: any) => <span className="text-white/60 font-mono text-xs">{formatETB(v)}</span> },
+                { key: 'winning_tax', label: 'Tax (15%)', render: (v: any) => <span className="text-nile-danger font-mono text-xs">-{formatETB(v)}</span> },
+                { key: 'net_payout', label: 'Net Payout', render: (v: any) => <span className="text-nile-success font-mono text-xs font-bold">{formatETB(v)}</span> },
+                { key: 'status', label: 'Status', render: (v: any) => <StatusBadge status={v} type="slip" /> },
+              ]}
+              data={payouts.slips ?? []}
+              isLoading={loading}
+              emptyMessage="No winning slips yet"
+            />
+            {(payouts.slips ?? []).length > 0 && (
+              <div className="mt-3 bg-gold/10 border border-gold/20 rounded-lg px-4 py-3 flex items-center justify-between flex-wrap gap-3">
+                <span className="text-gold font-semibold text-sm">TOTALS</span>
+                <div className="flex gap-6 text-sm">
+                  <div className="text-right">
+                    <p className="text-white/50 text-xs">Gross</p>
+                    <p className="text-white font-mono">{formatETB(payouts.totals.grossWinTotal)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white/50 text-xs">Tax</p>
+                    <p className="text-nile-danger font-mono">-{formatETB(payouts.totals.taxTotal)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white/50 text-xs">Net Total</p>
+                    <p className="text-nile-success font-mono font-bold">{formatETB(payouts.totals.netPayoutTotal)}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ── ROW 7: Recent Activity ── */}
       <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold text-white">Recent Activity</h3>
