@@ -152,15 +152,22 @@ export async function getCreditRequests({
   page = 1,
 }: { limit?: number; page?: number } = {}) {
   const supabase = await createClient()
+  const adminClient = await createAdminClient()
+
+  // Get admin's own ID to filter only requests sent to admin
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { requests: [], total: 0 }
+
   const from = (page - 1) * limit
   const to = from + limit - 1
-  const { data, error, count } = await supabase
+  const { data, error, count } = await adminClient
     .from('credit_requests')
     .select(`
       *,
       requester:profiles!credit_requests_requester_id_fkey (username, role),
       target:profiles!credit_requests_to_user_id_fkey (username, role)
     `, { count: 'exact' })
+    .eq('to_user_id', user.id)
     .order('created_at', { ascending: false })
     .range(from, to)
   if (error) return { requests: [], total: 0 }
