@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LucideIcon, Menu, X, LogOut, LayoutDashboard, Search, ChevronDown } from 'lucide-react'
@@ -39,6 +39,18 @@ export function CashierTopLayout({
   const [menuOpen, setMenuOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [jackpotOpen, setJackpotOpen] = useState(false)
+
+  useEffect(() => {
+    supabase
+      .from('jackpots')
+      .select('status')
+      .eq('status', 'open')
+      .limit(1)
+      .then(({ data }) => {
+        setJackpotOpen(!!(data && data.length > 0))
+      })
+  }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -81,8 +93,20 @@ export function CashierTopLayout({
 
           {/* Jackpot */}
           <Link href="/cashier-jackpot">
-            <button className="bg-gold text-charcoal font-bold text-xs px-3 py-1.5 rounded-md hover:bg-gold-light transition-colors animate-pulse-gold hover:animate-none">
+            <button
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+                jackpotOpen
+                  ? 'bg-gold text-charcoal animate-pulse-gold hover:animate-none hover:bg-gold-light'
+                  : 'text-white/60'
+              }`}
+              style={!jackpotOpen ? { background: 'rgba(255,255,255,0.12)' } : {}}
+            >
               🏆 JACKPOT
+              {!jackpotOpen && (
+                <span className="text-[9px] px-1 rounded" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                  CLOSED
+                </span>
+              )}
             </button>
           </Link>
 
