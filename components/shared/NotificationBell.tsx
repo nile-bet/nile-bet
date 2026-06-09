@@ -130,57 +130,79 @@ export function NotificationBell() {
           )}
         </div>
 
-        <div className="max-h-80 overflow-y-auto">
+        <div className="max-h-96 overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="py-8 text-center text-white/40 text-sm">
               <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" />
               No notifications yet
             </div>
-          ) : (
-            notifications
-              .slice(0, 20)
-              .map((notif: Notification) => {
-                const {
-                  icon: Icon,
-                  color,
-                } = getNotifIcon(notif.type)
-                return (
-                  <div
-                    key={notif.id}
-                    onClick={() =>
-                      markAsRead(notif.id)
-                    }
-                    className={cn(
-                      'flex gap-3 p-3 cursor-pointer hover:bg-nile-blue/10 transition-colors border-b border-nile-blue/10',
-                      !notif.is_read &&
-                        'border-l-2 border-l-gold bg-gold/5'
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        'mt-0.5 flex-shrink-0',
-                        color
-                      )}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white leading-snug">
-                        {notif.message}
-                      </p>
-                      <p className="text-xs text-white/40 mt-0.5">
-                        {formatTimeAgo(
-                          notif.created_at
-                        )}
-                      </p>
-                    </div>
-                    {!notif.is_read && (
-                      <div className="w-2 h-2 rounded-full bg-gold flex-shrink-0 mt-1.5" />
-                    )}
+          ) : (() => {
+            const unread = notifications.filter((n: Notification) => !n.is_read).slice(0, 20)
+            const read = notifications.filter((n: Notification) => n.is_read).slice(0, 10)
+
+            const renderNotif = (notif: Notification) => {
+              const { icon: Icon, color } = getNotifIcon(notif.type)
+              return (
+                <div
+                  key={notif.id}
+                  onClick={() => markAsRead(notif.id)}
+                  className={cn(
+                    'flex gap-3 p-3 cursor-pointer hover:bg-nile-blue/10 transition-colors border-b border-nile-blue/10',
+                    !notif.is_read && 'border-l-2 border-l-gold bg-gold/5'
+                  )}
+                >
+                  <div className={cn('mt-0.5 flex-shrink-0', color)}>
+                    <Icon className="w-4 h-4" />
                   </div>
-                )
-              })
-          )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white leading-snug">{notif.message}</p>
+                    <p className="text-xs text-white/40 mt-0.5">{formatTimeAgo(notif.created_at)}</p>
+                  </div>
+                  {!notif.is_read && (
+                    <div className="w-2 h-2 rounded-full bg-gold flex-shrink-0 mt-1.5" />
+                  )}
+                </div>
+              )
+            }
+
+            return (
+              <>
+                {/* Unread section */}
+                {unread.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 flex items-center justify-between sticky top-0 z-10"
+                      style={{ background: 'rgba(212,175,55,0.08)', borderBottom: '1px solid rgba(212,175,55,0.15)' }}>
+                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#FFD700' }}>
+                        Unread · {unread.length}
+                      </span>
+                    </div>
+                    {unread.map(renderNotif)}
+                  </>
+                )}
+
+                {/* Read section */}
+                {read.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 sticky top-0 z-10"
+                      style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.06)', borderTop: unread.length > 0 ? '1px solid rgba(255,255,255,0.06)' : undefined }}>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">
+                        Read · {read.length}
+                      </span>
+                    </div>
+                    {read.map(renderNotif)}
+                  </>
+                )}
+
+                {/* Empty unread state */}
+                {unread.length === 0 && read.length === 0 && (
+                  <div className="py-8 text-center text-white/40 text-sm">
+                    <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    No notifications yet
+                  </div>
+                )}
+              </>
+            )
+          })()}
         </div>
 
         <div className="p-3 border-t border-nile-blue/20">
