@@ -92,7 +92,8 @@ export function CashierTopLayout({
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-8 h-8 rounded-full bg-nile-blue border border-gold/30 flex items-center justify-center text-gold font-bold text-sm hover:border-gold/60 transition-colors"
+              className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all hover:scale-105"
+              style={{ background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#0D1526' }}
             >
               {user?.username?.charAt(0).toUpperCase()}
             </button>
@@ -103,20 +104,34 @@ export function CashierTopLayout({
                 <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
 
                 {/* Dropdown */}
-                <div className="absolute right-0 top-10 z-50 w-52 rounded-xl overflow-hidden shadow-xl"
-                  style={{ background: '#1A1F4D', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className="absolute right-0 top-10 z-50 w-56 rounded-2xl overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(160deg, #0f1729 0%, #1a1042 100%)',
+                    border: '1px solid rgba(212,175,55,0.25)',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.08)',
+                  }}>
 
                   {/* User info */}
-                  <div className="px-3 py-2.5 border-b border-white/10">
-                    <p className="font-semibold text-sm text-white">@{user?.username}</p>
-                    {role && <RoleBadge role={role as UserRole} className="mt-1" />}
+                  <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(212,175,55,0.15)', background: 'rgba(212,175,55,0.05)' }}>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+                        style={{ background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#0D1526' }}>
+                        {user?.username?.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm text-white">@{user?.username}</p>
+                        {role && <RoleBadge role={role as UserRole} className="mt-0.5" />}
+                      </div>
+                    </div>
                     {user?.credit_balance !== undefined && (
-                      <p className="text-gold font-mono text-sm mt-1">{formatETB(user.credit_balance)}</p>
+                      <div className="mt-2 px-2 py-1 rounded-lg text-center" style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                        <p className="text-gold font-mono text-sm font-bold">{formatETB(user.credit_balance)}</p>
+                      </div>
                     )}
                   </div>
 
                   {/* All nav items */}
-                  <div className="py-1 border-b border-white/10">
+                  <div className="py-1.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                     {navItems.map((item) => {
                       const Icon = item.icon
                       const isActive = pathname === item.href
@@ -125,10 +140,17 @@ export function CashierTopLayout({
                           key={item.href}
                           href={item.href}
                           onClick={() => setDropdownOpen(false)}
-                          className={cn(
-                            'flex items-center gap-2.5 px-3 py-2 text-sm transition-colors',
-                            isActive ? 'text-gold bg-gold/10' : 'text-white/70 hover:text-white hover:bg-white/5'
-                          )}
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm transition-all"
+                          style={isActive ? {
+                            color: '#FFD700',
+                            background: 'rgba(212,175,55,0.12)',
+                            borderLeft: '2px solid #FFD700',
+                          } : {
+                            color: 'rgba(255,255,255,0.6)',
+                            borderLeft: '2px solid transparent',
+                          }}
+                          onMouseEnter={e => { if (!isActive) { (e.currentTarget as HTMLElement).style.color = '#fff'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}}
+                          onMouseLeave={e => { if (!isActive) { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)'; (e.currentTarget as HTMLElement).style.background = 'transparent' }}}
                         >
                           <Icon className="w-4 h-4 flex-shrink-0" />
                           {item.label}
@@ -137,10 +159,14 @@ export function CashierTopLayout({
                     })}
                   </div>
 
-                  <div className="py-1 border-t border-white/10">
+                  <div className="py-1.5">
                     <button
                       onClick={() => { setDropdownOpen(false); setShowLogoutConfirm(true) }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm transition-all"
+                      style={{ color: '#f87171', borderLeft: '2px solid transparent' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.08)' }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                    >
                       <LogOut className="w-4 h-4" />
                       Logout
                     </button>
