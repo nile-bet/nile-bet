@@ -11,7 +11,7 @@ import { SkeletonStatCard } from '@/components/shared/SkeletonCard'
 import { formatETB, formatTimeAgo } from '@/lib/utils/formatCurrency'
 import { useAuthStore } from '@/lib/stores/authStore'
 import {
-  Wallet, Users, User, TrendingUp, Clock, Ticket,
+  Wallet, Users, TrendingUp, Clock, Ticket,
   CheckCircle, XCircle, RefreshCw, DollarSign, ArrowUpRight,
 } from 'lucide-react'
 import {
@@ -81,7 +81,6 @@ export default function AgentDashboard() {
       { Metric: 'My Balance', Value: stats.myBalance },
       { Metric: 'Total Cashiers', Value: stats.totalCashiers },
       { Metric: 'Active Cashiers', Value: stats.activeCashiers },
-      { Metric: 'Total Bettors', Value: stats.totalBettors },
       { Metric: 'Total Collected', Value: stats.totalCollected },
       { Metric: 'Total Paid Out', Value: stats.totalPaidOut },
       { Metric: 'Tax Collected', Value: stats.taxCollected },
@@ -231,7 +230,6 @@ export default function AgentDashboard() {
       {!loading && stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatsCard title="Total Cashiers" value={`${stats.activeCashiers} / ${stats.totalCashiers}`} subtitle="Active / Total" icon={Users} />
-          <StatsCard title="Total Bettors" value={stats.totalBettors} subtitle="In my network" icon={User} />
           <StatsCard title="Pending Credits" value={stats.pendingRequests ?? 0} subtitle="Awaiting approval" icon={Clock} variant={(stats.pendingRequests ?? 0) > 0 ? 'warning' : 'default'} />
           <StatsCard title="Tax Collected" value={formatETB(stats.taxCollected ?? 0)} subtitle="From winning slips" icon={DollarSign} variant="gold" />
         </div>

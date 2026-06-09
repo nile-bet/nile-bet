@@ -12,7 +12,6 @@ import { OfflineBanner }
 import {
   LayoutDashboard,
   Users,
-  User,
   CreditCard,
   Ticket,
   BarChart3,
@@ -37,12 +36,6 @@ const agentNav: NavItem[] = [
     label: 'Cashiers',
     icon: Users,
   },
-  {
-    href: '/agent-bettors',
-    label: 'Bettors',
-    icon: User,
-  },
-
   {
     href: '/agent-credits',
     label: 'Credits',
