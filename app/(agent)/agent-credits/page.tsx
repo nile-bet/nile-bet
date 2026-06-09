@@ -41,6 +41,8 @@ export default function AgentCreditsPage() {
     useState<any[]>([])
   const [approvingId, setApprovingId] =
     useState<string | null>(null)
+  const [historyFilter, setHistoryFilter] =
+    useState<'all' | 'admin_to_agent' | 'agent_to_cashier'>('all')
 
   useEffect(() => {
     if (user) {
@@ -417,15 +419,107 @@ export default function AgentCreditsPage() {
         )}
 
       {activeTab === 'history' && (
-        <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
-          <h3 className="text-white font-semibold mb-4">
-            Credit History
-          </h3>
-          <DataTable
-            columns={historyColumns}
-            data={history}
-            emptyMessage="No credit history yet"
-          />
+        <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5 space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <h3 className="text-white font-semibold">Credit History</h3>
+            <span className="text-white/40 text-xs">{history.length} records</span>
+          </div>
+
+          {/* Filter buttons */}
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { key: 'all', label: '🔁 All' },
+              { key: 'admin_to_agent', label: '⬇️ Admin → Me' },
+              { key: 'agent_to_cashier', label: '⬆️ Me → Cashier' },
+            ].map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setHistoryFilter(f.key as any)}
+                className={cn(
+                  'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                  historyFilter === f.key
+                    ? 'bg-gold text-charcoal'
+                    : 'bg-charcoal border border-nile-blue/30 text-white/60 hover:text-white'
+                )}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Filtered results */}
+          {(() => {
+            const filtered = history.filter((h: any) => {
+              if (historyFilter === 'admin_to_agent') return h.to_profile?.username === user?.username
+              if (historyFilter === 'agent_to_cashier') return h.from_profile?.username === user?.username
+              return true
+            })
+
+            if (filtered.length === 0) {
+              return (
+                <div className="py-8 text-center text-white/30 text-sm">
+                  No records for this filter
+                </div>
+              )
+            }
+
+            return (
+              <div className="space-y-2">
+                {filtered.map((h: any) => {
+                  const isIncoming = h.to_profile?.username === user?.username
+                  return (
+                    <div key={h.id} className={cn(
+                      'flex items-center gap-4 p-3 rounded-xl border transition-all',
+                      isIncoming
+                        ? 'bg-nile-success/5 border-nile-success/20'
+                        : 'bg-gold/5 border-gold/20'
+                    )}>
+                      {/* Direction badge */}
+                      <div className={cn(
+                        'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold',
+                        isIncoming ? 'bg-nile-success/20 text-nile-success' : 'bg-gold/20 text-gold'
+                      )}>
+                        {isIncoming ? '↓' : '↑'}
+                      </div>
+
+                      {/* From → To */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span className="text-white/50">@{h.from_profile?.username ?? '—'}</span>
+                          <span className="text-white/20">→</span>
+                          <span className={isIncoming ? 'text-nile-success font-medium' : 'text-gold font-medium'}>
+                            @{h.to_profile?.username ?? '—'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-0.5">
+                          {h.note && <span className="text-white/30 text-xs truncate">{h.note}</span>}
+                          <span className="text-white/20 text-xs">{formatDate(h.created_at)}</span>
+                        </div>
+                      </div>
+
+                      {/* Amount */}
+                      <div className={cn(
+                        'font-mono font-bold text-sm flex-shrink-0',
+                        isIncoming ? 'text-nile-success' : 'text-gold'
+                      )}>
+                        {isIncoming ? '+' : '-'}{formatETB(h.amount)}
+                      </div>
+
+                      {/* Direction label */}
+                      <div className={cn(
+                        'hidden sm:block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0',
+                        isIncoming
+                          ? 'bg-nile-success/10 text-nile-success border border-nile-success/20'
+                          : 'bg-gold/10 text-gold border border-gold/20'
+                      )}>
+                        {isIncoming ? 'Admin → Me' : 'Me → Cashier'}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })()}
         </div>
       )}
     </div>
