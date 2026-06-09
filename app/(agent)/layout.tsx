@@ -37,6 +37,11 @@ const agentNav: NavItem[] = [
     icon: Users,
   },
   {
+    href: '/agent-jackpot',
+    label: 'Jackpot',
+    icon: Trophy,
+  },
+  {
     href: '/agent-credits',
     label: 'Credits',
     icon: CreditCard,
