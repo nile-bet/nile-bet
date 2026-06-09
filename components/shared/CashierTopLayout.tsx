@@ -110,6 +110,15 @@ export function CashierTopLayout({
             </button>
           </Link>
 
+          <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase"
+            style={{
+              background: 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(255,215,0,0.25))',
+              border: '1px solid rgba(212,175,55,0.4)',
+              color: '#FFD700',
+              letterSpacing: '0.12em',
+            }}>
+            CASHIER
+          </span>
           <NotificationBell />
 
           {/* Avatar dropdown with all nav + dashboard + check slip + logout */}
