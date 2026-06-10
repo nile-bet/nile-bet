@@ -226,7 +226,6 @@ export default function CashierJackpotPage() {
                   className="bg-gold text-charcoal px-3 py-2 rounded-lg text-xs font-bold hover:bg-gold-light disabled:opacity-50 flex items-center gap-1"
                 >
                   {searchingSlip ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
-                  Load
                 </button>
                 {loadedSlip && (
                   <button
