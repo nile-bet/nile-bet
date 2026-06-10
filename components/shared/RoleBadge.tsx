@@ -10,24 +10,24 @@ interface RoleBadgeProps {
 
 const roleConfig = {
   admin: {
-    label: 'admin',
+    label: '👑 admin',
     className:
-      'bg-gold/20 text-gold border-gold/40',
+      'bg-gradient-to-r from-gold/30 to-amber-500/20 text-gold border-gold/60 shadow-sm shadow-gold/20',
   },
   agent: {
-    label: 'agent',
+    label: '🔷 agent',
     className:
-      'bg-nile-blue-light/20 text-nile-blue-light border-nile-blue-light/40',
+      'bg-gradient-to-r from-sky-500/20 to-blue-600/10 text-sky-300 border-sky-400/50 shadow-sm shadow-sky-500/20',
   },
   cashier: {
-    label: 'cashier',
+    label: '💚 cashier',
     className:
-      'bg-nile-success/20 text-nile-success border-nile-success/40',
+      'bg-gradient-to-r from-emerald-500/20 to-green-600/10 text-emerald-300 border-emerald-400/50 shadow-sm shadow-emerald-500/20',
   },
   bettor: {
-    label: 'bettor',
+    label: '⚡ bettor',
     className:
-      'bg-nile-purple/20 text-nile-purple border-nile-purple/40',
+      'bg-gradient-to-r from-violet-500/20 to-purple-600/10 text-violet-300 border-violet-400/50 shadow-sm shadow-violet-500/20',
   },
 }
 

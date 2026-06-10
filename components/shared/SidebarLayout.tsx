@@ -41,9 +41,9 @@ function SidebarContent({
   const { user, role } = useAuthStore()
 
   return (
-    <div className="flex flex-col h-full bg-slate-dark">
+    <div className="flex flex-col h-full" style={{background: "linear-gradient(180deg, #0f1729 0%, #0a1020 60%, #080d1a 100%)"}}>
       {/* Logo */}
-      <div className="p-4 border-b border-gold/10">
+      <div className="p-4 border-b border-gold/20" style={{background: "linear-gradient(90deg, rgba(212,175,55,0.08) 0%, transparent 100%)"}}>
         <Logo size="sm" showTagline />
       </div>
 
@@ -66,11 +66,11 @@ function SidebarContent({
               className={cn(
                 'flex items-center gap-3 px-4 py-2.5 text-sm transition-colors border-l-2',
                 isActive
-                  ? 'bg-gold/10 text-gold border-gold font-medium'
-                  : 'text-white/60 hover:text-white hover:bg-gold/5 border-transparent'
+                  ? 'bg-gradient-to-r from-gold/20 to-transparent text-gold border-gold font-semibold shadow-sm'
+                  : 'text-white/50 hover:text-white hover:bg-white/5 hover:border-white/20 border-transparent transition-all duration-200'
               )}
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
+              <Icon className={cn("w-4 h-4 flex-shrink-0", isActive ? "text-gold drop-shadow-sm" : "text-white/40 group-hover:text-white/70")} />
               {item.label}
             </Link>
           )
@@ -78,9 +78,9 @@ function SidebarContent({
       </nav>
 
       {/* User card at bottom */}
-      <div className="p-4 border-t border-gold/10">
+      <div className="p-4 border-t border-gold/20" style={{background: "linear-gradient(0deg, rgba(212,175,55,0.06) 0%, transparent 100%)"}}>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-nile-blue border border-gold/30 flex items-center justify-center text-gold font-bold text-sm flex-shrink-0">
+          <div className="w-8 h-8 rounded-full border-2 border-gold/50 flex items-center justify-center text-gold font-bold text-sm flex-shrink-0" style={{background: "linear-gradient(135deg, #1a2a4a 0%, #0f1729 100%)"}}>
             {user?.username
               ?.charAt(0)
               .toUpperCase()}
@@ -124,7 +124,7 @@ export function SidebarLayout({
   return (
     <div className="flex h-screen overflow-hidden bg-charcoal">
       {/* Desktop sidebar */}
-      <div className={cn("hidden md:flex flex-shrink-0 transition-all duration-300 border-r border-gold/10", sidebarCollapsed ? "w-0 overflow-hidden" : "w-60")}>
+      <div className={cn("hidden md:flex flex-shrink-0 transition-all duration-300 border-r border-gold/20 shadow-xl shadow-black/30", sidebarCollapsed ? "w-0 overflow-hidden" : "w-60")}>
         <div className="w-full">
           <SidebarContent
             navItems={navItems}
@@ -148,7 +148,7 @@ export function SidebarLayout({
             onOpenChange={setMobileOpen}
           >
             <SheetTrigger asChild>
-              <button className="bg-gold text-charcoal p-3 rounded-full shadow-lg">
+              <button className="p-3 rounded-full shadow-lg shadow-gold/30 text-charcoal font-bold" style={{background: "linear-gradient(135deg, #f0c040 0%, #d4af37 100%)"}}>
                 <Menu className="w-5 h-5" />
               </button>
             </SheetTrigger>
