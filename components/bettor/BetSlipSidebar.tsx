@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Ticket, AlertTriangle } from 'lucide-react'
+import { X, Ticket, AlertTriangle, Search, Loader2 } from 'lucide-react'
 import { useBetSlipStore } from '@/lib/stores/betSlipStore'
 import { useAuthStore }
   from '@/lib/stores/authStore'
@@ -182,9 +182,9 @@ export function BetSlipSidebar({
               setLoadingSlip(false)
             }}
             disabled={loadingSlip || !copySlipId.trim()}
-            className="text-xs bg-nile-blue text-white px-2 py-1.5 rounded-md hover:bg-nile-blue/80 transition-colors disabled:opacity-50"
+            className="relative group text-xs bg-gradient-to-r from-gold/80 to-gold text-charcoal px-2 py-1.5 rounded-md hover:from-gold hover:to-gold-light transition-all disabled:opacity-50 shadow-sm hover:shadow-gold/30 hover:shadow-md"
           >
-            {loadingSlip ? '...' : 'Load'}
+            {loadingSlip ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Search className="w-3 h-3" /><span className="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-charcoal border border-gold/30 text-gold text-[10px] px-2 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Search</span></>}
           </button>
         </div>
       </div>
