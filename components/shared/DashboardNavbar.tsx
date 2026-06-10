@@ -143,10 +143,8 @@ export function DashboardNavbar({
             </div>
           )}
 
-        {/* Notification bell */}
         {role && role !== 'admin' && (
           <span className={`hidden md:flex text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
-            role === 'cashier' ? 'bg-nile-blue/30 text-nile-blue-light border border-nile-blue/40' :
             role === 'agent' ? 'bg-nile-orange/20 text-nile-orange border border-nile-orange/40' :
             'bg-gold/20 text-gold border border-gold/40'
           }`}>{role}</span>
