@@ -163,14 +163,12 @@ export function PublicNavbar() {
                 </span>
               </div>
 
-              {/* My Bets */}
-              <Link
-                href="/bettor-bets"
-                className="hidden md:block text-sm text-white/70 hover:text-gold transition-colors"
-              >
-                My Bets
-              </Link>
-
+              {/* Bettor Badge */}
+              {isAuthenticated && (
+                <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/20 to-nile-blue/20 border border-gold/40 text-gold animate-pulse-gold">
+                  ⚡ BETTOR
+                </span>
+              )}
               {/* Notification Bell */}
               <NotificationBell />
 
@@ -191,19 +189,14 @@ export function PublicNavbar() {
                     <p className="font-semibold text-sm">
                       @{user?.username}
                     </p>
-                    {role && (
-                      <RoleBadge
-                        role={role}
-                        className="mt-1"
-                      />
-                    )}
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/30 to-nile-blue/30 border border-gold/40 text-gold mt-1">⚡ BETTOR</span>
                   </div>
                   <DropdownMenuItem asChild>
                     <Link
                       href="/bettor-bets"
                       className="cursor-pointer"
                     >
-                      My Bets
+                      <span className="flex items-center gap-2 text-emerald-400 font-medium">🎟️ My Bets</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -211,7 +204,7 @@ export function PublicNavbar() {
                       href="/bettor-profile"
                       className="cursor-pointer"
                     >
-                      My Profile
+                      <span className="flex items-center gap-2 text-sky-400 font-medium">👤 My Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -219,7 +212,7 @@ export function PublicNavbar() {
                       href="/bettor-notifications"
                       className="cursor-pointer"
                     >
-                      Notifications
+                      <span className="flex items-center gap-2 text-violet-400 font-medium">🔔 Notifications</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-nile-blue/20" />
@@ -227,7 +220,7 @@ export function PublicNavbar() {
                     onClick={() => setShowLogoutConfirm(true)}
                     className="text-nile-danger cursor-pointer focus:text-nile-danger"
                   >
-                    Logout
+                    <span className="flex items-center gap-2 font-medium">🚪 Logout</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
