@@ -10,23 +10,30 @@ export async function getAllCoupons({
   type,
   page = 1,
   limit = 20,
+  status,
+  username,
 }: {
   type?: string
   page?: number
   limit?: number
+  status?: string
+  username?: string
 } = {}) {
   const supabase = await createClient()
   let query = supabase
     .from('coupons')
     .select(`
       *,
-      profiles!coupons_bettor_id_fkey (username),
+      bettor:profiles!coupons_bettor_id_fkey (username),
       redeemer:profiles!coupons_redeemed_by_fkey (username)
     `, { count: 'exact' })
     .order('created_at', { ascending: false })
 
   if (type && type !== 'all') {
     query = query.eq('type', type)
+  }
+  if (status && status !== 'all') {
+    query = query.eq('status', status)
   }
 
   const from = (page - 1) * limit
@@ -35,21 +42,43 @@ export async function getAllCoupons({
 
   const { data, error, count } = await query
   if (error) return { coupons: [], total: 0 }
-  return { coupons: data ?? [], total: count ?? 0 }
+
+  // Filter by username client-side (Supabase doesn't support filtering on joined columns directly)
+  let filtered = data ?? []
+  if (username) {
+    const lower = username.toLowerCase()
+    filtered = filtered.filter((c: any) =>
+      c.bettor?.username?.toLowerCase().includes(lower)
+    )
+  }
+
+  return { coupons: filtered, total: username ? filtered.length : (count ?? 0) }
 }
 
 export async function getCouponStats() {
   const supabase = await createClient()
   const { data } = await supabase
     .from('coupons')
-    .select('status, amount, type')
-  if (!data) return { total: 0, pending: 0, redeemed: 0, expired: 0, totalAmount: 0 }
+    .select('status, amount, type, updated_at')
+  if (!data) return {
+    activeTopups: 0, activeTopupAmount: 0,
+    activeWithdrawals: 0, activeWithdrawalAmount: 0,
+    redeemedToday: 0, redeemedTodayAmount: 0,
+    expiredToday: 0,
+  }
+  const today = new Date().toISOString().slice(0, 10)
+  const activeTopups = data.filter(c => c.status === 'pending' && c.type === 'topup')
+  const activeWithdrawals = data.filter(c => c.status === 'pending' && c.type === 'withdrawal')
+  const redeemedToday = data.filter(c => c.status === 'redeemed' && (c.updated_at ?? '').slice(0, 10) === today)
+  const expiredToday = data.filter(c => c.status === 'expired' && (c.updated_at ?? '').slice(0, 10) === today)
   return {
-    total: data.length,
-    pending: data.filter(c => c.status === 'pending').length,
-    redeemed: data.filter(c => c.status === 'redeemed').length,
-    expired: data.filter(c => c.status === 'expired').length,
-    totalAmount: data.reduce((sum, c) => sum + Number(c.amount), 0),
+    activeTopups: activeTopups.length,
+    activeTopupAmount: activeTopups.reduce((s, c) => s + Number(c.amount), 0),
+    activeWithdrawals: activeWithdrawals.length,
+    activeWithdrawalAmount: activeWithdrawals.reduce((s, c) => s + Number(c.amount), 0),
+    redeemedToday: redeemedToday.length,
+    redeemedTodayAmount: redeemedToday.reduce((s, c) => s + Number(c.amount), 0),
+    expiredToday: expiredToday.length,
   }
 }
 
