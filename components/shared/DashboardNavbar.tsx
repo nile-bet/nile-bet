@@ -144,12 +144,9 @@ export function DashboardNavbar({
           )}
 
         {role && (
-          <span className={`hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
-            role === 'admin' ? 'bg-gradient-to-r from-gold/30 to-amber-500/20 text-gold border border-gold/60 shadow-sm shadow-gold/20' :
-            role === 'agent' ? 'bg-nile-orange/20 text-nile-orange border border-nile-orange/40' :
-            role === 'cashier' ? 'bg-nile-blue/30 text-nile-blue-light border border-nile-blue/40' :
-            'bg-gold/20 text-gold border border-gold/40'
-          }`}>{role === 'admin' ? '👑 ' : ''}{role}</span>
+          <div className="hidden md:flex">
+            <RoleBadge role={role as UserRole} />
+          </div>
         )}
         <NotificationBell />
 
@@ -189,9 +186,9 @@ export function DashboardNavbar({
             <DropdownMenuItem asChild>
               <Link
                 href={dashboardLink}
-                className="cursor-pointer flex items-center gap-2"
+                className="cursor-pointer flex items-center gap-2 text-sky-400 font-medium hover:text-sky-300"
               >
-                <LayoutDashboard className="w-4 h-4" />
+                <LayoutDashboard className="w-4 h-4 text-sky-400" />
                 Dashboard
               </Link>
             </DropdownMenuItem>
@@ -206,16 +203,16 @@ export function DashboardNavbar({
                     ? '/slip-lookup'
                     : '/check-slip'
                 }
-                className="cursor-pointer flex items-center gap-2"
+                className="cursor-pointer flex items-center gap-2 text-emerald-400 font-medium hover:text-emerald-300"
               >
-                <Search className="w-4 h-4" />
+                <Search className="w-4 h-4 text-emerald-400" />
                 Check Slip
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-nile-blue/20" />
             <DropdownMenuItem
               onClick={() => setShowLogoutConfirm(true)}
-              className="text-nile-danger cursor-pointer focus:text-nile-danger flex items-center gap-2"
+              className="text-nile-danger cursor-pointer focus:text-nile-danger flex items-center gap-2 font-medium"
             >
               <LogOut className="w-4 h-4" />
               Logout
