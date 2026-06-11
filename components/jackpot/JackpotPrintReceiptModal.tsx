@@ -48,9 +48,10 @@ export function JackpotPrintReceiptModal({
   useEffect(() => {
     if (!isOpen || !slipId) return
 
-    getJackpotSlipById(slipId).then(
-      setSlip
-    )
+    // Delay fetch so DB has time to commit all selections
+    setTimeout(() => {
+      getJackpotSlipById(slipId).then(setSlip)
+    }, 1000)
 
     // QR Code
     const url = `${window.location.origin}/slip/${slipId}`
@@ -155,6 +156,19 @@ export function JackpotPrintReceiptModal({
             <Share2 className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Retry if selections missing */}
+        {slip && selections.length === 0 && (
+          <div className="flex items-center justify-between bg-nile-orange/10 border border-nile-orange/30 rounded-lg px-3 py-2 mb-3">
+            <p className="text-nile-orange text-xs">Picks still loading...</p>
+            <button
+              onClick={() => getJackpotSlipById(slipId).then(setSlip)}
+              className="text-xs bg-nile-orange/20 text-nile-orange px-3 py-1 rounded-lg hover:bg-nile-orange/30"
+            >
+              🔄 Reload
+            </button>
+          </div>
+        )}
 
         {/* Slip summary */}
         <div className="bg-charcoal/50 rounded-xl p-3 mb-4 text-center">
@@ -384,6 +398,9 @@ export function JackpotPrintReceiptModal({
                 }}
               >
                 MY PICKS ({selections.length}/12)
+                {selections.length === 0 && (
+                  <span style={{ fontSize: '9px', color: '#888', marginLeft: '4px' }}>(loading...)</span>
+                )}
               </div>
               {selections.map(
                 (sel: any, i: number) => {

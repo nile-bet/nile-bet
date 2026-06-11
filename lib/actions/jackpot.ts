@@ -166,12 +166,22 @@ export async function placeJackpotBet(data: {
     }
   }
 
-  // Insert selections
+  // Fetch jackpot_match IDs for foreign key
+  const { data: matchRows } = await supabase
+    .from('jackpot_matches')
+    .select('id, game_number')
+    .eq('jackpot_id', data.jackpotId)
+
+  const matchIdMap: Record<number, string> = {}
+  matchRows?.forEach((m: any) => { matchIdMap[m.game_number] = m.id })
+
+  // Insert selections with jackpot_match_id
   await supabase
     .from('jackpot_slip_selections')
     .insert(
       data.selections.map((sel) => ({
         jackpot_slip_id: slip.id,
+        jackpot_match_id: matchIdMap[sel.gameNumber] ?? null,
         game_number: sel.gameNumber,
         selection: sel.selection,
         odd: sel.odd,

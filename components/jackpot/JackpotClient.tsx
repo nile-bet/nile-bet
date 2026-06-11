@@ -40,7 +40,7 @@ export function JackpotClient({
   leaderboard,
   pastJackpots,
 }: Props) {
-  const { user, isAuthenticated } =
+  const { user, isAuthenticated, setUser } =
     useAuthStore()
   const [activeTab, setActiveTab] =
     useState<
@@ -52,6 +52,8 @@ export function JackpotClient({
     useState(false)
   const [placing, setPlacing] =
     useState(false)
+  const [lastSelections, setLastSelections] = useState<Record<number, Selection>>({})
+  const [betPlaced, setBetPlaced] = useState(false)
   const [mySlips, setMySlips] =
     useState<any[]>([])
   const [loadingSlips, setLoadingSlips] =
@@ -143,7 +145,20 @@ export function JackpotClient({
       )
       setReceiptSlipId(result.slipId)
       setShowReceipt(true)
+      setLastSelections(selections)
+      setBetPlaced(true)
       setSelections({})
+      // Refresh balance in store
+      if (user) {
+        setUser({ ...user, credit_balance: (user.credit_balance ?? 0) - (jackpot?.fixed_stake ?? 50) })
+      }
+      // Reload my slips after short delay so DB commits
+      setTimeout(async () => {
+        if (user) {
+          const data = await getMyJackpotSlips(user.id)
+          setMySlips(data)
+        }
+      }, 1500)
     } else {
       toast.error(
         result.error ?? 'Failed to place bet'
@@ -347,17 +362,44 @@ export function JackpotClient({
       {/* ── PICK GAMES TAB ── */}
       {activeTab === 'pick' && (
         <div className="space-y-4">
+          {/* Post-bet summary */}
+          {betPlaced && Object.keys(lastSelections).length === 12 && (
+            <div className="bg-nile-success/10 border border-nile-success/30 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-nile-success font-semibold text-sm">✅ Bet Placed — Your Picks</p>
+                <button onClick={() => { setBetPlaced(false); setLastSelections({}) }} className="text-white/30 hover:text-white text-xs">Dismiss</button>
+              </div>
+              <div className="space-y-1.5">
+                {matches.map((m: any) => {
+                  const pick = lastSelections[m.game_number]
+                  return (
+                    <div key={m.game_number} className="flex items-center justify-between bg-charcoal/40 rounded-lg px-3 py-1.5 text-xs">
+                      <span className="text-white/60 truncate flex-1">
+                        <span className="text-gold font-mono mr-2">G{m.game_number}</span>
+                        {m.home_team} vs {m.away_team}
+                      </span>
+                      <span className={cn('font-bold ml-2 px-2 py-0.5 rounded',
+                        pick === 'home' ? 'bg-gold/20 text-gold' :
+                        pick === 'draw' ? 'bg-white/10 text-white' :
+                        'bg-nile-blue/30 text-nile-blue-light'
+                      )}>
+                        {pick === 'home' ? '1 Home' : pick === 'draw' ? 'X Draw' : '2 Away'}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Progress */}
           <div className="flex items-center justify-between">
             <p className="text-white/60 text-sm">
-              {selectedCount}/12 games
-              selected
+              {selectedCount}/12 games selected
             </p>
             {selectedCount > 0 && (
               <button
-                onClick={() =>
-                  setSelections({})
-                }
+                onClick={() => setSelections({})}
                 className="text-xs text-white/40 hover:text-nile-danger"
               >
                 Clear All
@@ -369,9 +411,7 @@ export function JackpotClient({
           <div className="h-1.5 bg-nile-blue/30 rounded-full overflow-hidden">
             <div
               className="h-full bg-gold rounded-full transition-all"
-              style={{
-                width: `${(selectedCount / 12) * 100}%`,
-              }}
+              style={{ width: `${(selectedCount / 12) * 100}%` }}
             />
           </div>
 
@@ -959,11 +999,11 @@ function JackpotSlipCard({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {slip.correct_count !== null && (
-              <span className="text-white/70 text-sm bg-nile-blue/20 px-3 py-1 rounded-full">
-                {slip.correct_count}/12
-              </span>
-            )}
+            <span className="text-white/70 text-sm bg-nile-blue/20 px-3 py-1 rounded-full">
+              {slip.correct_count !== null && slip.status !== 'pending'
+                ? `${slip.correct_count}/12`
+                : `${slip.jackpot_slip_selections?.length ?? 0}/12 picks`}
+            </span>
             {slip.reward_amount > 0 && (
               <span className="text-nile-success font-mono text-sm">
                 +{formatETB(
