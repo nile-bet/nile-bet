@@ -143,11 +143,13 @@ export function DashboardNavbar({
             </div>
           )}
 
-        {role && role !== 'admin' && (
-          <span className={`hidden md:flex text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
+        {role && (
+          <span className={`hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
+            role === 'admin' ? 'bg-gradient-to-r from-gold/30 to-amber-500/20 text-gold border border-gold/60 shadow-sm shadow-gold/20' :
             role === 'agent' ? 'bg-nile-orange/20 text-nile-orange border border-nile-orange/40' :
+            role === 'cashier' ? 'bg-nile-blue/30 text-nile-blue-light border border-nile-blue/40' :
             'bg-gold/20 text-gold border border-gold/40'
-          }`}>{role}</span>
+          }`}>{role === 'admin' ? '👑 ' : ''}{role}</span>
         )}
         <NotificationBell />
 
