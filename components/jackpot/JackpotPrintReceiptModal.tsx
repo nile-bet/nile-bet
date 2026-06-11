@@ -298,147 +298,79 @@ export function JackpotPrintReceiptModal({
               />
 
               {/* Info */}
-              <div
-                style={{ fontSize: '10px' }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent:
-                      'space-between',
-                  }}
-                >
+              <div style={{ fontSize: '10px', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Jackpot:</span>
-                  <span>
-                    {jackpot?.name}
-                  </span>
+                  <span>{jackpot?.name}</span>
                 </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent:
-                      'space-between',
-                  }}
-                >
-                  <span>Entry Fee:</span>
-                  <span
-                    style={{
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {formatETB(
-                      jackpot?.fixed_stake ?? 50
-                    )}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent:
-                      'space-between',
-                  }}
-                >
-                  <span>Win All 12:</span>
-                  <span
-                    style={{
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {formatETB(
-                      jackpot?.win_all_reward ?? 250000
-                    )}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent:
-                      'space-between',
-                  }}
-                >
-                  <span>Miss 1:</span>
-                  <span>
-                    {formatETB(
-                      jackpot?.near_win_reward ?? 25000
-                    )}
-                  </span>
-                </div>
-                {!slip?.is_anonymous &&
-                  user && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent:
-                          'space-between',
-                      }}
-                    >
-                      <span>Bettor:</span>
-                      <span>
-                        @{user.username}
-                      </span>
-                    </div>
-                  )}
+                {!slip?.is_anonymous && user && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Bettor:</span>
+                    <span>@{user.username}</span>
+                  </div>
+                )}
               </div>
 
-              <div
-                style={{
-                  borderTop:
-                    '1px dashed #000',
-                  margin: '4px 0',
-                }}
-              />
+              <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+
+              {/* Jackpot rewards */}
+              <div style={{ fontSize: '10px', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Win All 12:</span>
+                  <span style={{ fontWeight: 'bold' }}>{formatETB(jackpot?.win_all_reward ?? 0)}</span>
+                </div>
+                {(jackpot?.near_win_reward ?? 0) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Miss 1:</span>
+                    <span>{formatETB(jackpot?.near_win_reward ?? 0)}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Entry Fee:</span>
+                  <span style={{ fontWeight: 'bold' }}>{formatETB(jackpot?.fixed_stake ?? 0)}</span>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
 
               {/* Selections */}
-              <div
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                  marginBottom: '3px',
-                }}
-              >
+              <div style={{ fontSize: '10px', fontWeight: 'bold', textAlign: 'center', marginBottom: '3px' }}>
                 MY PICKS ({selections.length}/12)
                 {selections.length === 0 && (
                   <span style={{ fontSize: '9px', color: '#888', marginLeft: '4px' }}>(loading...)</span>
                 )}
               </div>
-              {selections.map(
-                (sel: any, i: number) => {
-                  const match =
-                    sel.jackpot_matches
-                  const pick =
-                    sel.selection === 'home'
-                      ? '1'
-                      : sel.selection ===
-                        'away'
-                      ? '2'
-                      : 'X'
+              {selections.length === 0 ? (
+                <div style={{ textAlign: 'center', fontSize: '9px', color: '#888', padding: '6px 0' }}>
+                  Picks loading — tap Reload above
+                </div>
+              ) : (
+                selections.map((sel: any, i: number) => {
+                  const match = sel.jackpot_matches
+                  const pick = sel.selection === 'home' ? '1' : sel.selection === 'away' ? '2' : 'X'
+                  const isCorrect = sel.result === 'correct'
+                  const isWrong = sel.result === 'wrong'
                   return (
-                    <div
-                      key={i}
-                      style={{
-                        display: 'flex',
-                        justifyContent:
-                          'space-between',
-                        fontSize: '9px',
-                        marginBottom: '2px',
-                      }}
-                    >
-                      <span>
-                        {sel.game_number}.{' '}
-                        {match?.home_team} v{' '}
-                        {match?.away_team}
+                    <div key={i} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      fontSize: '9px',
+                      marginBottom: '2px',
+                      padding: '2px 3px',
+                      backgroundColor: isCorrect ? '#e8f5e9' : isWrong ? '#ffebee' : 'transparent',
+                      borderRadius: '3px',
+                    }}>
+                      <span style={{ flex: 1 }}>
+                        {sel.game_number}. {match?.home_team ?? 'Home'} v {match?.away_team ?? 'Away'}
                       </span>
-                      <span
-                        style={{
-                          fontWeight: 'bold',
-                        }}
-                      >
+                      <span style={{ fontWeight: 'bold', marginLeft: '6px', minWidth: '14px', textAlign: 'right' }}>
                         {pick}
+                        {isCorrect ? ' ✓' : isWrong ? ' ✗' : ''}
                       </span>
                     </div>
                   )
-                }
+                })
               )}
 
               {/* QR */}
