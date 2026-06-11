@@ -7,6 +7,7 @@ import {
   publishJackpot,
   settleJackpot,
   deleteJackpot,
+  updateJackpot,
 } from '@/lib/actions/adminMatches'
 import { StatusBadge }
   from '@/components/shared/StatusBadge'
@@ -18,7 +19,7 @@ import { useAuthStore }
   from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { Plus, Trophy, Trash2 } from 'lucide-react'
+import { Plus, Trophy, Trash2, Pencil } from 'lucide-react'
 
 export default function AdminJackpotPage() {
   const { user } = useAuthStore()
@@ -43,6 +44,16 @@ export default function AdminJackpotPage() {
     useState<string | null>(null)
   const [deleting, setDeleting] =
     useState(false)
+  const [showEdit, setShowEdit] = useState(false)
+  const [editJackpot, setEditJackpot] = useState<any>(null)
+  const [editName, setEditName] = useState('')
+  const [editClosesAt, setEditClosesAt] = useState('')
+  const [editGamesFinishAt, setEditGamesFinishAt] = useState('')
+  const [editStake, setEditStake] = useState('')
+  const [editWinAll, setEditWinAll] = useState('')
+  const [editNearWin, setEditNearWin] = useState('')
+  const [editGames, setEditGames] = useState<any[]>([])
+  const [saving, setSaving] = useState(false)
 
   // Create form
   const [jackpotName, setJackpotName] =
@@ -99,6 +110,56 @@ export default function AdminJackpotPage() {
     const data = await getAllJackpots()
     setJackpots(data)
     setLoading(false)
+  }
+
+  const openEdit = (jp: any) => {
+    setEditJackpot(jp)
+    setEditName(jp.name)
+    setEditClosesAt(jp.closes_at ? new Date(jp.closes_at).toISOString().slice(0,16) : '')
+    setEditGamesFinishAt(jp.closes_at ? new Date(jp.closes_at).toISOString().slice(0,16) : '')
+    setEditStake(String(jp.fixed_stake))
+    setEditWinAll(String(jp.win_all_reward))
+    setEditNearWin(String(jp.near_win_reward))
+    setEditGames((jp.jackpot_matches ?? []).sort((a: any, b: any) => a.game_number - b.game_number).map((m: any) => ({
+      gameNumber: m.game_number,
+      homeTeam: m.home_team,
+      awayTeam: m.away_team,
+      kickOffTime: m.kick_off_time ? new Date(m.kick_off_time).toISOString().slice(0,16) : '',
+      homeOdd: String(m.home_odd),
+      drawOdd: String(m.draw_odd),
+      awayOdd: String(m.away_odd),
+    })))
+    setShowEdit(true)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editJackpot) return
+    setSaving(true)
+    const result = await updateJackpot(editJackpot.id, {
+      name: editName,
+      closesAt: editClosesAt,
+      gamesFinishAt: editGamesFinishAt,
+      fixedStake: parseFloat(editStake) || 50,
+      winAllReward: parseFloat(editWinAll) || 250000,
+      nearWinReward: parseFloat(editNearWin) || 25000,
+      matches: editGames.map(g => ({
+        gameNumber: g.gameNumber,
+        homeTeam: g.homeTeam,
+        awayTeam: g.awayTeam,
+        kickOffTime: g.kickOffTime,
+        homeOdd: parseFloat(g.homeOdd) || 2.0,
+        drawOdd: parseFloat(g.drawOdd) || 3.0,
+        awayOdd: parseFloat(g.awayOdd) || 3.5,
+      })),
+    })
+    if (result.success) {
+      toast.success('Jackpot updated!')
+      setShowEdit(false)
+      loadJackpots()
+    } else {
+      toast.error(result.error ?? 'Failed to update')
+    }
+    setSaving(false)
   }
 
   const handleCreate = async () => {
@@ -272,15 +333,24 @@ export default function AdminJackpotPage() {
                   type="jackpot"
                 />
                 {jp.status === 'draft' && (
-                  <button
-                    onClick={() => {
-                      setActiveJackpot(jp)
-                      setShowPublishConfirm(true)
-                    }}
-                    className="bg-nile-success text-white text-xs px-3 py-1.5 rounded-lg hover:bg-nile-success/80"
-                  >
-                    Publish
-                  </button>
+                  <>
+                    <button
+                      onClick={() => openEdit(jp)}
+                      className="bg-nile-blue/30 text-sky-400 border border-sky-400/30 text-xs px-3 py-1.5 rounded-lg hover:bg-nile-blue/50 flex items-center gap-1"
+                    >
+                      <Pencil className="w-3 h-3" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveJackpot(jp)
+                        setShowPublishConfirm(true)
+                      }}
+                      className="bg-nile-success text-white text-xs px-3 py-1.5 rounded-lg hover:bg-nile-success/80"
+                    >
+                      Publish
+                    </button>
+                  </>
                 )}
                 {(jp.status === 'closed' || jp.status === 'open') && (() => {
                   const finishTime = jp.closes_at
@@ -586,6 +656,65 @@ export default function AdminJackpotPage() {
                 className="flex-1 bg-gold text-charcoal py-2.5 rounded-lg text-sm font-semibold hover:bg-gold-light"
               >
                 Create Jackpot
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEdit && editJackpot && (
+        <div className="fixed inset-0 bg-charcoal/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-dark border border-nile-blue/40 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6">
+            <h2 className="text-white font-semibold text-xl mb-6">✏️ Edit Jackpot</h2>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="col-span-2">
+                <label className="text-xs text-white/60 block mb-1">Jackpot Name</label>
+                <input value={editName} onChange={e => setEditName(e.target.value)} className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs text-white/60 block mb-1">Betting Closes At</label>
+                <input type="datetime-local" value={editClosesAt} onChange={e => setEditClosesAt(e.target.value)} className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs text-white/60 block mb-1">Games Finish At</label>
+                <input type="datetime-local" value={editGamesFinishAt} onChange={e => setEditGamesFinishAt(e.target.value)} className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs text-white/60 block mb-1">Fixed Stake (ETB)</label>
+                <input type="number" value={editStake} onChange={e => setEditStake(e.target.value)} className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs text-white/60 block mb-1">Win All 12 Reward (ETB)</label>
+                <input type="number" value={editWinAll} onChange={e => setEditWinAll(e.target.value)} className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs text-white/60 block mb-1">Miss 1 Reward (ETB)</label>
+                <input type="number" value={editNearWin} onChange={e => setEditNearWin(e.target.value)} className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none" />
+              </div>
+            </div>
+            <h3 className="text-white font-medium mb-4">12 Games</h3>
+            <div className="space-y-3 max-h-[400px] overflow-y-auto scrollbar-hide">
+              {editGames.map((game, i) => (
+                <div key={i} className="bg-charcoal/50 rounded-lg p-3">
+                  <p className="text-gold text-[10px] tracking-widest uppercase mb-2">Game {game.gameNumber}</p>
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <input value={game.homeTeam} onChange={e => setEditGames(prev => prev.map((g,j) => j===i ? {...g, homeTeam: e.target.value} : g))} placeholder="Home Team" className="bg-charcoal border border-nile-blue/30 rounded px-2 py-1.5 text-white text-sm focus:outline-none" />
+                    <input value={game.awayTeam} onChange={e => setEditGames(prev => prev.map((g,j) => j===i ? {...g, awayTeam: e.target.value} : g))} placeholder="Away Team" className="bg-charcoal border border-nile-blue/30 rounded px-2 py-1.5 text-white text-sm focus:outline-none" />
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    <input type="datetime-local" value={game.kickOffTime} onChange={e => setEditGames(prev => prev.map((g,j) => j===i ? {...g, kickOffTime: e.target.value} : g))} className="col-span-1 bg-charcoal border border-nile-blue/30 rounded px-2 py-1 text-white text-xs focus:outline-none" />
+                    <input type="number" step="0.01" value={game.homeOdd} onChange={e => setEditGames(prev => prev.map((g,j) => j===i ? {...g, homeOdd: e.target.value} : g))} placeholder="1 Home" className="bg-charcoal border border-nile-blue/30 rounded px-2 py-1 text-gold font-mono text-xs text-center focus:outline-none" />
+                    <input type="number" step="0.01" value={game.drawOdd} onChange={e => setEditGames(prev => prev.map((g,j) => j===i ? {...g, drawOdd: e.target.value} : g))} placeholder="X Draw" className="bg-charcoal border border-nile-blue/30 rounded px-2 py-1 text-gold font-mono text-xs text-center focus:outline-none" />
+                    <input type="number" step="0.01" value={game.awayOdd} onChange={e => setEditGames(prev => prev.map((g,j) => j===i ? {...g, awayOdd: e.target.value} : g))} placeholder="2 Away" className="bg-charcoal border border-nile-blue/30 rounded px-2 py-1 text-gold font-mono text-xs text-center focus:outline-none" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowEdit(false)} className="flex-1 border border-white/20 text-white/60 py-2.5 rounded-lg text-sm">Cancel</button>
+              <button onClick={handleSaveEdit} disabled={saving} className="flex-1 bg-gold text-charcoal py-2.5 rounded-lg text-sm font-semibold hover:bg-gold-light disabled:opacity-50">
+                {saving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>

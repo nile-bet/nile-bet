@@ -1469,6 +1469,55 @@ export async function enterMatchResult(data: {
 
 // ─── JACKPOT MANAGEMENT ───────────────
 
+
+export async function updateJackpot(
+  jackpotId: string,
+  data: {
+    name: string
+    closesAt: string
+    gamesFinishAt?: string
+    fixedStake: number
+    winAllReward: number
+    nearWinReward: number
+    matches: {
+      gameNumber: number
+      homeTeam: string
+      awayTeam: string
+      kickOffTime: string
+      homeOdd: number
+      drawOdd: number
+      awayOdd: number
+    }[]
+  }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('jackpots')
+    .update({
+      name: data.name,
+      closes_at: data.gamesFinishAt || data.closesAt,
+      fixed_stake: data.fixedStake,
+      win_all_reward: data.winAllReward,
+      near_win_reward: data.nearWinReward,
+    })
+    .eq('id', jackpotId)
+  if (error) return { success: false, error: error.message }
+  for (const m of data.matches) {
+    await supabase
+      .from('jackpot_matches')
+      .update({
+        home_team: m.homeTeam,
+        away_team: m.awayTeam,
+        kick_off_time: m.kickOffTime,
+        home_odd: m.homeOdd,
+        draw_odd: m.drawOdd,
+        away_odd: m.awayOdd,
+      })
+      .eq('jackpot_id', jackpotId)
+      .eq('game_number', m.gameNumber)
+  }
+  return { success: true }
+}
 export async function createJackpot(data: {
   name: string
   opensAt: string
