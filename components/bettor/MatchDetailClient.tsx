@@ -46,7 +46,25 @@ const MARKET_NAME_OVERRIDES: Record<string, string> = {
   'away team goals over/under': 'Away Team Goals Over/Under',
 }
 
-function resolveMarketName(raw: string): string {
+function resolveMarketName(raw: string, categoryName?: string): string {
+  const cat = (categoryName ?? '').toUpperCase()
+
+  if (cat === 'GOALS' && /^Over\/Under \d+\.\d+$/i.test(raw))
+    return raw.replace(/^Over\/Under/i, 'Goal Over/Under')
+
+  if (cat === 'CORNERS') {
+    if (/O\/U/i.test(raw)) return raw.replace(/O\/U/i, 'Over/Under')
+  }
+
+  if (cat === 'CARDS') {
+    if (/O\/U/i.test(raw)) return raw.replace(/O\/U/i, 'Over/Under')
+  }
+
+  if (cat === 'TEAM GOALS') {
+    if (/^Home Team O\/U/i.test(raw)) return raw.replace(/^Home Team O\/U/i, 'Home Team Goals Over/Under')
+    if (/^Away Team O\/U/i.test(raw)) return raw.replace(/^Away Team O\/U/i, 'Away Team Goals Over/Under')
+  }
+
   return MARKET_NAME_OVERRIDES[raw.toLowerCase()] ?? raw
 }
 
