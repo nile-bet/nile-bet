@@ -233,80 +233,89 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
                 </div>
               )}
 
-              {/* Compact match table */}
-              <div className="rounded-xl overflow-hidden border border-[#252E6D]/60" style={{ background: '#13173a' }}>
-                {/* Table header */}
-                <div className="grid items-center px-3 py-2 border-b border-[#252E6D]/60 text-[10px] font-bold uppercase tracking-widest text-white/25"
-                  style={{ gridTemplateColumns: '28px 1fr 90px 90px 90px' }}>
-                  <span>#</span>
-                  <span>Match</span>
-                  <span className="text-center">1 Home</span>
-                  <span className="text-center">X Draw</span>
-                  <span className="text-center">2 Away</span>
-                </div>
-                {matches.map((match: any, idx: number) => {
+              {/* Match cards */}
+              <div className="space-y-2">
+                {matches.map((match: any) => {
                   const sel = selections[match.game_number]
                   const result = match.result
                   const isResulted = !!result && result !== 'pending'
-                  const rowBg = isResulted && result === sel
-                    ? 'rgba(74,222,128,0.04)'
-                    : isResulted && result !== sel && sel
-                    ? 'rgba(239,68,68,0.03)'
-                    : sel ? 'rgba(212,175,55,0.03)' : idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)'
                   return (
                     <div key={match.id}
-                      className="grid items-center px-3 py-2.5 border-b border-[#252E6D]/30 last:border-0 transition-colors"
-                      style={{ gridTemplateColumns: '28px 1fr 90px 90px 90px', background: rowBg }}>
-                      {/* Game number */}
-                      <span className="text-[10px] font-mono font-bold" style={{ color: 'rgba(212,175,55,0.5)' }}>{match.game_number}</span>
-                      {/* Teams + time */}
-                      <div className="min-w-0 pr-2">
-                        <div className="flex items-center gap-1 text-xs">
-                          <span className="text-white font-semibold truncate">{match.home_team}</span>
-                          <span className="text-white/20 flex-shrink-0 text-[10px]">v</span>
-                          <span className="text-white/70 truncate">{match.away_team}</span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-white/25 font-mono">
+                      className="rounded-xl border transition-all overflow-hidden"
+                      style={
+                        isResulted && result === sel ? { borderColor: 'rgba(74,222,128,0.35)', background: 'rgba(74,222,128,0.04)' } :
+                        isResulted && result !== sel && sel ? { borderColor: 'rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.03)' } :
+                        sel ? { borderColor: 'rgba(212,175,55,0.35)', background: 'rgba(212,175,55,0.04)' } :
+                        { borderColor: 'rgba(37,46,109,0.7)', background: 'linear-gradient(135deg, #1A1F4D, #1C2155)' }
+                      }>
+                      {/* Match header row */}
+                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/[0.05]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37' }}>
+                            G{match.game_number}
+                          </span>
+                          <span className="text-[10px] text-white/30 font-mono">
+                            {new Date(match.kick_off_time).toLocaleDateString('en-ET', { month: 'short', day: 'numeric' })}
+                            {' · '}
                             {new Date(match.kick_off_time).toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' })}
                           </span>
-                          {isResulted && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={
-                              result === 'home' ? { color: '#FFD700', background: 'rgba(212,175,55,0.15)' } :
-                              result === 'away' ? { color: '#4A90D9', background: 'rgba(74,144,217,0.15)' } :
-                              { color: 'white', background: 'rgba(255,255,255,0.08)' }
-                            }>
-                              {result === 'home' ? '1' : result === 'away' ? '2' : 'X'} ✓
-                            </span>
-                          )}
+                        </div>
+                        {isResulted && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={
+                            result === 'home' ? { color: '#FFD700', background: 'rgba(212,175,55,0.15)' } :
+                            result === 'away' ? { color: '#60a5fa', background: 'rgba(96,165,250,0.15)' } :
+                            { color: 'white', background: 'rgba(255,255,255,0.1)' }
+                          }>
+                            {result === 'home' ? '1 Home' : result === 'away' ? '2 Away' : 'X Draw'} ✓
+                          </span>
+                        )}
+                      </div>
+                      {/* Teams + odds row */}
+                      <div className="px-3 py-2.5">
+                        {/* Team names */}
+                        <div className="flex items-center justify-between mb-2.5">
+                          <span className="text-white font-semibold text-sm flex-1">{match.home_team}</span>
+                          <span className="text-white/25 text-xs mx-2 flex-shrink-0">vs</span>
+                          <span className="text-white font-semibold text-sm flex-1 text-right">{match.away_team}</span>
+                        </div>
+                        {/* Odds buttons */}
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {([
+                            { key: 'home' as const, label: '1', sublabel: 'Home', odd: match.home_odd },
+                            { key: 'draw' as const, label: 'X', sublabel: 'Draw', odd: match.draw_odd },
+                            { key: 'away' as const, label: '2', sublabel: 'Away', odd: match.away_odd },
+                          ]).map(opt => {
+                            const isSelected = sel === opt.key
+                            const isCorrect = isResulted && result === opt.key
+                            const isWrong = isResulted && isSelected && result !== opt.key
+                            return (
+                              <button key={opt.key}
+                                onClick={() => { if (isOpen) handleSelect(match.game_number, opt.key) }}
+                                disabled={!isOpen}
+                                className="flex items-center justify-between px-3 py-2 rounded-lg transition-all"
+                                style={
+                                  isCorrect ? { background: 'rgba(74,222,128,0.18)', border: '1.5px solid #4ade80' } :
+                                  isWrong ? { background: 'rgba(239,68,68,0.12)', border: '1.5px solid #ef4444' } :
+                                  isSelected ? { background: 'rgba(212,175,55,0.2)', border: '1.5px solid #D4AF37' } :
+                                  { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
+                                }>
+                                <span className="text-xs font-bold" style={
+                                  isCorrect ? { color: '#4ade80' } :
+                                  isWrong ? { color: '#ef4444' } :
+                                  isSelected ? { color: '#FFD700' } :
+                                  { color: 'rgba(255,255,255,0.5)' }
+                                }>{opt.label}</span>
+                                <span className="text-xs font-mono font-bold" style={
+                                  isCorrect ? { color: '#4ade80' } :
+                                  isWrong ? { color: '#ef4444' } :
+                                  isSelected ? { color: '#FFD700' } :
+                                  { color: 'rgba(255,255,255,0.7)' }
+                                }>{opt.odd?.toFixed(2) ?? '—'}</span>
+                              </button>
+                            )
+                          })}
                         </div>
                       </div>
-                      {/* Odd buttons */}
-                      {([
-                        { key: 'home' as const, odd: match.home_odd },
-                        { key: 'draw' as const, odd: match.draw_odd },
-                        { key: 'away' as const, odd: match.away_odd },
-                      ]).map(opt => {
-                        const isSelected = sel === opt.key
-                        const isCorrect = isResulted && result === opt.key
-                        const isWrong = isResulted && isSelected && result !== opt.key
-                        return (
-                          <div key={opt.key} className="flex justify-center px-1">
-                            <button
-                              onClick={() => { if (isOpen) handleSelect(match.game_number, opt.key) }}
-                              disabled={!isOpen}
-                              className="w-full max-w-[78px] flex flex-col items-center py-1.5 rounded-lg transition-all text-center"
-                              style={
-                                isCorrect ? { background: 'rgba(74,222,128,0.18)', border: '1.5px solid #4ade80', color: '#4ade80' } :
-                                isWrong ? { background: 'rgba(239,68,68,0.12)', border: '1.5px solid #ef4444', color: '#ef4444' } :
-                                isSelected ? { background: 'rgba(212,175,55,0.2)', border: '1.5px solid #D4AF37', color: '#FFD700' } :
-                                { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(37,46,109,0.7)', color: 'rgba(255,255,255,0.45)' }
-                              }>
-                              <span className="text-[11px] font-mono font-bold leading-none">{opt.odd?.toFixed(2) ?? '—'}</span>
-                            </button>
-                          </div>
-                        )
-                      })}
                     </div>
                   )
                 })}
