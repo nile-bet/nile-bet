@@ -301,17 +301,16 @@ export async function getJackpotLeaderboard(
       status,
       reward_amount,
       is_anonymous,
+      created_at,
       bettor:profiles!jackpot_slips_bettor_id_fkey (
         username
       )
     `
     )
     .eq('jackpot_id', jackpotId)
-    .not('correct_count', 'is', null)
-    .order('correct_count', {
-      ascending: false,
-    })
-    .limit(20)
+    .order('correct_count', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: true })
+    .limit(50)
 
   return data ?? []
 }
@@ -333,13 +332,19 @@ export async function getAllJackpotsPublic() {
       near_win_reward,
       opens_at,
       closes_at,
-      created_at
+      created_at,
+      jackpot_matches (
+        id,
+        game_number,
+        home_team,
+        away_team,
+        kick_off_time,
+        result
+      )
     `
     )
-    .order('created_at', {
-      ascending: false,
-    })
-    .limit(10)
+    .order('created_at', { ascending: false })
+    .limit(20)
 
   return data ?? []
 }

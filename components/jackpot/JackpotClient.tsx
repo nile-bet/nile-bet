@@ -333,33 +333,72 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
               {leaderboard.length === 0 ? (
                 <div className="rounded-2xl p-10 text-center border border-[#252E6D]/60" style={{ background: 'linear-gradient(135deg, #1A1F4D, #1C2155)' }}>
                   <Star className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: '#D4AF37' }} />
-                  <p className="text-white/40">No results yet</p>
+                  <p className="text-white/40 text-sm">No entries yet — be the first!</p>
                 </div>
               ) : (
-                <div className="rounded-2xl overflow-hidden border border-[#252E6D]/60" style={{ background: 'linear-gradient(135deg, #1A1F4D, #1C2155)' }}>
-                  <div className="px-4 py-3 border-b border-[#252E6D]/60" style={{ background: 'rgba(212,175,55,0.05)' }}>
-                    <h3 className="text-white font-bold flex items-center gap-2"><TrendingUp className="w-4 h-4" style={{ color: '#D4AF37' }} /> Top Entries</h3>
+                <div className="rounded-xl overflow-hidden border border-[#252E6D]/60" style={{ background: '#13173a' }}>
+                  {/* Header */}
+                  <div className="grid px-4 py-2.5 border-b border-[#252E6D]/60 text-[10px] font-bold uppercase tracking-widest text-white/25"
+                    style={{ gridTemplateColumns: '36px 1fr 60px 80px' }}>
+                    <span>#</span>
+                    <span>Player</span>
+                    <span className="text-center">Score</span>
+                    <span className="text-right">Prize</span>
                   </div>
-                  {leaderboard.map((entry, i) => {
+                  {leaderboard.map((entry: any, i: number) => {
                     const rank = i + 1
-                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`
+                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null
+                    const isWinner = entry.status === 'won'
+                    const isNearWin = entry.status === 'near_win'
+                    const isPending = entry.status === 'pending' || entry.correct_count === null
                     return (
-                      <div key={entry.slip_id} className="flex items-center justify-between px-4 py-3 border-b border-[#252E6D]/30 last:border-0 transition-all"
-                        style={entry.status === 'won' ? { background: 'rgba(212,175,55,0.06)' } : entry.status === 'near_win' ? { background: 'rgba(74,222,128,0.04)' } : {}}>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xl w-8 text-center">{medal}</span>
-                          <div>
-                            <p className="text-white text-sm font-semibold">{entry.is_anonymous ? 'Anonymous' : `@${entry.bettor?.username ?? '—'}`}</p>
-                            <p className="text-white/30 text-xs font-mono">#{entry.slip_id}</p>
-                          </div>
+                      <div key={entry.slip_id}
+                        className="grid items-center px-4 py-3 border-b border-[#252E6D]/20 last:border-0"
+                        style={{
+                          gridTemplateColumns: '36px 1fr 60px 80px',
+                          background: isWinner ? 'rgba(212,175,55,0.06)' : isNearWin ? 'rgba(74,222,128,0.04)' : 'transparent'
+                        }}>
+                        {/* Rank */}
+                        <span className="text-sm w-8">
+                          {medal ?? <span className="text-white/30 font-mono text-xs">#{rank}</span>}
+                        </span>
+                        {/* Player */}
+                        <div>
+                          <p className="text-white text-sm font-semibold">
+                            {entry.is_anonymous ? '🔒 Anonymous' : `@${(entry.bettor as any)?.username ?? '—'}`}
+                          </p>
+                          <p className="text-white/25 text-[10px] font-mono">{entry.slip_id}</p>
                         </div>
+                        {/* Score */}
+                        <div className="text-center">
+                          {isPending ? (
+                            <span className="text-white/20 text-xs">—</span>
+                          ) : (
+                            <span className="font-bold text-sm font-mono" style={{ color: isWinner ? '#FFD700' : isNearWin ? '#4ade80' : 'rgba(255,255,255,0.6)' }}>
+                              {entry.correct_count}/12
+                            </span>
+                          )}
+                        </div>
+                        {/* Prize */}
                         <div className="text-right">
-                          <p className="font-bold text-sm" style={{ color: '#D4AF37' }}>{entry.correct_count ?? 0}/12</p>
-                          {entry.reward_amount > 0 && <p className="text-xs font-mono" style={{ color: '#4ade80' }}>+{formatETB(entry.reward_amount)}</p>}
+                          {entry.reward_amount > 0 ? (
+                            <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>
+                              +{formatETB(entry.reward_amount)}
+                            </span>
+                          ) : isPending ? (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                              Live
+                            </span>
+                          ) : (
+                            <span className="text-white/20 text-xs">—</span>
+                          )}
                         </div>
                       </div>
                     )
                   })}
+                  <div className="px-4 py-2.5 border-t border-[#252E6D]/40 text-center">
+                    <p className="text-white/20 text-[10px]">{leaderboard.length} total entries</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -367,26 +406,84 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
 
           {/* HISTORY TAB */}
           {activeTab === 'history' && (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {pastJackpots.length === 0 ? (
-                <p className="text-white/40 text-center py-10">No past jackpots</p>
-              ) : pastJackpots.map(jp => (
-                <div key={jp.id} className="rounded-xl p-4 border border-[#252E6D]/60 flex justify-between items-start" style={{ background: 'linear-gradient(135deg, #1A1F4D, #1C2155)' }}>
-                  <div>
-                    <p className="text-white font-semibold text-sm">{jp.name}</p>
-                    <p className="text-white/30 text-xs mt-0.5">{formatDate(jp.created_at)}</p>
-                    <div className="flex gap-3 mt-2 text-xs">
-                      <span className="text-white/40">Win All: <span className="font-mono" style={{ color: '#D4AF37' }}>{formatETB(jp.win_all_reward)}</span></span>
-                      <span className="text-white/40">Entry: <span className="font-mono text-white/60">{formatETB(jp.fixed_stake)}</span></span>
-                    </div>
-                  </div>
-                  <span className="text-xs px-2.5 py-1 rounded-full border font-semibold" style={
-                    jp.status === 'settled' ? { color: '#4ade80', borderColor: 'rgba(74,222,128,0.3)', background: 'rgba(74,222,128,0.08)' } :
-                    jp.status === 'open' ? { color: '#FFD700', borderColor: 'rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.08)' } :
-                    { color: 'rgba(255,255,255,0.4)', borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }
-                  }>{jp.status}</span>
+                <div className="rounded-2xl p-10 text-center border border-[#252E6D]/60" style={{ background: 'linear-gradient(135deg, #1A1F4D, #1C2155)' }}>
+                  <Star className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: '#D4AF37' }} />
+                  <p className="text-white/40 text-sm">No past jackpots yet</p>
                 </div>
-              ))}
+              ) : pastJackpots.map((jp: any) => {
+                const jpMatches = (jp.jackpot_matches ?? []).sort((a: any, b: any) => a.game_number - b.game_number)
+                const settledMatches = jpMatches.filter((m: any) => m.result && m.result !== 'pending')
+                const isCurrentActive = jackpot && jp.id === jackpot.id
+                return (
+                  <div key={jp.id} className="rounded-xl overflow-hidden border border-[#252E6D]/60" style={{ background: '#13173a' }}>
+                    {/* Header */}
+                    <div className="px-4 py-3 border-b border-[#252E6D]/40 flex items-center justify-between" style={{ background: 'rgba(212,175,55,0.04)' }}>
+                      <div>
+                        <p className="text-white font-bold text-sm">{jp.name}</p>
+                        <p className="text-white/30 text-xs mt-0.5">{formatDate(jp.created_at)}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {settledMatches.length > 0 && (
+                          <span className="text-[10px] text-white/30">{settledMatches.length}/{jpMatches.length} results</span>
+                        )}
+                        <span className="text-[10px] px-2 py-0.5 rounded-full border font-semibold" style={
+                          jp.status === 'settled' ? { color: '#4ade80', borderColor: 'rgba(74,222,128,0.3)', background: 'rgba(74,222,128,0.08)' } :
+                          jp.status === 'open' ? { color: '#FFD700', borderColor: 'rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.08)' } :
+                          jp.status === 'closed' ? { color: '#f59e0b', borderColor: 'rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.08)' } :
+                          { color: 'rgba(255,255,255,0.4)', borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }
+                        }>{jp.status}</span>
+                      </div>
+                    </div>
+                    {/* Prizes row */}
+                    <div className="grid grid-cols-3 divide-x divide-[#252E6D]/40 border-b border-[#252E6D]/40">
+                      <div className="px-3 py-2 text-center">
+                        <p className="text-[9px] text-white/30 uppercase tracking-wider mb-0.5">Win All</p>
+                        <p className="text-xs font-mono font-bold" style={{ color: '#D4AF37' }}>{formatETB(jp.win_all_reward)}</p>
+                      </div>
+                      <div className="px-3 py-2 text-center">
+                        <p className="text-[9px] text-white/30 uppercase tracking-wider mb-0.5">Miss 1</p>
+                        <p className="text-xs font-mono" style={{ color: '#4ade80' }}>{formatETB(jp.near_win_reward)}</p>
+                      </div>
+                      <div className="px-3 py-2 text-center">
+                        <p className="text-[9px] text-white/30 uppercase tracking-wider mb-0.5">Entry</p>
+                        <p className="text-xs font-mono text-white/60">{formatETB(jp.fixed_stake)}</p>
+                      </div>
+                    </div>
+                    {/* Match results — only if there are any */}
+                    {jpMatches.length > 0 && (
+                      <div className="divide-y divide-[#252E6D]/20">
+                        {jpMatches.map((m: any) => {
+                          const settled = m.result && m.result !== 'pending'
+                          return (
+                            <div key={m.id} className="grid items-center px-3 py-2 text-xs"
+                              style={{ gridTemplateColumns: '24px 1fr 36px' }}>
+                              <span className="font-mono text-[10px]" style={{ color: 'rgba(212,175,55,0.4)' }}>{m.game_number}</span>
+                              <span className="text-white/60 truncate">
+                                {m.home_team} <span className="text-white/20">v</span> {m.away_team}
+                              </span>
+                              <div className="text-right">
+                                {settled ? (
+                                  <span className="font-bold px-1.5 py-0.5 rounded text-[10px]" style={
+                                    m.result === 'home' ? { color: '#FFD700', background: 'rgba(212,175,55,0.15)' } :
+                                    m.result === 'away' ? { color: '#4A90D9', background: 'rgba(74,144,217,0.15)' } :
+                                    { color: 'white', background: 'rgba(255,255,255,0.08)' }
+                                  }>
+                                    {m.result === 'home' ? '1' : m.result === 'away' ? '2' : 'X'}
+                                  </span>
+                                ) : (
+                                  <span className="text-white/15 text-[10px]">—</span>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
