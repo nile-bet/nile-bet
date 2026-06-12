@@ -274,7 +274,7 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
             <p className="text-white/20 text-xs mt-1">{activeCategory} markets not available for this match</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-px bg-white/[0.04] p-px">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.04] p-px">
             {activeMarkets.map((mm) => (
               <div key={mm.id} className="bg-[#181818]">
                 <MarketBlock
