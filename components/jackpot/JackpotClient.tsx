@@ -45,6 +45,12 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
     setLoadingSlips(false)
   }
 
+  const refreshMySlips = async () => {
+    if (!user) return
+    const data = await getMyJackpotSlips(user.id)
+    setMySlips(data)
+  }
+
   const handleTabChange = (tab: 'pick' | 'myslips' | 'leaderboard' | 'history') => {
     setActiveTab(tab)
     if (tab === 'myslips' && user) handleLoadMySlips()
@@ -311,8 +317,18 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
           {/* MY SLIPS TAB */}
           {activeTab === 'myslips' && (
             <div className="space-y-3">
-              {loadingSlips ? (
-                <p className="text-white/40 text-center py-10">Loading your slips...</p>
+              {!isAuthenticated ? (
+                <div className="rounded-2xl p-10 text-center border border-[#252E6D]/60" style={{ background: 'linear-gradient(135deg, #1A1F4D, #1C2155)' }}>
+                  <Trophy className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: '#D4AF37' }} />
+                  <p className="text-white/40 mb-3">Login to view your slips</p>
+                  <a href="/login" className="inline-block px-5 py-2 rounded-xl text-sm font-bold" style={{ background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#1C2155' }}>Login</a>
+                </div>
+              ) : loadingSlips ? (
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="rounded-xl h-24 animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                  ))}
+                </div>
               ) : mySlips.length === 0 ? (
                 <div className="rounded-2xl p-10 text-center border border-[#252E6D]/60" style={{ background: 'linear-gradient(135deg, #1A1F4D, #1C2155)' }}>
                   <Trophy className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: '#D4AF37' }} />
@@ -320,9 +336,15 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
                   <button onClick={() => handleTabChange('pick')} className="px-5 py-2 rounded-xl text-sm font-bold" style={{ background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#1C2155' }}>Enter Now</button>
                 </div>
               ) : (
-                mySlips.map(slip => (
-                  <JackpotSlipCard key={slip.id} slip={slip} onPrint={slipId => { setReceiptSlipId(slipId); setShowReceipt(true) }} />
-                ))
+                <>
+                  <div className="flex items-center justify-between">
+                    <p className="text-white/40 text-xs">{mySlips.length} slip{mySlips.length !== 1 ? 's' : ''}</p>
+                    <button onClick={refreshMySlips} className="text-[10px] text-white/30 hover:text-white px-2 py-1 rounded border border-white/10 hover:border-white/20">↻ Refresh</button>
+                  </div>
+                  {mySlips.map(slip => (
+                    <JackpotSlipCard key={slip.id} slip={slip} onPrint={slipId => { setReceiptSlipId(slipId); setShowReceipt(true) }} />
+                  ))}
+                </>
               )}
             </div>
           )}
@@ -689,13 +711,23 @@ function JackpotSlipCard({ slip, onPrint }: { slip: any; onPrint: (slipId: strin
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="font-mono font-bold text-sm" style={{ color: '#D4AF37' }}>#{slip.slip_id}</p>
-            <p className="text-white/30 text-xs mt-0.5">{slip.jackpots?.name} • {formatDate(slip.created_at)}</p>
+            <p className="text-white/30 text-xs mt-0.5">
+              {slip.jackpots?.name} • {formatDate(slip.created_at)}
+            </p>
+            <p className="text-white/20 text-[10px] mt-0.5">
+              Stake: <span className="font-mono" style={{ color: 'rgba(212,175,55,0.6)' }}>{formatETB(slip.stake ?? slip.jackpots?.fixed_stake ?? 0)}</span>
+              {' '}• Status: <span className={
+                slip.status === 'won' ? 'text-yellow-400' :
+                slip.status === 'near_win' ? 'text-green-400' :
+                slip.status === 'lost' ? 'text-red-400' : 'text-white/40'
+              }>{slip.status}</span>
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs px-3 py-1 rounded-full font-mono font-bold" style={{ background: 'rgba(37,46,109,0.6)', color: slip.status !== 'pending' ? '#D4AF37' : 'rgba(255,255,255,0.5)' }}>
-              {slip.correct_count !== null && slip.status !== 'pending' ? `${slip.correct_count}/12` : `${selections.length}/12 picks`}
+              {slip.correct_count !== null && slip.status !== 'pending' ? `${slip.correct_count}/12 ✓` : `${selections.length}/12 picks`}
             </span>
-            {slip.reward_amount > 0 && <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>+{formatETB(slip.reward_amount)}</span>}
+            {(slip.reward_amount ?? 0) > 0 && <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>+{formatETB(slip.reward_amount)}</span>}
           </div>
         </div>
         <div className="flex gap-2">
@@ -713,8 +745,10 @@ function JackpotSlipCard({ slip, onPrint }: { slip: any; onPrint: (slipId: strin
           <div className="mt-3 space-y-1.5">
             {selections.map((sel: any) => {
               const match = sel.jackpot_matches
-              const isCorrect = sel.result === 'correct'
-              const isWrong = sel.result === 'wrong'
+              const matchResult = match?.result
+              const isSettled = matchResult && matchResult !== 'pending'
+              const isCorrect = isSettled ? sel.selection === matchResult : sel.result === 'correct'
+              const isWrong = isSettled ? sel.selection !== matchResult : sel.result === 'wrong'
               return (
                 <div key={sel.id} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs" style={
                   isCorrect ? { background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)' } :

@@ -261,26 +261,38 @@ export async function getMyJackpotSlips(
     .from('jackpot_slips')
     .select(
       `
-      *,
-      jackpots (name, status),
+      id,
+      slip_id,
+      status,
+      stake,
+      correct_count,
+      reward_amount,
+      is_anonymous,
+      created_at,
+      jackpots (id, name, status, fixed_stake, win_all_reward, near_win_reward),
       jackpot_slip_selections (
+        id,
         game_number,
         selection,
         odd,
         result,
         jackpot_matches (
+          id,
+          game_number,
           home_team,
           away_team,
-          result
+          kick_off_time,
+          result,
+          home_odd,
+          draw_odd,
+          away_odd
         )
       )
     `
     )
     .eq('bettor_id', bettorId)
-    .order('created_at', {
-      ascending: false,
-    })
-    .limit(20)
+    .order('created_at', { ascending: false })
+    .limit(50)
 
   return data ?? []
 }
