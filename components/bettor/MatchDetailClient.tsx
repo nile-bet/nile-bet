@@ -18,13 +18,45 @@ const CATEGORY_ORDER = [
   'MIN 1X2', 'MIN GOALS', 'SPECIALS',
 ]
 
+// Market name overrides: key = original market name (lowercase), value = display name
+const MARKET_NAME_OVERRIDES: Record<string, string> = {
+  // Goals category
+  'goal over/under': 'Goal Over/Under',
+  'over/under': 'Goal Over/Under',
+  // Halves category
+  'halves over/under': 'Goal Over/Under',
+  'half over/under': 'Goal Over/Under',
+  // Corners category
+  'corners over/under': 'Total Corners Over/Under',
+  'total corners': 'Total Corners Over/Under',
+  'total corners over/under': 'Total Corners Over/Under',
+  '1st half corners': '1st Half Corners Over/Under',
+  '1st half corners over/under': '1st Half Corners Over/Under',
+  'first half corners': '1st Half Corners Over/Under',
+  // Cards category
+  'cards over/under': 'Total Cards Over/Under',
+  'total cards': 'Total Cards Over/Under',
+  'total cards over/under': 'Total Cards Over/Under',
+  // Team Goals category
+  'home team goals': 'Home Team Goals Over/Under',
+  'home goals over/under': 'Home Team Goals Over/Under',
+  'home team goals over/under': 'Home Team Goals Over/Under',
+  'away team goals': 'Away Team Goals Over/Under',
+  'away goals over/under': 'Away Team Goals Over/Under',
+  'away team goals over/under': 'Away Team Goals Over/Under',
+}
+
+function resolveMarketName(raw: string): string {
+  return MARKET_NAME_OVERRIDES[raw.toLowerCase()] ?? raw
+}
+
 function MarketBlock({ mm, match, commonProps, activeCategory }: any) {
   const [collapsed, setCollapsed] = useState(false)
   const template = mm.market_templates as any
   const odds = mm.match_market_odds ?? []
   const selections: string[] = template?.selections ?? []
   const isDynamic = template?.is_dynamic ?? false
-  const marketName = template?.name ?? ''
+  const marketName = resolveMarketName(template?.name ?? '')
   const catName = (template?.market_categories?.name ?? activeCategory).toUpperCase()
 
   const renderRows = () => {
@@ -216,15 +248,16 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
             <p className="text-white/20 text-xs mt-1">{activeCategory} markets not available for this match</p>
           </div>
         ) : (
-          <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-px bg-white/[0.04] p-px">
             {activeMarkets.map((mm) => (
-              <MarketBlock
-                key={mm.id}
-                mm={mm}
-                match={match}
-                commonProps={commonProps}
-                activeCategory={activeCategory}
-              />
+              <div key={mm.id} className="bg-[#181818]">
+                <MarketBlock
+                  mm={mm}
+                  match={match}
+                  commonProps={commonProps}
+                  activeCategory={activeCategory}
+                />
+              </div>
             ))}
           </div>
         )}
