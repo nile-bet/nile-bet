@@ -56,7 +56,7 @@ function MarketBlock({ mm, match, commonProps, activeCategory }: any) {
   const odds = mm.match_market_odds ?? []
   const selections: string[] = template?.selections ?? []
   const isDynamic = template?.is_dynamic ?? false
-  const marketName = resolveMarketName(template?.name ?? '')
+  const marketName = resolveMarketName(template?.name ?? '', template?.market_categories?.name ?? '')
   const catName = (template?.market_categories?.name ?? activeCategory).toUpperCase()
 
   const renderRows = () => {
@@ -191,6 +191,14 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
   }
 
   const activeMarkets = byCategory.get(activeCategory) ?? []
+
+  // DEBUG: log market names — remove after fixing
+  if (typeof window !== 'undefined' && activeMarkets.length > 0) {
+    console.log('[Markets]', activeCategory, activeMarkets.map((mm: any) => ({
+      cat: mm.market_templates?.market_categories?.name,
+      name: mm.market_templates?.name,
+    })))
+  }
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: '#181818' }}>
