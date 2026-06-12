@@ -453,7 +453,7 @@ export function BetSlipSidebar({
                   : 'bg-white/10 text-white/30 cursor-not-allowed'
               )}
             >
-              {generatingCode ? 'Generating...' : slipCode ? '🔄 Regenerate Code' : '🎟️ Get Slip Code (Cash)'}
+              {generatingCode ? 'Generating...' : slipCode ? '🔄 Regenerate Code' : '🎟️ Place Bet'}
             </button>
           ) : (
             <button
