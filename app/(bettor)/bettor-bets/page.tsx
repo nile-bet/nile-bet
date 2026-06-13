@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { redirect } from 'next/navigation'
 import { PublicNavbar }
   from '@/components/shared/PublicNavbar'
@@ -18,7 +18,7 @@ import {
 } from '@/lib/actions/coupons'
 import { useAuthStore }
   from '@/lib/stores/authStore'
-import { Ticket } from 'lucide-react'
+import { Ticket, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const TABS = [
@@ -124,41 +124,7 @@ export default function MyBetsPage() {
           ) : (
             <div className="space-y-4">
               {jackpotSlips.map((js) => (
-                <div
-                  key={js.id}
-                  className="bg-slate-dark border border-gold/20 rounded-xl p-4"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-gold font-mono font-bold">
-                      #{js.slip_id}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-xs px-2 py-1 rounded-full border font-semibold',
-                        js.status === 'won'
-                          ? 'bg-nile-success/20 text-nile-success border-nile-success/40'
-                          : js.status ===
-                            'near_win'
-                          ? 'bg-gold/20 text-gold border-gold/40'
-                          : js.status ===
-                            'lost'
-                          ? 'bg-nile-danger/20 text-nile-danger border-nile-danger/40'
-                          : 'bg-nile-blue-light/20 text-nile-blue-light border-nile-blue-light/40'
-                      )}
-                    >
-                      {js.status.toUpperCase()}
-                    </span>
-                  </div>
-                  <p className="text-white/50 text-xs mb-2">
-                    {js.jackpots?.name}
-                  </p>
-                  {js.correct_count > 0 && (
-                    <p className="text-gold text-sm font-medium">
-                      {js.correct_count} / 12
-                      correct
-                    </p>
-                  )}
-                </div>
+                <JackpotSlipCard key={js.id} slip={js} />
               ))}
             </div>
           )
@@ -214,6 +180,102 @@ export default function MyBetsPage() {
       </main>
 
       <Footer />
+    </div>
+  )
+}
+
+function JackpotSlipCard({ slip }: { slip: any }) {
+  const [expanded, setExpanded] = useState(false)
+  const selections = slip.jackpot_slip_selections?.sort(
+    (a: any, b: any) => a.game_number - b.game_number
+  ) ?? []
+
+  const placedAt = slip.created_at ? new Date(slip.created_at) : null
+  const dateStr = placedAt?.toLocaleDateString('en-ET', { year: 'numeric', month: 'short', day: 'numeric' })
+  const timeStr = placedAt?.toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' })
+
+  return (
+    <div className="rounded-2xl overflow-hidden border transition-all" style={
+      slip.status === 'won' ? { borderColor: 'rgba(212,175,55,0.4)', background: 'linear-gradient(135deg,rgba(212,175,55,0.06),#1A1F4D)' } :
+      slip.status === 'near_win' ? { borderColor: 'rgba(74,222,128,0.3)', background: 'linear-gradient(135deg,rgba(74,222,128,0.04),#1A1F4D)' } :
+      slip.status === 'lost' ? { borderColor: 'rgba(239,68,68,0.2)', background: '#1A1F4D' } :
+      { borderColor: 'rgba(37,46,109,0.8)', background: 'linear-gradient(135deg,#1A1F4D,#1C2155)' }
+    }>
+      {slip.status === 'won' && (
+        <div className="px-4 py-2 text-center border-b border-[#D4AF37]/20" style={{ background: 'rgba(212,175,55,0.1)' }}>
+          <p className="font-bold text-sm" style={{ color: '#FFD700' }}>🏆 JACKPOT WINNER!</p>
+        </div>
+      )}
+      {slip.status === 'near_win' && (
+        <div className="px-4 py-2 text-center border-b border-green-500/20" style={{ background: 'rgba(74,222,128,0.06)' }}>
+          <p className="font-semibold text-sm text-green-400">🥈 Near Win — 11/12!</p>
+        </div>
+      )}
+      <div className="p-4">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <p className="font-mono font-bold text-base" style={{ color: '#D4AF37' }}>#{slip.slip_id}</p>
+            <p className="text-white/40 text-xs mt-0.5">{slip.jackpots?.name}</p>
+            <p className="text-white/25 text-[10px] mt-0.5 font-mono">{dateStr} · {timeStr}</p>
+          </div>
+          <div className="flex flex-col items-end gap-1.5">
+            <span className="text-[10px] px-2.5 py-1 rounded-full font-bold border" style={
+              slip.status === 'won' ? { color: '#FFD700', borderColor: 'rgba(212,175,55,0.4)', background: 'rgba(212,175,55,0.1)' } :
+              slip.status === 'near_win' ? { color: '#4ade80', borderColor: 'rgba(74,222,128,0.4)', background: 'rgba(74,222,128,0.1)' } :
+              slip.status === 'lost' ? { color: '#ef4444', borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.1)' } :
+              { color: '#4A90D9', borderColor: 'rgba(74,144,217,0.4)', background: 'rgba(74,144,217,0.1)' }
+            }>{slip.status.toUpperCase()}</span>
+            <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full" style={{ background: 'rgba(37,46,109,0.6)', color: slip.status !== 'pending' ? '#D4AF37' : 'rgba(255,255,255,0.4)' }}>
+              {slip.correct_count !== null && slip.status !== 'pending' ? `${slip.correct_count}/12` : `${selections.length}/12 picks`}
+            </span>
+            {slip.reward_amount > 0 && (
+              <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>+{slip.reward_amount?.toLocaleString('en-ET', { style: 'currency', currency: 'ETB' })}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Expand button */}
+        <button onClick={() => setExpanded(!expanded)}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all border border-[#252E6D]/60 text-white/40 hover:text-white hover:border-[#D4AF37]/30 mb-0">
+          <span>{expanded ? 'Hide Picks' : `View ${selections.length} Picks`}</span>
+          {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+        </button>
+
+        {/* Picks list */}
+        {expanded && (
+          <div className="mt-2 space-y-1.5">
+            {selections.map((sel: any) => {
+              const match = sel.jackpot_matches
+              const isCorrect = sel.result === 'correct'
+              const isWrong = sel.result === 'wrong'
+              return (
+                <div key={sel.id} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs border" style={
+                  isCorrect ? { background: 'rgba(74,222,128,0.08)', borderColor: 'rgba(74,222,128,0.2)' } :
+                  isWrong ? { background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' } :
+                  { background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(37,46,109,0.4)' }
+                }>
+                  <span className="text-white/50 truncate flex-1">
+                    <span className="font-mono font-bold mr-2 text-[10px]" style={{ color: 'rgba(212,175,55,0.6)' }}>G{sel.game_number}</span>
+                    {match?.home_team ?? '—'} <span className="text-white/25">vs</span> {match?.away_team ?? '—'}
+                  </span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                    <span className="font-black px-2 py-0.5 rounded-lg text-[11px]" style={
+                      isCorrect ? { color: '#4ade80', background: 'rgba(74,222,128,0.15)' } :
+                      isWrong ? { color: '#ef4444', background: 'rgba(239,68,68,0.15)' } :
+                      { color: '#FFD700', background: 'rgba(212,175,55,0.15)' }
+                    }>
+                      {sel.selection === 'home' ? '1' : sel.selection === 'away' ? '2' : 'X'}
+                    </span>
+                    {isCorrect && <CheckCircle className="w-3.5 h-3.5 text-green-400" />}
+                    {isWrong && <XCircle className="w-3.5 h-3.5 text-red-400" />}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

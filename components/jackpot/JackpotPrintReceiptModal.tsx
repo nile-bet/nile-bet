@@ -286,6 +286,14 @@ export function JackpotPrintReceiptModal({
                   <span>Jackpot:</span>
                   <span>{jackpot?.name}</span>
                 </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Date:</span>
+                  <span>{slip?.created_at ? new Date(slip.created_at).toLocaleDateString('en-ET', { year: 'numeric', month: 'short', day: 'numeric' }) : new Date().toLocaleDateString('en-ET')}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Time:</span>
+                  <span>{slip?.created_at ? new Date(slip.created_at).toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('en-ET')}</span>
+                </div>
                 {!slip?.is_anonymous && user && (
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Bettor:</span>
