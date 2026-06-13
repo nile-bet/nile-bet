@@ -51,7 +51,7 @@ export function JackpotPrintReceiptModal({
     // Delay fetch so DB has time to commit all selections
     setTimeout(() => {
       getJackpotSlipById(slipId).then(setSlip)
-    }, 1000)
+    }, 2500)
 
     // QR Code
     const url = `${window.location.origin}/slip/${slipId}`
@@ -171,33 +171,16 @@ export function JackpotPrintReceiptModal({
         )}
 
         {/* Slip summary */}
-        <div className="bg-charcoal/50 rounded-xl p-3 mb-4 text-center">
-          <p className="text-white/50 text-xs mb-0.5">
-            JACKPOT SLIP
-          </p>
-          <p className="text-gold font-mono text-2xl font-bold">
-            #{slipId}
-          </p>
-          <p className="text-white/50 text-xs mt-1">
-            🏆 {jackpot?.name}
-          </p>
-          <p className="text-gold font-mono text-sm mt-1">
-            Entry: {formatETB(jackpot?.fixed_stake ?? 50)}
-          </p>
+        <div className="bg-charcoal/50 rounded-xl p-3 mb-3 text-center">
+          <p className="text-white/50 text-xs mb-0.5">JACKPOT SLIP</p>
+          <p className="text-gold font-mono text-2xl font-bold">#{slipId}</p>
+          <p className="text-white/50 text-xs mt-1">🏆 {jackpot?.name}</p>
+          <p className="text-gold font-mono text-sm mt-1">Entry: {formatETB(jackpot?.fixed_stake ?? 50)}</p>
         </div>
 
-        {/* Receipt preview */}
-        <div
-          className="border border-dashed border-nile-blue/30 rounded-lg overflow-auto"
-          style={{ maxHeight: '360px' }}
-        >
-          <div
-            style={{
-              transform: 'scale(0.82)',
-              transformOrigin: 'top center',
-              backgroundColor: 'white',
-            }}
-          >
+        {/* Scrollable receipt preview */}
+        <div className="border border-dashed border-nile-blue/30 rounded-lg overflow-y-auto" style={{ maxHeight: "45vh" }}>
+          <div style={{ transform: "scale(0.72)", transformOrigin: 'top center', backgroundColor: 'white' }}>
             {/* Thermal receipt content */}
             <div
               ref={receiptRef}

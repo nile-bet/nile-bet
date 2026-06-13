@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient }
+import { createClient, createAdminClient }
   from '@/lib/supabase/server'
 
 // ─── PUBLIC: Get active jackpot ───────
@@ -44,9 +44,10 @@ export async function placeJackpotBet(data: {
   error?: string
 }> {
   const supabase = await createClient()
+  const adminClient = await createAdminClient()
 
   // Validate jackpot is open
-  const { data: jackpot } = await supabase
+  const { data: jackpot } = await adminClient
     .from('jackpots')
     .select('*')
     .eq('id', data.jackpotId)
@@ -95,7 +96,7 @@ export async function placeJackpotBet(data: {
   }
 
   // Validate balance
-  const { data: bettor } = await supabase
+  const { data: bettor } = await adminClient
     .from('profiles')
     .select('credit_balance')
     .eq('id', data.bettorId)
@@ -126,48 +127,46 @@ export async function placeJackpotBet(data: {
     ).toString()
 
   // Deduct balance
-  await supabase
+  const { error: deductError } = await adminClient
     .from('profiles')
     .update({
-      credit_balance:
-        bettor.credit_balance - stake,
+      credit_balance: bettor.credit_balance - stake,
     })
     .eq('id', data.bettorId)
 
+  if (deductError) {
+    return { success: false, error: 'Failed to deduct balance' }
+  }
+
   // Insert jackpot slip
-  const { data: slip, error: slipError } =
-    await supabase
-      .from('jackpot_slips')
-      .insert({
-        slip_id: slipId,
-        jackpot_id: data.jackpotId,
-        bettor_id: data.bettorId,
-        placed_by: data.placedById,
-        is_anonymous: data.isAnonymous,
-        stake,
-        status: 'pending',
-      })
-      .select('id')
-      .single()
+  const { data: slip, error: slipError } = await adminClient
+    .from('jackpot_slips')
+    .insert({
+      slip_id: slipId,
+      jackpot_id: data.jackpotId,
+      bettor_id: data.bettorId,
+      placed_by: data.placedById,
+      is_anonymous: data.isAnonymous,
+      stake,
+      status: 'pending',
+    })
+    .select('id')
+    .single()
 
   if (slipError || !slip) {
-    // Refund balance
-    await supabase
+    // Refund balance on failure
+    await adminClient
       .from('profiles')
-      .update({
-        credit_balance:
-          bettor.credit_balance,
-      })
+      .update({ credit_balance: bettor.credit_balance })
       .eq('id', data.bettorId)
-
     return {
       success: false,
-      error: 'Failed to place jackpot bet',
+      error: 'Failed to create slip: ' + (slipError?.message ?? 'unknown'),
     }
   }
 
   // Fetch jackpot_match IDs for foreign key
-  const { data: matchRows } = await supabase
+  const { data: matchRows } = await adminClient
     .from('jackpot_matches')
     .select('id, game_number')
     .eq('jackpot_id', data.jackpotId)
@@ -175,8 +174,8 @@ export async function placeJackpotBet(data: {
   const matchIdMap: Record<number, string> = {}
   matchRows?.forEach((m: any) => { matchIdMap[m.game_number] = m.id })
 
-  // Insert selections with jackpot_match_id
-  await supabase
+  // Insert selections
+  const { error: selError } = await adminClient
     .from('jackpot_slip_selections')
     .insert(
       data.selections.map((sel) => ({
@@ -184,13 +183,19 @@ export async function placeJackpotBet(data: {
         jackpot_match_id: matchIdMap[sel.gameNumber] ?? null,
         game_number: sel.gameNumber,
         selection: sel.selection,
-        odd: sel.odd,
         result: 'pending',
       }))
     )
 
+  if (selError) {
+    return {
+      success: false,
+      error: 'Slip created but selections failed: ' + selError.message,
+    }
+  }
+
   // Activity log
-  await supabase
+  await adminClient
     .from('activity_logs')
     .insert({
       user_id: data.placedById,
@@ -211,9 +216,9 @@ export async function placeJackpotBet(data: {
 export async function getJackpotSlipById(
   slipId: string
 ) {
-  const supabase = await createClient()
+  const adminClient = await createAdminClient()
 
-  const { data } = await supabase
+  const { data, error } = await adminClient
     .from('jackpot_slips')
     .select(
       `
@@ -247,6 +252,7 @@ export async function getJackpotSlipById(
     .eq('slip_id', slipId.toUpperCase())
     .single()
 
+  if (error) console.error('getJackpotSlipById error:', error)
   return data ?? null
 }
 
@@ -255,9 +261,9 @@ export async function getJackpotSlipById(
 export async function getMyJackpotSlips(
   bettorId: string
 ) {
-  const supabase = await createClient()
+  const adminClient = await createAdminClient()
 
-  const { data } = await supabase
+  const { data } = await adminClient
     .from('jackpot_slips')
     .select(
       `
@@ -274,7 +280,6 @@ export async function getMyJackpotSlips(
         id,
         game_number,
         selection,
-        odd,
         result,
         jackpot_matches (
           id,
