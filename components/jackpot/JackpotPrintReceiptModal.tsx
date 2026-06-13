@@ -27,6 +27,7 @@ interface Props {
   onClose: () => void
   slipId: string
   jackpot: any
+  bettorUsername?: string
 }
 
 export function JackpotPrintReceiptModal({
@@ -34,6 +35,7 @@ export function JackpotPrintReceiptModal({
   onClose,
   slipId,
   jackpot,
+  bettorUsername,
 }: Props) {
   const receiptRef =
     useRef<HTMLDivElement>(null)
@@ -294,10 +296,10 @@ export function JackpotPrintReceiptModal({
                   <span>Time:</span>
                   <span>{slip?.created_at ? new Date(slip.created_at).toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('en-ET')}</span>
                 </div>
-                {!slip?.is_anonymous && user && (
+                {!slip?.is_anonymous && (
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Bettor:</span>
-                    <span>@{user.username}</span>
+                    <span>{bettorUsername ? bettorUsername : user ? `@${user.username}` : 'Anonymous'}</span>
                   </div>
                 )}
               </div>

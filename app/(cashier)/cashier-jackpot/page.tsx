@@ -70,10 +70,14 @@ export default function CashierJackpotPage() {
     })
     if (result.success && result.slipId) {
       toast.success(`🏆 Jackpot placed! Slip #${result.slipId}`)
+      const savedBettorName = bettorName
       setTimeout(async () => {
         const slip = await getJackpotSlipById(result.slipId!)
-        if (slip) { setPlacedSlip(slip); setShowPrintModal(true) }
-      }, 1000)
+        if (slip) {
+          setPlacedSlip({ ...slip, _bettorName: savedBettorName })
+          setShowPrintModal(true)
+        }
+      }, 1500)
       setSelections({}); setBettorName(''); setIsAnonymous(false)
     } else { toast.error(result.error ?? 'Failed') }
     setPlacing(false)
@@ -153,7 +157,7 @@ export default function CashierJackpotPage() {
                   isJackpot={true}
                   stake={jackpot.fixed_stake}
                   placedAt={placedSlip.created_at ?? new Date().toISOString()}
-                  bettorUsername={bettorName || undefined}
+                  bettorUsername={placedSlip._bettorName || undefined}
                   cashierUsername={user?.username}
                   isAnonymous={placedSlip.is_anonymous}
                   selections={(placedSlip.jackpot_slip_selections ?? []).sort((a: any, b: any) => a.game_number - b.game_number).map((s: any) => ({
