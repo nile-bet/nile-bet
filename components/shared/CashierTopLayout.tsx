@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LucideIcon, Menu, X, LogOut, LayoutDashboard, Search, ChevronDown } from 'lucide-react'
+import { LucideIcon, Menu, X, LogOut, LayoutDashboard, Search, ChevronDown, Home, Globe, BarChart2 } from 'lucide-react'
 import { Logo } from './Logo'
 import { NotificationBell } from './NotificationBell'
 import { RoleBadge } from './RoleBadge'
@@ -204,6 +204,31 @@ export function CashierTopLayout({
           </div>
         </div>
       </nav>
+
+      {/* Secondary nav: Home / Sports / Results */}
+      <div className="flex items-center justify-center gap-10 px-4 py-2.5 border-b border-gold/10 flex-shrink-0" style={{ background: '#1A1F4D' }}>
+        <Link
+          href="/cashier-place-bet"
+          className="flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-gold transition-colors"
+        >
+          <Home className="w-4 h-4" />
+          Home
+        </Link>
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('open-countries-panel'))}
+          className="flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-gold transition-colors"
+        >
+          <Globe className="w-4 h-4" />
+          Sports
+        </button>
+        <Link
+          href="/cashier-results"
+          className="flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-gold transition-colors"
+        >
+          <BarChart2 className="w-4 h-4" />
+          Results
+        </Link>
+      </div>
 
       {/* Page content — full width, no sidebar */}
       <main className="flex-1 overflow-y-auto">
