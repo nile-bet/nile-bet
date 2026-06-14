@@ -50,7 +50,20 @@ export default function CashierJackpotPage() {
   const loadSlips = async () => {
     if (!jackpot) return
     setLoadingSlips(true)
-    const { data } = await supabase.from('jackpot_slips').select('*, jackpot_slip_selections(*, jackpot_matches(home_team, away_team))').eq('jackpot_id', jackpot.id).order('created_at', { ascending: false }).limit(50)
+    // Fetch slips for current jackpot (and most recent past jackpot if current is new)
+    const { data } = await supabase
+      .from('jackpot_slips')
+      .select(`
+        *,
+        jackpots(id, name, status, fixed_stake, win_all_reward, near_win_reward),
+        jackpot_slip_selections(
+          id, game_number, selection, result,
+          jackpot_matches(game_number, home_team, away_team, kick_off_time, result)
+        )
+      `)
+      .eq('jackpot_id', jackpot.id)
+      .order('created_at', { ascending: false })
+      .limit(200)
     setSlips(data ?? [])
     setLoadingSlips(false)
   }
@@ -209,7 +222,7 @@ export default function CashierJackpotPage() {
 
       {/* Tabs */}
       <div className="flex flex-shrink-0 border-b border-[#252E6D]/60" style={{ background: '#1A1F4D' }}>
-        {([{ key: 'pick', label: '🎯 Place Bet' }, { key: 'slips', label: "🎫 Today's Slips" }] as { key: Tab; label: string }[]).map(t => (
+        {([{ key: 'pick', label: '🎯 Place Bet' }, { key: 'slips', label: "🎫 Weekly Slips" }] as { key: Tab; label: string }[]).map(t => (
           <button key={t.key} onClick={() => handleTabChange(t.key)}
             className="flex-1 py-2.5 text-xs font-bold transition-all border-b-2"
             style={activeTab === t.key ? { borderColor: '#D4AF37', color: '#FFD700' } : { borderColor: 'transparent', color: 'rgba(255,255,255,0.3)' }}>
@@ -470,6 +483,15 @@ export default function CashierJackpotPage() {
 function CashierSlipCard({ slip }: { slip: any }) {
   const [expanded, setExpanded] = useState(false)
   const selections = slip.jackpot_slip_selections?.sort((a: any, b: any) => a.game_number - b.game_number) ?? []
+  const placedAt = new Date(slip.created_at)
+  const dateStr = placedAt.toLocaleDateString('en-ET', { year: 'numeric', month: 'short', day: 'numeric' })
+  const timeStr = placedAt.toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' })
+  const correctCount = slip.correct_count
+  const totalGames = selections.length || 12
+  const statusColor =
+    slip.status === 'won' ? '#FFD700' :
+    slip.status === 'near_win' ? '#4ade80' :
+    slip.status === 'lost' ? '#ef4444' : 'rgba(255,255,255,0.4)'
 
   return (
     <div className="rounded-xl overflow-hidden border transition-all" style={
@@ -478,48 +500,108 @@ function CashierSlipCard({ slip }: { slip: any }) {
       slip.status === 'lost' ? { borderColor: 'rgba(239,68,68,0.2)', background: '#1A1F4D' } :
       { borderColor: 'rgba(37,46,109,0.7)', background: 'linear-gradient(135deg,#1A1F4D,#0f1422)' }
     }>
-      {slip.status === 'won' && <div className="px-4 py-1.5 text-center border-b border-[#D4AF37]/20" style={{ background: 'rgba(212,175,55,0.1)' }}><p className="font-bold text-xs" style={{ color: '#FFD700' }}>🏆 JACKPOT WINNER!</p></div>}
-      {slip.status === 'near_win' && <div className="px-4 py-1.5 text-center border-b border-green-500/20" style={{ background: 'rgba(74,222,128,0.06)' }}><p className="font-semibold text-xs text-green-400">🥈 11/12 Correct!</p></div>}
+      {slip.status === 'won' && (
+        <div className="px-4 py-1.5 text-center border-b border-[#D4AF37]/20" style={{ background: 'rgba(212,175,55,0.1)' }}>
+          <p className="font-bold text-xs" style={{ color: '#FFD700' }}>🏆 JACKPOT WINNER!</p>
+        </div>
+      )}
+      {slip.status === 'near_win' && (
+        <div className="px-4 py-1.5 text-center border-b border-green-500/20" style={{ background: 'rgba(74,222,128,0.06)' }}>
+          <p className="font-semibold text-xs text-green-400">🥈 Near Win — 11/12!</p>
+        </div>
+      )}
+
       <div className="p-3">
-        <div className="flex items-center justify-between mb-2">
+        {/* Top row: slip ID + status */}
+        <div className="flex items-start justify-between mb-2">
           <div>
             <p className="font-mono font-bold text-sm" style={{ color: '#D4AF37' }}>#{slip.slip_id}</p>
-            <p className="text-white/30 text-[10px] mt-0.5">{slip.is_anonymous ? 'Anonymous' : slip.bettor_name ?? '—'}</p>
+            <p className="text-white/30 text-[10px] mt-0.5">
+              {slip.is_anonymous ? '🔒 Anonymous' : `👤 ${slip.bettor_name ?? '—'}`}
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            {slip.correct_count !== null && (
-              <span className="text-xs px-2.5 py-0.5 rounded-full font-mono font-bold" style={{ background: 'rgba(37,46,109,0.6)', color: '#D4AF37' }}>{slip.correct_count}/{selections.length || 12}</span>
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border" style={{
+              color: statusColor,
+              borderColor: statusColor + '40',
+              background: statusColor + '15',
+            }}>
+              {slip.status.toUpperCase()}
+            </span>
+            {correctCount !== null && (
+              <span className="text-[10px] font-mono font-bold" style={{ color: correctCount === totalGames ? '#4ade80' : '#D4AF37' }}>
+                {correctCount}/{totalGames} ✓
+              </span>
             )}
-            {slip.reward_amount > 0 && <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>+{formatETB(slip.reward_amount)}</span>}
-            <button onClick={() => setExpanded(!expanded)} className="text-white/20 hover:text-white transition-colors w-6 h-6 flex items-center justify-center rounded-lg hover:bg-white/10">
-              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
           </div>
         </div>
+
+        {/* Date & time + stake */}
+        <div className="flex items-center justify-between mb-2 px-2 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center gap-3 text-[10px] text-white/35">
+            <span>📅 {dateStr}</span>
+            <span>🕐 {timeStr}</span>
+          </div>
+          <div className="flex items-center gap-2 text-[10px]">
+            <span className="text-white/30">Stake:</span>
+            <span className="font-mono font-bold" style={{ color: '#D4AF37' }}>{formatETB(slip.stake ?? slip.jackpots?.fixed_stake ?? 0)}</span>
+          </div>
+        </div>
+
+        {/* Reward if any */}
+        {(slip.reward_amount ?? 0) > 0 && (
+          <div className="flex items-center justify-between mb-2 px-2 py-1.5 rounded-lg" style={{ background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.2)' }}>
+            <span className="text-[10px] text-green-400/70">Prize Won</span>
+            <span className="text-sm font-mono font-bold text-green-400">+{formatETB(slip.reward_amount)}</span>
+          </div>
+        )}
+
+        {/* Expand/collapse picks */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all text-xs"
+          style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.15)', color: 'rgba(212,175,55,0.7)' }}>
+          <span className="font-semibold">
+            {expanded ? '▲ Hide Picks' : `▼ View ${selections.length} Picks`}
+          </span>
+          <span className="font-mono text-[10px]">{selections.length}/12</span>
+        </button>
+
+        {/* Picks list */}
         {expanded && (
           <div className="mt-2 space-y-1">
+            {/* Header */}
+            <div className="grid px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-white/20"
+              style={{ gridTemplateColumns: '24px 1fr 28px' }}>
+              <span>#</span>
+              <span>Match</span>
+              <span className="text-center">Pick</span>
+            </div>
             {selections.map((sel: any) => {
               const match = sel.jackpot_matches
-              const isCorrect = sel.result === 'correct'
-              const isWrong = sel.result === 'wrong'
+              const isCorrect = (match?.result && match.result !== 'pending') ? sel.selection === match.result : sel.result === 'correct'
+              const isWrong = (match?.result && match.result !== 'pending') ? sel.selection !== match.result : sel.result === 'wrong'
+              const pick = sel.selection === 'home' ? '1' : sel.selection === 'away' ? '2' : 'X'
               return (
-                <div key={sel.id} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs border" style={
-                  isCorrect ? { background: 'rgba(74,222,128,0.08)', borderColor: 'rgba(74,222,128,0.2)' } :
-                  isWrong ? { background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' } :
-                  { background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(37,46,109,0.4)' }
-                }>
-                  <span className="text-white/40 truncate flex-1 text-[11px]">
-                    <span className="font-mono mr-1.5" style={{ color: 'rgba(212,175,55,0.4)' }}>G{sel.game_number}</span>
-                    {match?.home_team} vs {match?.away_team}
+                <div key={sel.id}
+                  className="grid items-center px-2 py-1.5 rounded-lg text-xs border"
+                  style={{
+                    gridTemplateColumns: '24px 1fr 28px',
+                    background: isCorrect ? 'rgba(74,222,128,0.07)' : isWrong ? 'rgba(239,68,68,0.07)' : 'rgba(255,255,255,0.025)',
+                    borderColor: isCorrect ? 'rgba(74,222,128,0.2)' : isWrong ? 'rgba(239,68,68,0.2)' : 'rgba(37,46,109,0.4)',
+                  }}>
+                  <span className="font-mono text-[9px] font-bold" style={{ color: 'rgba(212,175,55,0.4)' }}>{sel.game_number}</span>
+                  <span className="text-white/50 text-[10px] truncate">
+                    {match?.home_team ?? '—'} <span className="text-white/20">v</span> {match?.away_team ?? '—'}
                   </span>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <span className="font-black text-xs px-1.5 py-0.5 rounded-lg" style={
+                  <div className="flex items-center justify-center">
+                    <span className="font-black text-[11px] px-1 py-0.5 rounded" style={
                       isCorrect ? { color: '#4ade80', background: 'rgba(74,222,128,0.15)' } :
                       isWrong ? { color: '#ef4444', background: 'rgba(239,68,68,0.15)' } :
                       { color: '#FFD700', background: 'rgba(212,175,55,0.15)' }
-                    }>{sel.selection === 'home' ? '1' : sel.selection === 'away' ? '2' : 'X'}</span>
-                    {isCorrect && <CheckCircle className="w-3 h-3 text-green-400" />}
-                    {isWrong && <XCircle className="w-3 h-3 text-red-400" />}
+                    }>
+                      {pick}
+                    </span>
                   </div>
                 </div>
               )
