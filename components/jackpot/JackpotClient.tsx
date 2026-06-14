@@ -6,7 +6,7 @@ import { placeJackpotBet, getMyJackpotSlips } from '@/lib/actions/jackpot'
 import { formatETB, formatDate, formatCountdown } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { Trophy, Clock, CheckCircle, XCircle, Star, Copy, Check, Zap, Target, TrendingUp, Shield, ChevronRight } from 'lucide-react'
+import { Trophy, Clock, CheckCircle, XCircle, Star, Copy, Check, Zap, Target, TrendingUp, Shield, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
 import { JackpotPrintReceiptModal } from './JackpotPrintReceiptModal'
 
 interface Props { jackpot: any; leaderboard: any[]; pastJackpots: any[] }
@@ -28,6 +28,7 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
   const [showGuestSlipModal, setShowGuestSlipModal] = useState(false)
   const [lastSelections, setLastSelections] = useState<Record<number, Selection>>({})
   const [betPlaced, setBetPlaced] = useState(false)
+  const [expandedHistory, setExpandedHistory] = useState<Record<string, boolean>>({})
 
   const matches = jackpot?.jackpot_matches?.sort((a: any, b: any) => a.game_number - b.game_number) ?? []
   const selectedCount = Object.keys(selections).length
@@ -406,8 +407,18 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
                         <p className="text-xs font-mono text-white/60">{formatETB(jp.fixed_stake)}</p>
                       </div>
                     </div>
-                    {/* Match results — only if there are any */}
+                    {/* Toggle button */}
                     {jpMatches.length > 0 && (
+                      <button
+                        onClick={() => setExpandedHistory(prev => ({ ...prev, [jp.id]: !prev[jp.id] }))}
+                        className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold transition-all border-b border-[#252E6D]/40"
+                        style={{ color: 'rgba(212,175,55,0.7)', background: 'rgba(212,175,55,0.03)' }}>
+                        <span>{expandedHistory[jp.id] ? 'Hide Match List' : 'Show Match List'} ({jpMatches.length})</span>
+                        {expandedHistory[jp.id] ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                      </button>
+                    )}
+                    {/* Match results — only if expanded */}
+                    {jpMatches.length > 0 && expandedHistory[jp.id] && (
                       <div className="divide-y divide-[#252E6D]/20">
                         {jpMatches.map((m: any) => {
                           const settled = m.result && m.result !== 'pending'
