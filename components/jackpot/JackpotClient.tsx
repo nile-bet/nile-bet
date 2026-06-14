@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Trophy, Clock, CheckCircle, XCircle, Star, Copy, Check, Zap, Target, TrendingUp, Shield, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
 import { JackpotPrintReceiptModal } from './JackpotPrintReceiptModal'
+import { FlagImage } from '@/components/shared/FlagImage'
 
 interface Props { jackpot: any; leaderboard: any[]; pastJackpots: any[] }
 type Selection = 'home' | 'draw' | 'away'
@@ -250,12 +251,20 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
                         { borderColor: 'rgba(37,46,109,0.7)', background: 'linear-gradient(135deg, #1A1F4D, #1C2155)' }
                       }>
                       {/* Match header row */}
-                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/[0.05]">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37' }}>
+                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/[0.05] gap-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37' }}>
                             G{match.game_number}
                           </span>
-                          <span className="text-[10px] text-white/30 font-mono">
+                          {match.leagues?.countries?.flag_emoji && (
+                            <FlagImage emoji={match.leagues.countries.flag_emoji} size="sm" />
+                          )}
+                          {match.leagues?.name && (
+                            <span className="text-[10px] text-white/40 truncate">
+                              {match.leagues.name}
+                            </span>
+                          )}
+                          <span className="text-[10px] text-white/30 font-mono flex-shrink-0 ml-auto">
                             {new Date(match.kick_off_time).toLocaleDateString('en-ET', { month: 'short', day: 'numeric' })}
                             {' · '}
                             {new Date(match.kick_off_time).toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' })}

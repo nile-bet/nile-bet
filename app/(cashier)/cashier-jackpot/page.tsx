@@ -5,6 +5,7 @@ import { useAuthStore } from '@/lib/stores/authStore'
 import { placeJackpotBet, getJackpotSlipById } from '@/lib/actions/jackpot'
 import { Trophy, Loader2, Lock, Unlock, User, CheckCircle, XCircle, ChevronDown, ChevronUp, Search, X, Printer, Clock, Star } from 'lucide-react'
 import { ThermalReceipt } from '@/components/cashier/ThermalReceipt'
+import { FlagImage } from '@/components/shared/FlagImage'
 import { usePrint } from '@/lib/hooks/usePrint'
 import { formatETB } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
@@ -46,7 +47,7 @@ export default function CashierJackpotPage() {
       const { data: jp } = await supabase.from('jackpots').select('*').in('status', ['open', 'draft']).order('created_at', { ascending: false }).limit(1).single()
       if (jp) {
         setJackpot(jp)
-        const { data: m } = await supabase.from('jackpot_matches').select('*').eq('jackpot_id', jp.id).order('game_number', { ascending: true })
+        const { data: m } = await supabase.from('jackpot_matches').select('*, leagues (name, countries (name, flag_emoji))').eq('jackpot_id', jp.id).order('game_number', { ascending: true })
         setMatches(m ?? [])
       }
       setLoading(false)
@@ -263,12 +264,18 @@ export default function CashierJackpotPage() {
                       background: isResulted && result === sel ? 'rgba(74,222,128,0.04)' : isResulted && result !== sel && sel ? 'rgba(239,68,68,0.04)' : sel ? GOLD + '0.04)' : idx % 2 === 0 ? '#1A1F4D' : '#1C2155',
                     }}>
                     {/* Match info row */}
-                    <div className="flex items-center px-2.5 py-1.5 gap-2 border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+                    <div className="flex items-center px-2.5 py-1 gap-1.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
                       <span className="text-[9px] font-bold font-mono flex-shrink-0 px-1.5 py-0.5 rounded" style={{ background: GOLD + '0.12)', color: GOLD + '0.7)' }}>G{m.game_number}</span>
+                      {m.leagues?.countries?.flag_emoji && <FlagImage emoji={m.leagues.countries.flag_emoji} size="sm" />}
+                      {m.leagues?.name && <span className="text-[9px] text-white/30 truncate flex-shrink-0 max-w-[80px]">{m.leagues.name}</span>}
+                      <span className="text-white/15 text-[9px] font-mono flex-shrink-0 ml-auto">
+                        {new Date(m.kick_off_time).toLocaleDateString('en-ET', { month: 'short', day: 'numeric' })} · {new Date(m.kick_off_time).toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <div className="flex items-center px-2.5 py-1.5 gap-2 border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
                       <span className="text-white font-semibold text-xs flex-1 truncate">{m.home_team}</span>
                       <span className="text-white/20 text-[9px] flex-shrink-0">vs</span>
                       <span className="text-white/70 text-xs flex-1 text-right truncate">{m.away_team}</span>
-                      <span className="text-white/20 text-[9px] font-mono flex-shrink-0">{new Date(m.kick_off_time).toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' })}</span>
                       {isResulted && (
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
                           style={result === 'home' ? { color: G, background: GOLD + '0.15)' } : result === 'away' ? { color: '#60a5fa', background: 'rgba(96,165,250,0.15)' } : { color: 'white', background: 'rgba(255,255,255,0.1)' }}>
