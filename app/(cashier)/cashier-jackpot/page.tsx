@@ -207,7 +207,8 @@ export default function CashierJackpotPage() {
 
       {/* PICK TAB */}
       {activeTab === 'pick' && (
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden justify-center">
+          <div className="flex w-full max-w-5xl overflow-hidden">
 
           {/* LEFT — Match List */}
           <div className="flex-1 overflow-y-auto" style={{ background: '#101534' }}>
@@ -316,7 +317,7 @@ export default function CashierJackpotPage() {
           </div>
 
           {/* RIGHT — Slip Builder */}
-          <div className="w-60 flex-shrink-0 flex flex-col border-l" style={{ background: 'linear-gradient(160deg,#1A1F4D,#101534)', borderColor: BLUE + '0.6)' }}>
+          <div className="w-56 flex-shrink-0 flex flex-col border-l" style={{ background: 'linear-gradient(160deg,#1A1F4D,#101534)', borderColor: BLUE + '0.6)' }}>
 
             {/* Picks list */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -430,12 +431,14 @@ export default function CashierJackpotPage() {
               </button>
             </div>
           </div>
+          </div>
         </div>
       )}
 
       {/* SLIPS TAB */}
       {activeTab === 'slips' && (
-        <div className="flex-1 overflow-y-auto p-2.5 space-y-2" style={{ background: '#101534' }}>
+        <div className="flex-1 overflow-y-auto p-2.5" style={{ background: '#101534' }}>
+          <div className="max-w-3xl mx-auto space-y-2">
           {/* Stats bar */}
           {!loadingSlips && slips.length > 0 && (
             <div className="grid grid-cols-4 gap-1.5 mb-1">
@@ -462,6 +465,7 @@ export default function CashierJackpotPage() {
               <p className="text-white/25 text-xs">No slips this week</p>
             </div>
           ) : slips.map(slip => <CashierSlipCard key={slip.id} slip={slip} />)}
+          </div>
         </div>
       )}
     </div>
