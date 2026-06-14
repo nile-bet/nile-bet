@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Trophy, Loader2, CheckCircle, XCircle } from 'lucide-react'
 import { formatETB } from '@/lib/utils/formatCurrency'
 import { cn } from '@/lib/utils'
+import { FlagImage } from '@/components/shared/FlagImage'
 
 export default function AgentJackpotPage() {
   const [jackpot, setJackpot] = useState<any>(null)
@@ -24,7 +25,7 @@ export default function AgentJackpotPage() {
         setJackpot(jp)
         const { data: m } = await supabase
           .from('jackpot_matches')
-          .select('*')
+          .select('*, leagues (name, countries (name, flag_emoji))')
           .eq('jackpot_id', jp.id)
           .order('game_number', { ascending: true })
         setMatches(m ?? [])
@@ -68,8 +69,18 @@ export default function AgentJackpotPage() {
       <div className="space-y-2">
         {matches.map((m) => (
           <div key={m.id} className="bg-slate-dark border border-nile-blue/20 rounded-lg p-3">
+            {/* Meta row: flag, league, date/time */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-gold/10 text-gold/70 flex-shrink-0">G{m.game_number}</span>
+              {m.leagues?.countries?.flag_emoji && <FlagImage emoji={m.leagues.countries.flag_emoji} size="sm" />}
+              {m.leagues?.name && <span className="text-[10px] text-white/40 truncate">{m.leagues.name}</span>}
+              {m.kick_off_time && (
+                <span className="text-[10px] text-white/25 font-mono ml-auto flex-shrink-0">
+                  {new Date(m.kick_off_time).toLocaleDateString('en-ET', { month: 'short', day: 'numeric' })} · {new Date(m.kick_off_time).toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
+            </div>
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-gold/50 w-12 flex-shrink-0">G{m.game_number}</span>
               <span className="text-white text-xs font-medium flex-1 truncate">{m.home_team}</span>
               <div className="flex gap-1 flex-shrink-0">
                 {[
