@@ -57,24 +57,8 @@ export default function CashierResultsPage() {
     e.preventDefault()
     window.dispatchEvent(new CustomEvent('open-countries-panel'))
   }
-
   return (
     <div className="flex flex-col">
-      {/* Same nav as place-bet page */}
-      <div className="flex items-center justify-center gap-10 px-4 py-3 bg-slate-dark border-b border-gold/10">
-        <Link href="/cashier-place-bet" className="flex items-center gap-2 text-base font-semibold text-white/70 hover:text-gold transition-colors">
-          <Home className="w-5 h-5" />
-          Home
-        </Link>
-        <button onClick={handleSportsClick} className="flex items-center gap-2 text-base font-semibold text-white/70 hover:text-gold transition-colors">
-          <Globe className="w-5 h-5" />
-          Sports
-        </button>
-        <Link href="/cashier-results" className="flex items-center gap-2 text-base font-semibold text-gold transition-colors">
-          <BarChart2 className="w-5 h-5" />
-          Results
-        </Link>
-      </div>
 
     <div className="p-6 max-w-4xl">
       <h1 className="font-display text-2xl font-bold text-white mb-6">Results</h1>
