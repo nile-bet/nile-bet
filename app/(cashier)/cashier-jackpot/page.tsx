@@ -62,6 +62,7 @@ export default function CashierJackpotPage() {
       .from('jackpot_slips')
       .select(`*, jackpots(id,name,status,fixed_stake,win_all_reward,near_win_reward), bettor:profiles!jackpot_slips_bettor_id_fkey(username), jackpot_slip_selections(id,game_number,selection,result,jackpot_matches(game_number,home_team,away_team,kick_off_time,result))`)
       .eq('jackpot_id', jackpot.id)
+      .eq('placed_by', user?.id)
       .order('created_at', { ascending: false })
       .limit(200)
     setSlips(data ?? [])
