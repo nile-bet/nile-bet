@@ -305,6 +305,8 @@ export interface JackpotMatch {
   draw_odd: number
   away_odd: number
   result: 'home' | 'draw' | 'away' | 'pending'
+  league_id?: string | null
+  leagues?: { name: string; countries?: { name: string; flag_emoji: string } } | null
   created_at: string
 }
 

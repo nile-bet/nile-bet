@@ -1487,6 +1487,7 @@ export async function updateJackpot(
       homeOdd: number
       drawOdd: number
       awayOdd: number
+      leagueId?: string
     }[]
   }
 ): Promise<{ success: boolean; error?: string }> {
@@ -1512,6 +1513,7 @@ export async function updateJackpot(
         home_odd: m.homeOdd,
         draw_odd: m.drawOdd,
         away_odd: m.awayOdd,
+        league_id: m.leagueId || null,
       })
       .eq('jackpot_id', jackpotId)
       .eq('game_number', m.gameNumber)
@@ -1534,6 +1536,7 @@ export async function createJackpot(data: {
     homeOdd: number
     drawOdd: number
     awayOdd: number
+    leagueId?: string
   }[]
   createdBy: string
 }): Promise<{
@@ -1586,6 +1589,7 @@ export async function createJackpot(data: {
         home_odd: m.homeOdd,
         draw_odd: m.drawOdd,
         away_odd: m.awayOdd,
+        league_id: m.leagueId || null,
         result: 'pending',
       }))
     )

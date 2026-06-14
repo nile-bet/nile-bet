@@ -9,6 +9,7 @@ import {
   deleteJackpot,
   updateJackpot,
 } from '@/lib/actions/adminMatches'
+import { getCountriesWithLeagues } from '@/lib/actions/matches'
 import { StatusBadge }
   from '@/components/shared/StatusBadge'
 import { ConfirmModal }
@@ -75,8 +76,10 @@ export default function AdminJackpotPage() {
       homeOdd: '',
       drawOdd: '',
       awayOdd: '',
+      leagueId: '',
     }))
   )
+  const [countries, setCountries] = useState<any[]>([])
 
   // Settle form
   const [results, setResults] = useState<
@@ -88,6 +91,7 @@ export default function AdminJackpotPage() {
 
   useEffect(() => {
     loadJackpots()
+    getCountriesWithLeagues().then(setCountries)
   }, [])
 
   const handleDelete = async () => {
@@ -128,6 +132,7 @@ export default function AdminJackpotPage() {
       homeOdd: String(m.home_odd),
       drawOdd: String(m.draw_odd),
       awayOdd: String(m.away_odd),
+      leagueId: m.league_id || '',
     })))
     setShowEdit(true)
   }
@@ -150,6 +155,7 @@ export default function AdminJackpotPage() {
         homeOdd: parseFloat(g.homeOdd) || 2.0,
         drawOdd: parseFloat(g.drawOdd) || 3.0,
         awayOdd: parseFloat(g.awayOdd) || 3.5,
+        leagueId: g.leagueId || undefined,
       })),
     })
     if (result.success) {
@@ -173,6 +179,7 @@ export default function AdminJackpotPage() {
       homeOdd: parseFloat(g.homeOdd) || 2.0,
       drawOdd: parseFloat(g.drawOdd) || 3.0,
       awayOdd: parseFloat(g.awayOdd) || 3.5,
+      leagueId: g.leagueId || undefined,
     }))
 
     const incomplete = matchesData.find(
@@ -556,6 +563,20 @@ export default function AdminJackpotPage() {
                   <p className="text-gold text-[10px] tracking-widest uppercase mb-2">
                     Game {game.gameNumber}
                   </p>
+                  <select
+                    value={game.leagueId}
+                    onChange={(e) => setGame(i, 'leagueId', e.target.value)}
+                    className="w-full bg-charcoal border border-nile-blue/30 rounded px-2 py-1.5 text-white text-xs focus:outline-none mb-2"
+                  >
+                    <option value="">No league selected</option>
+                    {countries.map((c: any) => (
+                      <optgroup key={c.id} label={`${c.flag_emoji} ${c.name}`}>
+                        {c.leagues?.map((l: any) => (
+                          <option key={l.id} value={l.id}>{l.name}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <input
                       value={game.homeTeam}
@@ -698,6 +719,20 @@ export default function AdminJackpotPage() {
               {editGames.map((game, i) => (
                 <div key={i} className="bg-charcoal/50 rounded-lg p-3">
                   <p className="text-gold text-[10px] tracking-widest uppercase mb-2">Game {game.gameNumber}</p>
+                  <select
+                    value={game.leagueId}
+                    onChange={(e) => setEditGames(prev => prev.map((g,j) => j===i ? {...g, leagueId: e.target.value} : g))}
+                    className="w-full bg-charcoal border border-nile-blue/30 rounded px-2 py-1.5 text-white text-xs focus:outline-none mb-2"
+                  >
+                    <option value="">No league selected</option>
+                    {countries.map((c: any) => (
+                      <optgroup key={c.id} label={`${c.flag_emoji} ${c.name}`}>
+                        {c.leagues?.map((l: any) => (
+                          <option key={l.id} value={l.id}>{l.name}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <input value={game.homeTeam} onChange={e => setEditGames(prev => prev.map((g,j) => j===i ? {...g, homeTeam: e.target.value} : g))} placeholder="Home Team" className="bg-charcoal border border-nile-blue/30 rounded px-2 py-1.5 text-white text-sm focus:outline-none" />
                     <input value={game.awayTeam} onChange={e => setEditGames(prev => prev.map((g,j) => j===i ? {...g, awayTeam: e.target.value} : g))} placeholder="Away Team" className="bg-charcoal border border-nile-blue/30 rounded px-2 py-1.5 text-white text-sm focus:outline-none" />

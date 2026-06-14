@@ -13,7 +13,7 @@ export async function getActiveJackpot() {
     .select(
       `
       *,
-      jackpot_matches (*)
+      jackpot_matches (*, leagues (name, countries (name, flag_emoji)))
     `
     )
     .in('status', ['open', 'closed'])
@@ -356,7 +356,9 @@ export async function getAllJackpotsPublic() {
         home_team,
         away_team,
         kick_off_time,
-        result
+        result,
+        league_id,
+        leagues (name, countries (name, flag_emoji))
       )
     `
     )
