@@ -14,7 +14,7 @@ type Selection = 'home' | 'draw' | 'away'
 
 export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
   const { user, isAuthenticated, setUser } = useAuthStore()
-  const [activeTab, setActiveTab] = useState<'pick' | 'myslips' | 'leaderboard' | 'history'>('pick')
+  const [activeTab, setActiveTab] = useState<'pick' | 'myslips' | 'history'>('pick')
   const [selections, setSelections] = useState<Record<number, Selection>>({})
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [placing, setPlacing] = useState(false)
@@ -51,7 +51,7 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
     setMySlips(data)
   }
 
-  const handleTabChange = (tab: 'pick' | 'myslips' | 'leaderboard' | 'history') => {
+  const handleTabChange = (tab: 'pick' | 'myslips' | 'history') => {
     setActiveTab(tab)
     if (tab === 'myslips' && user) handleLoadMySlips()
   }
@@ -85,7 +85,7 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
   const tabs = [
     { key: 'pick', label: '🎯 Pick', icon: Target },
     ...(isAuthenticated ? [{ key: 'myslips', label: '🎫 My Slips', icon: Shield }] : []),
-    { key: 'leaderboard', label: '🏆 Board', icon: TrendingUp },
+    
     { key: 'history', label: '📋 History', icon: Star },
   ]
 
@@ -358,82 +358,6 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
             </div>
           )}
 
-          {/* LEADERBOARD TAB */}
-          {activeTab === 'leaderboard' && (
-            <div className="space-y-3">
-              {leaderboard.length === 0 ? (
-                <div className="rounded-2xl p-10 text-center border border-[#252E6D]/60" style={{ background: 'linear-gradient(135deg, #1A1F4D, #1C2155)' }}>
-                  <Star className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: '#D4AF37' }} />
-                  <p className="text-white/40 text-sm">No entries yet — be the first!</p>
-                </div>
-              ) : (
-                <div className="rounded-xl overflow-hidden border border-[#252E6D]/60" style={{ background: '#13173a' }}>
-                  {/* Header */}
-                  <div className="grid px-4 py-2.5 border-b border-[#252E6D]/60 text-[10px] font-bold uppercase tracking-widest text-white/25"
-                    style={{ gridTemplateColumns: '36px 1fr 60px 80px' }}>
-                    <span>#</span>
-                    <span>Player</span>
-                    <span className="text-center">Score</span>
-                    <span className="text-right">Prize</span>
-                  </div>
-                  {leaderboard.map((entry: any, i: number) => {
-                    const rank = i + 1
-                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null
-                    const isWinner = entry.status === 'won'
-                    const isNearWin = entry.status === 'near_win'
-                    const isPending = entry.status === 'pending' || entry.correct_count === null
-                    return (
-                      <div key={entry.slip_id}
-                        className="grid items-center px-4 py-3 border-b border-[#252E6D]/20 last:border-0"
-                        style={{
-                          gridTemplateColumns: '36px 1fr 60px 80px',
-                          background: isWinner ? 'rgba(212,175,55,0.06)' : isNearWin ? 'rgba(74,222,128,0.04)' : 'transparent'
-                        }}>
-                        {/* Rank */}
-                        <span className="text-sm w-8">
-                          {medal ?? <span className="text-white/30 font-mono text-xs">#{rank}</span>}
-                        </span>
-                        {/* Player */}
-                        <div>
-                          <p className="text-white text-sm font-semibold">
-                            {entry.is_anonymous ? '🔒 Anonymous' : `@${(entry.bettor as any)?.username ?? '—'}`}
-                          </p>
-                          <p className="text-white/25 text-[10px] font-mono">{entry.slip_id}</p>
-                        </div>
-                        {/* Score */}
-                        <div className="text-center">
-                          {isPending ? (
-                            <span className="text-white/20 text-xs">—</span>
-                          ) : (
-                            <span className="font-bold text-sm font-mono" style={{ color: isWinner ? '#FFD700' : isNearWin ? '#4ade80' : 'rgba(255,255,255,0.6)' }}>
-                              {entry.correct_count}/12
-                            </span>
-                          )}
-                        </div>
-                        {/* Prize */}
-                        <div className="text-right">
-                          {entry.reward_amount > 0 ? (
-                            <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>
-                              +{formatETB(entry.reward_amount)}
-                            </span>
-                          ) : isPending ? (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)' }}>
-                              Live
-                            </span>
-                          ) : (
-                            <span className="text-white/20 text-xs">—</span>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
-                  <div className="px-4 py-2.5 border-t border-[#252E6D]/40 text-center">
-                    <p className="text-white/20 text-[10px]">{leaderboard.length} total entries</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* HISTORY TAB */}
           {activeTab === 'history' && (
