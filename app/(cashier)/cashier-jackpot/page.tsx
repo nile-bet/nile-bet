@@ -155,16 +155,28 @@ export default function CashierJackpotPage() {
             </div>
             <div className="overflow-auto flex-1 border-t" style={{ borderColor: BLUE + '0.4)' }}>
               <div style={{ transform: 'scale(0.82)', transformOrigin: 'top center', background: 'white' }}>
-                <ThermalReceipt ref={receiptRef} slipId={placedSlip.slip_id} isJackpot={true} stake={jackpot.fixed_stake}
+                <ThermalReceipt
+                  ref={receiptRef}
+                  slipId={placedSlip.slip_id}
+                  isJackpot={true}
+                  stake={jackpot.fixed_stake}
                   placedAt={placedSlip.created_at ?? new Date().toISOString()}
                   bettorUsername={placedSlip._bettorName || undefined}
-                  cashierUsername={user?.username} isAnonymous={placedSlip.is_anonymous}
-                  selections={(placedSlip.jackpot_slip_selections ?? []).sort((a: any, b: any) => a.game_number - b.game_number).map((s: any) => ({
-                    matchName: `${s.jackpot_matches?.home_team ?? 'Home'} vs ${s.jackpot_matches?.away_team ?? 'Away'}`,
-                    marketName: `Game ${s.game_number}`,
-                    selection: s.selection === 'home' ? '1 Home' : s.selection === 'away' ? '2 Away' : 'X Draw',
-                    odd: 1,
-                  }))} />
+                  cashierUsername={user?.username}
+                  isAnonymous={placedSlip.is_anonymous}
+                  maxPayout={jackpot.win_all_reward}
+                  jackpotMiss1={jackpot.near_win_reward}
+                  winningTax={taxAmount(jackpot.win_all_reward)}
+                  netPayout={netAfterTax(jackpot.win_all_reward)}
+                  selections={(placedSlip.jackpot_slip_selections ?? [])
+                    .sort((a: any, b: any) => a.game_number - b.game_number)
+                    .map((s: any) => ({
+                      matchName: `${s.jackpot_matches?.home_team ?? 'Home'} vs ${s.jackpot_matches?.away_team ?? 'Away'}`,
+                      marketName: `Game ${s.game_number}`,
+                      selection: s.selection === 'home' ? '1 Home' : s.selection === 'away' ? '2 Away' : 'X Draw',
+                      odd: 1,
+                    }))}
+                />
               </div>
             </div>
           </div>

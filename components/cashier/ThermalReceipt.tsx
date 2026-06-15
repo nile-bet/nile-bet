@@ -22,6 +22,8 @@ interface ThermalReceiptProps {
   maxPayout?: number
   netPayout?: number
   winningTax?: number
+  jackpotWinAll?: number
+  jackpotMiss1?: number
   selections: ReceiptSelection[]
   bettorUsername?: string
   cashierUsername?: string
@@ -47,6 +49,8 @@ export const ThermalReceipt = forwardRef<
     maxPayout,
     netPayout,
     winningTax,
+    jackpotWinAll,
+    jackpotMiss1,
     selections,
     bettorUsername,
     cashierUsername,
@@ -351,76 +355,77 @@ export const ThermalReceipt = forwardRef<
 
       {/* Financials */}
       <div style={{ fontSize: '10px' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <span>Stake:</span>
-          <span style={{ fontWeight: 'bold' }}>
-            {formatETB(stake)}
-          </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span>Entry Fee:</span>
+          <span style={{ fontWeight: 'bold' }}>{formatETB(stake)}</span>
         </div>
         {totalOdds && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
-          >
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span>Total Odds:</span>
             <span>{totalOdds.toFixed(2)}</span>
           </div>
         )}
-        {maxPayout && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
-          >
+
+        {/* Jackpot prize breakdown */}
+        {isJackpot && maxPayout && (
+          <>
+            <div style={{ borderTop: '1px dashed #ccc', margin: '4px 0' }} />
+            <div style={{ fontWeight: 'bold', textAlign: 'center', fontSize: '9px', marginBottom: '3px', letterSpacing: '1px' }}>
+              PRIZE BREAKDOWN
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>Win All 12 (gross):</span>
+              <span>{formatETB(maxPayout)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#c00' }}>
+              <span>Tax (15%):</span>
+              <span>-{formatETB(maxPayout * 0.15)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', borderTop: '1px solid #000', paddingTop: '2px', marginTop: '2px' }}>
+              <span>Win All 12 (net):</span>
+              <span>{formatETB(maxPayout * 0.85)}</span>
+            </div>
+            {jackpotMiss1 && jackpotMiss1 > 0 && (
+              <>
+                <div style={{ borderTop: '1px dashed #ccc', margin: '3px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Miss 1 (gross):</span>
+                  <span>{formatETB(jackpotMiss1)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#c00' }}>
+                  <span>Tax (15%):</span>
+                  <span>-{formatETB(jackpotMiss1 * 0.15)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+                  <span>Miss 1 (net):</span>
+                  <span>{formatETB(jackpotMiss1 * 0.85)}</span>
+                </div>
+              </>
+            )}
+          </>
+        )}
+
+        {/* Regular slip payout */}
+        {!isJackpot && maxPayout && (
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span>Max Payout:</span>
             <span>{formatETB(maxPayout)}</span>
           </div>
         )}
-        {winningTax !== undefined && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              color: '#555',
-            }}
-          >
+        {!isJackpot && winningTax !== undefined && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
             <span>Tax (15%):</span>
             <span>-{formatETB(winningTax)}</span>
           </div>
         )}
-        {netPayout && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontWeight: 'bold',
-              fontSize: '12px',
-              marginTop: '3px',
-              paddingTop: '3px',
-              borderTop: '1px solid #000',
-            }}
-          >
+        {!isJackpot && netPayout && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '12px', marginTop: '3px', paddingTop: '3px', borderTop: '1px solid #000' }}>
             <span>Net Payout:</span>
             <span>{formatETB(netPayout)}</span>
           </div>
         )}
         {insuranceApplied && (
-          <div
-            style={{
-              textAlign: 'center',
-              marginTop: '3px',
-              fontSize: '9px',
-              color: '#555',
-            }}
-          >
+          <div style={{ textAlign: 'center', marginTop: '3px', fontSize: '9px', color: '#555' }}>
             🛡️ Insurance Active (10+ selections)
           </div>
         )}
