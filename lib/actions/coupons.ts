@@ -392,10 +392,15 @@ export async function getBettorStats(
       'status, stake, net_payout, insurance_applied'
     )
     .eq('bettor_id', bettorId)
+  const { data: jackpotSlips } = await supabase
+    .from('jackpot_slips')
+    .select('status, stake')
+    .eq('bettor_id', bettorId)
+  const jackpotCount = jackpotSlips?.length ?? 0
 
   if (!slips) {
     return {
-      totalBets: 0,
+      totalBets: jackpotCount,
       wonBets: 0,
       lostBets: 0,
       cancelledBets: 0,
@@ -406,7 +411,7 @@ export async function getBettorStats(
     }
   }
 
-  const totalBets = slips.length
+  const totalBets = slips.length + jackpotCount
   const wonBets = slips.filter(
     (s) => s.status === 'won'
   ).length
