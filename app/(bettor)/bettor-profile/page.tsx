@@ -277,79 +277,73 @@ export default function ProfilePage() {
                 <TrendingUp className="w-4 h-4 text-gold" />
                 Betting Statistics
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              {/* Regular bets */}
+              <p className="text-white/40 text-[10px] uppercase tracking-widest mb-2">Regular Bets</p>
+              <div className="grid grid-cols-2 gap-2">
                 <div className="bg-charcoal/50 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-white font-mono">
-                    {stats?.totalBets ?? 0}
-                  </p>
-                  <p className="text-white/50 text-xs">
-                    Total Bets
-                  </p>
+                  <p className="text-2xl font-bold text-white font-mono">{stats?.totalBets ?? 0}</p>
+                  <p className="text-white/50 text-xs">Total Bets</p>
                 </div>
                 <div className="bg-nile-success/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-nile-success font-mono">
-                    {stats?.wonBets ?? 0}
-                  </p>
-                  <p className="text-white/50 text-xs">
-                    Won
-                  </p>
+                  <p className="text-2xl font-bold text-nile-success font-mono">{stats?.wonBets ?? 0}</p>
+                  <p className="text-white/50 text-xs">Won</p>
                 </div>
                 <div className="bg-nile-danger/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-nile-danger font-mono">
-                    {stats?.lostBets ?? 0}
-                  </p>
-                  <p className="text-white/50 text-xs">
-                    Lost
-                  </p>
+                  <p className="text-2xl font-bold text-nile-danger font-mono">{stats?.lostBets ?? 0}</p>
+                  <p className="text-white/50 text-xs">Lost</p>
                 </div>
                 <div className="bg-gold/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-gold font-mono">
-                    {stats?.nearWinBets ?? 0}
-                  </p>
-                  <p className="text-white/50 text-xs">
-                    Near Win 🛡️
-                  </p>
+                  <p className="text-2xl font-bold text-gold font-mono">{stats?.nearWinBets ?? 0}</p>
+                  <p className="text-white/50 text-xs">Near Win 🛡️</p>
                 </div>
               </div>
 
+              {/* Jackpot stats */}
+              {(stats?.jackpotEntries ?? 0) > 0 && (
+                <>
+                  <p className="text-white/40 text-[10px] uppercase tracking-widest mt-3 mb-2">🏆 Jackpot Entries</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-charcoal/50 rounded-lg p-2.5 text-center">
+                      <p className="text-xl font-bold text-gold font-mono">{stats?.jackpotEntries ?? 0}</p>
+                      <p className="text-white/50 text-[10px]">Entries</p>
+                    </div>
+                    <div className="bg-nile-success/10 rounded-lg p-2.5 text-center">
+                      <p className="text-xl font-bold text-nile-success font-mono">{stats?.jackpotWon ?? 0}</p>
+                      <p className="text-white/50 text-[10px]">Won</p>
+                    </div>
+                    <div className="bg-gold/10 rounded-lg p-2.5 text-center">
+                      <p className="text-xl font-bold text-gold font-mono">{stats?.jackpotNearWin ?? 0}</p>
+                      <p className="text-white/50 text-[10px]">Near Win</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
               <div className="border-t border-gold/10 mt-4 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/50">
-                    Total Staked:
-                  </span>
-                  <span className="text-white font-mono">
-                    {formatETB(
-                      stats?.totalStaked ?? 0
-                    )}
-                  </span>
+                  <span className="text-white/50">Total Staked:</span>
+                  <span className="text-white font-mono">{formatETB(stats?.totalStaked ?? 0)}</span>
                 </div>
+                {(stats?.jackpotStaked ?? 0) > 0 && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-white/30">· Jackpot Staked:</span>
+                    <span className="text-white/50 font-mono">{formatETB(stats?.jackpotStaked ?? 0)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/50">
-                    Total Won:
-                  </span>
-                  <span className="text-nile-success font-mono">
-                    {formatETB(
-                      stats?.totalWon ?? 0
-                    )}
-                  </span>
+                  <span className="text-white/50">Total Won:</span>
+                  <span className="text-nile-success font-mono">{formatETB(stats?.totalWon ?? 0)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-semibold">
-                  <span className="text-white/70">
-                    Net Result:
-                  </span>
-                  <span
-                    className={
-                      netResultPositive
-                        ? 'text-nile-success font-mono'
-                        : 'text-nile-danger font-mono'
-                    }
-                  >
-                    {netResultPositive
-                      ? '+'
-                      : ''}
-                    {formatETB(
-                      stats?.netResult ?? 0
-                    )}
+                {(stats?.jackpotWon_amount ?? 0) > 0 && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-white/30">· Jackpot Won (after tax):</span>
+                    <span className="text-nile-success/70 font-mono">{formatETB(stats?.jackpotWon_amount ?? 0)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm font-semibold border-t border-white/10 pt-2 mt-1">
+                  <span className="text-white/70">Net Result:</span>
+                  <span className={netResultPositive ? 'text-nile-success font-mono' : 'text-nile-danger font-mono'}>
+                    {netResultPositive ? '+' : ''}{formatETB(stats?.netResult ?? 0)}
                   </span>
                 </div>
               </div>
