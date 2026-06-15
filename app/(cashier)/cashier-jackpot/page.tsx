@@ -14,6 +14,10 @@ import { cn } from '@/lib/utils'
 type Selection = 'home' | 'draw' | 'away'
 type Tab = 'pick' | 'slips'
 
+const TAX_RATE = 0.15
+const netAfterTax = (gross: number) => gross * (1 - TAX_RATE)
+const taxAmount = (gross: number) => gross * TAX_RATE
+
 const G = '#D4AF37'        // --color-gold
 const GOLD = 'rgba(212,175,55,'
 const BLUE = 'rgba(37,46,109,'   // --color-nile-blue
@@ -181,11 +185,11 @@ export default function CashierJackpotPage() {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <p className="text-[9px] text-white/25 uppercase tracking-widest">Win All</p>
-            <p className="font-mono font-bold text-xs" style={{ color: G }}>{formatETB(jackpot.win_all_reward)}</p>
+            <p className="font-mono font-bold text-xs" style={{ color: G }}>{formatETB(netAfterTax(jackpot.win_all_reward))}</p>
           </div>
           <div className="text-right">
             <p className="text-[9px] text-white/25 uppercase tracking-widest">Miss 1</p>
-            <p className="font-mono text-xs text-white/50">{formatETB(jackpot.near_win_reward)}</p>
+            <p className="font-mono text-xs text-white/50">{formatETB(netAfterTax(jackpot.near_win_reward))}</p>
           </div>
           <div className="text-right">
             <p className="text-[9px] text-white/25 uppercase tracking-widest">Entry</p>
@@ -409,13 +413,17 @@ export default function CashierJackpotPage() {
                   <span className="font-mono font-bold" style={{ color: '#FFD700' }}>{formatETB(jackpot.fixed_stake)}</span>
                 </div>
                 <div className="flex justify-between text-[10px]">
-                  <span className="text-white/35">Win All</span>
-                  <span className="font-mono text-green-400">{formatETB(jackpot.win_all_reward)}</span>
+                  <span className="text-white/35">Win All (net)</span>
+                  <span className="font-mono text-green-400">{formatETB(netAfterTax(jackpot.win_all_reward))}</span>
+                </div>
+                <div className="flex justify-between text-[10px]">
+                  <span className="text-white/25">Tax 15%</span>
+                  <span className="font-mono text-white/25">-{formatETB(taxAmount(jackpot.win_all_reward))}</span>
                 </div>
                 {jackpot.near_win_reward > 0 && (
                   <div className="flex justify-between text-[10px]">
-                    <span className="text-white/35">Miss 1</span>
-                    <span className="font-mono text-white/45">{formatETB(jackpot.near_win_reward)}</span>
+                    <span className="text-white/35">Miss 1 (net)</span>
+                    <span className="font-mono text-white/45">{formatETB(netAfterTax(jackpot.near_win_reward))}</span>
                   </div>
                 )}
               </div>
@@ -502,7 +510,13 @@ function CashierSlipCard({ slip }: { slip: any }) {
               </span>
             )}
             {(slip.reward_amount ?? 0) > 0 && (
-              <span className="text-xs font-mono font-bold text-green-400">+{formatETB(slip.reward_amount)}</span>
+              <div className="flex flex-col items-end">
+                <div className="flex items-center gap-1">
+                  <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ color: '#ef4444', background: 'rgba(239,68,68,0.12)' }}>-15%</span>
+                  <span className="text-xs font-mono font-bold text-green-400">+{formatETB(netAfterTax(slip.reward_amount))}</span>
+                </div>
+                <span className="text-[9px] text-white/25">gross {formatETB(slip.reward_amount)}</span>
+              </div>
             )}
           </div>
         </div>

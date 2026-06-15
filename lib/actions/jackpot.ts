@@ -3,6 +3,14 @@
 import { createClient, createAdminClient }
   from '@/lib/supabase/server'
 
+const JACKPOT_TAX_RATE = 0.15 // 15% winning tax
+
+export function calcJackpotTax(grossReward: number) {
+  const tax = grossReward * JACKPOT_TAX_RATE
+  const net = grossReward - tax
+  return { gross: grossReward, tax: Math.round(tax * 100) / 100, net: Math.round(net * 100) / 100 }
+}
+
 // ─── PUBLIC: Get active jackpot ───────
 
 export async function getActiveJackpot() {

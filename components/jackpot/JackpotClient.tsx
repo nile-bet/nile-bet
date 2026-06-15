@@ -11,6 +11,10 @@ import { JackpotPrintReceiptModal } from './JackpotPrintReceiptModal'
 import { FlagImage } from '@/components/shared/FlagImage'
 
 interface Props { jackpot: any; leaderboard: any[]; pastJackpots: any[] }
+
+const TAX_RATE = 0.15
+function netAfterTax(gross: number) { return gross * (1 - TAX_RATE) }
+function taxAmount(gross: number) { return gross * TAX_RATE }
 type Selection = 'home' | 'draw' | 'away'
 
 export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
@@ -533,11 +537,15 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-white/40">Win All 12</span>
-                    <span className="font-mono" style={{ color: '#4ade80' }}>{formatETB(jackpot.win_all_reward)}</span>
+                    <span className="font-mono" style={{ color: '#4ade80' }}>{formatETB(netAfterTax(jackpot.win_all_reward))}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-white/40 text-[10px]">Tax (15%)</span>
+                    <span className="font-mono text-[10px] text-white/30">-{formatETB(taxAmount(jackpot.win_all_reward))}</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-white/40">Miss 1</span>
-                    <span className="font-mono text-white/60">{formatETB(jackpot.near_win_reward)}</span>
+                    <span className="font-mono text-white/60">{formatETB(netAfterTax(jackpot.near_win_reward))}</span>
                   </div>
                   {isAuthenticated && user && (
                     <div className="flex justify-between text-xs pt-1 border-t border-[#252E6D]/40">
@@ -680,7 +688,15 @@ function JackpotSlipCard({ slip, onPrint }: { slip: any; onPrint: (slipId: strin
             <span className="text-xs px-3 py-1 rounded-full font-mono font-bold" style={{ background: 'rgba(37,46,109,0.6)', color: slip.status !== 'pending' ? '#D4AF37' : 'rgba(255,255,255,0.5)' }}>
               {slip.correct_count !== null && slip.status !== 'pending' ? `${slip.correct_count}/12 ✓` : `${selections.length}/12 picks`}
             </span>
-            {(slip.reward_amount ?? 0) > 0 && <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>+{formatETB(slip.reward_amount)}</span>}
+            {(slip.reward_amount ?? 0) > 0 && (
+              <div className="flex flex-col items-end">
+                <div className="flex items-center gap-1">
+                  <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ color: '#ef4444', background: 'rgba(239,68,68,0.12)' }}>-15%</span>
+                  <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>+{formatETB(netAfterTax(slip.reward_amount))}</span>
+                </div>
+                <span className="text-[9px] text-white/25">gross {formatETB(slip.reward_amount)}</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
