@@ -570,10 +570,6 @@ export default function CashierDashboard() {
                 <p className="text-white/50 text-xs">Lost</p>
               </div>
               <div className="bg-charcoal/50 rounded-lg p-3 text-center">
-                <p className="text-nile-orange font-mono text-lg font-bold">{stats.jackpot?.pending ?? 0}</p>
-                <p className="text-white/50 text-xs">Pending</p>
-              </div>
-              <div className="bg-charcoal/50 rounded-lg p-3 text-center">
                 <p className="text-white/60 font-mono text-lg font-bold">{stats.jackpot?.inProgress ?? 0}</p>
                 <p className="text-white/50 text-xs">In Progress</p>
               </div>
