@@ -280,9 +280,9 @@ export default function ProfilePage() {
               {/* Regular bets */}
               <p className="text-white/40 text-[10px] uppercase tracking-widest mb-2">Regular Bets</p>
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-charcoal/50 rounded-lg p-3 text-center">
+                <div className="bg-charcoal/50 rounded-lg p-3 text-center col-span-2">
                   <p className="text-2xl font-bold text-white font-mono">{stats?.totalBets ?? 0}</p>
-                  <p className="text-white/50 text-xs">Total Bets</p>
+                  <p className="text-white/50 text-xs">Total Slips (Regular + Jackpot)</p>
                 </div>
                 <div className="bg-nile-success/10 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold text-nile-success font-mono">{stats?.wonBets ?? 0}</p>
