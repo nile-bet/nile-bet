@@ -104,24 +104,52 @@ export async function getCashierDashboardStats(
   // but slip still pending
   const inProgressSlips = 0
 
-  const totalCollected = all.reduce(
+  const totalCollectedSlips = all.reduce(
     (a, s) => a + (s.stake ?? 0),
     0
   )
-  const totalPaidOut = [
+  const totalPaidOutSlips = [
     ...wonSlips,
     ...nearWinSlips,
   ].reduce(
     (a, s) => a + (s.net_payout ?? 0),
     0
   )
-  const grossProfitLoss =
-    totalCollected - totalPaidOut
 
-  const pendingLiability = pendingSlips.reduce(
+  const pendingLiabilitySlips = pendingSlips.reduce(
     (a, s) => a + (s.net_payout ?? 0),
     0
   )
+
+  // Jackpot slips for this cashier
+  let jq = supabase
+    .from('jackpot_slips')
+    .select('stake, status, reward_amount, placed_by, created_at')
+    .eq('placed_by', cashierId)
+
+  if (startDate) {
+    jq = jq.gte('created_at', startDate)
+  }
+  if (endDate) {
+    jq = jq.lte('created_at', endDate)
+  }
+
+  const { data: jackpotSlips } = await jq
+  const allJackpot = jackpotSlips ?? []
+
+  const jackpotTotal = allJackpot.length
+  const jackpotWon = allJackpot.filter((s) => s.status === 'won')
+  const jackpotNearWin = allJackpot.filter((s) => s.status === 'near_win')
+  const jackpotLost = allJackpot.filter((s) => s.status === 'lost').length
+  const jackpotPending = allJackpot.filter((s) => s.status === 'pending')
+  const jackpotInsured = jackpotNearWin.length
+  const jackpotInProgress = 0
+
+  const jackpotCollected = allJackpot.reduce((a, s) => a + (s.stake ?? 0), 0)
+  const jackpotPaidOut = [...jackpotWon, ...jackpotNearWin].reduce((a, s) => a + (s.reward_amount ?? 0), 0)
+  const jackpotPendingLiability = jackpotPending.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
+  const jackpotWonTotal = jackpotWon.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
+  const jackpotInsuredTotal = jackpotNearWin.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
 
   // User topups (coupon topups processed)
   const { data: couponsRedeemed } =
@@ -141,6 +169,12 @@ export async function getCashierDashboardStats(
   const topupTransactions =
     couponsRedeemed?.length ?? 0
 
+  // Combine slip + jackpot totals
+  const totalCollected = totalCollectedSlips + jackpotCollected
+  const totalPaidOut = totalPaidOutSlips + jackpotPaidOut
+  const grossProfitLoss = totalCollected - totalPaidOut
+  const pendingLiability = pendingLiabilitySlips + jackpotPendingLiability
+
   const walletBalance =
     profile?.credit_balance ?? 0
   const accountTotal =
@@ -152,15 +186,17 @@ export async function getCashierDashboardStats(
   const cashierProfit = grossProfitLoss * 0.4
   const agentPayable = grossProfitLoss * 0.6
 
-  const totalWon = wonSlips.reduce(
+  const totalWonSlips = wonSlips.reduce(
     (a, s) => a + (s.net_payout ?? 0),
     0
   )
-  const insuredTotal = nearWinSlips.reduce(
+  const insuredTotalSlips = nearWinSlips.reduce(
     (a, s) =>
       a + (s.insurance_payout ?? 0),
     0
   )
+  const totalWon = totalWonSlips + jackpotWonTotal
+  const insuredTotal = insuredTotalSlips + jackpotInsuredTotal
   const wonRedeemedAmount = 0
   const insuredRedeemedAmount = 0
   const pendingPayout = pendingLiability
@@ -192,6 +228,20 @@ export async function getCashierDashboardStats(
     wonRedeemedAmount,
     insuredRedeemedAmount,
     pendingPayout,
+    // Jackpot stats
+    jackpot: {
+      total: jackpotTotal,
+      won: jackpotWon.length,
+      pending: jackpotPending.length,
+      insured: jackpotInsured,
+      lost: jackpotLost,
+      inProgress: jackpotInProgress,
+      wonTotal: jackpotWonTotal,
+      insuredTotal: jackpotInsuredTotal,
+      pendingPayout: jackpotPendingLiability,
+      collected: jackpotCollected,
+      paidOut: jackpotPaidOut,
+    },
   }
 }
 
@@ -263,21 +313,61 @@ export async function getCashierPayoutsReport(
 
   const { data: slips } = await q
 
-  const totalGross = (slips ?? []).reduce(
-    (a, s) => a + (s.max_payout ?? 0),
-    0
-  )
-  const totalTax = (slips ?? []).reduce(
-    (a, s) => a + (s.winning_tax ?? 0),
-    0
-  )
-  const totalNet = (slips ?? []).reduce(
-    (a, s) => a + (s.net_payout ?? 0),
-    0
+  // Jackpot winning slips
+  let jq = supabase
+    .from('jackpot_slips')
+    .select(`
+      slip_id,
+      stake,
+      reward_amount,
+      status,
+      is_anonymous,
+      created_at,
+      jackpots (name),
+      bettor:profiles!jackpot_slips_bettor_id_fkey (username)
+    `)
+    .eq('placed_by', cashierId)
+    .in('status', ['won', 'near_win'])
+    .order('created_at', { ascending: false })
+  if (startDate) jq = jq.gte('created_at', startDate)
+  if (endDate) jq = jq.lte('created_at', endDate)
+  const { data: jackpotSlips } = await jq
+
+  const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => ({
+    slip_id: j.slip_id,
+    stake: j.stake,
+    total_odds: null,
+    max_payout: j.reward_amount,
+    winning_tax: 0,
+    net_payout: j.reward_amount,
+    status: j.status,
+    is_anonymous: j.is_anonymous,
+    insurance_applied: j.status === 'near_win',
+    insurance_payout: j.status === 'near_win' ? j.reward_amount : 0,
+    created_at: j.created_at,
+    bettor: j.bettor,
+    is_jackpot: true,
+    jackpot_name: j.jackpots?.name,
+  }))
+
+  const allSlips = [...(slips ?? []), ...jackpotPayouts].sort(
+    (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
 
+  const totalGross = allSlips.reduce(
+    (a: any, s: any) => a + (s.max_payout ?? 0),
+    0
+  )
+  const totalTax = allSlips.reduce(
+    (a: any, s: any) => a + (s.winning_tax ?? 0),
+    0
+  )
+  const totalNet = allSlips.reduce(
+    (a: any, s: any) => a + (s.net_payout ?? 0),
+    0
+  )
   return {
-    slips: slips ?? [],
+    slips: allSlips,
     totals: {
       grossWinTotal: totalGross,
       taxTotal: totalTax,
@@ -312,16 +402,55 @@ export async function getRecentSlipsCashier(
     .eq('placed_by', cashierId)
     .order('created_at', { ascending: false })
     .limit(50)
-
   if (
     statusFilter &&
     statusFilter !== 'all'
   ) {
     q = q.eq('status', statusFilter)
   }
-
   const { data } = await q
-  return data ?? []
+
+  // Jackpot slips
+  let jjq = supabase
+    .from('jackpot_slips')
+    .select(`
+      id,
+      slip_id,
+      stake,
+      reward_amount,
+      status,
+      is_anonymous,
+      created_at,
+      jackpots (name),
+      bettor:profiles!jackpot_slips_bettor_id_fkey (username)
+    `)
+    .eq('placed_by', cashierId)
+    .order('created_at', { ascending: false })
+    .limit(50)
+  if (statusFilter && statusFilter !== 'all') {
+    jjq = jjq.eq('status', statusFilter)
+  }
+  const { data: jackpotData } = await jjq
+
+  const jackpotMapped = (jackpotData ?? []).map((j: any) => ({
+    id: j.id,
+    slip_id: j.slip_id,
+    stake: j.stake,
+    total_odds: null,
+    net_payout: j.reward_amount,
+    status: j.status,
+    is_anonymous: j.is_anonymous,
+    created_at: j.created_at,
+    bettor: j.bettor,
+    is_jackpot: true,
+    jackpot_name: j.jackpots?.name,
+  }))
+
+  const combined = [...(data ?? []), ...jackpotMapped]
+    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 50)
+
+  return combined
 }
 
 // ─── REQUEST CREDITS ──────────────────
