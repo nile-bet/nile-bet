@@ -80,23 +80,41 @@ export async function getPlatformStats(
 
   const { data: slips } = await slipsQuery
 
+  // Jackpot slips (merged into combined totals)
+  let jpQuery = supabase
+    .from('jackpot_slips')
+    .select('stake, reward_amount, status')
+
+  if (startDate) jpQuery = jpQuery.gte('created_at', startDate)
+  if (endDate) jpQuery = jpQuery.lte('created_at', endDate)
+
+  const { data: jackpotSlips } = await jpQuery
+
+  const jpWonTax = (jackpotSlips ?? [])
+    .filter((s) => s.status === 'won' || s.status === 'near_win')
+    .reduce((a, s) => a + (s.reward_amount ?? 0) * 0.15, 0)
+
+  const jpPendingPayout = (jackpotSlips ?? [])
+    .filter((s) => s.status === 'pending')
+    .reduce((a, s) => a + (s.stake ?? 0), 0)
+
   const totalRevenue = (slips ?? [])
     .filter((s) => s.status === 'won')
     .reduce(
       (a, s) => a + (s.winning_tax ?? 0), 0
-    )
+    ) + jpWonTax
 
   const pendingPayouts = (slips ?? [])
     .filter((s) => s.status === 'pending')
     .reduce(
       (a, s) => a + (s.net_payout ?? 0), 0
-    )
+    ) + jpPendingPayout
 
   const taxCollected = (slips ?? [])
     .filter((s) => s.status === 'won')
     .reduce(
       (a, s) => a + (s.winning_tax ?? 0), 0
-    )
+    ) + jpWonTax
 
   // User counts
   const { count: activeBettors } =
@@ -129,7 +147,7 @@ export async function getPlatformStats(
   return {
     totalRevenue,
     activeBettors: activeBettors ?? 0,
-    totalSlipsToday: slips?.length ?? 0,
+    totalSlipsToday: (slips?.length ?? 0) + (jackpotSlips?.length ?? 0),
     pendingPayouts,
     totalCashiers: totalCashiers ?? 0,
     totalAgents: totalAgents ?? 0,
@@ -152,6 +170,11 @@ export async function getRevenueByDay(
     .select('stake, net_payout, winning_tax, status, created_at')
     .gte('created_at', start.toISOString())
     .in('status', ['won', 'lost', 'pending', 'near_win'])
+
+  const { data: jackpotSlips } = await supabase
+    .from('jackpot_slips')
+    .select('stake, reward_amount, status, created_at')
+    .gte('created_at', start.toISOString())
 
   const grouped: Record<string, {
     date: string
@@ -179,6 +202,17 @@ export async function getRevenueByDay(
     }
   })
 
+  ;(jackpotSlips ?? []).forEach((slip) => {
+    const date = slip.created_at.split('T')[0]
+    if (!grouped[date]) {
+      grouped[date] = { date, revenue: 0, payouts: 0, profit: 0 }
+    }
+    grouped[date].revenue += slip.stake ?? 0
+    if (slip.status === 'won' || slip.status === 'near_win') {
+      grouped[date].payouts += (slip.reward_amount ?? 0) * 0.85
+    }
+  })
+
   Object.values(grouped).forEach((d) => {
     d.profit = d.revenue - d.payouts
   })
@@ -197,6 +231,10 @@ export async function getSlipStatusCounts() {
     .from('slips')
     .select('status')
 
+  const { data: jackpotData } = await supabase
+    .from('jackpot_slips')
+    .select('status')
+
   const counts = {
     pending: 0,
     won: 0,
@@ -206,6 +244,12 @@ export async function getSlipStatusCounts() {
   }
 
   ;(data ?? []).forEach((s) => {
+    if (s.status in counts) {
+      counts[s.status as keyof typeof counts]++
+    }
+  })
+
+  ;(jackpotData ?? []).forEach((s) => {
     if (s.status in counts) {
       counts[s.status as keyof typeof counts]++
     }

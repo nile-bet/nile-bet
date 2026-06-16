@@ -327,6 +327,17 @@ export async function getAgentProfitReport(filters?: DateFilters) {
   const { data } = await query
   const slips = data ?? []
 
+  let jpQuery = supabase
+    .from('jackpot_slips')
+    .select('stake, reward_amount, status, placed_by, created_at')
+    .in('placed_by', cashierIds)
+    .order('created_at', { ascending: false })
+    .limit(5000)
+  if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
+  if (filters?.endDate) jpQuery = jpQuery.lte('created_at', filters.endDate)
+  const { data: jpData } = await jpQuery
+  const jackpotSlips = jpData ?? []
+
   // Step 4: Group by agent
   const map: Record<string, any> = {}
   for (const slip of slips) {
@@ -340,6 +351,21 @@ export async function getAgentProfitReport(filters?: DateFilters) {
     if (slip.status === 'won') {
       map[agentId].totalPaidOut += slip.net_payout ?? 0
       map[agentId].taxCollected += slip.winning_tax ?? 0
+    }
+  }
+
+  for (const slip of jackpotSlips) {
+    const agentId = cashierToAgent[slip.placed_by ?? '']
+    if (!agentId) continue
+    const username = agentMap[agentId] ?? 'unknown'
+    if (!map[agentId]) {
+      map[agentId] = { username, totalCollected: 0, totalPaidOut: 0, grossProfit: 0, taxCollected: 0, agentShare: 0, cashierShare: 0 }
+    }
+    map[agentId].totalCollected += slip.stake ?? 0
+    if (slip.status === 'won' || slip.status === 'near_win') {
+      const tax = (slip.reward_amount ?? 0) * 0.15
+      map[agentId].totalPaidOut += (slip.reward_amount ?? 0) - tax
+      map[agentId].taxCollected += tax
     }
   }
 
@@ -366,6 +392,16 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
   const { data } = await query
   const slips = data ?? []
 
+  let jpQuery = supabase
+    .from('jackpot_slips')
+    .select('bettor_id, placed_by, stake, reward_amount, status, created_at, profiles!jackpot_slips_bettor_id_fkey(username)')
+    .order('created_at', { ascending: false })
+    .limit(1000)
+  if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
+  if (filters?.endDate) jpQuery = jpQuery.lte('created_at', filters.endDate)
+  const { data: jpData } = await jpQuery
+  const jackpotSlips = jpData ?? []
+
   if (role === 'cashiers') {
     // Group by placed_by (cashier username)
     const map: Record<string, any> = {}
@@ -378,6 +414,17 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       map[key].totalStaked += slip.stake ?? 0
       if (slip.status === 'won') {
         map[key].totalPaid += slip.net_payout ?? 0
+      }
+    }
+    for (const slip of jackpotSlips) {
+      const key = slip.placed_by ?? 'unknown'
+      if (!map[key]) {
+        map[key] = { username: key, slipCount: 0, totalStaked: 0, totalPaid: 0, netProfit: 0 }
+      }
+      map[key].slipCount += 1
+      map[key].totalStaked += slip.stake ?? 0
+      if (slip.status === 'won' || slip.status === 'near_win') {
+        map[key].totalPaid += (slip.reward_amount ?? 0) * 0.85
       }
     }
     return Object.values(map)
@@ -395,6 +442,16 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       map[username].slipCount += 1
       map[username].totalStaked += slip.stake ?? 0
       if (slip.status === 'won') map[username].wonBets += 1
+      if (slip.status === 'lost') map[username].lostBets += 1
+    }
+    for (const slip of jackpotSlips) {
+      const username = (slip.profiles as any)?.username ?? slip.bettor_id ?? 'unknown'
+      if (!map[username]) {
+        map[username] = { username, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, winRate: 0 }
+      }
+      map[username].slipCount += 1
+      map[username].totalStaked += slip.stake ?? 0
+      if (slip.status === 'won' || slip.status === 'near_win') map[username].wonBets += 1
       if (slip.status === 'lost') map[username].lostBets += 1
     }
     return Object.values(map)
@@ -419,19 +476,31 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
   const { data } = await query
   const slips = data ?? []
 
+  let jpQuery = supabase
+    .from('jackpot_slips')
+    .select('stake, reward_amount, status, created_at')
+    .order('created_at', { ascending: false })
+    .limit(2000)
+  if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
+  if (filters?.endDate) jpQuery = jpQuery.lte('created_at', filters.endDate)
+  const { data: jpData } = await jpQuery
+  const jackpotSlips = jpData ?? []
+
+  const periodOf = (createdAt: string) => {
+    const d = new Date(createdAt)
+    if (granularity === 'weekly') {
+      const week = Math.ceil(d.getDate() / 7)
+      return `${d.getFullYear()}-W${String(d.getMonth() + 1).padStart(2,'0')}-${week}`
+    } else if (granularity === 'monthly') {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    }
+    return createdAt.slice(0, 10)
+  }
+
   // Group by period
   const map: Record<string, any> = {}
   for (const slip of slips) {
-    const d = new Date(slip.created_at)
-    let period: string
-    if (granularity === 'weekly') {
-      const week = Math.ceil(d.getDate() / 7)
-      period = `${d.getFullYear()}-W${String(d.getMonth() + 1).padStart(2,'0')}-${week}`
-    } else if (granularity === 'monthly') {
-      period = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    } else {
-      period = slip.created_at.slice(0, 10)
-    }
+    const period = periodOf(slip.created_at)
     if (!map[period]) {
       map[period] = { period, slipCount: 0, totalStaked: 0, totalPaidOut: 0, grossProfit: 0, taxCollected: 0 }
     }
@@ -440,6 +509,20 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
     if (slip.status === 'won') {
       map[period].totalPaidOut += slip.net_payout ?? 0
       map[period].taxCollected += slip.winning_tax ?? 0
+    }
+  }
+
+  for (const slip of jackpotSlips) {
+    const period = periodOf(slip.created_at)
+    if (!map[period]) {
+      map[period] = { period, slipCount: 0, totalStaked: 0, totalPaidOut: 0, grossProfit: 0, taxCollected: 0 }
+    }
+    map[period].slipCount += 1
+    map[period].totalStaked += slip.stake ?? 0
+    if (slip.status === 'won' || slip.status === 'near_win') {
+      const tax = (slip.reward_amount ?? 0) * 0.15
+      map[period].totalPaidOut += (slip.reward_amount ?? 0) - tax
+      map[period].taxCollected += tax
     }
   }
 
@@ -462,6 +545,17 @@ export async function getTaxReport(filters?: DateFilters) {
   const { data } = await query
   const slips = data ?? []
 
+  let jpQuery = supabase
+    .from('jackpot_slips')
+    .select('reward_amount, status, created_at')
+    .in('status', ['won', 'near_win'])
+    .order('created_at', { ascending: false })
+    .limit(2000)
+  if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
+  if (filters?.endDate) jpQuery = jpQuery.lte('created_at', filters.endDate)
+  const { data: jpData } = await jpQuery
+  const jackpotSlips = jpData ?? []
+
   // Group by date
   const map: Record<string, any> = {}
   for (const slip of slips) {
@@ -473,6 +567,19 @@ export async function getTaxReport(filters?: DateFilters) {
     map[date].grossPayout += (slip.net_payout ?? 0) + (slip.winning_tax ?? 0)
     map[date].taxAmount += slip.winning_tax ?? 0
     map[date].netPaidOut += slip.net_payout ?? 0
+  }
+
+  for (const slip of jackpotSlips) {
+    const date = slip.created_at.slice(0, 10)
+    if (!map[date]) {
+      map[date] = { date, winningSlips: 0, grossPayout: 0, taxAmount: 0, netPaidOut: 0 }
+    }
+    const gross = slip.reward_amount ?? 0
+    const tax = gross * 0.15
+    map[date].winningSlips += 1
+    map[date].grossPayout += gross
+    map[date].taxAmount += tax
+    map[date].netPaidOut += gross - tax
   }
 
   return Object.values(map).sort((a: any, b: any) => a.date.localeCompare(b.date))
@@ -503,4 +610,59 @@ export async function getCouponHistoryByUser(
 
   const { data, count } = await q
   return { coupons: data ?? [], total: count ?? 0 }
+}
+
+// ─── JACKPOT PROFIT REPORT ────────────
+export async function getJackpotProfitReport(filters?: DateFilters) {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('jackpot_slips')
+    .select('slip_id, stake, reward_amount, status, jackpot_id, created_at, jackpots(name)')
+    .order('created_at', { ascending: false })
+    .limit(2000)
+  if (filters?.startDate) query = query.gte('created_at', filters.startDate)
+  if (filters?.endDate) query = query.lte('created_at', filters.endDate)
+  const { data } = await query
+  const slips = data ?? []
+
+  const map: Record<string, any> = {}
+  for (const slip of slips) {
+    const date = slip.created_at.slice(0, 10)
+    if (!map[date]) {
+      map[date] = {
+        date,
+        totalSlips: 0,
+        totalCollected: 0,
+        won: 0,
+        nearWin: 0,
+        lost: 0,
+        pending: 0,
+        grossPayout: 0,
+        taxCollected: 0,
+        netPaidOut: 0,
+        grossProfit: 0,
+      }
+    }
+    map[date].totalSlips += 1
+    map[date].totalCollected += slip.stake ?? 0
+
+    if (slip.status === 'won') map[date].won += 1
+    else if (slip.status === 'near_win') map[date].nearWin += 1
+    else if (slip.status === 'lost') map[date].lost += 1
+    else if (slip.status === 'pending') map[date].pending += 1
+
+    if (slip.status === 'won' || slip.status === 'near_win') {
+      const gross = slip.reward_amount ?? 0
+      const tax = gross * 0.15
+      map[date].grossPayout += gross
+      map[date].taxCollected += tax
+      map[date].netPaidOut += gross - tax
+    }
+  }
+
+  return Object.values(map).map((r: any) => {
+    r.grossProfit = r.totalCollected - r.netPaidOut - r.taxCollected
+    return r
+  }).sort((a: any, b: any) => a.date.localeCompare(b.date))
 }

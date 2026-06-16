@@ -7,6 +7,7 @@ import {
   getTopUsersReport,
   getPlatformProfitReport,
   getTaxReport,
+  getJackpotProfitReport,
 } from '@/lib/actions/adminFinance'
 import { DataTable }
   from '@/components/shared/DataTable'
@@ -34,6 +35,7 @@ const REPORT_TABS = [
   { key: 'topusers', label: 'Top Users' },
   { key: 'platform', label: 'Platform P&L' },
   { key: 'tax', label: 'Tax Collection' },
+  { key: 'jackpot', label: '🏆 Jackpot' },
 ]
 
 const DATE_PRESETS = [
@@ -107,6 +109,8 @@ export default function ReportsPage() {
     useState<any[]>([])
   const [taxData, setTaxData] =
     useState<any[]>([])
+  const [jackpotData, setJackpotData] =
+    useState<any[]>([])
   const [granularity, setGranularity] =
     useState<'daily' | 'weekly' | 'monthly'>(
       'daily'
@@ -151,6 +155,10 @@ export default function ReportsPage() {
       const data =
         await getTaxReport(filters)
       setTaxData(data)
+    } else if (activeTab === 'jackpot') {
+      const data =
+        await getJackpotProfitReport(filters)
+      setJackpotData(data)
     }
     setLoading(false)
   }
@@ -225,6 +233,18 @@ export default function ReportsPage() {
       0
     ),
   }
+  const jackpotTotal = {
+    totalSlips: jackpotData.reduce((a, r) => a + r.totalSlips, 0),
+    collected: jackpotData.reduce((a, r) => a + r.totalCollected, 0),
+    won: jackpotData.reduce((a, r) => a + r.won, 0),
+    nearWin: jackpotData.reduce((a, r) => a + r.nearWin, 0),
+    lost: jackpotData.reduce((a, r) => a + r.lost, 0),
+    pending: jackpotData.reduce((a, r) => a + r.pending, 0),
+    grossPayout: jackpotData.reduce((a, r) => a + r.grossPayout, 0),
+    taxCollected: jackpotData.reduce((a, r) => a + r.taxCollected, 0),
+    netPaidOut: jackpotData.reduce((a, r) => a + r.netPaidOut, 0),
+    grossProfit: jackpotData.reduce((a, r) => a + r.grossProfit, 0),
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -264,6 +284,8 @@ export default function ReportsPage() {
                 ? platformData
                 : activeTab === 'tax'
                 ? taxData
+                : activeTab === 'jackpot'
+                ? jackpotData
                 : topCashiers,
               `${activeTab}-report`
             )
@@ -902,6 +924,127 @@ export default function ReportsPage() {
                 ]}
                 data={taxData}
                 emptyMessage="No tax data"
+              />
+            </div>
+          )}
+
+          {/* ── JACKPOT REPORT ── */}
+          {activeTab === 'jackpot' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatsCard
+                  title="Total Slips"
+                  value={jackpotTotal.totalSlips}
+                />
+                <StatsCard
+                  title="Total Collected"
+                  value={formatETB(jackpotTotal.collected)}
+                  variant="gold"
+                />
+                <StatsCard
+                  title="Gross Profit"
+                  value={formatETB(jackpotTotal.grossProfit)}
+                  variant="success"
+                />
+                <StatsCard
+                  title="Tax Collected"
+                  value={formatETB(jackpotTotal.taxCollected)}
+                  variant="gold"
+                />
+                <StatsCard
+                  title="Won"
+                  value={jackpotTotal.won}
+                  variant="success"
+                />
+                <StatsCard
+                  title="Insured (Near Win)"
+                  value={jackpotTotal.nearWin}
+                />
+                <StatsCard
+                  title="Lost"
+                  value={jackpotTotal.lost}
+                />
+                <StatsCard
+                  title="Pending"
+                  value={jackpotTotal.pending}
+                />
+              </div>
+
+              {/* Chart */}
+              <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
+                <h3 className="text-white font-semibold mb-4">
+                  Jackpot Revenue vs Payout
+                </h3>
+                {jackpotData.length === 0 ? (
+                  <p className="text-white/30 text-center py-8">
+                    No jackpot data in this period
+                  </p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <ComposedChart data={jackpotData.slice(0, 30)}>
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fill: '#ffffff40', fontSize: 10 }}
+                        tickFormatter={(v) => v.slice(5)}
+                      />
+                      <YAxis tick={{ fill: '#ffffff40', fontSize: 10 }} />
+                      <Tooltip {...tooltipStyle} formatter={(v: any) => formatETB(v)} />
+                      <Bar dataKey="totalCollected" fill="#C9A84C" name="Collected" radius={[2, 2, 0, 0]} />
+                      <Bar dataKey="netPaidOut" fill="#E74C3C" name="Paid Out" radius={[2, 2, 0, 0]} />
+                      <Line dataKey="grossProfit" stroke="#2ECC71" strokeWidth={2} dot={false} name="Profit" />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+
+              <DataTable
+                columns={[
+                  {
+                    key: 'date',
+                    label: 'Date',
+                    render: (v: any) => (
+                      <span className="text-white/70 text-xs font-mono">{v}</span>
+                    ),
+                  },
+                  { key: 'totalSlips', label: 'Slips', sortable: true },
+                  {
+                    key: 'totalCollected',
+                    label: 'Collected',
+                    render: (v: any) => formatETB(v),
+                  },
+                  { key: 'won', label: 'Won' },
+                  { key: 'nearWin', label: 'Insured' },
+                  { key: 'lost', label: 'Lost' },
+                  { key: 'pending', label: 'Pending' },
+                  {
+                    key: 'taxCollected',
+                    label: 'Tax (15%)',
+                    render: (v: any) => (
+                      <span className="text-gold font-mono text-xs">{formatETB(v)}</span>
+                    ),
+                  },
+                  {
+                    key: 'netPaidOut',
+                    label: 'Net Paid Out',
+                    render: (v: any) => (
+                      <span className="text-nile-danger font-mono text-xs">{formatETB(v)}</span>
+                    ),
+                  },
+                  {
+                    key: 'grossProfit',
+                    label: 'Gross P/L',
+                    render: (v: any) => (
+                      <span className={cn(
+                        'font-mono text-xs',
+                        v >= 0 ? 'text-nile-success' : 'text-nile-danger'
+                      )}>
+                        {v >= 0 ? '+' : ''}{formatETB(v)}
+                      </span>
+                    ),
+                  },
+                ]}
+                data={jackpotData}
+                emptyMessage="No jackpot data"
               />
             </div>
           )}
