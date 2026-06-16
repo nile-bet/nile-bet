@@ -321,7 +321,7 @@ export default function AgentDashboard() {
           <>
             <DataTable
               columns={[
-                { key: 'slip_id', label: 'Slip ID', render: (v: any) => <span className="text-gold font-mono text-xs">#{v}</span> },
+                { key: 'slip_id', label: 'Slip ID', render: (v: any, row: any) => <span className="text-gold font-mono text-xs">{row?.is_jackpot && '🏆 '}#{v}</span> },
                 { key: 'cashier_username', label: 'Cashier', render: (v: any) => <span className="text-white/60 text-xs">@{v}</span> },
                 { key: 'bettor', label: 'Bettor', render: (v: any, row: any) => <span className="text-white/60 text-xs">{row.is_anonymous ? 'Anonymous' : `@${v?.username ?? '—'}`}</span> },
                 { key: 'stake', label: 'Stake', render: (v: any) => <span className="text-white/70 font-mono text-xs">{formatETB(v)}</span> },
