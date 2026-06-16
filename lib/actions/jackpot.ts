@@ -369,24 +369,3 @@ export async function getAllJackpotsPublic() {
 
   return data ?? []
 }
-// ─── Universal slip lookup (regular + jackpot) ───
-export async function lookupAnySlip(slipId: string): Promise
-  { type: 'regular'; data: any } |
-  { type: 'jackpot'; data: any } |
-  null
-> {
-  const id = slipId.trim().toUpperCase()
-  if (id.startsWith('JP')) {
-    const data = await getJackpotSlipById(id)
-    return data ? { type: 'jackpot', data } : null
-  } else {
-    const { createClient } = await import('@/lib/supabase/server')
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('slips')
-      .select(`*, slip_selections(*, matches(home_team,away_team,status,kick_off_time), match_markets(market_templates(name,market_categories(name))))`)
-      .eq('slip_id', id)
-      .single()
-    return data ? { type: 'regular', data } : null
-  }
-}
