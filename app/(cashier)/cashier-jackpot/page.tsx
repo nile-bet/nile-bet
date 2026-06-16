@@ -31,6 +31,7 @@ export default function CashierJackpotPage() {
   const [matches, setMatches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [placing, setPlacing] = useState(false)
+  const [forceClosed, setForceClosed] = useState(false)
   const [selections, setSelections] = useState<Record<number, Selection>>({})
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [bettorName, setBettorName] = useState('')
@@ -59,6 +60,20 @@ export default function CashierJackpotPage() {
     load()
   }, [])
 
+  // Auto-close when countdown expires
+  useEffect(() => {
+    if (!jackpot?.closes_at || jackpot?.status !== 'open') return
+    const interval = setInterval(async () => {
+      if (new Date() >= new Date(jackpot.closes_at)) {
+        setForceClosed(true)
+        clearInterval(interval)
+        const { autoCloseExpiredJackpot } = await import('@/lib/actions/jackpot')
+        await autoCloseExpiredJackpot(jackpot.id)
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [jackpot?.closes_at, jackpot?.status])
+
   const loadSlips = async () => {
     if (!jackpot) return
     setLoadingSlips(true)
@@ -77,7 +92,8 @@ export default function CashierJackpotPage() {
   const handleSelect = (gn: number, sel: Selection) => setSelections(prev => ({ ...prev, [gn]: sel }))
   const selectedCount = Object.keys(selections).length
   const allSelected = selectedCount === matches.length && matches.length > 0
-  const canPlace = allSelected && !placing && (isAnonymous || bettorName.trim().length > 0)
+  const isJackpotOpen = jackpot?.status === 'open' && !forceClosed && jackpot?.closes_at && new Date() < new Date(jackpot.closes_at)
+  const canPlace = allSelected && !placing && isJackpotOpen && (isAnonymous || bettorName.trim().length > 0)
 
   const handlePlace = async () => {
     if (!user || !jackpot || !allSelected) return

@@ -369,3 +369,23 @@ export async function getAllJackpotsPublic() {
 
   return data ?? []
 }
+// ─── Auto-close expired jackpots ─────
+export async function autoCloseExpiredJackpot(jackpotId: string) {
+  const adminClient = await createAdminClient()
+  const { data: jackpot } = await adminClient
+    .from('jackpots')
+    .select('id, status, closes_at')
+    .eq('id', jackpotId)
+    .single()
+
+  if (!jackpot) return { success: false }
+  if (jackpot.status !== 'open') return { success: false }
+  if (new Date() < new Date(jackpot.closes_at)) return { success: false }
+
+  const { error } = await adminClient
+    .from('jackpots')
+    .update({ status: 'closed', updated_at: new Date().toISOString() })
+    .eq('id', jackpotId)
+
+  return { success: !error }
+}

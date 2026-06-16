@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/lib/stores/authStore'
-import { placeJackpotBet, getMyJackpotSlips } from '@/lib/actions/jackpot'
+import { placeJackpotBet, getMyJackpotSlips, autoCloseExpiredJackpot } from '@/lib/actions/jackpot'
 import { formatETB, formatDate, formatCountdown } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -128,8 +128,30 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
     )
   }
 
-  const isOpen = jackpot.status === 'open'
-  const isClosed = jackpot.status === 'closed'
+  const [forceClosed, setForceClosed] = useState(false)
+
+  // Auto-close when countdown reaches zero
+  useEffect(() => {
+    if (!jackpot?.closes_at || jackpot.status !== 'open') return
+    const check = () => {
+      if (new Date() >= new Date(jackpot.closes_at)) {
+        setForceClosed(true)
+      }
+    }
+    check()
+    const interval = setInterval(async () => {
+      if (new Date() >= new Date(jackpot.closes_at)) {
+        setForceClosed(true)
+        clearInterval(interval)
+        // Auto-close in DB
+        await autoCloseExpiredJackpot(jackpot.id)
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [jackpot?.closes_at, jackpot?.status])
+
+  const isOpen = jackpot.status === 'open' && !forceClosed && new Date() < new Date(jackpot.closes_at)
+  const isClosed = jackpot.status === 'closed' || jackpot.status === 'open' && (forceClosed || new Date() >= new Date(jackpot.closes_at))
   const isSettled = jackpot.status === 'settled'
 
   return (
@@ -172,6 +194,7 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
               <p className="text-xs mt-0.5 flex items-center gap-1.5">
                 {isOpen && <><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" /><span className="text-green-400">Open for betting</span></>}
                 {isClosed && <><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" /><span className="text-amber-400">Betting closed</span></>}
+                {forceClosed && jackpot.status === 'open' && <span className="text-[10px] text-amber-400/60 ml-1">(closing...)</span>}
                 {isSettled && <><span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" /><span className="text-red-400">Settled</span></>}
                 <span className="text-white/30">• Closes {formatDate(jackpot.closes_at)}</span>
               </p>
