@@ -943,6 +943,13 @@ export async function getAgentReport(
     if (slip.status === 'won' || slip.status === 'near_win') c.totalPaid += slip.net_payout ?? 0
     if (slip.status === 'won') c.taxCollected += slip.winning_tax ?? 0
   }
+  for (const slip of allJackpotSlips) {
+    const c = cashierMap[(slip as any).placed_by]
+    if (!c) continue
+    c.slipCount += 1
+    c.totalCollected += (slip as any).stake ?? 0
+    if ((slip as any).status === 'won' || (slip as any).status === 'near_win') c.totalPaid += (slip as any).reward_amount ?? 0
+  }
   for (const c of Object.values(cashierMap) as any[]) {
     c.grossProfit = c.totalCollected - c.totalPaid - c.taxCollected
     c.agentShare = c.grossProfit * 0.6
