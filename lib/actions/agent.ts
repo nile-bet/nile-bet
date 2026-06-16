@@ -879,6 +879,7 @@ export async function getAgentReport(
 
   const cashierIds = (cashiers ?? []).map((c) => c.id)
   let allSlips: any[] = []
+  let allJackpotSlips: any[] = []
 
   if (cashierIds.length > 0) {
     let q = supabase
@@ -889,6 +890,15 @@ export async function getAgentReport(
     if (filters.endDate) q = q.lte('created_at', filters.endDate)
     const { data } = await q
     allSlips = data ?? []
+
+    let jq = supabase
+      .from('jackpot_slips')
+      .select('stake, reward_amount, status, created_at, placed_by')
+      .in('placed_by', cashierIds)
+    if (filters.startDate) jq = jq.gte('created_at', filters.startDate)
+    if (filters.endDate) jq = jq.lte('created_at', filters.endDate)
+    const { data: jData } = await jq
+    allJackpotSlips = jData ?? []
   }
 
   const totalCollected = allSlips.reduce((a, s) => a + (s.stake ?? 0), 0)
@@ -928,7 +938,7 @@ export async function getAgentReport(
   }
 
   return {
-    summary: { totalCollected, totalPaid, taxCollected, grossProfit, agentShare, slipCount: allSlips.length },
+    summary: { totalCollected, totalPaid, taxCollected, grossProfit, agentShare, slipCount: allSlips.length + allJackpotSlips.length },
     trendData: Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date)),
     cashierBreakdown: Object.values(cashierMap).sort((a: any, b: any) => b.grossProfit - a.grossProfit),
   }
@@ -1237,24 +1247,58 @@ export async function getAgentNetworkStats(
     all = data ?? []
   }
 
-  const totalSlips = all.length
-  const wonSlips = all.filter((s) => s.status === 'won').length
-  const lostSlips = all.filter((s) => s.status === 'lost').length
-  const pendingSlips = all.filter((s) => s.status === 'pending').length
-  const inProgressSlips = all.filter((s) => s.status === 'in_progress').length
-  const insuredSlips = all.filter((s) => s.status === 'near_win' || s.insurance_applied).length
+  // Fetch all jackpot slips via cashier IDs
+  let allJackpot: any[] = []
+  if (cashierIds.length > 0) {
+    let jq = supabase
+      .from('jackpot_slips')
+      .select('stake, reward_amount, status, placed_by, created_at')
+      .in('placed_by', cashierIds)
+    if (startDate) jq = jq.gte('created_at', startDate)
+    if (endDate) jq = jq.lte('created_at', endDate)
+    const { data } = await jq
+    allJackpot = data ?? []
+  }
 
-  const totalCollected = all.reduce((a, s) => a + (s.stake ?? 0), 0)
-  const totalPaidOut = all.filter((s) => s.status === 'won' || s.status === 'near_win')
+  const totalSlips = all.length + allJackpot.length
+  const wonSlips = all.filter((s) => s.status === 'won').length + allJackpot.filter((s) => s.status === 'won').length
+  const lostSlips = all.filter((s) => s.status === 'lost').length + allJackpot.filter((s) => s.status === 'lost').length
+  const pendingSlips = all.filter((s) => s.status === 'pending').length + allJackpot.filter((s) => s.status === 'pending').length
+  const inProgressSlips = all.filter((s) => s.status === 'in_progress').length
+  const insuredSlips = all.filter((s) => s.status === 'near_win' || s.insurance_applied).length + allJackpot.filter((s) => s.status === 'near_win').length
+
+  const totalCollectedSlips = all.reduce((a, s) => a + (s.stake ?? 0), 0)
+  const totalPaidOutSlips = all.filter((s) => s.status === 'won' || s.status === 'near_win')
     .reduce((a, s) => a + (s.net_payout ?? 0), 0)
   const taxCollected = all.filter((s) => s.status === 'won')
     .reduce((a, s) => a + (s.winning_tax ?? 0), 0)
-  const pendingLiability = all.filter((s) => s.status === 'pending')
+  const pendingLiabilitySlips = all.filter((s) => s.status === 'pending')
     .reduce((a, s) => a + (s.max_payout ?? s.net_payout ?? 0), 0)
+
+  // Jackpot financials
+  const jackpotCollected = allJackpot.reduce((a, s) => a + (s.stake ?? 0), 0)
+  const jackpotPaidOut = allJackpot.filter((s) => s.status === 'won' || s.status === 'near_win')
+    .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
+  const jackpotPendingLiability = allJackpot.filter((s) => s.status === 'pending')
+    .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
+
+  const totalCollected = totalCollectedSlips + jackpotCollected
+  const totalPaidOut = totalPaidOutSlips + jackpotPaidOut
+  const pendingLiability = pendingLiabilitySlips + jackpotPendingLiability
 
   const grossProfit = totalCollected - totalPaidOut - taxCollected
   const agentProfit = grossProfit * 0.6
   const cashierProfit = grossProfit * 0.4
+
+  // Jackpot status breakdown
+  const jackpotTotal = allJackpot.length
+  const jackpotWon = allJackpot.filter((s) => s.status === 'won').length
+  const jackpotPending = allJackpot.filter((s) => s.status === 'pending').length
+  const jackpotInsured = allJackpot.filter((s) => s.status === 'near_win').length
+  const jackpotLost = allJackpot.filter((s) => s.status === 'lost').length
+  const jackpotInProgress = 0
+  const jackpotWonTotal = allJackpot.filter((s) => s.status === 'won')
+    .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
 
   // Pending credit requests
   const { count: pendingRequests } = await supabase
@@ -1282,6 +1326,19 @@ export async function getAgentNetworkStats(
     grossProfit,
     agentProfit,
     cashierProfit,
+    // Jackpot status
+    jackpot: {
+      total: jackpotTotal,
+      won: jackpotWon,
+      pending: jackpotPending,
+      insured: jackpotInsured,
+      lost: jackpotLost,
+      inProgress: jackpotInProgress,
+      wonTotal: jackpotWonTotal,
+      collected: jackpotCollected,
+      paidOut: jackpotPaidOut,
+      pendingLiability: jackpotPendingLiability,
+    },
   }
 }
 

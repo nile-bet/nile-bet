@@ -27,6 +27,7 @@ export default function AgentDashboard() {
   const [stats, setStats] = useState<any>(null)
   const [report, setReport] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [jackpotExpanded, setJackpotExpanded] = useState(false)
   const [recentActivity, setRecentActivity] = useState<any[]>([])
 
   useEffect(() => { if (user) loadData() }, [user, dateFilter])
@@ -232,6 +233,63 @@ export default function AgentDashboard() {
           <StatsCard title="Total Cashiers" value={`${stats.activeCashiers} / ${stats.totalCashiers}`} subtitle="Active / Total" icon={Users} />
           <StatsCard title="Pending Credits" value={stats.pendingRequests ?? 0} subtitle="Awaiting approval" icon={Clock} variant={(stats.pendingRequests ?? 0) > 0 ? 'warning' : 'default'} />
           <StatsCard title="Tax Collected" value={formatETB(stats.taxCollected ?? 0)} subtitle="From winning slips" icon={DollarSign} variant="gold" />
+        </div>
+      )}
+
+      {/* ── ROW 4b: Jackpot Status (collapsible) ── */}
+      {!loading && stats && (
+        <div className="bg-slate-dark border border-gold/20 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setJackpotExpanded(!jackpotExpanded)}
+            className="w-full flex items-center justify-between p-4 hover:bg-gold/5 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gold/10 rounded-lg text-lg">🏆</div>
+              <div className="text-left">
+                <p className="text-white font-semibold text-sm">Jackpot Status</p>
+                <p className="text-white/40 text-xs">
+                  {stats.jackpot?.total ?? 0} jackpot {(stats.jackpot?.total ?? 0) === 1 ? 'slip' : 'slips'} · {formatETB(stats.jackpot?.collected ?? 0)} collected
+                </p>
+              </div>
+            </div>
+            <span className="text-gold text-sm">{jackpotExpanded ? '▲ Hide' : '▼ Expand'}</span>
+          </button>
+          {jackpotExpanded && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 pt-0 border-t border-gold/10">
+              <div className="bg-charcoal/50 rounded-lg p-3 text-center">
+                <p className="text-white font-mono text-lg font-bold">{stats.jackpot?.total ?? 0}</p>
+                <p className="text-white/50 text-xs">Total</p>
+              </div>
+              <div className="bg-charcoal/50 rounded-lg p-3 text-center">
+                <p className="text-nile-success font-mono text-lg font-bold">{stats.jackpot?.won ?? 0}</p>
+                <p className="text-white/50 text-xs">Won</p>
+              </div>
+              <div className="bg-charcoal/50 rounded-lg p-3 text-center">
+                <p className="text-nile-orange font-mono text-lg font-bold">{stats.jackpot?.pending ?? 0}</p>
+                <p className="text-white/50 text-xs">Pending</p>
+              </div>
+              <div className="bg-charcoal/50 rounded-lg p-3 text-center">
+                <p className="text-gold font-mono text-lg font-bold">{stats.jackpot?.insured ?? 0}</p>
+                <p className="text-white/50 text-xs">Insured (Near Win)</p>
+              </div>
+              <div className="bg-charcoal/50 rounded-lg p-3 text-center">
+                <p className="text-nile-danger font-mono text-lg font-bold">{stats.jackpot?.lost ?? 0}</p>
+                <p className="text-white/50 text-xs">Lost</p>
+              </div>
+              <div className="bg-charcoal/50 rounded-lg p-3 text-center">
+                <p className="text-white/60 font-mono text-lg font-bold">{stats.jackpot?.inProgress ?? 0}</p>
+                <p className="text-white/50 text-xs">In Progress</p>
+              </div>
+              <div className="bg-charcoal/50 rounded-lg p-3 text-center">
+                <p className="text-nile-success font-mono text-lg font-bold">{formatETB(stats.jackpot?.wonTotal ?? 0)}</p>
+                <p className="text-white/50 text-xs">Won Total</p>
+              </div>
+              <div className="bg-charcoal/50 rounded-lg p-3 text-center">
+                <p className="text-nile-orange font-mono text-lg font-bold">{formatETB(stats.jackpot?.pendingLiability ?? 0)}</p>
+                <p className="text-white/50 text-xs">Pending Payout</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
