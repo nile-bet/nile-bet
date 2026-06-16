@@ -9,8 +9,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ThermalReceipt } from './ThermalReceipt'
-import { getSlipById } from '@/lib/actions/bets'
+import { getSlipById, rebetSlip } from '@/lib/actions/bets'
 import { getJackpotSlipById } from '@/lib/actions/jackpot'
+import { rebetJackpotSlip } from '@/lib/actions/bets'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { formatETB } from '@/lib/utils/formatCurrency'
 import { Printer } from 'lucide-react'
 import { toast } from 'sonner'
@@ -29,6 +31,9 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
   const [loading, setLoading] = useState(false)
   const [qrDataUrl, setQrDataUrl] = useState('')
   const [barcodeDataUrl, setBarcodeDataUrl] = useState('')
+  const [rebetting, setRebetting] = useState(false)
+  const [newSlipId, setNewSlipId] = useState<string | null>(null)
+  const { user } = useAuthStore()
 
   useEffect(() => {
     if (!isOpen || !slipId) return
@@ -36,6 +41,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
     setSlip(null)
     setQrDataUrl('')
     setBarcodeDataUrl('')
+    setNewSlipId(null)
 
     const fetch = isJackpot
       ? getJackpotSlipById(slipId)
@@ -127,7 +133,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Printer className="w-5 h-5 text-gold" />
-            Re-print Receipt — #{slipId}
+            {newSlipId ? `New Slip #${newSlipId} (from #${slipId})` : `Re-print Receipt — #${slipId}`}
           </DialogTitle>
         </DialogHeader>
 
@@ -141,16 +147,54 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
 
         {!loading && slip && (
           <>
-            {/* Print button */}
-            <div className="flex gap-2 mb-4">
+            {/* Rebet + Print buttons */}
+            <div className="flex gap-2 mb-3">
               <button
-                onClick={handlePrint}
-                className="flex-1 flex items-center justify-center gap-2 bg-gold text-charcoal py-2.5 rounded-lg text-sm font-semibold hover:bg-gold-light"
+                onClick={async () => {
+                  if (!user || rebetting) return
+                  setRebetting(true)
+                  try {
+                    let result
+                    if (isJackpot) {
+                      const { rebetJackpotSlip } = await import('@/lib/actions/bets')
+                      result = await rebetJackpotSlip(slipId, user.id, user.id, slip.is_anonymous ?? false)
+                    } else {
+                      result = await rebetSlip(slipId, user.id, slip.bettor_id ?? user.id, slip.stake, slip.is_anonymous ?? false)
+                    }
+                    if (result.success && result.newSlipId) {
+                      setNewSlipId(result.newSlipId)
+                      toast.success(`New slip #${result.newSlipId} placed!`)
+                      setTimeout(() => handlePrint(), 800)
+                    } else {
+                      toast.error(result.error ?? 'Failed to rebet')
+                    }
+                  } catch (e: any) {
+                    toast.error(e.message ?? 'Error')
+                  }
+                  setRebetting(false)
+                }}
+                disabled={rebetting || !user}
+                className="flex-1 flex items-center justify-center gap-2 bg-gold text-charcoal py-2.5 rounded-lg text-sm font-semibold hover:bg-gold-light disabled:opacity-50"
               >
                 <Printer className="w-4 h-4" />
-                Print Receipt
+                {rebetting ? 'Placing...' : `🔄 Rebet & Print${newSlipId ? ` #${newSlipId}` : ''}`}
+              </button>
+              <button
+                onClick={handlePrint}
+                className="border border-nile-blue/30 text-white/60 px-4 py-2.5 rounded-lg text-sm hover:text-white hover:border-gold/30"
+                title="Print only (no new slip)"
+              >
+                <Printer className="w-4 h-4" />
               </button>
             </div>
+            {newSlipId && (
+              <div className="bg-nile-success/10 border border-nile-success/30 rounded-lg px-3 py-2 mb-3 text-center">
+                <p className="text-nile-success text-xs font-semibold">✅ New Slip #{newSlipId} — Balance deducted</p>
+              </div>
+            )}
+            <p className="text-white/25 text-[10px] text-center mb-3">
+              🔄 Rebet places a new slip with same selections and deducts balance · 🖨️ Print only reprints original
+            </p>
 
             {/* Slip summary */}
             <div className="bg-charcoal/50 rounded-xl p-4 mb-4 text-center">

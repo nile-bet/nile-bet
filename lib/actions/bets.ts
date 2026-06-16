@@ -704,3 +704,136 @@ export async function saveAnonymousSlip(input: {
 
   return { success: true, slipCode }
 }
+
+// ─── Rebet: place a new slip identical to original, deduct balance ───
+export async function rebetSlip(
+  originalSlipId: string,
+  placedById: string,
+  bettorId: string,
+  stake: number,
+  isAnonymous: boolean
+): Promise<{ success: boolean; newSlipId?: string; error?: string }> {
+  const adminClient = await createAdminClient()
+
+  // 1. Get original slip selections
+  const { data: slip } = await adminClient
+    .from('slips')
+    .select(`slip_id, stake, is_anonymous, slip_selections(*, match_markets(id, match_market_odds(selection, odd_value)))`)
+    .eq('slip_id', originalSlipId)
+    .single()
+
+  if (!slip) return { success: false, error: 'Original slip not found' }
+
+  // 2. Check bettor balance
+  const { data: bettor } = await adminClient
+    .from('profiles')
+    .select('credit_balance')
+    .eq('id', bettorId)
+    .single()
+
+  if (!bettor) return { success: false, error: 'Bettor not found' }
+  if ((bettor.credit_balance ?? 0) < stake) return { success: false, error: `Insufficient balance. Need ETB ${stake}` }
+
+  // 3. Build selections with current odds
+  const selections = (slip.slip_selections as any[]) ?? []
+  if (selections.length === 0) return { success: false, error: 'No selections found' }
+
+  const newSelections = selections.map((s: any) => {
+    const currentOdd = s.match_markets?.match_market_odds?.find((o: any) => o.selection === s.selection)?.odd_value ?? s.odd_at_placement
+    return { matchMarketId: s.match_market_id, selection: s.selection, oddAtPlacement: currentOdd }
+  })
+
+  // 4. Generate new slip ID
+  const newSlipId = Math.floor(10000000 + Math.random() * 90000000).toString()
+
+  // 5. Calculate total odds & max payout
+  const totalOdds = newSelections.reduce((acc: number, s: any) => acc * s.oddAtPlacement, 1)
+  const maxPayout = stake * totalOdds
+  const winningTax = maxPayout * 0.15
+  const netPayout = maxPayout - winningTax
+
+  // 6. Deduct balance
+  const { error: deductErr } = await adminClient
+    .from('profiles')
+    .update({ credit_balance: bettor.credit_balance - stake })
+    .eq('id', bettorId)
+  if (deductErr) return { success: false, error: 'Failed to deduct balance' }
+
+  // 7. Insert new slip
+  const { data: newSlip, error: slipErr } = await adminClient
+    .from('slips')
+    .insert({
+      slip_id: newSlipId,
+      bettor_id: bettorId,
+      placed_by: placedById,
+      stake,
+      total_odds: totalOdds,
+      max_payout: maxPayout,
+      winning_tax: winningTax,
+      net_payout: netPayout,
+      status: 'pending',
+      is_anonymous: isAnonymous,
+    })
+    .select('id')
+    .single()
+
+  if (slipErr || !newSlip) {
+    // refund
+    await adminClient.from('profiles').update({ credit_balance: bettor.credit_balance }).eq('id', bettorId)
+    return { success: false, error: 'Failed to create new slip' }
+  }
+
+  // 8. Insert selections
+  const { error: selErr } = await adminClient
+    .from('slip_selections')
+    .insert(newSelections.map((s: any) => ({
+      slip_id: newSlip.id,
+      match_market_id: s.matchMarketId,
+      selection: s.selection,
+      odd_at_placement: s.oddAtPlacement,
+    })))
+
+  if (selErr) {
+    await adminClient.from('profiles').update({ credit_balance: bettor.credit_balance }).eq('id', bettorId)
+    return { success: false, error: 'Failed to insert selections' }
+  }
+
+  // 9. Log
+  await adminClient.from('activity_logs').insert({
+    user_id: placedById,
+    action: 'slip_rebet',
+    details: { original_slip_id: originalSlipId, new_slip_id: newSlipId, stake },
+  })
+
+  return { success: true, newSlipId }
+}
+
+// ─── Rebet Jackpot: place new jackpot slip identical to original ───
+export async function rebetJackpotSlip(
+  originalSlipId: string,
+  placedById: string,
+  bettorId: string,
+  isAnonymous: boolean
+): Promise<{ success: boolean; newSlipId?: string; error?: string }> {
+  const { placeJackpotBet, getJackpotSlipById } = await import('@/lib/actions/jackpot')
+  const slip = await getJackpotSlipById(originalSlipId)
+  if (!slip) return { success: false, error: 'Original jackpot slip not found' }
+
+  const selections = ((slip as any).jackpot_slip_selections ?? []).map((s: any) => ({
+    gameNumber: s.game_number,
+    selection: s.selection as 'home' | 'draw' | 'away',
+    odd: s.jackpot_matches?.home_odd ?? 1,
+  }))
+
+  const result = await placeJackpotBet({
+    jackpotId: (slip as any).jackpot_id,
+    bettorId,
+    placedById,
+    isAnonymous,
+    selections,
+  })
+
+  return result.success
+    ? { success: true, newSlipId: result.slipId }
+    : { success: false, error: result.error }
+}
