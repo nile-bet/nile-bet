@@ -900,23 +900,34 @@ export async function getAgentReport(
     const { data: jData } = await jq
     allJackpotSlips = jData ?? []
   }
-
-  const totalCollected = allSlips.reduce((a, s) => a + (s.stake ?? 0), 0)
-  const totalPaid = allSlips
+  const totalCollectedSlips = allSlips.reduce((a, s) => a + (s.stake ?? 0), 0)
+  const totalPaidSlips = allSlips
     .filter((s) => s.status === 'won' || s.status === 'near_win')
     .reduce((a, s) => a + (s.net_payout ?? 0), 0)
   const taxCollected = allSlips
     .filter((s) => s.status === 'won')
     .reduce((a, s) => a + (s.winning_tax ?? 0), 0)
+  const jackpotCollectedR = allJackpotSlips.reduce((a: number, s: any) => a + (s.stake ?? 0), 0)
+  const jackpotPaidR = allJackpotSlips
+    .filter((s: any) => s.status === 'won' || s.status === 'near_win')
+    .reduce((a: number, s: any) => a + (s.reward_amount ?? 0), 0)
+  const totalCollected = totalCollectedSlips + jackpotCollectedR
+  const totalPaid = totalPaidSlips + jackpotPaidR
   const grossProfit = totalCollected - totalPaid - taxCollected
   const agentShare = grossProfit * 0.6
-
   const grouped: Record<string, any> = {}
   allSlips.forEach((slip) => {
     const date = slip.created_at.split('T')[0]
     if (!grouped[date]) grouped[date] = { date, collected: 0, paid: 0, profit: 0 }
     grouped[date].collected += slip.stake ?? 0
     if (slip.status === 'won' || slip.status === 'near_win') grouped[date].paid += slip.net_payout ?? 0
+    grouped[date].profit = grouped[date].collected - grouped[date].paid
+  })
+  allJackpotSlips.forEach((slip: any) => {
+    const date = slip.created_at.split('T')[0]
+    if (!grouped[date]) grouped[date] = { date, collected: 0, paid: 0, profit: 0 }
+    grouped[date].collected += slip.stake ?? 0
+    if (slip.status === 'won' || slip.status === 'near_win') grouped[date].paid += slip.reward_amount ?? 0
     grouped[date].profit = grouped[date].collected - grouped[date].paid
   })
 
