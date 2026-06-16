@@ -32,8 +32,8 @@ interface SidebarLayoutProps {
 }
 
 const SIDEBAR_THEMES: Record<string, string> = {
-  admin: "linear-gradient(180deg, #11163a 0%, #0c1030 60%, #07091f 100%)",
-  agent: "linear-gradient(180deg, #0c1f26 0%, #09171c 60%, #061013 100%)",
+  admin: "linear-gradient(180deg, #1C2155 0%, #252E6D 55%, #161a42 100%)",
+  agent: "linear-gradient(180deg, #252E6D 0%, #1C2155 55%, #2a1f4d 100%)",
 }
 
 function SidebarContent({
