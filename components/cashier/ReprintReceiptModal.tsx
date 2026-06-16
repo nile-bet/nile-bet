@@ -77,9 +77,11 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
   }, [isOpen, slipId, isJackpot])
 
   const handlePrint = usePrint(receiptRef, {
-    
-    documentTitle: `NILE-Reprint-${slipId}`,
-    onAfterPrint: () => toast.success('Receipt re-printed!'),
+    documentTitle: `NILE-${newSlipId ?? slipId}`,
+    onAfterPrint: () => {
+      toast.success('Receipt printed!')
+      setTimeout(() => onClose(), 400)
+    },
     onPrintError: () => {
       console.error("Print failed")
       toast.error('Print failed. Check printer connection.')
@@ -199,7 +201,10 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
             {/* Slip summary */}
             <div className="bg-charcoal/50 rounded-xl p-4 mb-4 text-center">
               <p className="text-white/50 text-xs mb-1">{isJackpot ? 'JACKPOT SLIP' : 'SLIP ID'}</p>
-              <p className="text-gold font-mono text-2xl font-bold tracking-widest">#{slipId}</p>
+              <p className="text-gold font-mono text-2xl font-bold tracking-widest">#{newSlipId ?? slipId}</p>
+              {newSlipId && (
+                <p className="text-white/30 text-[10px] mt-0.5">Original: #{slipId}</p>
+              )}
               {isJackpot && slip.jackpots?.name && (
                 <p className="text-white/50 text-xs mt-1">🏆 {slip.jackpots.name}</p>
               )}
@@ -220,7 +225,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
                 {/* ── NORMAL SLIP ── */}
                 {!isJackpot && normalSlipData && (
                   <div ref={receiptRef}>
-                    <ThermalReceipt {...normalSlipData} />
+                    <ThermalReceipt {...normalSlipData} slipId={newSlipId ?? normalSlipData.slipId} />
                     {/* Re-print stamp */}
                     <div style={{
                       fontFamily: "'Courier New', monospace",
@@ -267,7 +272,8 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
                     {/* Slip ID */}
                     <div style={{ textAlign: 'center', margin: '4px 0' }}>
                       <div style={{ fontSize: '10px' }}>SLIP ID</div>
-                      <div style={{ fontSize: '20px', fontWeight: 'bold', letterSpacing: '2px' }}>#{slipId}</div>
+                      <div style={{ fontSize: '20px', fontWeight: 'bold', letterSpacing: '2px' }}>#{newSlipId ?? slipId}</div>
+                      {newSlipId && <div style={{ fontSize: '8px', color: '#888' }}>Original: #{slipId}</div>}
                     </div>
 
                     {/* Barcode */}
