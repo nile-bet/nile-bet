@@ -12,8 +12,8 @@ import { SlipDetailCard }
   from '@/components/shared/SlipDetailCard'
 import { LoadingSpinner }
   from '@/components/shared/LoadingSpinner'
-import { getSlipById }
-  from '@/lib/actions/bets'
+import { getSlipById } from '@/lib/actions/bets'
+import { getJackpotSlipById } from '@/lib/actions/jackpot'
 import { cn } from '@/lib/utils'
 import { Clock, Trash2, Info } from 'lucide-react'
 import type { SlipWithSelections }
@@ -50,21 +50,24 @@ export default function CheckSlipPage() {
     setHistory([])
   }
 
+  const [jackpotSlip, setJackpotSlip] = useState<any>(null)
+
   const handleCheck = async () => {
     if (!slipId.trim()) return
+    const id = slipId.trim().toUpperCase()
     setLoading(true)
     setNotFound(false)
     setSlip(null)
+    setJackpotSlip(null)
 
-    const data = await getSlipById(
-      slipId.trim().toUpperCase()
-    )
-
-    if (data) {
-      setSlip(data)
-      addToHistory(slipId.trim().toUpperCase())
+    if (id.startsWith('JP')) {
+      const data = await getJackpotSlipById(id)
+      if (data) { setJackpotSlip(data); addToHistory(id) }
+      else setNotFound(true)
     } else {
-      setNotFound(true)
+      const data = await getSlipById(id)
+      if (data) { setSlip(data); addToHistory(id) }
+      else setNotFound(true)
     }
     setLoading(false)
   }
@@ -105,7 +108,7 @@ export default function CheckSlipPage() {
                   e.key === 'Enter' &&
                   handleCheck()
                 }
-                placeholder="e.g. 48392017 or JP48392017"
+                placeholder="e.g. 48392017 or JP85391421"
                 maxLength={10}
                 className="flex-1 bg-charcoal border border-gold/20 rounded-lg px-4 py-3 text-white font-mono text-center placeholder:text-white/25 placeholder:font-sans focus:outline-none focus:border-gold/50"
               />
@@ -156,6 +159,79 @@ export default function CheckSlipPage() {
               showShareOptions
             />
           )}
+
+              {jackpotSlip && !loading && (
+                <div className="bg-slate-dark border border-gold/30 rounded-xl overflow-hidden">
+                  {/* Header */}
+                  <div className="bg-gold/10 border-b border-gold/20 px-5 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🏆</span>
+                      <div>
+                        <p className="text-gold font-bold font-mono">#{jackpotSlip.slip_id}</p>
+                        <p className="text-white/40 text-xs">{jackpotSlip.jackpots?.name}</p>
+                      </div>
+                    </div>
+                    <span className={`text-xs px-2.5 py-1 rounded-full border font-semibold ${
+                      jackpotSlip.status === 'won' ? 'text-yellow-400 border-yellow-400/30 bg-yellow-400/10' :
+                      jackpotSlip.status === 'near_win' ? 'text-green-400 border-green-400/30 bg-green-400/10' :
+                      jackpotSlip.status === 'lost' ? 'text-red-400 border-red-400/30 bg-red-400/10' :
+                      'text-white/50 border-white/20 bg-white/5'
+                    }`}>{jackpotSlip.status?.toUpperCase()}</span>
+                  </div>
+                  {/* Info */}
+                  <div className="px-5 py-3 grid grid-cols-2 gap-3 border-b border-nile-blue/20 text-sm">
+                    <div>
+                      <p className="text-white/40 text-xs">Bettor</p>
+                      <p className="text-white font-medium">{jackpotSlip.is_anonymous ? '🔒 Anonymous' : `@${(jackpotSlip.bettor as any)?.username ?? '—'}`}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/40 text-xs">Entry Fee</p>
+                      <p className="text-gold font-mono font-bold">{jackpotSlip.stake ? `ETB ${Number(jackpotSlip.stake).toLocaleString()}` : '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/40 text-xs">Score</p>
+                      <p className="text-white font-mono">{jackpotSlip.correct_count !== null ? `${jackpotSlip.correct_count}/12` : 'Pending'}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/40 text-xs">Prize (net after 15% tax)</p>
+                      <p className={`font-mono font-bold ${(jackpotSlip.reward_amount ?? 0) > 0 ? 'text-green-400' : 'text-white/30'}`}>
+                        {(jackpotSlip.reward_amount ?? 0) > 0 ? `+ETB ${(jackpotSlip.reward_amount * 0.85).toLocaleString()}` : '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-white/40 text-xs">Placed At</p>
+                      <p className="text-white/60 text-xs">{new Date(jackpotSlip.created_at).toLocaleString('en-ET')}</p>
+                    </div>
+                  </div>
+                  {/* Picks */}
+                  <div className="px-5 py-3">
+                    <p className="text-white/50 text-xs uppercase tracking-widest mb-2 font-bold">Picks ({(jackpotSlip.jackpot_slip_selections ?? []).length}/12)</p>
+                    <div className="space-y-1">
+                      {(jackpotSlip.jackpot_slip_selections ?? [])
+                        .sort((a: any, b: any) => a.game_number - b.game_number)
+                        .map((sel: any) => {
+                          const match = sel.jackpot_matches
+                          const settled = match?.result && match.result !== 'pending'
+                          const correct = settled ? sel.selection === match.result : sel.result === 'correct'
+                          const wrong = settled ? sel.selection !== match.result : sel.result === 'wrong'
+                          const pick = sel.selection === 'home' ? '1' : sel.selection === 'away' ? '2' : 'X'
+                          return (
+                            <div key={sel.id} className="flex items-center justify-between px-3 py-1.5 rounded-lg text-xs border"
+                              style={{ background: correct ? 'rgba(74,222,128,0.06)' : wrong ? 'rgba(239,68,68,0.06)' : 'rgba(255,255,255,0.02)', borderColor: correct ? 'rgba(74,222,128,0.2)' : wrong ? 'rgba(239,68,68,0.2)' : 'rgba(37,46,109,0.4)' }}>
+                              <span className="text-white/40">
+                                <span className="font-mono text-gold/50 mr-2">G{sel.game_number}</span>
+                                {match?.home_team ?? '—'} v {match?.away_team ?? '—'}
+                              </span>
+                              <span className={`font-black px-2 py-0.5 rounded text-sm ${correct ? 'text-green-400 bg-green-400/15' : wrong ? 'text-red-400 bg-red-400/15' : 'text-gold bg-gold/15'}`}>
+                                {pick}{correct ? ' ✓' : wrong ? ' ✗' : ''}
+                              </span>
+                            </div>
+                          )
+                        })}
+                    </div>
+                  </div>
+                </div>
+              )}
 
           {/* Recent History */}
           {history.length > 0 && (
