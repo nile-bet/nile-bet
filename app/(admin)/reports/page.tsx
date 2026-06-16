@@ -163,6 +163,20 @@ export default function ReportsPage() {
     setLoading(false)
   }
 
+
+
+  const remapForExport = (
+    data: any[],
+    keyMap: Record<string, string>
+  ) =>
+    data.map((row) => {
+      const out: Record<string, any> = {}
+      for (const [key, label] of Object.entries(keyMap)) {
+        out[label] = row[key]
+      }
+      return out
+    })
+
   const exportExcel = (
     data: any[],
     filename: string
@@ -275,25 +289,68 @@ export default function ReportsPage() {
       {/* Date filter */}
       <div className="flex items-center gap-3 flex-wrap">
         <DateRangeFilter value={dateFilter} onChange={setDateFilter} />
-        <button
-          onClick={() =>
-            exportExcel(
-              activeTab === 'agent'
-                ? agentData
-                : activeTab === 'platform'
-                ? platformData
-                : activeTab === 'tax'
-                ? taxData
-                : activeTab === 'jackpot'
-                ? jackpotData
-                : topCashiers,
-              `${activeTab}-report`
-            )
-          }
-          className="ml-auto border border-gold/30 text-gold px-4 py-1.5 rounded-lg text-xs hover:bg-gold/10"
-        >
-          📊 Export Excel
-        </button>
+        {activeTab === 'topusers' ? (
+          <div className="ml-auto flex gap-2">
+            <button
+              onClick={() =>
+                exportExcel(
+                  remapForExport(topCashiers, {
+                    username: 'Cashier',
+                    slipCount: 'Total Slips',
+                    jackpotSlipCount: 'JP Slips',
+                    totalStaked: 'Collected',
+                    totalPaid: 'Paid Out',
+                    netProfit: 'Net Profit',
+                  }),
+                  'top-cashiers-report'
+                )
+              }
+              className="border border-gold/30 text-gold px-4 py-1.5 rounded-lg text-xs hover:bg-gold/10"
+            >
+              📊 Export Cashiers
+            </button>
+            <button
+              onClick={() =>
+                exportExcel(
+                  remapForExport(topBettors, {
+                    username: 'Bettor',
+                    slipCount: 'Total Bets',
+                    wonBets: 'Total Won',
+                    lostBets: 'Total Lost',
+                    jackpotWon: 'JP Won',
+                    jackpotLost: 'JP Lost',
+                    totalStaked: 'Staked',
+                    winRate: 'Win Rate',
+                  }),
+                  'top-bettors-report'
+                )
+              }
+              className="border border-gold/30 text-gold px-4 py-1.5 rounded-lg text-xs hover:bg-gold/10"
+            >
+              📊 Export Bettors
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() =>
+              exportExcel(
+                activeTab === 'agent'
+                  ? agentData
+                  : activeTab === 'platform'
+                  ? platformData
+                  : activeTab === 'tax'
+                  ? taxData
+                  : activeTab === 'jackpot'
+                  ? jackpotData
+                  : topCashiers,
+                `${activeTab}-report`
+              )
+            }
+            className="ml-auto border border-gold/30 text-gold px-4 py-1.5 rounded-lg text-xs hover:bg-gold/10"
+          >
+            📊 Export Excel
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -487,8 +544,18 @@ export default function ReportsPage() {
                     },
                     {
                       key: 'slipCount',
-                      label: 'Slips',
+                      label: 'Total Slips',
                       sortable: true,
+                    },
+                    {
+                      key: 'jackpotSlipCount',
+                      label: 'JP Slips',
+                      sortable: true,
+                      render: (v: any) => (
+                        <span className="text-gold/70 font-mono text-xs">
+                          {v}
+                        </span>
+                      ),
                     },
                     {
                       key: 'totalStaked',
@@ -548,12 +615,12 @@ export default function ReportsPage() {
                     },
                     {
                       key: 'slipCount',
-                      label: 'Bets',
+                      label: 'Total Bets',
                       sortable: true,
                     },
                     {
                       key: 'wonBets',
-                      label: 'Won',
+                      label: 'Total Won',
                       render: (v: any) => (
                         <span className="text-nile-success text-xs">
                           {v}
@@ -562,9 +629,27 @@ export default function ReportsPage() {
                     },
                     {
                       key: 'lostBets',
-                      label: 'Lost',
+                      label: 'Total Lost',
                       render: (v: any) => (
                         <span className="text-nile-danger text-xs">
+                          {v}
+                        </span>
+                      ),
+                    },
+                    {
+                      key: 'jackpotWon',
+                      label: 'JP Won',
+                      render: (v: any) => (
+                        <span className="text-gold/80 text-xs">
+                          {v}
+                        </span>
+                      ),
+                    },
+                    {
+                      key: 'jackpotLost',
+                      label: 'JP Lost',
+                      render: (v: any) => (
+                        <span className="text-white/40 text-xs">
                           {v}
                         </span>
                       ),

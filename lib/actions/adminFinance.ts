@@ -426,7 +426,7 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       const key = slip.placed_by ?? 'unknown'
       const username = usernameMap[key] ?? key
       if (!map[key]) {
-        map[key] = { username, slipCount: 0, totalStaked: 0, totalPaid: 0, netProfit: 0 }
+        map[key] = { username, slipCount: 0, jackpotSlipCount: 0, totalStaked: 0, totalPaid: 0, netProfit: 0 }
       }
       map[key].slipCount += 1
       map[key].totalStaked += slip.stake ?? 0
@@ -438,9 +438,10 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       const key = slip.placed_by ?? 'unknown'
       const username = usernameMap[key] ?? key
       if (!map[key]) {
-        map[key] = { username, slipCount: 0, totalStaked: 0, totalPaid: 0, netProfit: 0 }
+        map[key] = { username, slipCount: 0, jackpotSlipCount: 0, totalStaked: 0, totalPaid: 0, netProfit: 0 }
       }
       map[key].slipCount += 1
+      map[key].jackpotSlipCount += 1
       map[key].totalStaked += slip.stake ?? 0
       if (slip.status === 'won' || slip.status === 'near_win') {
         map[key].totalPaid += (slip.reward_amount ?? 0) * 0.85
@@ -456,7 +457,7 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
     for (const slip of slips) {
       const username = (slip.profiles as any)?.username ?? slip.bettor_id ?? 'unknown'
       if (!map[username]) {
-        map[username] = { username, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, winRate: 0 }
+        map[username] = { username, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, jackpotWon: 0, jackpotLost: 0, winRate: 0 }
       }
       map[username].slipCount += 1
       map[username].totalStaked += slip.stake ?? 0
@@ -466,12 +467,18 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
     for (const slip of jackpotSlips) {
       const username = (slip.profiles as any)?.username ?? slip.bettor_id ?? 'unknown'
       if (!map[username]) {
-        map[username] = { username, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, winRate: 0 }
+        map[username] = { username, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, jackpotWon: 0, jackpotLost: 0, winRate: 0 }
       }
       map[username].slipCount += 1
       map[username].totalStaked += slip.stake ?? 0
-      if (slip.status === 'won' || slip.status === 'near_win') map[username].wonBets += 1
-      if (slip.status === 'lost') map[username].lostBets += 1
+      if (slip.status === 'won' || slip.status === 'near_win') {
+        map[username].wonBets += 1
+        map[username].jackpotWon += 1
+      }
+      if (slip.status === 'lost') {
+        map[username].lostBets += 1
+        map[username].jackpotLost += 1
+      }
     }
     return Object.values(map)
       .map((r) => ({
