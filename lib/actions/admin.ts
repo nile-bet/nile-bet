@@ -993,3 +993,45 @@ export async function changeUserPassword(
 
   return { success: true }
 }
+
+// ─── JACKPOT DASHBOARD STATS ─────────
+export async function getJackpotDashboardStats(
+  dateFilter: DateFilterInput = 'daily'
+) {
+  const supabase = await createClient()
+  const { startDate, endDate } = resolveDateRange(dateFilter)
+
+  let slipsQuery = supabase
+    .from('jackpot_slips')
+    .select('status, created_at')
+
+  if (startDate) slipsQuery = slipsQuery.gte('created_at', startDate)
+  if (endDate) slipsQuery = slipsQuery.lte('created_at', endDate)
+
+  const { data: slips } = await slipsQuery
+
+  const counts = {
+    total: slips?.length ?? 0,
+    won: 0,
+    pending: 0,
+    insured: 0,
+    lost: 0,
+  }
+
+  ;(slips ?? []).forEach((s) => {
+    if (s.status === 'won') counts.won++
+    else if (s.status === 'pending') counts.pending++
+    else if (s.status === 'near_win') counts.insured++
+    else if (s.status === 'lost') counts.lost++
+  })
+
+  const { count: inProgress } = await supabase
+    .from('jackpots')
+    .select('*', { count: 'exact', head: true })
+    .in('status', ['open', 'closed'])
+
+  return {
+    ...counts,
+    inProgress: inProgress ?? 0,
+  }
+}

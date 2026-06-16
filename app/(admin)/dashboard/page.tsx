@@ -9,6 +9,7 @@ import {
   getRevenueByDay,
   getSlipStatusCounts,
   getAgentPerformance,
+  getJackpotDashboardStats,
 } from '@/lib/actions/admin'
 import { StatsCard }
   from '@/components/shared/StatsCard'
@@ -66,6 +67,10 @@ export default function AdminDashboard() {
     useState<any[]>([])
   const [liveLogs, setLiveLogs] =
     useState<any[]>([])
+  const [jackpotStats, setJackpotStats] =
+    useState<any>(null)
+  const [jackpotExpanded, setJackpotExpanded] =
+    useState(false)
   const [loading, setLoading] =
     useState(true)
 
@@ -116,12 +121,16 @@ export default function AdminDashboard() {
       revenue,
       slipCounts,
       agentData,
+      jackpotStatsData,
     ] = await Promise.all([
       getPlatformStats(dateFilter),
       getRevenueByDay(30),
       getSlipStatusCounts(),
       getAgentPerformance(dateFilter),
+      getJackpotDashboardStats(dateFilter),
     ])
+
+    setJackpotStats(jackpotStatsData)
 
     setStats(statsData)
     setRevenueData(revenue)
@@ -279,6 +288,77 @@ export default function AdminDashboard() {
           />
         </div>
       )}
+
+      {/* Jackpot Status Card */}
+      <div className="bg-slate-dark border border-gold/20 rounded-xl overflow-hidden">
+        <button
+          onClick={() => setJackpotExpanded(!jackpotExpanded)}
+          className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Gift className="w-4 h-4 text-gold" />
+            <h3 className="font-semibold text-white">Jackpot Status</h3>
+            {jackpotStats && (
+              <span className="text-white/40 text-xs font-mono ml-2">
+                {jackpotStats.total} slips
+              </span>
+            )}
+          </div>
+          <span className={cn(
+            'text-white/40 transition-transform text-sm',
+            jackpotExpanded && 'rotate-180'
+          )}>
+            ▼
+          </span>
+        </button>
+
+        {jackpotExpanded && (
+          <div className="px-5 pb-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {loading || !jackpotStats ? (
+              [...Array(6)].map((_, i) => <SkeletonStatCard key={i} />)
+            ) : (
+              <>
+                <StatsCard
+                  title="Total"
+                  value={jackpotStats.total}
+                  icon={Ticket}
+                  variant="default"
+                />
+                <StatsCard
+                  title="Won"
+                  value={jackpotStats.won}
+                  icon={TrendingUp}
+                  variant="gold"
+                />
+                <StatsCard
+                  title="Pending"
+                  value={jackpotStats.pending}
+                  icon={Clock}
+                  variant="default"
+                />
+                <StatsCard
+                  title="Insured"
+                  value={jackpotStats.insured}
+                  icon={Gift}
+                  variant="default"
+                />
+                <StatsCard
+                  title="Lost"
+                  value={jackpotStats.lost}
+                  icon={Ticket}
+                  variant="default"
+                />
+                <StatsCard
+                  title="In Progress"
+                  value={jackpotStats.inProgress}
+                  icon={Clock}
+                  variant="gold"
+                />
+              </>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
