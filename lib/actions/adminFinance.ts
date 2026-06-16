@@ -403,12 +403,30 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
   const jackpotSlips = jpData ?? []
 
   if (role === 'cashiers') {
+    // Resolve placed_by ids -> usernames
+    const placedByIds = Array.from(new Set([
+      ...slips.map((s) => s.placed_by).filter(Boolean),
+      ...jackpotSlips.map((s) => s.placed_by).filter(Boolean),
+    ])) as string[]
+
+    const usernameMap: Record<string, string> = {}
+    if (placedByIds.length > 0) {
+      const { data: placerProfiles } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', placedByIds)
+      ;(placerProfiles ?? []).forEach((p: any) => {
+        usernameMap[p.id] = p.username
+      })
+    }
+
     // Group by placed_by (cashier username)
     const map: Record<string, any> = {}
     for (const slip of slips) {
       const key = slip.placed_by ?? 'unknown'
+      const username = usernameMap[key] ?? key
       if (!map[key]) {
-        map[key] = { username: key, slipCount: 0, totalStaked: 0, totalPaid: 0, netProfit: 0 }
+        map[key] = { username, slipCount: 0, totalStaked: 0, totalPaid: 0, netProfit: 0 }
       }
       map[key].slipCount += 1
       map[key].totalStaked += slip.stake ?? 0
@@ -418,8 +436,9 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
     }
     for (const slip of jackpotSlips) {
       const key = slip.placed_by ?? 'unknown'
+      const username = usernameMap[key] ?? key
       if (!map[key]) {
-        map[key] = { username: key, slipCount: 0, totalStaked: 0, totalPaid: 0, netProfit: 0 }
+        map[key] = { username, slipCount: 0, totalStaked: 0, totalPaid: 0, netProfit: 0 }
       }
       map[key].slipCount += 1
       map[key].totalStaked += slip.stake ?? 0
