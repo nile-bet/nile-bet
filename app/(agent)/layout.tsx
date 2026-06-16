@@ -98,7 +98,7 @@ export default function AgentLayout({
     <>
       <AgentInitializer />
       <OfflineBanner />
-      <SidebarLayout navItems={agentNav}>
+      <SidebarLayout navItems={agentNav} theme="agent">
         {children}
       </SidebarLayout>
     </>

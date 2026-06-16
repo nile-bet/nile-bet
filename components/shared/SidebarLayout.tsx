@@ -28,20 +28,28 @@ interface SidebarLayoutProps {
   children: React.ReactNode
   showRedeemSlip?: boolean
   onRedeemSlip?: () => void
+  theme?: 'admin' | 'agent'
+}
+
+const SIDEBAR_THEMES: Record<string, string> = {
+  admin: "linear-gradient(180deg, #11163a 0%, #0c1030 60%, #07091f 100%)",
+  agent: "linear-gradient(180deg, #0c1f26 0%, #09171c 60%, #061013 100%)",
 }
 
 function SidebarContent({
   navItems,
   onClose,
+  theme = 'admin',
 }: {
   navItems: NavItem[]
   onClose?: () => void
+  theme?: 'admin' | 'agent'
 }) {
   const pathname = usePathname()
   const { user, role } = useAuthStore()
 
   return (
-    <div className="flex flex-col h-full" style={{background: "linear-gradient(180deg, #0f1729 0%, #0a1020 60%, #080d1a 100%)"}}>
+    <div className="flex flex-col h-full" style={{background: SIDEBAR_THEMES[theme]}}>
       {/* Logo */}
       <div className="p-4 border-b border-gold/20" style={{background: "linear-gradient(90deg, rgba(212,175,55,0.08) 0%, transparent 100%)"}}>
         <Logo size="sm" showTagline />
@@ -116,6 +124,7 @@ export function SidebarLayout({
   children,
   showRedeemSlip = false,
   onRedeemSlip,
+  theme = 'admin',
 }: SidebarLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -128,6 +137,7 @@ export function SidebarLayout({
         <div className="w-full">
           <SidebarContent
             navItems={navItems}
+            theme={theme}
           />
         </div>
       </div>
@@ -161,6 +171,7 @@ export function SidebarLayout({
                 onClose={() =>
                   setMobileOpen(false)
                 }
+                theme={theme}
               />
             </SheetContent>
           </Sheet>

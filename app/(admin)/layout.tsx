@@ -107,7 +107,7 @@ export default function AdminLayout({
     <>
       <AdminInitializer />
       <OfflineBanner />
-      <SidebarLayout navItems={adminNav}>
+      <SidebarLayout navItems={adminNav} theme="admin">
         {children}
       </SidebarLayout>
     </>
