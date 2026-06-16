@@ -98,11 +98,9 @@ export async function getPlatformStats(
     .filter((s) => s.status === 'pending')
     .reduce((a, s) => a + (s.stake ?? 0), 0)
 
-  const totalRevenue = (slips ?? [])
-    .filter((s) => s.status === 'won')
-    .reduce(
-      (a, s) => a + (s.winning_tax ?? 0), 0
-    ) + jpWonTax
+  const totalRevenue =
+    (slips ?? []).reduce((a, s) => a + (s.stake ?? 0), 0) +
+    (jackpotSlips ?? []).reduce((a, s) => a + (s.stake ?? 0), 0)
 
   const pendingPayouts = (slips ?? [])
     .filter((s) => s.status === 'pending')
