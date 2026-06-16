@@ -220,7 +220,6 @@ export default function AdminDashboard() {
             value={formatETB(
               stats?.totalRevenue ?? 0
             )}
-            subtitle="Tax collected"
             icon={DollarSign}
             variant="gold"
           />
