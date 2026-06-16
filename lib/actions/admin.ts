@@ -7,28 +7,60 @@ import { createAdminClient }
 
 // ─── STATS ───────────────────────────
 
-export async function getPlatformStats(
-  dateFilter: string = 'daily'
-) {
-  const supabase = await createClient()
+type DateFilterInput =
+  | string
+  | {
+      type: 'daily' | 'weekly' | 'monthly' | 'lifetime' | 'custom'
+      startDate?: string
+      endDate?: string
+    }
 
-  let startDate: string | null = null
+function resolveDateRange(dateFilter: DateFilterInput): {
+  startDate: string | null
+  endDate: string | null
+} {
   const now = new Date()
+  const filter: {
+    type: 'daily' | 'weekly' | 'monthly' | 'lifetime' | 'custom'
+    startDate?: string
+    endDate?: string
+  } =
+    typeof dateFilter === 'string'
+      ? { type: dateFilter as 'daily' | 'weekly' | 'monthly' | 'lifetime' | 'custom' }
+      : dateFilter
 
-  if (dateFilter === 'daily') {
+  if (filter.type === 'daily') {
     const d = new Date(now)
     d.setHours(0, 0, 0, 0)
-    startDate = d.toISOString()
-  } else if (dateFilter === 'weekly') {
+    return { startDate: d.toISOString(), endDate: now.toISOString() }
+  }
+  if (filter.type === 'weekly') {
     const d = new Date(now)
     d.setDate(d.getDate() - 7)
-    startDate = d.toISOString()
-  } else if (dateFilter === 'monthly') {
+    return { startDate: d.toISOString(), endDate: now.toISOString() }
+  }
+  if (filter.type === 'monthly') {
     const d = new Date(now)
     d.setDate(1)
     d.setHours(0, 0, 0, 0)
-    startDate = d.toISOString()
+    return { startDate: d.toISOString(), endDate: now.toISOString() }
   }
+  if (filter.type === 'custom') {
+    return {
+      startDate: filter.startDate ?? null,
+      endDate: filter.endDate ?? null,
+    }
+  }
+  // lifetime
+  return { startDate: null, endDate: null }
+}
+
+export async function getPlatformStats(
+  dateFilter: DateFilterInput = 'daily'
+) {
+  const supabase = await createClient()
+
+  const { startDate, endDate } = resolveDateRange(dateFilter)
 
   // Slips query
   let slipsQuery = supabase
@@ -38,6 +70,11 @@ export async function getPlatformStats(
   if (startDate) {
     slipsQuery = slipsQuery.gte(
       'created_at', startDate
+    )
+  }
+  if (endDate) {
+    slipsQuery = slipsQuery.lte(
+      'created_at', endDate
     )
   }
 
@@ -178,9 +215,11 @@ export async function getSlipStatusCounts() {
 }
 
 export async function getAgentPerformance(
-  dateFilter: string = 'daily'
+  dateFilter: DateFilterInput = 'daily'
 ) {
   const supabase = await createClient()
+
+  const { startDate, endDate } = resolveDateRange(dateFilter)
 
   const { data: agents } = await supabase
     .from('profiles')
@@ -202,11 +241,25 @@ export async function getAgentPerformance(
           .eq('created_by', agent.id)
           .eq('role', 'cashier')
 
-      const { data: agentSlips } =
-        await supabase
-          .from('slips')
-          .select('stake, net_payout, status')
-          .eq('placed_by', agent.id)
+      // Agent's own cashiers' slips (agent revenue flows through cashier network)
+      const { data: cashiers } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('created_by', agent.id)
+        .eq('role', 'cashier')
+
+      const cashierIds = (cashiers ?? []).map((c) => c.id)
+      const placerIds = [agent.id, ...cashierIds]
+
+      let slipsQuery = supabase
+        .from('slips')
+        .select('stake, net_payout, status, created_at')
+        .in('placed_by', placerIds)
+
+      if (startDate) slipsQuery = slipsQuery.gte('created_at', startDate)
+      if (endDate) slipsQuery = slipsQuery.lte('created_at', endDate)
+
+      const { data: agentSlips } = await slipsQuery
 
       const revenue = (agentSlips ?? [])
         .reduce(

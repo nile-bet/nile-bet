@@ -43,47 +43,40 @@ const DATE_PRESETS = [
 ]
 
 function getDateRange(preset: string): {
-  startDate: string
-  endDate: string
+  startDate?: string
+  endDate?: string
 } {
   const now = new Date()
-  if (preset === 'month') {
-    const start = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      1
-    )
+  if (preset === 'daily') {
+    const start = new Date(now)
+    start.setHours(0, 0, 0, 0)
     return {
       startDate: start.toISOString(),
       endDate: now.toISOString(),
     }
   }
-  if (preset === 'lastmonth') {
-    const start = new Date(
-      now.getFullYear(),
-      now.getMonth() - 1,
-      1
-    )
-    const end = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      0
-    )
+  if (preset === 'weekly') {
+    const start = new Date(now)
+    start.setDate(start.getDate() - 7)
     return {
       startDate: start.toISOString(),
-      endDate: end.toISOString(),
+      endDate: now.toISOString(),
     }
   }
-  // year
-  const start = new Date(
-    now.getFullYear(),
-    0,
-    1
-  )
-  return {
-    startDate: start.toISOString(),
-    endDate: now.toISOString(),
+  if (preset === 'monthly') {
+    const start = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1
+    )
+    start.setHours(0, 0, 0, 0)
+    return {
+      startDate: start.toISOString(),
+      endDate: now.toISOString(),
+    }
   }
+  // lifetime — no bounds
+  return { startDate: undefined, endDate: undefined }
 }
 
 const tooltipStyle = {

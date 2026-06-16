@@ -117,10 +117,10 @@ export default function AdminDashboard() {
       slipCounts,
       agentData,
     ] = await Promise.all([
-      getPlatformStats(dateFilter as any),
+      getPlatformStats(dateFilter),
       getRevenueByDay(30),
       getSlipStatusCounts(),
-      getAgentPerformance(dateFilter as any),
+      getAgentPerformance(dateFilter),
     ])
 
     setStats(statsData)
