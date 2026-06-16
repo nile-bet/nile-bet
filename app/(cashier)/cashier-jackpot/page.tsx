@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { placeJackpotBet, getJackpotSlipById } from '@/lib/actions/jackpot'
-import { Trophy, Loader2, Lock, Unlock, User, CheckCircle, XCircle, ChevronDown, ChevronUp, Search, X, Printer, Clock, Star } from 'lucide-react'
+import { Trophy, Loader2, User, CheckCircle, XCircle, ChevronDown, ChevronUp, Search, X, Printer, Clock, Star } from 'lucide-react'
 import { ThermalReceipt } from '@/components/cashier/ThermalReceipt'
 import { FlagImage } from '@/components/shared/FlagImage'
 import { usePrint } from '@/lib/hooks/usePrint'
@@ -33,7 +33,6 @@ export default function CashierJackpotPage() {
   const [placing, setPlacing] = useState(false)
   const [forceClosed, setForceClosed] = useState(false)
   const [selections, setSelections] = useState<Record<number, Selection>>({})
-  const [isAnonymous, setIsAnonymous] = useState(false)
   const [bettorName, setBettorName] = useState('')
   const [activeTab, setActiveTab] = useState<Tab>('pick')
   const [slipSearchId, setSlipSearchId] = useState('')
@@ -93,13 +92,13 @@ export default function CashierJackpotPage() {
   const selectedCount = Object.keys(selections).length
   const allSelected = selectedCount === matches.length && matches.length > 0
   const isJackpotOpen = jackpot?.status === 'open' && !forceClosed && jackpot?.closes_at && new Date() < new Date(jackpot.closes_at)
-  const canPlace = allSelected && !placing && isJackpotOpen && (isAnonymous || bettorName.trim().length > 0)
+  const canPlace = allSelected && !placing && isJackpotOpen && bettorName.trim().length > 0
 
   const handlePlace = async () => {
     if (!user || !jackpot || !allSelected) return
     setPlacing(true)
     const result = await placeJackpotBet({
-      jackpotId: jackpot.id, bettorId: user.id, placedById: user.id, isAnonymous,
+      jackpotId: jackpot.id, bettorId: user.id, placedById: user.id, isAnonymous: false,
       selections: matches.map(m => ({ gameNumber: m.game_number, selection: selections[m.game_number], odd: selections[m.game_number] === 'home' ? m.home_odd : selections[m.game_number] === 'draw' ? m.draw_odd : m.away_odd })),
     })
     if (result.success && result.slipId) {
@@ -109,7 +108,7 @@ export default function CashierJackpotPage() {
         const slip = await getJackpotSlipById(result.slipId!)
         if (slip) { setPlacedSlip({ ...slip, _bettorName: savedBettorName }); setShowPrintModal(true) }
       }, 1800)
-      setSelections({}); setBettorName(''); setIsAnonymous(false)
+      setSelections({}); setBettorName('')
     } else { toast.error(result.error ?? 'Failed') }
     setPlacing(false)
   }
@@ -416,21 +415,13 @@ export default function CashierJackpotPage() {
             {/* Place For */}
             <div className="px-2 py-2 border-t space-y-1.5" style={{ borderColor: BLUE + '0.4)', background: 'rgba(0,0,0,0.15)' }}>
               <p className="text-[9px] text-white/25 uppercase tracking-widest font-bold">Place For</p>
-              <button onClick={() => { setIsAnonymous(!isAnonymous); setBettorName('') }}
-                className="flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-lg border w-full transition-all"
-                style={isAnonymous ? { borderColor: 'rgba(251,191,36,0.35)', color: '#fbbf24', background: 'rgba(251,191,36,0.07)' } : { borderColor: BLUE + '0.6)', color: 'rgba(255,255,255,0.35)' }}>
-                {isAnonymous ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
-                {isAnonymous ? 'Anonymous' : 'Named bettor'}
-              </button>
-              {!isAnonymous && (
-                <div className="relative">
-                  <User className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3" style={{ color: GOLD + '0.4)' }} />
-                  <input type="text" value={bettorName} onChange={e => setBettorName(e.target.value)}
-                    placeholder="Bettor name"
-                    className="w-full rounded-lg pl-7 pr-2.5 py-1.5 text-white text-[10px] focus:outline-none placeholder:text-white/15"
-                    style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${GOLD}0.2)` }} />
-                </div>
-              )}
+              <div className="relative">
+                <User className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3" style={{ color: GOLD + '0.4)' }} />
+                <input type="text" value={bettorName} onChange={e => setBettorName(e.target.value)}
+                  placeholder="Bettor name"
+                  className="w-full rounded-lg pl-7 pr-2.5 py-1.5 text-white text-[10px] focus:outline-none placeholder:text-white/15"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${GOLD}0.2)` }} />
+              </div>
             </div>
 
             {/* Summary + Place */}
@@ -462,7 +453,7 @@ export default function CashierJackpotPage() {
                   : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.15)', cursor: 'not-allowed' }}>
                 {placing ? <span className="flex items-center justify-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" />Placing...</span>
                   : !allSelected ? `Pick ${matches.length - selectedCount} more`
-                  : !isAnonymous && !bettorName.trim() ? 'Enter name'
+                  : !bettorName.trim() ? 'Enter name'
                   : `🏆 Place — ${formatETB(jackpot.fixed_stake)}`}
               </button>
             </div>

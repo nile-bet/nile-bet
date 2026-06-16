@@ -29,11 +29,13 @@ import {
 interface PlaceBetModalProps {
   isOpen: boolean
   onClose: () => void
+  forceNamed?: boolean
 }
 
 export function PlaceBetModal({
   isOpen,
   onClose,
+  forceNamed = false,
 }: PlaceBetModalProps) {
   const {
     selections,
@@ -49,7 +51,7 @@ export function PlaceBetModal({
   const { user, settings } = useAuthStore()
 
   const [isAnonymous, setIsAnonymous] =
-    useState(false)
+    useState(forceNamed ? false : false)
   const [placing, setPlacing] =
     useState(false)
 
@@ -105,13 +107,15 @@ export function PlaceBetModal({
       stake: stakeNum,
       bettorId: user.id,
       placedById: user.id,
-      isAnonymous,
+      isAnonymous: forceNamed ? false : isAnonymous,
     })
 
     if (result.success && result.slipId) {
       toast.success(
         `Bet placed! Slip #${result.slipId}`
       )
+
+      const effectiveAnonymous = forceNamed ? false : isAnonymous
 
       // Build receipt data
       setReceiptData({
@@ -122,8 +126,8 @@ export function PlaceBetModal({
         netPayout,
         winningTax,
         insuranceApplied,
-        isAnonymous,
-        bettorUsername: isAnonymous
+        isAnonymous: effectiveAnonymous,
+        bettorUsername: effectiveAnonymous
           ? undefined
           : user.username,
         cashierUsername:
@@ -333,27 +337,29 @@ export function PlaceBetModal({
                 </div>
               )}
 
-              {/* Anonymous toggle */}
-              <button
-                onClick={() =>
-                  setIsAnonymous(!isAnonymous)
-                }
-                className={cn(
-                  'flex items-center gap-2 text-xs px-3 py-2 rounded-lg border w-full',
-                  isAnonymous
-                    ? 'border-nile-orange/40 text-nile-orange bg-nile-orange/10'
-                    : 'border-nile-blue/30 text-white/50 hover:text-white'
-                )}
-              >
-                {isAnonymous ? (
-                  <Lock className="w-3 h-3" />
-                ) : (
-                  <Unlock className="w-3 h-3" />
-                )}
-                {isAnonymous
-                  ? 'Placing anonymously'
-                  : 'Place anonymously'}
-              </button>
+              {/* Anonymous toggle (hidden for cashier-forced named bets) */}
+              {!forceNamed && (
+                <button
+                  onClick={() =>
+                    setIsAnonymous(!isAnonymous)
+                  }
+                  className={cn(
+                    'flex items-center gap-2 text-xs px-3 py-2 rounded-lg border w-full',
+                    isAnonymous
+                      ? 'border-nile-orange/40 text-nile-orange bg-nile-orange/10'
+                      : 'border-nile-blue/30 text-white/50 hover:text-white'
+                  )}
+                >
+                  {isAnonymous ? (
+                    <Lock className="w-3 h-3" />
+                  ) : (
+                    <Unlock className="w-3 h-3" />
+                  )}
+                  {isAnonymous
+                    ? 'Placing anonymously'
+                    : 'Place anonymously'}
+                </button>
+              )}
 
               {/* Place button */}
               <button

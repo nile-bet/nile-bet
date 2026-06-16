@@ -48,6 +48,7 @@ export function CashierPlaceBetClient({
       <PlaceBetModal
         isOpen={showPlaceBet}
         onClose={() => setShowPlaceBet(false)}
+        forceNamed
       />
     </div>
   )
