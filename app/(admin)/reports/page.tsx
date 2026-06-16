@@ -504,6 +504,30 @@ export default function ReportsPage() {
                           : rank === 2
                           ? '🥈'
                           : '🥉'
+                      const stageStyle =
+                        rank === 1
+                          ? {
+                              background: 'linear-gradient(180deg, rgba(255,215,0,0.35) 0%, rgba(201,168,76,0.15) 100%)',
+                              borderColor: 'rgba(255,215,0,0.5)',
+                              boxShadow: '0 0 24px rgba(255,215,0,0.25)',
+                            }
+                          : rank === 2
+                          ? {
+                              background: 'linear-gradient(180deg, rgba(192,192,192,0.30) 0%, rgba(148,163,184,0.12) 100%)',
+                              borderColor: 'rgba(203,213,225,0.5)',
+                              boxShadow: '0 0 18px rgba(203,213,225,0.18)',
+                            }
+                          : {
+                              background: 'linear-gradient(180deg, rgba(205,127,50,0.32) 0%, rgba(180,83,9,0.12) 100%)',
+                              borderColor: 'rgba(217,119,6,0.5)',
+                              boxShadow: '0 0 18px rgba(217,119,6,0.18)',
+                            }
+                      const numberColor =
+                        rank === 1
+                          ? '#FFD700'
+                          : rank === 2
+                          ? '#CBD5E1'
+                          : '#D97706'
                       return (
                         <div
                           key={idx}
@@ -522,10 +546,22 @@ export default function ReportsPage() {
                           </p>
                           <div
                             className={cn(
-                              'mt-2 rounded-t-lg bg-nile-blue/40 border border-nile-blue/30 w-24',
+                              'mt-2 rounded-t-lg border w-24 flex items-start justify-center pt-2',
                               height
                             )}
-                          />
+                            style={stageStyle}
+                          >
+                            <span
+                              className="font-black"
+                              style={{
+                                fontSize: rank === 1 ? '2.25rem' : '1.75rem',
+                                color: numberColor,
+                                textShadow: '0 2px 6px rgba(0,0,0,0.4)',
+                              }}
+                            >
+                              {rank}
+                            </span>
+                          </div>
                         </div>
                       )
                     })}
