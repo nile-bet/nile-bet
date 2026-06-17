@@ -116,9 +116,11 @@ export function CouponRedeemPanel({ onClose }: Props) {
   }
 
   const payoutAmount = slipData?.slip_id?.startsWith('JP') ? slipData?.reward_amount : slipData?.net_payout
+  // Redeeming a winning slip credits the redeemer's balance, so there's no
+  // "insufficient balance" condition for slip redemption — only for coupon topups.
   const isInsufficient = mode === 'coupon'
     ? lookedUp?.type === 'topup' && (user?.credit_balance ?? 0) < (lookedUp?.amount ?? 0)
-    : ['won','near_win'].includes(slipData?.status) && (user?.credit_balance ?? 0) < (payoutAmount ?? 0)
+    : false
 
   const slipStatusColor: Record<string, string> = {
     won: 'text-nile-success',
@@ -312,30 +314,23 @@ export function CouponRedeemPanel({ onClose }: Props) {
                   </div>
                   <div>
                     <p className="text-nile-success font-bold text-sm">Winning Slip!</p>
-                    <p className="text-white/60 text-xs">Pay bettor {formatETB(payoutAmount ?? slipData.net_payout)} cash</p>
+                    <p className="text-white/60 text-xs">Redeem to collect {formatETB(payoutAmount ?? slipData.net_payout)} into your balance</p>
                   </div>
                 </div>
-
-                {isInsufficient && (
-                  <div className="flex items-center gap-2 bg-nile-danger/10 border border-nile-danger/30 rounded-xl px-3 py-2.5">
-                    <AlertTriangle className="w-4 h-4 text-nile-danger flex-shrink-0" />
-                    <p className="text-nile-danger text-xs">Insufficient balance — request credits from your agent</p>
-                  </div>
-                )}
 
                 <div className="flex gap-2">
                   <button
                     onClick={handleRedeemSlip}
-                    disabled={approving || isInsufficient}
+                    disabled={approving}
                     className={cn(
                       'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all',
-                      !approving && !isInsufficient
+                      !approving
                         ? 'bg-nile-success text-white hover:bg-nile-success/80'
                         : 'bg-white/10 text-white/30 cursor-not-allowed'
                     )}
                   >
                     <Check className="w-4 h-4" />
-                    {approving ? 'Processing...' : `Pay ${formatETB(payoutAmount ?? slipData.net_payout)}`}
+                    {approving ? 'Processing...' : `Redeem ${formatETB(payoutAmount ?? slipData.net_payout)}`}
                   </button>
                   <button
                     onClick={resetState}

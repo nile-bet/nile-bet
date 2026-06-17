@@ -557,7 +557,7 @@ export async function redeemWinningSlip(
   if (!slip) return { success: false, error: 'Slip not found' }
   if (slip.status !== 'won') return { success: false, error: `Slip is ${slip.status} — only won slips can be redeemed` }
 
-  // Fetch cashier balance
+  // Fetch redeemer balance
   const { data: cashier } = await supabase
     .from('profiles')
     .select('credit_balance')
@@ -565,9 +565,6 @@ export async function redeemWinningSlip(
     .single()
 
   if (!cashier) return { success: false, error: 'Cashier not found' }
-  if (cashier.credit_balance < slip.net_payout) {
-    return { success: false, error: `Insufficient balance. You need ${slip.net_payout.toLocaleString()} but have ${cashier.credit_balance.toLocaleString()}` }
-  }
 
   // Mark slip as paid
   const { error: slipErr } = await supabase
@@ -577,19 +574,19 @@ export async function redeemWinningSlip(
 
   if (slipErr) return { success: false, error: 'Failed to update slip status' }
 
-  // Deduct from cashier
+  // Credit the redeemer (cashier/agent/admin) with the payout amount
   await supabase
     .from('profiles')
-    .update({ credit_balance: cashier.credit_balance - slip.net_payout })
+    .update({ credit_balance: cashier.credit_balance + slip.net_payout })
     .eq('id', cashierId)
 
   // Log transaction
   await supabase.from('transactions').insert({
     profile_id: cashierId,
     type: 'winning_payout',
-    amount: -slip.net_payout,
+    amount: slip.net_payout,
     reference_id: slip.id,
-    note: `Winning payout for slip ${slipId}`,
+    note: `Winning payout redeemed for slip ${slipId}`,
   })
 
   return { success: true, amount: slip.net_payout }
@@ -622,18 +619,16 @@ export async function redeemJackpotWinningSlip(
     .single()
 
   if (!cashier) return { success: false, error: 'Cashier not found' }
-  if (cashier.credit_balance < slip.reward_amount) {
-    return { success: false, error: `Insufficient balance. Need ${slip.reward_amount.toLocaleString()} but have ${cashier.credit_balance.toLocaleString()}` }
-  }
 
   await supabase.from('jackpot_slips').update({ status: 'paid' }).eq('id', slip.id)
-  await supabase.from('profiles').update({ credit_balance: cashier.credit_balance - slip.reward_amount }).eq('id', cashierId)
+  // Credit the redeemer (cashier/agent/admin) with the reward amount
+  await supabase.from('profiles').update({ credit_balance: cashier.credit_balance + slip.reward_amount }).eq('id', cashierId)
   await supabase.from('transactions').insert({
     profile_id: cashierId,
     type: 'jackpot_payout',
-    amount: -slip.reward_amount,
+    amount: slip.reward_amount,
     reference_id: slip.id,
-    note: `Jackpot payout for slip ${slipId}`,
+    note: `Jackpot payout redeemed for slip ${slipId}`,
   })
 
   return { success: true, amount: slip.reward_amount }
