@@ -246,16 +246,19 @@ export default function CashierDashboard() {
         <span className={cn(
           'text-[10px] font-bold px-2 py-0.5 rounded-full border',
           v === 'won' ? 'text-nile-success border-nile-success/30 bg-nile-success/10' :
-          v === 'redeemed' ? 'text-nile-blue-light border-nile-blue-light/30 bg-nile-blue-light/10' :
+          v === 'paid' ? 'text-nile-blue-light border-nile-blue-light/30 bg-nile-blue-light/10' :
+          v === 'near_win' ? 'text-gold border-gold/30 bg-gold/10' :
           'text-nile-orange border-nile-orange/30 bg-nile-orange/10'
-        )}>{v?.toUpperCase()}</span>
+        )}>{v === 'paid' ? 'REDEEMED ✓' : v?.toUpperCase()}</span>
       ),
     },
     {
       key: 'redeemed_at',
-      label: 'Redeemed',
+      label: 'Redeemed At',
       render: (v: any) => (
-        <span className="text-white/40 text-[10px]">{v ? formatDate(v) : '—'}</span>
+        <span className={v ? "text-nile-success text-[10px]" : "text-white/30 text-[10px]"}>
+          {v ? new Date(v).toLocaleString('en-ET', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
+        </span>
       ),
     },
   ]

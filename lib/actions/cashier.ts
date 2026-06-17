@@ -300,12 +300,14 @@ export async function getCashierPayoutsReport(
       is_anonymous,
       insurance_applied,
       insurance_payout,
+      redeemed_at,
+      redeemed_by,
       created_at,
       bettor:profiles!slips_bettor_id_fkey (username)
     `
     )
     .eq('placed_by', cashierId)
-    .in('status', ['won', 'near_win'])
+    .in('status', ['won', 'near_win', 'paid'])
     .order('created_at', { ascending: false })
 
   if (startDate) {

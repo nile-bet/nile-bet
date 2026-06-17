@@ -570,7 +570,7 @@ export async function redeemWinningSlip(
   // Mark slip as paid
   const { error: slipErr } = await supabase
     .from('slips')
-    .update({ status: 'paid' })
+    .update({ status: 'paid', redeemed_at: new Date().toISOString(), redeemed_by: cashierId })
     .eq('id', slip.id)
 
   if (slipErr) return { success: false, error: 'Failed to update slip status' }
