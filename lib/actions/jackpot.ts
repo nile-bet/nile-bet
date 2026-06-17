@@ -120,13 +120,28 @@ export async function placeJackpotBet(data: {
     }
   }
 
-  // Generate slip ID (JP + 8 digits)
-  const slipId =
-    'JP' +
-    Math.floor(
-      10000000 +
-        Math.random() * 90000000
-    ).toString()
+  // Generate slip ID (JP + 8 digits), checked against existing jackpot_slips for uniqueness
+  let slipId = ''
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const candidate =
+      'JP' +
+      Math.floor(
+        10000000 +
+          Math.random() * 90000000
+      ).toString()
+    const { data: existing } = await adminClient
+      .from('jackpot_slips')
+      .select('id')
+      .eq('slip_id', candidate)
+      .maybeSingle()
+    if (!existing) {
+      slipId = candidate
+      break
+    }
+  }
+  if (!slipId) {
+    return { success: false, error: 'Failed to generate a unique slip ID, please try again' }
+  }
 
   // Deduct balance
   const { error: deductError } = await adminClient

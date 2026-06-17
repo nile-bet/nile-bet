@@ -1758,15 +1758,21 @@ export async function settleJackpot(
       })
       .eq('id', slip.id)
 
-    // Credit reward
+    // Credit reward — ONLY auto-credit when the bettor is a real registered
+    // bettor placing their own bet online. For cashier/agent walk-in slips
+    // (bettor_id === placed_by, role is cashier/agent), the payout happens
+    // only when the customer redeems the slip via redeemJackpotWinningSlip,
+    // which deducts from the cashier's own float instead.
     if (reward > 0 && slip.bettor_id) {
       const { data: bettor } = await supabase
         .from('profiles')
-        .select('credit_balance')
+        .select('credit_balance, role')
         .eq('id', slip.bettor_id)
         .single()
 
-      if (bettor) {
+      const isWalkInPlacement = slip.bettor_id === slip.placed_by && bettor?.role !== 'bettor'
+
+      if (bettor && !isWalkInPlacement) {
         await supabase
           .from('profiles')
           .update({
@@ -1774,7 +1780,9 @@ export async function settleJackpot(
               bettor.credit_balance + reward,
           })
           .eq('id', slip.bettor_id)
+      }
 
+      if (bettor) {
         await supabase
           .from('notifications')
           .insert({

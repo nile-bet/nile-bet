@@ -651,8 +651,9 @@ export async function saveAnonymousSlip(input: {
 
   const { selections, stake } = input
 
-  // Generate 8-digit code
-  const slipCode = Math.floor(10000000 + Math.random() * 90000000).toString()
+  // Generate 8-digit code (DB-checked for uniqueness)
+  const { data: slipCodeData } = await supabase.rpc('generate_slip_id')
+  const slipCode = slipCodeData as string
 
   // Calculate odds
   const totalOdds = selections.reduce((acc, s) => acc * s.odd, 1)
@@ -743,8 +744,9 @@ export async function rebetSlip(
     return { matchMarketId: s.match_market_id, selection: s.selection, oddAtPlacement: currentOdd }
   })
 
-  // 4. Generate new slip ID
-  const newSlipId = Math.floor(10000000 + Math.random() * 90000000).toString()
+  // 4. Generate new slip ID (DB-checked for uniqueness)
+  const { data: newSlipIdData } = await adminClient.rpc('generate_slip_id')
+  const newSlipId = newSlipIdData as string
 
   // 5. Calculate total odds & max payout
   const totalOdds = newSelections.reduce((acc: number, s: any) => acc * s.oddAtPlacement, 1)

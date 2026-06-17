@@ -6,8 +6,23 @@ export async function POST(req: NextRequest) {
     const { jackpotId, selections } = await req.json()
     const supabase = await createAdminClient()
 
-    // Generate JP + 8 digit code
-    const slipCode = 'JP' + Math.floor(10000000 + Math.random() * 90000000).toString()
+    // Generate JP + 8 digit code, checked against existing jackpot_slips for uniqueness
+    let slipCode = ''
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const candidate = 'JP' + Math.floor(10000000 + Math.random() * 90000000).toString()
+      const { data: existing } = await supabase
+        .from('jackpot_slips')
+        .select('id')
+        .eq('slip_id', candidate)
+        .maybeSingle()
+      if (!existing) {
+        slipCode = candidate
+        break
+      }
+    }
+    if (!slipCode) {
+      return NextResponse.json({ success: false, error: 'Failed to generate a unique slip ID, please try again' }, { status: 500 })
+    }
 
     // Validate jackpot is open
     const { data: jackpot } = await supabase
