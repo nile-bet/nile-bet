@@ -190,8 +190,8 @@ export default function CashierDashboard() {
       key: 'slip_id',
       label: 'Slip ID',
       render: (v: any, row: any) => (
-        <span className="text-gold font-mono text-xs">
-          {row.is_jackpot && '🏆 '}#{v}
+        <span className="text-white/50 font-mono text-xs">
+          {row.is_jackpot ? '🏆 ' : ''}XXX...{String(v).slice(-4)}
         </span>
       ),
     },
@@ -199,10 +199,8 @@ export default function CashierDashboard() {
       key: 'bettor',
       label: 'Bettor',
       render: (v: any, row: any) => (
-        <span className="text-white/60 text-xs">
-          {row.is_anonymous
-            ? 'Anonymous'
-            : `@${v?.username ?? '—'}`}
+        <span className="text-white font-medium text-xs">
+          {row.is_anonymous ? 'Anonymous' : `@${v?.username ?? '—'}`}
         </span>
       ),
     },
@@ -210,43 +208,54 @@ export default function CashierDashboard() {
       key: 'stake',
       label: 'Stake',
       render: (v: any) => (
-        <span className="text-white/70 font-mono text-xs">
-          {formatETB(v)}
-        </span>
+        <span className="text-white font-mono text-xs">{formatETB(v)}</span>
+      ),
+    },
+    {
+      key: 'total_odds',
+      label: 'Odds',
+      render: (v: any, row: any) => (
+        <span className="text-gold font-mono text-xs font-bold">{row.is_jackpot ? '—' : (v ?? 0).toFixed(2)}</span>
       ),
     },
     {
       key: 'max_payout',
       label: 'Gross Win',
       render: (v: any) => (
-        <span className="text-white/60 font-mono text-xs">
-          {formatETB(v)}
-        </span>
+        <span className="text-white font-mono text-xs">{formatETB(v)}</span>
       ),
     },
     {
       key: 'winning_tax',
       label: 'Tax (15%)',
       render: (v: any) => (
-        <span className="text-nile-danger font-mono text-xs">
-          -{formatETB(v)}
-        </span>
+        <span className="text-nile-danger font-mono text-xs font-semibold">-{formatETB(v)}</span>
       ),
     },
     {
       key: 'net_payout',
       label: 'Net Payout',
       render: (v: any) => (
-        <span className="text-nile-success font-mono text-xs font-bold">
-          {formatETB(v)}
-        </span>
+        <span className="text-nile-success font-mono text-xs font-bold">{formatETB(v)}</span>
       ),
     },
     {
       key: 'status',
       label: 'Status',
+      render: (v: any, row: any) => (
+        <span className={cn(
+          'text-[10px] font-bold px-2 py-0.5 rounded-full border',
+          v === 'won' ? 'text-nile-success border-nile-success/30 bg-nile-success/10' :
+          v === 'redeemed' ? 'text-nile-blue-light border-nile-blue-light/30 bg-nile-blue-light/10' :
+          'text-nile-orange border-nile-orange/30 bg-nile-orange/10'
+        )}>{v?.toUpperCase()}</span>
+      ),
+    },
+    {
+      key: 'redeemed_at',
+      label: 'Redeemed',
       render: (v: any) => (
-        <StatusBadge status={v} type="slip" />
+        <span className="text-white/40 text-[10px]">{v ? formatDate(v) : '—'}</span>
       ),
     },
   ]
@@ -715,59 +724,53 @@ export default function CashierDashboard() {
       )}
 
       {/* ── ROW 6: Payouts Report ── */}
-      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
-        <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-          🏆 Payouts Report
-        </h3>
+      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl overflow-hidden">
+        {/* Header */}
+        <div className="px-5 py-3 border-b border-nile-blue/20 flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-gold" />
+          <h3 className="font-semibold text-white text-sm">Payouts Report</h3>
+        </div>
 
-        {/* 4 mini cards */}
+        {/* 4 stat cards */}
         {!loading && stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            <div className="bg-charcoal/50 rounded-lg p-3 text-center">
-              <p className="text-nile-success font-mono text-lg font-bold">
-                {formatETB(stats.totalWon)}
-              </p>
-              <p className="text-white/50 text-xs">
-                Total Won
-              </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-nile-blue/20 border-b border-nile-blue/20">
+            {/* Total Won */}
+            <div className="p-4 bg-nile-success/10">
+              <div className="flex items-start justify-between mb-2">
+                <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Total Won</p>
+                <CheckCircle className="w-4 h-4 text-nile-success/60" />
+              </div>
+              <p className="text-nile-success font-mono text-xl font-bold">{formatETB(stats.totalWon)}</p>
+              <p className="text-white/30 text-[10px] mt-1">{stats.wonSlips ?? 0} winning slips (after 15% tax)</p>
             </div>
-            <div className="bg-charcoal/50 rounded-lg p-3 text-center">
-              <p className="text-white/60 font-mono text-lg font-bold">
-                {formatETB(
-                  stats.wonRedeemedAmount
-                )}
-              </p>
-              <p className="text-white/50 text-xs">
-                Won-Redeemed
-              </p>
+            {/* Won Redeemed */}
+            <div className="p-4 bg-nile-blue/10">
+              <div className="flex items-start justify-between mb-2">
+                <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Won - Redeemed</p>
+                <CheckCircle className="w-4 h-4 text-nile-blue-light/60" />
+              </div>
+              <p className="text-nile-blue-light font-mono text-xl font-bold">{formatETB(stats.wonRedeemedAmount)}</p>
+              <p className="text-white/30 text-[10px] mt-1">{stats.redeemedSlips ?? 0} slips redeemed</p>
             </div>
-            <div className="bg-charcoal/50 rounded-lg p-3 text-center">
-              <p className="text-gold font-mono text-lg font-bold">
-                {formatETB(
-                  stats.insuredTotal
-                )}
-              </p>
-              <p className="text-white/50 text-xs">
-                Insured
-              </p>
+            {/* Insured */}
+            <div className="p-4 bg-nile-orange/10">
+              <div className="flex items-start justify-between mb-2">
+                <p className="text-white/60 text-xs font-medium uppercase tracking-wider">🛡️ Insured - Redeemed</p>
+                <CheckCircle className="w-4 h-4 text-nile-orange/60" />
+              </div>
+              <p className="text-nile-orange font-mono text-xl font-bold">{formatETB(stats.insuredTotal)}</p>
+              <p className="text-white/30 text-[10px] mt-1">{stats.insuredSlips ?? 0} slips (stake refund)</p>
             </div>
-            <div className="bg-charcoal/50 rounded-lg p-3 text-center">
-              <p
-                className={cn(
-                  'font-mono text-lg font-bold',
-                  (stats.pendingPayout ?? 0) >
-                  0
-                    ? 'text-nile-orange'
-                    : 'text-white/60'
-                )}
-              >
-                {formatETB(
-                  stats.pendingPayout
-                )}
+            {/* Pending Payout */}
+            <div className="p-4 bg-charcoal/40">
+              <div className="flex items-start justify-between mb-2">
+                <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Pending Payout</p>
+                <Clock className="w-4 h-4 text-white/30" />
+              </div>
+              <p className={cn('font-mono text-xl font-bold', (stats.pendingPayout ?? 0) > 0 ? 'text-nile-orange' : 'text-white/50')}>
+                {formatETB(stats.pendingPayout)}
               </p>
-              <p className="text-white/50 text-xs">
-                Pending Payout
-              </p>
+              <p className="text-white/30 text-[10px] mt-1">{stats.pendingPayoutSlips ?? 0} slips waiting</p>
             </div>
           </div>
         )}

@@ -200,6 +200,8 @@ export async function getCashierDashboardStats(
   const wonRedeemedAmount = 0
   const insuredRedeemedAmount = 0
   const pendingPayout = pendingLiability
+  const redeemedSlips = wonRedeemed + insuredRedeemed
+  const pendingPayoutSlips = wonPending + insuredPending + jackpotPending.length
 
   return {
     walletBalance,
@@ -228,6 +230,8 @@ export async function getCashierDashboardStats(
     wonRedeemedAmount,
     insuredRedeemedAmount,
     pendingPayout,
+    redeemedSlips,
+    pendingPayoutSlips,
     // Jackpot stats
     jackpot: {
       total: jackpotTotal,
