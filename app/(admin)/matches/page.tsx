@@ -298,7 +298,7 @@ export default function MatchesPage() {
           >
             <BarChart3 className="w-3.5 h-3.5" />
           </button>
-          {row.status === 'closed' && (
+          {(row.status === 'closed' || (row.kick_off_time && new Date(row.kick_off_time) < new Date() && row.status !== 'finished' && row.status !== 'cancelled')) && (
             <button
               onClick={() =>
                 router.push(
@@ -306,7 +306,7 @@ export default function MatchesPage() {
                 )
               }
               className="p-1.5 border border-gold/30 text-gold rounded hover:bg-gold/20"
-              title="Enter Result"
+              title="Enter Result & Settle"
             >
               <Trophy className="w-3.5 h-3.5" />
             </button>
