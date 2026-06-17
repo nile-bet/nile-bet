@@ -10,6 +10,7 @@ export type SlipStatus =
   | 'lost'
   | 'cancelled'
   | 'near_win'
+  | 'paid'
 
 export type MatchStatus =
   | 'pending'

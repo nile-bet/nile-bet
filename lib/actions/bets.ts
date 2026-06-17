@@ -555,6 +555,7 @@ export async function redeemWinningSlip(
     .single()
 
   if (!slip) return { success: false, error: 'Slip not found' }
+  if (slip.status === 'paid') return { success: false, error: 'Slip already redeemed' }
   if (slip.status !== 'won') return { success: false, error: `Slip is ${slip.status} — only won slips can be redeemed` }
 
   // Fetch redeemer balance

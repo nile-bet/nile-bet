@@ -37,6 +37,7 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
 
     cancelled: 'border-white/10 bg-white/5',
     near_win: 'border-gold/40 bg-gold/5',
+    paid: 'border-nile-success/40 bg-nile-success/5',
   }[slip.status] ?? 'border-gold/20'
 
   const resultIcon = (result: string) => {
