@@ -790,44 +790,25 @@ export default function CashierDashboard() {
             {/* Totals row */}
             {(payouts.slips ?? []).length >
               0 && (
-              <div className="mt-3 bg-gold/10 border border-gold/20 rounded-lg px-4 py-3 flex items-center justify-between flex-wrap gap-3">
-                <span className="text-gold font-semibold text-sm">
-                  TOTALS
-                </span>
-                <div className="flex gap-6 text-sm">
-                  <div className="text-right">
-                    <p className="text-white/50 text-xs">
-                      Gross
-                    </p>
-                    <p className="text-white font-mono">
-                      {formatETB(
-                        payouts.totals
-                          .grossWinTotal
-                      )}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-white/50 text-xs">
-                      Tax
-                    </p>
-                    <p className="text-nile-danger font-mono">
-                      -{' '}
-                      {formatETB(
-                        payouts.totals.taxTotal
-                      )}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-white/50 text-xs">
-                      Net Total
-                    </p>
-                    <p className="text-nile-success font-mono font-bold">
-                      {formatETB(
-                        payouts.totals
-                          .netPayoutTotal
-                      )}
-                    </p>
-                  </div>
+              <div className="mt-2 border-t border-gold/20 bg-gold/5 px-4 py-3 grid grid-cols-4 md:grid-cols-8 gap-2">
+                <div className="col-span-4 md:col-span-2 flex items-center">
+                  <span className="text-gold font-bold text-xs uppercase tracking-widest">Totals</span>
+                </div>
+                <div className="text-right">
+                  <p className="text-white/40 text-[9px] uppercase">Stake</p>
+                  <p className="text-white font-mono text-xs">{formatETB(payouts.totals.stakeTotal ?? 0)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-white/40 text-[9px] uppercase">Gross Win</p>
+                  <p className="text-white font-mono text-xs">{formatETB(payouts.totals.grossWinTotal)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-white/40 text-[9px] uppercase">Tax (15%)</p>
+                  <p className="text-nile-danger font-mono text-xs font-semibold">-{formatETB(payouts.totals.taxTotal)}</p>
+                </div>
+                <div className="text-right col-span-2">
+                  <p className="text-white/40 text-[9px] uppercase">Net Payout</p>
+                  <p className="text-nile-success font-mono text-xs font-bold">{formatETB(payouts.totals.netPayoutTotal)}</p>
                 </div>
               </div>
             )}

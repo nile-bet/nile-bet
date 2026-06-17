@@ -329,6 +329,7 @@ export async function getCashierPayoutsReport(
       status,
       is_anonymous,
       created_at,
+      updated_at,
       jackpots (name),
       bettor:profiles!jackpot_slips_bettor_id_fkey (username)
     `)
@@ -339,45 +340,48 @@ export async function getCashierPayoutsReport(
   if (endDate) jq = jq.lte('created_at', endDate)
   const { data: jackpotSlips } = await jq
 
-  const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => ({
-    slip_id: j.slip_id,
-    stake: j.stake,
-    total_odds: null,
-    max_payout: j.reward_amount,
-    winning_tax: 0,
-    net_payout: j.reward_amount,
-    status: j.status,
-    is_anonymous: j.is_anonymous,
-    insurance_applied: j.status === 'near_win',
-    insurance_payout: j.status === 'near_win' ? j.reward_amount : 0,
-    created_at: j.created_at,
-    bettor: j.bettor,
-    is_jackpot: true,
-    jackpot_name: j.jackpots?.name,
+  const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => {
+    const gross = j.reward_amount ?? 0
+    const tax = j.status === 'near_win' ? 0 : gross * 0.15
+    const net = gross - tax
+    return {
+      slip_id: j.slip_id,
+      stake: j.stake,
+      total_odds: null,
+      max_payout: gross,
+      winning_tax: tax,
+      net_payout: net,
+      status: j.status,
+      is_anonymous: j.is_anonymous,
+      insurance_applied: j.status === 'near_win',
+      insurance_payout: j.status === 'near_win' ? gross : 0,
+      created_at: j.created_at,
+      updated_at: j.updated_at,
+      redeemed_at: j.status !== 'pending' ? (j.updated_at ?? j.created_at) : null,
+      bettor: j.bettor,
+      is_jackpot: true,
+      jackpot_name: j.jackpots?.name,
+    }
+  })
+  const regularPayouts = (slips ?? []).map((s: any) => ({
+    ...s,
+    redeemed_at: s.status !== 'pending' ? (s.updated_at ?? null) : null,
+    is_jackpot: false,
   }))
-
-  const allSlips = [...(slips ?? []), ...jackpotPayouts].sort(
+  const allSlips = [...regularPayouts, ...jackpotPayouts].sort(
     (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
-
-  const totalGross = allSlips.reduce(
-    (a: any, s: any) => a + (s.max_payout ?? 0),
-    0
-  )
-  const totalTax = allSlips.reduce(
-    (a: any, s: any) => a + (s.winning_tax ?? 0),
-    0
-  )
-  const totalNet = allSlips.reduce(
-    (a: any, s: any) => a + (s.net_payout ?? 0),
-    0
-  )
+  const totalGross = allSlips.reduce((a: any, s: any) => a + (s.max_payout ?? 0), 0)
+  const totalTax = allSlips.reduce((a: any, s: any) => a + (s.winning_tax ?? 0), 0)
+  const totalNet = allSlips.reduce((a: any, s: any) => a + (s.net_payout ?? 0), 0)
+  const totalStake = allSlips.reduce((a: any, s: any) => a + (s.stake ?? 0), 0)
   return {
     slips: allSlips,
     totals: {
       grossWinTotal: totalGross,
       taxTotal: totalTax,
       netPayoutTotal: totalNet,
+      stakeTotal: totalStake,
     },
   }
 }
