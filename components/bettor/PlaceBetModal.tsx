@@ -51,7 +51,7 @@ export function PlaceBetModal({
   const { user, settings } = useAuthStore()
 
   const [isAnonymous, setIsAnonymous] =
-    useState(forceNamed ? false : false)
+    useState(forceNamed ? false : true) // default anonymous for cashier-placed bets
   const [placing, setPlacing] =
     useState(false)
 
