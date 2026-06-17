@@ -257,18 +257,20 @@ export default function CashierSlipHistoryPage() {
                           >
                             <Eye className="w-3 h-3" />
                           </a>
-                          <button
-                            onClick={() => setReprintSlip({ slipId: slip.slip_id, isJackpot })}
-                            title="Re-print slip"
-                            className={cn(
-                              'flex items-center gap-1 text-xs border px-2 py-1 rounded transition-colors',
-                              isJackpot
-                                ? 'text-gold border-gold/30 hover:bg-gold/10'
-                                : 'text-nile-blue-light border-nile-blue/30 hover:bg-nile-blue/10'
-                            )}
-                          >
-                            <Printer className="w-3 h-3" />
-                          </button>
+                          {slip.status !== 'paid' && (
+                            <button
+                              onClick={() => setReprintSlip({ slipId: slip.slip_id, isJackpot })}
+                              title="Re-print slip"
+                              className={cn(
+                                'flex items-center gap-1 text-xs border px-2 py-1 rounded transition-colors',
+                                isJackpot
+                                  ? 'text-gold border-gold/30 hover:bg-gold/10'
+                                  : 'text-nile-blue-light border-nile-blue/30 hover:bg-nile-blue/10'
+                              )}
+                            >
+                              <Printer className="w-3 h-3" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

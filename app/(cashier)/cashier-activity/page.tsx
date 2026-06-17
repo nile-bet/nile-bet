@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getCashierActivityLog } from '@/lib/actions/cashier'
+import { createClient } from '@/lib/supabase/client'
 import { DataTable } from '@/components/shared/DataTable'
 import { formatDate } from '@/lib/utils/formatCurrency'
 import { useAuthStore } from '@/lib/stores/authStore'
@@ -28,6 +29,7 @@ export default function CashierActivityPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [reprintSlip, setReprintSlip] = useState<{ slipId: string; isJackpot: boolean } | null>(null)
+  const [slipStatusMap, setSlipStatusMap] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (user) loadLogs()
@@ -40,6 +42,41 @@ export default function CashierActivityPage() {
     setLogs(data)
     setTotal(t)
     setLoading(false)
+
+    // Batch-fetch current statuses for any slips referenced in this page of logs
+    const normalIds = data
+      .map((l: any) => l.details?.slip_id)
+      .filter((id: any, i: number, arr: any[]) =>
+        data[i]?.action === 'bet_placed' && id && arr.indexOf(id) === i
+      )
+    const jackpotIds = data
+      .map((l: any) => l.details?.slip_id)
+      .filter((id: any, i: number, arr: any[]) =>
+        data[i]?.action === 'jackpot_bet_placed' && id && arr.indexOf(id) === i
+      )
+
+    const supabase = createClient()
+    const statusMap: Record<string, string> = {}
+
+    if (normalIds.length > 0) {
+      const { data: normalSlips } = await supabase
+        .from('slips')
+        .select('slip_id, status')
+        .in('slip_id', normalIds)
+      ;(normalSlips ?? []).forEach((s: any) => {
+        statusMap[s.slip_id] = s.status
+      })
+    }
+    if (jackpotIds.length > 0) {
+      const { data: jpSlips } = await supabase
+        .from('jackpot_slips')
+        .select('slip_id, status')
+        .in('slip_id', jackpotIds)
+      ;(jpSlips ?? []).forEach((s: any) => {
+        statusMap[s.slip_id] = s.status
+      })
+    }
+    setSlipStatusMap(statusMap)
   }
 
   const handleExport = () => {
@@ -87,6 +124,7 @@ export default function CashierActivityPage() {
         const isNormal = row.action === 'bet_placed'
         const isJackpot = row.action === 'jackpot_bet_placed'
         if ((!isNormal && !isJackpot) || !v?.slip_id) return null
+        if (slipStatusMap[v.slip_id] === 'paid') return null
         return (
           <button
             onClick={() => setReprintSlip({ slipId: v.slip_id, isJackpot })}
