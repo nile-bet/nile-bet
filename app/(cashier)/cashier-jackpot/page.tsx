@@ -98,7 +98,7 @@ export default function CashierJackpotPage() {
     if (!user || !jackpot || !allSelected) return
     setPlacing(true)
     const result = await placeJackpotBet({
-      jackpotId: jackpot.id, bettorId: user.id, placedById: user.id, isAnonymous: false,
+      jackpotId: jackpot.id, bettorId: user.id, placedById: user.id, isAnonymous: true,
       selections: matches.map(m => ({ gameNumber: m.game_number, selection: selections[m.game_number], odd: selections[m.game_number] === 'home' ? m.home_odd : selections[m.game_number] === 'draw' ? m.draw_odd : m.away_odd })),
     })
     if (result.success && result.slipId) {
