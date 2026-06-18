@@ -58,7 +58,7 @@ export async function getCashierDashboardStats(
   let q = supabase
     .from('slips')
     .select(
-      'stake, net_payout, winning_tax, status, insurance_applied, insurance_payout, placed_by, created_at, updated_at'
+      'stake, net_payout, winning_tax, status, insurance_applied, insurance_payout, redeemed_at, placed_by, created_at, updated_at'
     )
     .eq('placed_by', cashierId)
 
@@ -74,44 +74,36 @@ export async function getCashierDashboardStats(
   const all = slips ?? []
 
   const totalSlips = all.length
-  const wonSlips = all.filter(
-    (s) => s.status === 'won'
-  )
-  const lostSlips = all.filter(
-    (s) => s.status === 'lost'
-  ).length
-  const cancelledSlips = all.filter(
-    (s) => s.status === 'cancelled'
-  ).length
-  const pendingSlips = all.filter(
-    (s) => s.status === 'pending'
-  )
-  const nearWinSlips = all.filter(
-    (s) => s.status === 'near_win'
-  )
+  // 'won'      = won, awaiting payout
+  // 'paid'     = won and already redeemed/paid out
+  // 'near_win' = insured, awaiting payout
+  // Insured paid: near_win slips that have insurance_payout > 0 and redeemed_at set
+  const wonSlips = all.filter((s) => s.status === 'won')
+  const paidSlips = all.filter((s) => s.status === 'paid')
+  const lostSlips = all.filter((s) => s.status === 'lost').length
+  const cancelledSlips = all.filter((s) => s.status === 'cancelled').length
+  const pendingSlips = all.filter((s) => s.status === 'pending')
+  const nearWinSlips = all.filter((s) => s.status === 'near_win')
 
-  // Won slips awaiting redemption
-  const wonRedeemed = 0 // tracked via redeemWinningSlip action
-  const wonPending = wonSlips.length // all won slips need to be paid out
+  // Won: 'won' = pending payout, 'paid' = already redeemed
+  const wonRedeemed = paidSlips.length
+  const wonPending = wonSlips.length
 
+  // Insured (near_win): count those with insurance_payout redeemed vs awaiting
+  // Near_win slips redeemed are tracked by redeemed_at being set
   const insuredSlips = nearWinSlips
-  const insuredRedeemed = 0
-  const insuredPending = insuredSlips.length
+  const insuredRedeemed = nearWinSlips.filter((s: any) => s.redeemed_at).length
+  const insuredPending = insuredSlips.length - insuredRedeemed
 
-  // In-progress: pending slips where kick_off has passed (live bets)
   const inProgressSlips = pendingSlips.length
 
-  const totalCollectedSlips = all.reduce(
-    (a, s) => a + (s.stake ?? 0),
-    0
-  )
+  const totalCollectedSlips = all.reduce((a, s) => a + (s.stake ?? 0), 0)
+
+  // Paid out = all slips that have been settled with payout (paid + near_win)
   const totalPaidOutSlips = [
-    ...wonSlips,
+    ...paidSlips,
     ...nearWinSlips,
-  ].reduce(
-    (a, s) => a + (s.net_payout ?? 0),
-    0
-  )
+  ].reduce((a, s) => a + (s.net_payout ?? 0), 0)
 
   const pendingLiabilitySlips = pendingSlips.reduce(
     (a, s) => a + (s.net_payout ?? 0),
@@ -183,20 +175,25 @@ export async function getCashierDashboardStats(
   const cashierProfit = grossProfitLoss * 0.4
   const agentPayable = grossProfitLoss * 0.6
 
-  const totalWonSlips = wonSlips.reduce(
-    (a, s) => a + (s.net_payout ?? 0),
-    0
-  )
-  const insuredTotalSlips = nearWinSlips.reduce(
-    (a, s) =>
-      a + (s.insurance_payout ?? 0),
-    0
-  )
+  // Won amounts: 'paid' slips = redeemed, 'won' slips = pending payout
+  const wonRedeemedAmount = paidSlips.reduce((a, s) => a + (s.net_payout ?? 0), 0)
+  const wonPendingAmount = wonSlips.reduce((a, s) => a + (s.net_payout ?? 0), 0)
+
+  // Insured amounts: near_win slips (insurance_payout field)
+  const insuredTotalSlips = nearWinSlips.reduce((a, s) => a + (s.insurance_payout ?? s.net_payout ?? 0), 0)
+  const insuredRedeemedAmount = nearWinSlips
+    .filter((s) => (s as any).redeemed_at)
+    .reduce((a, s) => a + (s.insurance_payout ?? s.net_payout ?? 0), 0)
+  const insuredPendingAmount = insuredTotalSlips - insuredRedeemedAmount
+
+  // Total won = paid out (redeemed) + won pending + near_win + jackpot won
+  const totalWonSlips = wonRedeemedAmount + wonPendingAmount
   const totalWon = totalWonSlips + jackpotWonTotal
   const insuredTotal = insuredTotalSlips + jackpotInsuredTotal
-  const wonRedeemedAmount = 0
-  const insuredRedeemedAmount = 0
-  const pendingPayout = pendingLiability
+
+  // Pending payout = won slips not yet paid + near_win not yet redeemed + jackpot won pending
+  const jackpotWonPendingAmount = jackpotWon.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
+  const pendingPayout = wonPendingAmount + insuredPendingAmount + jackpotWonPendingAmount
   const redeemedSlips = wonRedeemed + insuredRedeemed
   const pendingPayoutSlips = wonPending + insuredPending + jackpotPending.length
 
@@ -208,11 +205,11 @@ export async function getCashierDashboardStats(
     totalSlips: totalSlips + jackpotTotal,
     regularSlips: totalSlips,
     jackpotSlipsCount: jackpotTotal,
-    wonSlips: wonSlips.length + jackpotWon.length,
-    wonRegular: wonSlips.length,
+    wonSlips: wonSlips.length + paidSlips.length + jackpotWon.length,
+    wonRegular: wonSlips.length + paidSlips.length,
     wonJackpot: jackpotWon.length,
     wonRedeemed,
-    wonPending: wonSlips.length + jackpotPending.length,
+    wonPending,
     insuredSlips: insuredSlips.length + jackpotInsured,
     insuredRedeemed,
     insuredPending: insuredPending + jackpotInsured,
@@ -233,7 +230,9 @@ export async function getCashierDashboardStats(
     totalWon,
     insuredTotal,
     wonRedeemedAmount,
+    wonPendingAmount,
     insuredRedeemedAmount,
+    insuredPendingAmount,
     pendingPayout,
     redeemedSlips,
     pendingPayoutSlips,
@@ -347,8 +346,8 @@ export async function getCashierPayoutsReport(
 
   const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => {
     const gross = j.reward_amount ?? 0
-    // Jackpot: won slips pay 15% tax, near_win (insured) is tax-free
-    const tax = gross * 0.15
+    // Jackpot: won slips pay 15% tax, near_win (insured) is stake refund = tax-free
+    const tax = j.status === 'won' ? gross * 0.15 : 0
     const net = gross - tax
     return {
       slip_id: j.slip_id,

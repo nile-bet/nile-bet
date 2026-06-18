@@ -454,14 +454,20 @@ export default function CashierDashboard() {
             <CheckCircle className="w-4 h-4 text-nile-success mx-auto mb-0.5" />
             <p className="text-xl font-bold text-nile-success font-mono">{stats.wonSlips}</p>
             <p className="text-white/50 text-xs">Won</p>
-            <p className="text-white/25 text-[10px]">{stats.wonRegular ?? 0} reg · {stats.wonJackpot ?? 0} jp</p>
+            <div className="mt-1 space-y-0.5">
+              <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.wonRedeemed ?? 0} redeemed</p>
+              <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.wonPending ?? 0} pending</p>
+            </div>
           </div>
           {/* Insured */}
           <div className="bg-gold/10 border border-gold/30 rounded-lg p-2 text-center">
-            <span className="text-xl block mb-1">🛡️</span>
+            <span className="text-base block mb-0.5">🛡️</span>
             <p className="text-xl font-bold text-gold font-mono">{stats.insuredSlips}</p>
             <p className="text-white/50 text-xs">Insured</p>
-            <p className="text-white/25 text-[10px]">{stats.insuredPending} need payout</p>
+            <div className="mt-1 space-y-0.5">
+              <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.insuredRedeemed ?? 0} redeemed</p>
+              <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.insuredPending ?? 0} pending</p>
+            </div>
           </div>
           {/* Lost */}
           <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-2 text-center">
@@ -722,16 +728,18 @@ export default function CashierDashboard() {
                 <CheckCircle className="w-4 h-4 text-nile-blue-light/60" />
               </div>
               <p className="text-nile-blue-light font-mono text-xl font-bold">{formatETB(stats.wonRedeemedAmount)}</p>
-              <p className="text-white/30 text-[10px] mt-1">{stats.redeemedSlips ?? 0} slips redeemed</p>
+              <p className="text-white/30 text-[10px] mt-1">{stats.wonRedeemed ?? 0} slips paid out</p>
+              <p className="text-nile-orange/60 text-[10px]">{formatETB(stats.wonPendingAmount ?? 0)} still pending</p>
             </div>
             {/* Insured */}
             <div className="p-4 bg-nile-orange/10">
               <div className="flex items-start justify-between mb-2">
-                <p className="text-white/60 text-xs font-medium uppercase tracking-wider">🛡️ Insured - Redeemed</p>
+                <p className="text-white/60 text-xs font-medium uppercase tracking-wider">🛡️ Insured</p>
                 <CheckCircle className="w-4 h-4 text-nile-orange/60" />
               </div>
               <p className="text-nile-orange font-mono text-xl font-bold">{formatETB(stats.insuredTotal)}</p>
-              <p className="text-white/30 text-[10px] mt-1">{stats.insuredSlips ?? 0} slips (stake refund)</p>
+              <p className="text-white/30 text-[10px] mt-1">{stats.insuredRedeemed ?? 0} redeemed · {stats.insuredPending ?? 0} pending</p>
+              <p className="text-nile-orange/60 text-[10px]">{formatETB(stats.insuredPendingAmount ?? 0)} awaiting payout</p>
             </div>
             {/* Pending Payout */}
             <div className="p-4 bg-charcoal/40">
