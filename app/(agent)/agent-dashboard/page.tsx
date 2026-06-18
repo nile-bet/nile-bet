@@ -22,7 +22,7 @@ import * as XLSX from 'xlsx'
 
 export default function AgentDashboard() {
   const { user } = useAuthStore()
-  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'monthly' })
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'lifetime' })
   const [payouts, setPayouts] = useState<any>(null)
   const [stats, setStats] = useState<any>(null)
   const [report, setReport] = useState<any>(null)

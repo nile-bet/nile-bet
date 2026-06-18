@@ -39,7 +39,7 @@ import { DateRangeFilter, type DateFilterValue } from '@/components/shared/DateR
 
 export default function CashierDashboard() {
   const { user } = useAuthStore()
-  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'daily' })
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'lifetime' })
   const [stats, setStats] =
     useState<any>(null)
   const [payouts, setPayouts] =
