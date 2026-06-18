@@ -621,7 +621,7 @@ export async function redeemJackpotWinningSlip(
 
   if (!cashier) return { success: false, error: 'Cashier not found' }
 
-  await supabase.from('jackpot_slips').update({ status: 'paid' }).eq('id', slip.id)
+  await supabase.from('jackpot_slips').update({ status: 'paid', redeemed_at: new Date().toISOString(), redeemed_by: cashierId }).eq('id', slip.id)
   // Credit the redeemer (cashier/agent/admin) with the reward amount
   await supabase.from('profiles').update({ credit_balance: cashier.credit_balance + slip.reward_amount }).eq('id', cashierId)
   await supabase.from('transactions').insert({

@@ -185,83 +185,6 @@ export default function CashierDashboard() {
   const isLowBalance =
     (user?.credit_balance ?? 0) < 1000
 
-  const payoutsColumns = [
-    {
-      key: 'slip_id',
-      label: 'Slip ID',
-      render: (v: any, row: any) => (
-        <span className="text-white/50 font-mono text-xs">
-          {row.is_jackpot ? '🏆 ' : ''}XXX...{String(v).slice(-4)}
-        </span>
-      ),
-    },
-    {
-      key: 'bettor',
-      label: 'Bettor',
-      render: (v: any, row: any) => (
-        <span className="text-white font-medium text-xs">
-          {row.is_anonymous ? 'Anonymous' : `@${v?.username ?? '—'}`}
-        </span>
-      ),
-    },
-    {
-      key: 'stake',
-      label: 'Stake',
-      render: (v: any) => (
-        <span className="text-white font-mono text-xs">{formatETB(v)}</span>
-      ),
-    },
-    {
-      key: 'total_odds',
-      label: 'Odds',
-      render: (v: any, row: any) => (
-        <span className="text-gold font-mono text-xs font-bold">{row.is_jackpot ? '—' : (v ?? 0).toFixed(2)}</span>
-      ),
-    },
-    {
-      key: 'max_payout',
-      label: 'Gross Win',
-      render: (v: any) => (
-        <span className="text-white font-mono text-xs">{formatETB(v)}</span>
-      ),
-    },
-    {
-      key: 'winning_tax',
-      label: 'Tax (15%)',
-      render: (v: any) => (
-        <span className="text-nile-danger font-mono text-xs font-semibold">-{formatETB(v)}</span>
-      ),
-    },
-    {
-      key: 'net_payout',
-      label: 'Net Payout',
-      render: (v: any) => (
-        <span className="text-nile-success font-mono text-xs font-bold">{formatETB(v)}</span>
-      ),
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      render: (v: any, row: any) => (
-        <span className={cn(
-          'text-[10px] font-bold px-2 py-0.5 rounded-full border',
-          v === 'won' ? 'text-nile-success border-nile-success/30 bg-nile-success/10' :
-          v === 'paid' ? 'text-nile-blue-light border-nile-blue-light/30 bg-nile-blue-light/10' :
-          v === 'near_win' ? 'text-gold border-gold/30 bg-gold/10' :
-          'text-nile-orange border-nile-orange/30 bg-nile-orange/10'
-        )}>{v === 'paid' ? 'REDEEMED ✓' : v?.toUpperCase()}</span>
-      ),
-    },
-    {
-      key: 'redeemed_at',
-      label: 'Redeemed At',
-      render: (v: any) => (
-        <span className={v ? "text-nile-success text-[10px]" : "text-white/30 text-[10px]"}>
-          {v ? new Date(v).toLocaleString('en-ET', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
-        </span>
-      ),
-    },
-  ]
 
   const recentSlipsColumns = [
     {
@@ -702,94 +625,201 @@ export default function CashierDashboard() {
       )}
 
       {/* ── ROW 6: Payouts Report ── */}
-      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl overflow-hidden" style={{fontSize:"13px"}}>
+      <div className="bg-slate-dark border border-nile-blue/30 rounded-2xl overflow-hidden">
         {/* Header */}
-        <div className="px-5 py-3 border-b border-nile-blue/20 flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-gold" />
-          <h3 className="font-semibold text-white text-sm">Payouts Report</h3>
+        <div className="px-5 py-3.5 border-b border-nile-blue/20 flex items-center gap-2.5">
+          <div className="p-1.5 bg-gold/10 rounded-lg">
+            <TrendingUp className="w-4 h-4 text-gold" />
+          </div>
+          <h3 className="font-semibold text-white text-sm tracking-wide">Payouts Report</h3>
+          {payouts && <span className="ml-auto text-white/30 text-xs">{payouts.slips?.length ?? 0} entries</span>}
         </div>
 
-        {/* 4 stat cards */}
+        {/* 4 summary cards */}
         {!loading && stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-nile-blue/20 border-b border-nile-blue/20">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 border-b border-nile-blue/20">
             {/* Total Won */}
-            <div className="p-4 bg-nile-success/10">
-              <div className="flex items-start justify-between mb-2">
-                <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Total Won</p>
-                <CheckCircle className="w-4 h-4 text-nile-success/60" />
+            <div className="rounded-xl p-3.5" style={{background:'rgba(34,197,94,0.08)', border:'1px solid rgba(34,197,94,0.18)'}}>
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Total Won</span>
+                <div className="p-1 rounded-md" style={{background:'rgba(34,197,94,0.15)'}}>
+                  <CheckCircle className="w-3.5 h-3.5 text-nile-success" />
+                </div>
               </div>
-              <p className="text-nile-success font-mono text-xl font-bold">{formatETB(stats.totalWon)}</p>
-              <p className="text-white/30 text-[10px] mt-1">{stats.wonSlips ?? 0} winning slips (after 15% tax)</p>
+              <p className="text-nile-success font-mono text-2xl font-bold leading-none">{formatETB(stats.totalWon)}</p>
+              <div className="mt-2.5 pt-2.5 border-t border-nile-success/10">
+                <p className="text-white/35 text-[10px]">{(stats.wonRedeemed ?? 0) + (stats.wonPending ?? 0)} winning slips · net after 15% tax</p>
+              </div>
             </div>
+
             {/* Won Redeemed */}
-            <div className="p-4 bg-nile-blue/10">
-              <div className="flex items-start justify-between mb-2">
-                <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Won - Redeemed</p>
-                <CheckCircle className="w-4 h-4 text-nile-blue-light/60" />
+            <div className="rounded-xl p-3.5" style={{background:'rgba(59,130,246,0.08)', border:'1px solid rgba(59,130,246,0.18)'}}>
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Redeemed</span>
+                <div className="p-1 rounded-md" style={{background:'rgba(59,130,246,0.15)'}}>
+                  <CheckCircle className="w-3.5 h-3.5 text-nile-blue-light" />
+                </div>
               </div>
-              <p className="text-nile-blue-light font-mono text-xl font-bold">{formatETB(stats.wonRedeemedAmount)}</p>
-              <p className="text-white/30 text-[10px] mt-1">{stats.wonRedeemed ?? 0} slips paid out</p>
-              <p className="text-nile-orange/60 text-[10px]">{formatETB(stats.wonPendingAmount ?? 0)} still pending</p>
+              <p className="text-nile-blue-light font-mono text-2xl font-bold leading-none">{formatETB(stats.wonRedeemedAmount)}</p>
+              <div className="mt-2.5 pt-2.5 border-t border-nile-blue-light/10 flex items-center justify-between">
+                <span className="text-white/35 text-[10px]">{stats.wonRedeemed ?? 0} slips paid out</span>
+                {(stats.wonPendingAmount ?? 0) > 0 && (
+                  <span className="text-nile-orange/70 text-[10px] font-medium">{formatETB(stats.wonPendingAmount)} due</span>
+                )}
+              </div>
             </div>
+
             {/* Insured */}
-            <div className="p-4 bg-nile-orange/10">
-              <div className="flex items-start justify-between mb-2">
-                <p className="text-white/60 text-xs font-medium uppercase tracking-wider">🛡️ Insured</p>
-                <CheckCircle className="w-4 h-4 text-nile-orange/60" />
+            <div className="rounded-xl p-3.5" style={{background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.18)'}}>
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">🛡️ Insured</span>
+                <div className="p-1 rounded-md" style={{background:'rgba(201,168,76,0.15)'}}>
+                  <CheckCircle className="w-3.5 h-3.5 text-gold" />
+                </div>
               </div>
-              <p className="text-nile-orange font-mono text-xl font-bold">{formatETB(stats.insuredTotal)}</p>
-              <p className="text-white/30 text-[10px] mt-1">{stats.insuredRedeemed ?? 0} redeemed · {stats.insuredPending ?? 0} pending</p>
-              <p className="text-nile-orange/60 text-[10px]">{formatETB(stats.insuredPendingAmount ?? 0)} awaiting payout</p>
+              <p className="text-gold font-mono text-2xl font-bold leading-none">{formatETB(stats.insuredTotal)}</p>
+              <div className="mt-2.5 pt-2.5 border-t border-gold/10 flex items-center justify-between">
+                <span className="text-white/35 text-[10px]">✓ {stats.insuredRedeemed ?? 0} paid</span>
+                {(stats.insuredPending ?? 0) > 0
+                  ? <span className="text-nile-orange/70 text-[10px] font-medium">⏳ {stats.insuredPending} pending</span>
+                  : <span className="text-white/25 text-[10px]">all settled</span>
+                }
+              </div>
             </div>
+
             {/* Pending Payout */}
-            <div className="p-4 bg-charcoal/40">
-              <div className="flex items-start justify-between mb-2">
-                <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Pending Payout</p>
-                <Clock className="w-4 h-4 text-white/30" />
+            <div className="rounded-xl p-3.5" style={{
+              background: (stats.pendingPayout ?? 0) > 0 ? 'rgba(249,115,22,0.08)' : 'rgba(255,255,255,0.03)',
+              border: (stats.pendingPayout ?? 0) > 0 ? '1px solid rgba(249,115,22,0.25)' : '1px solid rgba(255,255,255,0.06)'
+            }}>
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Pending Payout</span>
+                <div className="p-1 rounded-md" style={{background:'rgba(249,115,22,0.12)'}}>
+                  <Clock className="w-3.5 h-3.5 text-nile-orange" />
+                </div>
               </div>
-              <p className={cn('font-mono text-xl font-bold', (stats.pendingPayout ?? 0) > 0 ? 'text-nile-orange' : 'text-white/50')}>
-                {formatETB(stats.pendingPayout)}
+              <p className={cn('font-mono text-2xl font-bold leading-none', (stats.pendingPayout ?? 0) > 0 ? 'text-nile-orange' : 'text-white/30')}>
+                {formatETB(stats.pendingPayout ?? 0)}
               </p>
-              <p className="text-white/30 text-[10px] mt-1">{stats.pendingPayoutSlips ?? 0} slips waiting</p>
+              <div className="mt-2.5 pt-2.5 border-t border-nile-orange/10">
+                <p className="text-white/35 text-[10px]">
+                  {stats.pendingPayoutSlips ?? 0} slips awaiting payment
+                </p>
+              </div>
             </div>
           </div>
         )}
 
         {/* Payouts table */}
         {payouts && (
-          <>
-            <DataTable
-              columns={payoutsColumns}
-              data={payouts.slips ?? []}
-              isLoading={loading}
-              emptyMessage="No winning slips yet"
-            />
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-nile-blue/20">
+                  <th className="text-left px-4 py-2.5 text-white/40 font-semibold uppercase tracking-wider text-[10px]">Slip ID</th>
+                  <th className="text-left px-4 py-2.5 text-white/40 font-semibold uppercase tracking-wider text-[10px]">Bettor</th>
+                  <th className="text-right px-4 py-2.5 text-white/40 font-semibold uppercase tracking-wider text-[10px]">Stake</th>
+                  <th className="text-right px-4 py-2.5 text-white/40 font-semibold uppercase tracking-wider text-[10px]">Odds</th>
+                  <th className="text-right px-4 py-2.5 text-white/40 font-semibold uppercase tracking-wider text-[10px]">Gross Win</th>
+                  <th className="text-right px-4 py-2.5 text-white/40 font-semibold uppercase tracking-wider text-[10px]">Tax</th>
+                  <th className="text-right px-4 py-2.5 text-white/40 font-semibold uppercase tracking-wider text-[10px]">Net Payout</th>
+                  <th className="text-center px-4 py-2.5 text-white/40 font-semibold uppercase tracking-wider text-[10px]">Status</th>
+                  <th className="text-left px-4 py-2.5 text-white/40 font-semibold uppercase tracking-wider text-[10px]">Redeemed At</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-nile-blue/10">
+                {(payouts.slips ?? []).length === 0 ? (
+                  <tr><td colSpan={9} className="text-center py-8 text-white/30 text-sm">No winning slips yet</td></tr>
+                ) : (payouts.slips ?? []).map((row: any, i: number) => (
+                  <tr key={row.slip_id ?? i} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-4 py-2.5">
+                      <span className="font-mono text-white/40 text-[11px]">
+                        {row.is_jackpot ? <span className="text-gold mr-1">🏆</span> : null}
+                        ···{String(row.slip_id ?? '').slice(-6)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className="text-white/80 font-medium">
+                        {row.is_anonymous ? <span className="text-white/30 italic">Anonymous</span> : `@${row.bettor?.username ?? '—'}`}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <span className="text-white/70 font-mono">{formatETB(row.stake)}</span>
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <span className="text-gold/80 font-mono font-semibold">
+                        {row.is_jackpot ? <span className="text-white/20">—</span> : (row.total_odds ?? 0).toFixed(2)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <span className="text-white font-mono font-semibold">{formatETB(row.max_payout)}</span>
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      {(row.winning_tax ?? 0) > 0
+                        ? <span className="text-nile-danger/80 font-mono">-{formatETB(row.winning_tax)}</span>
+                        : <span className="text-white/20 font-mono text-[10px]">exempt</span>
+                      }
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <span className="text-nile-success font-mono font-bold">{formatETB(row.net_payout)}</span>
+                    </td>
+                    <td className="px-4 py-2.5 text-center">
+                      {row.status === 'paid' ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
+                          ✓ PAID
+                        </span>
+                      ) : row.status === 'near_win' ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold/12 text-gold border border-gold/25">
+                          🛡️ INSURED
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-success/12 text-nile-success border border-nile-success/25">
+                          ⏳ WON
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {row.redeemed_at ? (
+                        <span className="text-nile-success/80 text-[10px] font-medium">
+                          {new Date(row.redeemed_at).toLocaleString('en-ET', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      ) : (
+                        <span className="text-nile-orange/60 text-[10px]">Pending</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
             {/* Totals row */}
-            {(payouts.slips ?? []).length >
-              0 && (
-              <div className="mt-2 border-t border-gold/20 bg-gold/5 rounded-b-xl px-4 py-2.5 flex items-center justify-between flex-wrap gap-x-6 gap-y-1">
-                <span className="text-gold font-bold text-xs uppercase tracking-widest">TOTALS</span>
+            {(payouts.slips ?? []).length > 0 && (
+              <div className="border-t border-gold/20 bg-gold/5 px-4 py-3 flex items-center justify-between flex-wrap gap-x-6 gap-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-gold font-bold text-[10px] uppercase tracking-widest">TOTALS</span>
+                  <span className="text-white/25 text-[10px]">· {payouts.slips?.length} slips</span>
+                </div>
                 <div className="flex items-center gap-6 ml-auto">
                   <div className="text-right">
-                    <p className="text-white/30 text-[9px] uppercase">Stake</p>
+                    <p className="text-white/30 text-[9px] uppercase tracking-wider mb-0.5">Stake</p>
                     <p className="text-white font-mono text-xs font-bold">{formatETB(payouts.totals.stakeTotal ?? 0)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-white/30 text-[9px] uppercase">Gross Win</p>
+                    <p className="text-white/30 text-[9px] uppercase tracking-wider mb-0.5">Gross Win</p>
                     <p className="text-white font-mono text-xs font-bold">{formatETB(payouts.totals.grossWinTotal)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-white/30 text-[9px] uppercase">Tax (15%)</p>
+                    <p className="text-white/30 text-[9px] uppercase tracking-wider mb-0.5">Tax (15%)</p>
                     <p className="text-nile-danger font-mono text-xs font-bold">-{formatETB(payouts.totals.taxTotal)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-white/30 text-[9px] uppercase">Net Payout</p>
+                    <p className="text-white/30 text-[9px] uppercase tracking-wider mb-0.5">Net Payout</p>
                     <p className="text-nile-success font-mono text-sm font-bold">{formatETB(payouts.totals.netPayoutTotal)}</p>
                   </div>
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 

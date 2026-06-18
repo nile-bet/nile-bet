@@ -334,11 +334,12 @@ export async function getCashierPayoutsReport(
       is_anonymous,
       created_at,
       updated_at,
+      redeemed_at,
       jackpots (name),
       bettor:profiles!jackpot_slips_bettor_id_fkey (username)
     `)
     .eq('placed_by', cashierId)
-    .in('status', ['won', 'near_win'])
+    .in('status', ['won', 'near_win', 'paid'])
     .order('created_at', { ascending: false })
   if (startDate) jq = jq.gte('created_at', startDate)
   if (endDate) jq = jq.lte('created_at', endDate)
@@ -362,7 +363,7 @@ export async function getCashierPayoutsReport(
       insurance_payout: j.status === 'near_win' ? gross : 0,
       created_at: j.created_at,
       updated_at: j.updated_at,
-      redeemed_at: (j.status === 'paid') ? (j.redeemed_at ?? j.updated_at) : null,
+      redeemed_at: j.redeemed_at ?? null,
       bettor: j.bettor,
       is_jackpot: true,
       jackpot_name: j.jackpots?.name,
@@ -370,7 +371,7 @@ export async function getCashierPayoutsReport(
   })
   const regularPayouts = (slips ?? []).map((s: any) => ({
     ...s,
-    redeemed_at: s.status !== 'pending' ? (s.updated_at ?? null) : null,
+    redeemed_at: s.redeemed_at ?? null,
     is_jackpot: false,
   }))
   const allSlips = [...regularPayouts, ...jackpotPayouts].sort(
