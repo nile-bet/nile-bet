@@ -386,52 +386,36 @@ export async function getBettorStats(
 ) {
   const supabase = await createClient()
 
-  const { data: slips } = await supabase
-    .from('slips')
-    .select(
-      'status, stake, net_payout, insurance_applied'
-    )
-    .eq('bettor_id', bettorId)
-  const { data: jackpotSlips } = await supabase
-    .from('jackpot_slips')
-    .select('status, stake')
-    .eq('bettor_id', bettorId)
-  const jackpotCount = jackpotSlips?.length ?? 0
+  const [{ data: slips }, { data: jackpotSlips }] = await Promise.all([
+    supabase.from('slips').select('status, stake, net_payout, insurance_applied').eq('bettor_id', bettorId),
+    supabase.from('jackpot_slips').select('status, stake, reward_amount').eq('bettor_id', bettorId),
+  ])
 
-  if (!slips) {
-    return {
-      totalBets: jackpotCount,
-      wonBets: 0,
-      lostBets: 0,
-      cancelledBets: 0,
-      nearWinBets: 0,
-      totalStaked: 0,
-      totalWon: 0,
-      netResult: 0,
-    }
-  }
+  const s = slips ?? []
+  const j = jackpotSlips ?? []
 
-  const totalBets = slips.length + jackpotCount
-  const wonBets = slips.filter(
-    (s) => s.status === 'won'
-  ).length
-  const lostBets = slips.filter(
-    (s) => s.status === 'lost'
-  ).length
-  const cancelledBets = slips.filter(
-    (s) => s.status === 'cancelled'
-  ).length
-  const nearWinBets = slips.filter(
-    (s) => s.status === 'near_win'
-  ).length
-  const totalStaked = slips.reduce(
-    (a, s) => a + (s.stake ?? 0),
-    0
-  )
-  const totalWon = slips
-    .filter((s) => s.status === 'won')
-    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
-  const netResult = totalWon - totalStaked
+  const regularWon    = s.filter(x => x.status === 'won').length
+  const regularLost   = s.filter(x => x.status === 'lost').length
+  const regularCancel = s.filter(x => x.status === 'cancelled').length
+  const regularNear   = s.filter(x => x.status === 'near_win').length
+  const regularStaked = s.reduce((a, x) => a + (x.stake ?? 0), 0)
+  const regularWonAmt = s.filter(x => x.status === 'won').reduce((a, x) => a + (x.net_payout ?? 0), 0)
+
+  const jpWon     = j.filter(x => x.status === 'won').length
+  const jpLost    = j.filter(x => x.status === 'lost').length
+  const jpNear    = j.filter(x => x.status === 'near_win').length
+  const jpStaked  = j.reduce((a, x) => a + (x.stake ?? 0), 0)
+  const jpWonAmt  = j.filter(x => x.status === 'won').reduce((a, x) => a + ((x.reward_amount ?? 0) * 0.85), 0)
+  const jpNearAmt = j.filter(x => x.status === 'near_win').reduce((a, x) => a + ((x.reward_amount ?? 0) * 0.85), 0)
+
+  const totalBets     = s.length + j.length
+  const wonBets       = regularWon + jpWon
+  const lostBets      = regularLost + jpLost
+  const cancelledBets = regularCancel
+  const nearWinBets   = regularNear + jpNear
+  const totalStaked   = regularStaked + jpStaked
+  const totalWon      = regularWonAmt + jpWonAmt + jpNearAmt
+  const netResult     = totalWon - totalStaked
 
   return {
     totalBets,
@@ -442,9 +426,13 @@ export async function getBettorStats(
     totalStaked,
     totalWon,
     netResult,
+    jackpotEntries: j.length,
+    jackpotWon: jpWon,
+    jackpotNearWin: jpNear,
+    jackpotStaked: jpStaked,
+    jackpotWonAmount: jpWonAmt,
   }
 }
-
 export async function getActiveCoupon(
   bettorId: string
 ) {
