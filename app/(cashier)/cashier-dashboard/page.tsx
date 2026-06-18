@@ -326,7 +326,7 @@ export default function CashierDashboard() {
   ]
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 space-y-3">
       {/* Low balance banner */}
       {!loading && isLowBalance && (
         <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-4 flex items-center justify-between">
@@ -362,23 +362,24 @@ export default function CashierDashboard() {
 
       {/* Data banner */}
       {!loading && stats && (
-        <div className="bg-nile-blue/20 border border-gold/20 rounded-lg px-4 py-2 text-xs text-white/50">
-          📅 Showing:{' '}
-          {dateFilter.type === 'custom' ? `${dateFilter.startDate?.slice(0,10)} → ${dateFilter.endDate?.slice(0,10)}` : dateFilter.type}{' '}
-          data • {stats.totalSlips} total slips
+        <div className="border border-gold/10 rounded-lg px-3 py-1.5 text-[11px] text-white/40 flex items-center gap-2" style={{background:'rgba(37,46,109,0.15)'}}>
+          <span>📅</span>
+          <span>{dateFilter.type === 'custom' ? `${dateFilter.startDate?.slice(0,10)} → ${dateFilter.endDate?.slice(0,10)}` : dateFilter.type}</span>
+          <span className="text-white/20">·</span>
+          <span>{stats.totalSlips} slips</span>
         </div>
       )}
 
       {/* ── ROW 1: 4 Main Stats ── */}
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[...Array(4)].map((_, i) => (
             <SkeletonStatCard key={i} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-slate-dark border border-gold/30 rounded-xl p-5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-slate-dark border border-gold/30 rounded-xl p-3">
             <div className="flex justify-between items-start mb-2">
               <p className="text-white/60 text-sm">
                 Wallet Balance
@@ -440,46 +441,46 @@ export default function CashierDashboard() {
       )}
       {/* ── ROW 2: 6 Slip Status Mini Cards ── */}
       {!loading && stats && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
           {/* Total */}
-          <div className="bg-slate-dark border border-nile-blue/40 rounded-xl p-3 text-center">
-            <Ticket className="w-5 h-5 text-white/50 mx-auto mb-1" />
-            <p className="text-2xl font-bold text-white font-mono">{stats.totalSlips}</p>
+          <div className="bg-slate-dark border border-nile-blue/40 rounded-lg p-2 text-center">
+            <Ticket className="w-4 h-4 text-white/50 mx-auto mb-0.5" />
+            <p className="text-xl font-bold text-white font-mono">{stats.totalSlips}</p>
             <p className="text-white/50 text-xs">Total</p>
             <p className="text-white/25 text-[10px]">{stats.regularSlips ?? 0} reg · {stats.jackpotSlipsCount ?? 0} jp</p>
           </div>
           {/* Won */}
-          <div className="bg-nile-success/10 border border-nile-success/30 rounded-xl p-3 text-center">
-            <CheckCircle className="w-5 h-5 text-nile-success mx-auto mb-1" />
-            <p className="text-2xl font-bold text-nile-success font-mono">{stats.wonSlips}</p>
+          <div className="bg-nile-success/10 border border-nile-success/30 rounded-lg p-2 text-center">
+            <CheckCircle className="w-4 h-4 text-nile-success mx-auto mb-0.5" />
+            <p className="text-xl font-bold text-nile-success font-mono">{stats.wonSlips}</p>
             <p className="text-white/50 text-xs">Won</p>
             <p className="text-white/25 text-[10px]">{stats.wonRegular ?? 0} reg · {stats.wonJackpot ?? 0} jp</p>
           </div>
           {/* Insured */}
-          <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center">
+          <div className="bg-gold/10 border border-gold/30 rounded-lg p-2 text-center">
             <span className="text-xl block mb-1">🛡️</span>
-            <p className="text-2xl font-bold text-gold font-mono">{stats.insuredSlips}</p>
+            <p className="text-xl font-bold text-gold font-mono">{stats.insuredSlips}</p>
             <p className="text-white/50 text-xs">Insured</p>
             <p className="text-white/25 text-[10px]">{stats.insuredPending} need payout</p>
           </div>
           {/* Lost */}
-          <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-3 text-center">
-            <XCircle className="w-5 h-5 text-nile-danger mx-auto mb-1" />
-            <p className="text-2xl font-bold text-nile-danger font-mono">{stats.lostSlips}</p>
+          <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-2 text-center">
+            <XCircle className="w-4 h-4 text-nile-danger mx-auto mb-0.5" />
+            <p className="text-xl font-bold text-nile-danger font-mono">{stats.lostSlips}</p>
             <p className="text-white/50 text-xs">Lost</p>
             <p className="text-white/25 text-[10px]">{stats.lostRegular ?? 0} reg · {stats.lostJackpot ?? 0} jp</p>
           </div>
           {/* Pending */}
-          <div className="bg-nile-blue/20 border border-nile-blue/30 rounded-xl p-3 text-center">
-            <Clock className="w-5 h-5 text-gold mx-auto mb-1" />
-            <p className="text-2xl font-bold text-gold font-mono">{stats.pendingSlips}</p>
+          <div className="bg-nile-blue/20 border border-nile-blue/30 rounded-lg p-2 text-center">
+            <Clock className="w-4 h-4 text-gold mx-auto mb-0.5" />
+            <p className="text-xl font-bold text-gold font-mono">{stats.pendingSlips}</p>
             <p className="text-white/50 text-xs">Pending</p>
             <p className="text-white/25 text-[10px]">{stats.pendingRegular ?? 0} reg · {stats.pendingJackpot ?? 0} jp</p>
           </div>
           {/* Cancelled */}
-          <div className="bg-nile-blue/10 border border-nile-blue/20 rounded-xl p-3 text-center">
-            <RefreshCw className="w-5 h-5 text-nile-blue-light mx-auto mb-1" />
-            <p className="text-2xl font-bold text-nile-blue-light font-mono">{stats.cancelledSlips}</p>
+          <div className="bg-nile-blue/10 border border-nile-blue/20 rounded-lg p-2 text-center">
+            <RefreshCw className="w-4 h-4 text-nile-blue-light mx-auto mb-0.5" />
+            <p className="text-xl font-bold text-nile-blue-light font-mono">{stats.cancelledSlips}</p>
             <p className="text-white/50 text-xs">Cancelled</p>
             <p className="text-white/25 text-[10px]">voided slips</p>
           </div>
@@ -488,7 +489,7 @@ export default function CashierDashboard() {
 
       {/* ── ROW 3: User Top-ups ── */}
       {!loading && stats && (
-        <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-4 flex items-center gap-4">
+        <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-3 flex items-center gap-3">
           <div className="p-3 bg-nile-blue/20 rounded-lg">
             <ArrowUpRight className="w-5 h-5 text-gold" />
           </div>
@@ -564,14 +565,14 @@ export default function CashierDashboard() {
 
       {/* ── ROW 4: Account + Net Balance ── */}
       {!loading && stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-gradient-to-br from-nile-blue to-charcoal border border-gold/30 rounded-xl p-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="bg-gradient-to-br from-nile-blue to-charcoal border border-gold/30 rounded-xl p-4">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-white/60 text-sm">
                   Account (Staked + Wallet)
                 </p>
-                <p className="text-white font-mono text-2xl font-bold mt-2">
+                <p className="text-white font-mono text-xl font-bold mt-1">
                   {formatETB(
                     stats.accountTotal
                   )}
@@ -633,8 +634,8 @@ export default function CashierDashboard() {
 
       {/* ── ROW 5: Profit Split ── */}
       {!loading && stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-nile-success/10 border border-nile-success/20 rounded-xl p-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="bg-nile-success/10 border border-nile-success/20 rounded-xl p-4">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-white/60 text-sm">
@@ -695,7 +696,7 @@ export default function CashierDashboard() {
       )}
 
       {/* ── ROW 6: Payouts Report ── */}
-      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl overflow-hidden">
+      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl overflow-hidden" style={{fontSize:"13px"}}>
         {/* Header */}
         <div className="px-5 py-3 border-b border-nile-blue/20 flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-gold" />
@@ -785,8 +786,8 @@ export default function CashierDashboard() {
       </div>
 
       {/* ── ROW 7: Recent Slips ── */}
-      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-white">
             🔀 Recent Slips
           </h3>
