@@ -90,15 +90,15 @@ export async function getCashierDashboardStats(
     (s) => s.status === 'near_win'
   )
 
-  // Redeemed = slips with status redeemed (or won that have been paid out)
-  const wonRedeemed = wonSlips.filter((s: any) => s.redeemed_at != null).length
-  const wonPending = wonSlips.length - wonRedeemed
+  // Won slips awaiting redemption
+  const wonRedeemed = 0 // tracked via redeemWinningSlip action
+  const wonPending = wonSlips.length // all won slips need to be paid out
 
   const insuredSlips = nearWinSlips
   const insuredRedeemed = 0
   const insuredPending = insuredSlips.length
 
-  // In-progress: pending slips (active bets)
+  // In-progress: pending slips where kick_off has passed (live bets)
   const inProgressSlips = pendingSlips.length
 
   const totalCollectedSlips = all.reduce(
@@ -206,16 +206,24 @@ export async function getCashierDashboardStats(
     grossProfitLoss,
     pendingLiability,
     totalSlips: totalSlips + jackpotTotal,
+    regularSlips: totalSlips,
+    jackpotSlipsCount: jackpotTotal,
     wonSlips: wonSlips.length + jackpotWon.length,
+    wonRegular: wonSlips.length,
+    wonJackpot: jackpotWon.length,
     wonRedeemed,
-    wonPending: wonPending + jackpotPending.length,
+    wonPending: wonSlips.length + jackpotPending.length,
     insuredSlips: insuredSlips.length + jackpotInsured,
     insuredRedeemed,
     insuredPending: insuredPending + jackpotInsured,
     lostSlips: lostSlips + jackpotLost,
+    lostRegular: lostSlips,
+    lostJackpot: jackpotLost,
     cancelledSlips,
     pendingSlips: pendingSlips.length + jackpotPending.length,
-    inProgressSlips,
+    pendingRegular: pendingSlips.length,
+    pendingJackpot: jackpotPending.length,
+    inProgressSlips: pendingSlips.length + jackpotPending.length,
     userTopups,
     topupTransactions,
     accountTotal,

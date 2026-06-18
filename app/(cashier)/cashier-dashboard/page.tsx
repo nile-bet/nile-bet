@@ -438,69 +438,50 @@ export default function CashierDashboard() {
           />
         </div>
       )}
-
       {/* ── ROW 2: 6 Slip Status Mini Cards ── */}
       {!loading && stats && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {/* Total */}
           <div className="bg-slate-dark border border-nile-blue/40 rounded-xl p-3 text-center">
             <Ticket className="w-5 h-5 text-white/50 mx-auto mb-1" />
-            <p className="text-2xl font-bold text-white font-mono">
-              {stats.totalSlips}
-            </p>
+            <p className="text-2xl font-bold text-white font-mono">{stats.totalSlips}</p>
             <p className="text-white/50 text-xs">Total</p>
-            <p className="text-white/30 text-[10px]">regular + jackpot</p>
+            <p className="text-white/25 text-[10px]">{stats.regularSlips ?? 0} reg · {stats.jackpotSlipsCount ?? 0} jp</p>
           </div>
-
           {/* Won */}
           <div className="bg-nile-success/10 border border-nile-success/30 rounded-xl p-3 text-center">
             <CheckCircle className="w-5 h-5 text-nile-success mx-auto mb-1" />
-            <p className="text-2xl font-bold text-nile-success font-mono">
-              {stats.wonSlips}
-            </p>
+            <p className="text-2xl font-bold text-nile-success font-mono">{stats.wonSlips}</p>
             <p className="text-white/50 text-xs">Won</p>
-            <p className="text-white/30 text-[10px]">{stats.wonPending} unpaid</p>
+            <p className="text-white/25 text-[10px]">{stats.wonRegular ?? 0} reg · {stats.wonJackpot ?? 0} jp</p>
           </div>
-
-          {/* Near Win */}
+          {/* Insured */}
           <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center">
             <span className="text-xl block mb-1">🛡️</span>
-            <p className="text-2xl font-bold text-gold font-mono">
-              {stats.insuredSlips}
-            </p>
+            <p className="text-2xl font-bold text-gold font-mono">{stats.insuredSlips}</p>
             <p className="text-white/50 text-xs">Insured</p>
-            <p className="text-white/30 text-[10px]">{stats.insuredPending} pending</p>
+            <p className="text-white/25 text-[10px]">{stats.insuredPending} need payout</p>
           </div>
-
           {/* Lost */}
           <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-3 text-center">
             <XCircle className="w-5 h-5 text-nile-danger mx-auto mb-1" />
-            <p className="text-2xl font-bold text-nile-danger font-mono">
-              {stats.lostSlips}
-            </p>
-            <p className="text-white/50 text-xs">
-              Lost
-            </p>
+            <p className="text-2xl font-bold text-nile-danger font-mono">{stats.lostSlips}</p>
+            <p className="text-white/50 text-xs">Lost</p>
+            <p className="text-white/25 text-[10px]">{stats.lostRegular ?? 0} reg · {stats.lostJackpot ?? 0} jp</p>
           </div>
-
           {/* Pending */}
           <div className="bg-nile-blue/20 border border-nile-blue/30 rounded-xl p-3 text-center">
             <Clock className="w-5 h-5 text-gold mx-auto mb-1" />
-            <p className="text-2xl font-bold text-gold font-mono">
-              {stats.pendingSlips}
-            </p>
+            <p className="text-2xl font-bold text-gold font-mono">{stats.pendingSlips}</p>
             <p className="text-white/50 text-xs">Pending</p>
-            <p className="text-white/30 text-[10px]">awaiting results</p>
+            <p className="text-white/25 text-[10px]">{stats.pendingRegular ?? 0} reg · {stats.pendingJackpot ?? 0} jp</p>
           </div>
-
           {/* Cancelled */}
           <div className="bg-nile-blue/10 border border-nile-blue/20 rounded-xl p-3 text-center">
             <RefreshCw className="w-5 h-5 text-nile-blue-light mx-auto mb-1" />
-            <p className="text-2xl font-bold text-nile-blue-light font-mono">
-              {stats.cancelledSlips}
-            </p>
+            <p className="text-2xl font-bold text-nile-blue-light font-mono">{stats.cancelledSlips}</p>
             <p className="text-white/50 text-xs">Cancelled</p>
-            <p className="text-white/30 text-[10px]">voided slips</p>
+            <p className="text-white/25 text-[10px]">voided slips</p>
           </div>
         </div>
       )}
