@@ -342,7 +342,8 @@ export async function getCashierPayoutsReport(
 
   const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => {
     const gross = j.reward_amount ?? 0
-    const tax = j.status === 'near_win' ? 0 : gross * 0.15
+    // Jackpot: won slips pay 15% tax, near_win (insured) is tax-free
+    const tax = gross * 0.15
     const net = gross - tax
     return {
       slip_id: j.slip_id,
@@ -357,7 +358,7 @@ export async function getCashierPayoutsReport(
       insurance_payout: j.status === 'near_win' ? gross : 0,
       created_at: j.created_at,
       updated_at: j.updated_at,
-      redeemed_at: j.status !== 'pending' ? (j.updated_at ?? j.created_at) : null,
+      redeemed_at: (j.status === 'paid') ? (j.redeemed_at ?? j.updated_at) : null,
       bettor: j.bettor,
       is_jackpot: true,
       jackpot_name: j.jackpots?.name,
