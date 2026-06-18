@@ -1,7 +1,6 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
-
 import { usePrint } from '@/lib/hooks/usePrint'
 import {
   Dialog,
@@ -9,16 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  getJackpotSlipById,
-} from '@/lib/actions/jackpot'
-import { useAuthStore }
-  from '@/lib/stores/authStore'
-import {
-  formatETB,
-  formatDate,
-} from '@/lib/utils/formatCurrency'
-import { Printer, Share2, Copy } from 'lucide-react'
+import { getJackpotSlipById } from '@/lib/actions/jackpot'
+import { useAuthStore } from '@/lib/stores/authStore'
+import { formatETB } from '@/lib/utils/formatCurrency'
+import { Printer, Share2, Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import QRCode from 'qrcode'
 
@@ -37,63 +30,44 @@ export function JackpotPrintReceiptModal({
   jackpot,
   bettorUsername,
 }: Props) {
-  const receiptRef =
-    useRef<HTMLDivElement>(null)
+  const receiptRef = useRef<HTMLDivElement>(null)
   const { user } = useAuthStore()
-  const [slip, setSlip] =
-    useState<any>(null)
-  const [qrDataUrl, setQrDataUrl] =
-    useState('')
-  const [barcodeDataUrl, setBarcodeDataUrl] =
-    useState('')
+  const [slip, setSlip] = useState<any>(null)
+  const [qrDataUrl, setQrDataUrl] = useState('')
+  const [barcodeDataUrl, setBarcodeDataUrl] = useState('')
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (!isOpen || !slipId) return
-
-    // Delay fetch so DB has time to commit all selections
     setTimeout(() => {
       getJackpotSlipById(slipId).then(setSlip)
     }, 2500)
-
-    // QR Code
     const url = `${window.location.origin}/slip/${slipId}`
-    QRCode.toDataURL(url, {
-      width: 120,
-      margin: 1,
-    })
+    QRCode.toDataURL(url, { width: 120, margin: 1 })
       .then(setQrDataUrl)
       .catch(console.error)
-
-    // Barcode
-    import('bwip-js')
-      .then((mod) => {
-        const bwipjs = mod.default
-        const canvas =
-          document.createElement('canvas')
-        bwipjs.toCanvas(canvas, {
-          bcid: 'code128',
-          text: slipId,
-          scale: 2,
-          height: 10,
-          width: 80,
-          includetext: true,
-          textxalign: 'center',
-          textsize: 10,
-          backgroundcolor: 'FFFFFF',
-          barcolor: '000000',
-        })
-        setBarcodeDataUrl(
-          canvas.toDataURL('image/png')
-        )
+    import('bwip-js').then((mod) => {
+      const bwipjs = mod.default
+      const canvas = document.createElement('canvas')
+      bwipjs.toCanvas(canvas, {
+        bcid: 'code128',
+        text: slipId,
+        scale: 2,
+        height: 10,
+        width: 80,
+        includetext: true,
+        textxalign: 'center',
+        textsize: 10,
+        backgroundcolor: 'FFFFFF',
+        barcolor: '000000',
       })
-      .catch(console.error)
+      setBarcodeDataUrl(canvas.toDataURL('image/png'))
+    }).catch(console.error)
   }, [isOpen, slipId])
 
   const handlePrint = usePrint(receiptRef, {
-    
     documentTitle: `NILE-Jackpot-${slipId}`,
-    onAfterPrint: () =>
-      toast.success('Receipt printed!'),
+    onAfterPrint: () => toast.success('Receipt printed!'),
     pageStyle: `
       @page { size: 80mm auto; margin: 0; }
       @media print {
@@ -103,18 +77,32 @@ export function JackpotPrintReceiptModal({
     `,
   })
 
-  const selections =
-    slip?.jackpot_slip_selections?.sort(
-      (a: any, b: any) =>
-        a.game_number - b.game_number
-    ) ?? []
+  const handleCopyId = () => {
+    navigator.clipboard.writeText(slipId)
+    setCopied(true)
+    toast.success('Slip ID copied!')
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/slip/${slipId}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `NILE Jackpot #${slipId}`, url })
+      } catch { /* cancelled */ }
+    } else {
+      navigator.clipboard.writeText(url)
+      toast.success('Link copied!')
+    }
+  }
+
+  const selections = slip?.jackpot_slip_selections?.sort(
+    (a: any, b: any) => a.game_number - b.game_number
+  ) ?? []
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={onClose}
-    >
-      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-sm">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-lg w-full" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Printer className="w-5 h-5 text-gold" />
@@ -122,41 +110,44 @@ export function JackpotPrintReceiptModal({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Actions */}
+        {/* Action buttons */}
         <div className="flex gap-2 mb-4">
           <button
             onClick={handlePrint}
             className="flex-1 flex items-center justify-center gap-2 bg-gold text-charcoal py-2.5 rounded-lg text-sm font-semibold hover:bg-gold-light"
           >
             <Printer className="w-4 h-4" />
-            Print
+            Print Receipt
           </button>
           <button
-            onClick={() => {
-              navigator.clipboard.writeText(slipId)
-              toast.success('Slip ID copied!')
-            }}
-            className="flex items-center justify-center border border-nile-blue/30 text-white/60 px-3 py-2.5 rounded-lg hover:text-white"
-          >
-            <Copy className="w-4 h-4" />
-          </button>
-          <button
-            onClick={async () => {
-              const url = `${window.location.origin}/slip/${slipId}`
-              if (navigator.share) {
-                await navigator.share({
-                  title: `NILE Jackpot #${slipId}`,
-                  url,
-                })
-              } else {
-                navigator.clipboard.writeText(url)
-                toast.success('Link copied!')
-              }
-            }}
-            className="flex items-center justify-center border border-nile-blue/30 text-white/60 px-3 py-2.5 rounded-lg hover:text-white"
+            onClick={handleShare}
+            className="flex items-center justify-center gap-1.5 border border-nile-blue/30 text-white/60 px-3 py-2.5 rounded-lg text-sm hover:text-white"
           >
             <Share2 className="w-4 h-4" />
           </button>
+          <button
+            onClick={handleCopyId}
+            className="flex items-center justify-center gap-1.5 border border-nile-blue/30 text-white/60 px-3 py-2.5 rounded-lg text-sm hover:text-white"
+          >
+            {copied ? (
+              <Check className="w-4 h-4 text-nile-success" />
+            ) : (
+              <Copy className="w-4 h-4" />
+            )}
+          </button>
+        </div>
+
+        {/* Slip summary */}
+        <div className="bg-charcoal/50 rounded-xl p-4 mb-4 text-center">
+          <p className="text-white/50 text-xs mb-1">JACKPOT SLIP ID</p>
+          <p className="text-gold font-mono text-2xl font-bold tracking-widest">#{slipId}</p>
+          <p className="text-white/50 text-xs mt-1">🏆 {jackpot?.name}</p>
+          <p className="text-nile-success text-sm mt-1">
+            Win All: {formatETB(jackpot?.win_all_reward ?? 0)}
+          </p>
+          {(jackpot?.near_win_reward ?? 0) > 0 && (
+            <p className="text-gold text-xs mt-0.5">🛡️ Miss 1: {formatETB(jackpot?.near_win_reward ?? 0)}</p>
+          )}
         </div>
 
         {/* Retry if selections missing */}
@@ -172,18 +163,13 @@ export function JackpotPrintReceiptModal({
           </div>
         )}
 
-        {/* Slip summary */}
-        <div className="bg-charcoal/50 rounded-xl p-3 mb-3 text-center">
-          <p className="text-white/50 text-xs mb-0.5">JACKPOT SLIP</p>
-          <p className="text-gold font-mono text-2xl font-bold">#{slipId}</p>
-          <p className="text-white/50 text-xs mt-1">🏆 {jackpot?.name}</p>
-          <p className="text-gold font-mono text-sm mt-1">Entry: {formatETB(jackpot?.fixed_stake ?? 50)}</p>
-        </div>
-
-        {/* Scrollable receipt preview */}
-        <div className="border border-dashed border-nile-blue/30 rounded-lg overflow-y-auto" style={{ maxHeight: "45vh" }}>
-          <div style={{ transform: "scale(0.72)", transformOrigin: 'top center', backgroundColor: 'white' }}>
-            {/* Thermal receipt content */}
+        {/* Receipt preview */}
+        <div
+          className="border border-dashed border-nile-blue/30 rounded-lg overflow-hidden"
+          style={{ maxHeight: '55vh', overflowY: 'auto' }}
+        >
+          <div style={{ transform: 'scale(0.85)', transformOrigin: 'top center', backgroundColor: 'white' }}>
+            {/* Thermal receipt */}
             <div
               ref={receiptRef}
               className="thermal-receipt"
@@ -191,96 +177,33 @@ export function JackpotPrintReceiptModal({
                 width: '80mm',
                 backgroundColor: '#FFFFFF',
                 color: '#000000',
-                fontFamily:
-                  "'Courier New', monospace",
+                fontFamily: "'Courier New', monospace",
                 fontSize: '11px',
                 padding: '4mm',
                 lineHeight: '1.4',
               }}
             >
               {/* Header */}
-              <div
-                style={{
-                  textAlign: 'center',
-                  borderBottom:
-                    '1px dashed #000',
-                  paddingBottom: '4px',
-                  marginBottom: '6px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                    letterSpacing: '3px',
-                  }}
-                >
-                  NILE BET
-                </div>
-                <div
-                  style={{ fontSize: '10px' }}
-                >
-                  Flow into Wins
-                </div>
-                <div
-                  style={{
-                    fontSize: '13px',
-                    fontWeight: 'bold',
-                    marginTop: '2px',
-                  }}
-                >
-                  🏆 WEEKEND JACKPOT
-                </div>
+              <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: '4px', marginBottom: '6px' }}>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '3px' }}>NILE BET</div>
+                <div style={{ fontSize: '10px' }}>Flow into Wins</div>
+                <div style={{ fontSize: '13px', fontWeight: 'bold', marginTop: '2px' }}>🏆 WEEKEND JACKPOT</div>
               </div>
 
               {/* Slip ID */}
-              <div
-                style={{
-                  textAlign: 'center',
-                  margin: '4px 0',
-                }}
-              >
-                <div
-                  style={{ fontSize: '10px' }}
-                >
-                  SLIP ID
-                </div>
-                <div
-                  style={{
-                    fontSize: '20px',
-                    fontWeight: 'bold',
-                    letterSpacing: '2px',
-                  }}
-                >
-                  #{slipId}
-                </div>
+              <div style={{ textAlign: 'center', margin: '4px 0' }}>
+                <div style={{ fontSize: '10px' }}>SLIP ID</div>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', letterSpacing: '2px' }}>#{slipId}</div>
               </div>
 
               {/* Barcode */}
               {barcodeDataUrl && (
-                <div
-                  style={{
-                    textAlign: 'center',
-                  }}
-                >
-                  <img
-                    src={barcodeDataUrl}
-                    alt="barcode"
-                    style={{
-                      maxWidth: '100%',
-                      height: 'auto',
-                    }}
-                  />
+                <div style={{ textAlign: 'center' }}>
+                  <img src={barcodeDataUrl} alt="barcode" style={{ maxWidth: '100%', height: 'auto' }} />
                 </div>
               )}
 
-              <div
-                style={{
-                  borderTop:
-                    '1px dashed #000',
-                  margin: '4px 0',
-                }}
-              />
+              <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
 
               {/* Info */}
               <div style={{ fontSize: '10px', marginBottom: '4px' }}>
@@ -299,14 +222,14 @@ export function JackpotPrintReceiptModal({
                 {!slip?.is_anonymous && (
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Bettor:</span>
-                    <span>{bettorUsername ? bettorUsername : user ? `@${user.username}` : 'Anonymous'}</span>
+                    <span>{bettorUsername ?? (user ? `@${user.username}` : 'Anonymous')}</span>
                   </div>
                 )}
               </div>
 
               <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
 
-              {/* Jackpot rewards */}
+              {/* Rewards */}
               <div style={{ fontSize: '10px', marginBottom: '4px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Win All 12:</span>
@@ -314,7 +237,7 @@ export function JackpotPrintReceiptModal({
                 </div>
                 {(jackpot?.near_win_reward ?? 0) > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Miss 1:</span>
+                    <span>Miss 1 (Insured):</span>
                     <span>{formatETB(jackpot?.near_win_reward ?? 0)}</span>
                   </div>
                 )}
@@ -358,8 +281,7 @@ export function JackpotPrintReceiptModal({
                         {sel.game_number}. {match?.home_team ?? 'Home'} v {match?.away_team ?? 'Away'}
                       </span>
                       <span style={{ fontWeight: 'bold', marginLeft: '6px', minWidth: '14px', textAlign: 'right' }}>
-                        {pick}
-                        {isCorrect ? ' ✓' : isWrong ? ' ✗' : ''}
+                        {pick}{isCorrect ? ' ✓' : isWrong ? ' ✗' : ''}
                       </span>
                     </div>
                   )
@@ -368,47 +290,16 @@ export function JackpotPrintReceiptModal({
 
               {/* QR */}
               {qrDataUrl && (
-                <div
-                  style={{
-                    textAlign: 'center',
-                    marginTop: '6px',
-                  }}
-                >
-                  <img
-                    src={qrDataUrl}
-                    alt="QR"
-                    style={{
-                      width: '80px',
-                      height: '80px',
-                    }}
-                  />
-                  <div
-                    style={{
-                      fontSize: '8px',
-                      color: '#888',
-                    }}
-                  >
-                    Scan to verify
-                  </div>
+                <div style={{ textAlign: 'center', marginTop: '6px' }}>
+                  <img src={qrDataUrl} alt="QR" style={{ width: '80px', height: '80px' }} />
+                  <div style={{ fontSize: '8px', color: '#888' }}>Scan to verify</div>
                 </div>
               )}
 
               {/* Footer */}
-              <div
-                style={{
-                  borderTop:
-                    '1px dashed #000',
-                  marginTop: '6px',
-                  paddingTop: '4px',
-                  textAlign: 'center',
-                  fontSize: '9px',
-                  color: '#555',
-                }}
-              >
+              <div style={{ borderTop: '1px dashed #000', marginTop: '6px', paddingTop: '4px', textAlign: 'center', fontSize: '9px', color: '#555' }}>
                 <div>Good luck! 🏆</div>
-                <div style={{ fontWeight: 'bold' }}>
-                  NILE BET
-                </div>
+                <div style={{ fontWeight: 'bold' }}>NILE BET</div>
                 <div>Must be 18+ to bet</div>
               </div>
             </div>
