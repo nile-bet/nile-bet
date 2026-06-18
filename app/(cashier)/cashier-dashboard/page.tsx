@@ -448,9 +448,8 @@ export default function CashierDashboard() {
             <p className="text-2xl font-bold text-white font-mono">
               {stats.totalSlips}
             </p>
-            <p className="text-white/50 text-xs">
-              Total
-            </p>
+            <p className="text-white/50 text-xs">Total</p>
+            <p className="text-white/30 text-[10px]">regular + jackpot</p>
           </div>
 
           {/* Won */}
@@ -459,28 +458,18 @@ export default function CashierDashboard() {
             <p className="text-2xl font-bold text-nile-success font-mono">
               {stats.wonSlips}
             </p>
-            <p className="text-white/50 text-xs">
-              Won
-            </p>
-            <p className="text-white/30 text-[10px]">
-              Pending: {stats.wonPending}
-            </p>
+            <p className="text-white/50 text-xs">Won</p>
+            <p className="text-white/30 text-[10px]">{stats.wonPending} unpaid</p>
           </div>
 
           {/* Near Win */}
           <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center">
-            <span className="text-xl block mb-1">
-              🛡️
-            </span>
+            <span className="text-xl block mb-1">🛡️</span>
             <p className="text-2xl font-bold text-gold font-mono">
               {stats.insuredSlips}
             </p>
-            <p className="text-white/50 text-xs">
-              Insured
-            </p>
-            <p className="text-white/30 text-[10px]">
-              Pending: {stats.insuredPending}
-            </p>
+            <p className="text-white/50 text-xs">Insured</p>
+            <p className="text-white/30 text-[10px]">{stats.insuredPending} pending</p>
           </div>
 
           {/* Lost */}
@@ -500,20 +489,18 @@ export default function CashierDashboard() {
             <p className="text-2xl font-bold text-gold font-mono">
               {stats.pendingSlips}
             </p>
-            <p className="text-white/50 text-xs">
-              Pending
-            </p>
+            <p className="text-white/50 text-xs">Pending</p>
+            <p className="text-white/30 text-[10px]">awaiting results</p>
           </div>
 
-          {/* In Progress */}
+          {/* Cancelled */}
           <div className="bg-nile-blue/10 border border-nile-blue/20 rounded-xl p-3 text-center">
             <RefreshCw className="w-5 h-5 text-nile-blue-light mx-auto mb-1" />
             <p className="text-2xl font-bold text-nile-blue-light font-mono">
-              {stats.inProgressSlips}
+              {stats.cancelledSlips}
             </p>
-            <p className="text-white/50 text-xs">
-              In Progress
-            </p>
+            <p className="text-white/50 text-xs">Cancelled</p>
+            <p className="text-white/30 text-[10px]">voided slips</p>
           </div>
         </div>
       )}

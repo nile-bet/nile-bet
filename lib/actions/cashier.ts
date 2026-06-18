@@ -58,7 +58,7 @@ export async function getCashierDashboardStats(
   let q = supabase
     .from('slips')
     .select(
-      'stake, net_payout, winning_tax, status, insurance_applied, insurance_payout, placed_by, created_at'
+      'stake, net_payout, winning_tax, status, insurance_applied, insurance_payout, placed_by, created_at, updated_at'
     )
     .eq('placed_by', cashierId)
 
@@ -90,19 +90,16 @@ export async function getCashierDashboardStats(
     (s) => s.status === 'near_win'
   )
 
-  // Separate redeemed vs pending payouts
-  // For simplicity, count all won as pending
-  // (in a real system you'd track redemption)
-  const wonRedeemed = 0
-  const wonPending = wonSlips.length
+  // Redeemed = slips with status redeemed (or won that have been paid out)
+  const wonRedeemed = wonSlips.filter((s: any) => s.redeemed_at != null).length
+  const wonPending = wonSlips.length - wonRedeemed
 
   const insuredSlips = nearWinSlips
   const insuredRedeemed = 0
   const insuredPending = insuredSlips.length
 
-  // In-progress: at least one match started
-  // but slip still pending
-  const inProgressSlips = 0
+  // In-progress: pending slips (active bets)
+  const inProgressSlips = pendingSlips.length
 
   const totalCollectedSlips = all.reduce(
     (a, s) => a + (s.stake ?? 0),
