@@ -290,51 +290,28 @@ export async function getCashierPayoutsReport(
     endDate = dateFilter.endDate ?? null
   }
 
+  // Fetch regular slips: won, near_win (insured), paid (redeemed)
   let q = supabase
     .from('slips')
-    .select(
-      `
-      slip_id,
-      stake,
-      total_odds,
-      max_payout,
-      winning_tax,
-      net_payout,
-      status,
-      is_anonymous,
-      insurance_applied,
-      insurance_payout,
-      redeemed_at,
-      redeemed_by,
-      created_at,
+    .select(`
+      slip_id, stake, total_odds, max_payout, winning_tax,
+      net_payout, status, is_anonymous, insurance_applied,
+      insurance_payout, redeemed_at, redeemed_by, created_at,
       bettor:profiles!slips_bettor_id_fkey (username)
-    `
-    )
+    `)
     .eq('placed_by', cashierId)
     .in('status', ['won', 'near_win', 'paid'])
     .order('created_at', { ascending: false })
-
-  if (startDate) {
-    q = q.gte('created_at', startDate)
-  }
-  if (endDate) {
-    q = q.lte('created_at', endDate)
-  }
-
+  if (startDate) q = q.gte('created_at', startDate)
+  if (endDate) q = q.lte('created_at', endDate)
   const { data: slips } = await q
 
-  // Jackpot winning slips
+  // Fetch jackpot slips: won, near_win (insured), paid (redeemed)
   let jq = supabase
     .from('jackpot_slips')
     .select(`
-      slip_id,
-      stake,
-      reward_amount,
-      status,
-      is_anonymous,
-      created_at,
-      updated_at,
-      redeemed_at,
+      slip_id, stake, reward_amount, status, is_anonymous,
+      created_at, updated_at, redeemed_at,
       jackpots (name),
       bettor:profiles!jackpot_slips_bettor_id_fkey (username)
     `)
@@ -345,10 +322,38 @@ export async function getCashierPayoutsReport(
   if (endDate) jq = jq.lte('created_at', endDate)
   const { data: jackpotSlips } = await jq
 
+  // Normalize regular slips
+  // status: 'won'|'near_win' = pending payout, 'paid' = redeemed
+  const regularPayouts = (slips ?? []).map((s: any) => {
+    const isRedeemed = s.status === 'paid'
+    const isInsured = s.status === 'near_win' || (s.status === 'paid' && s.insurance_applied)
+    const netAmt = s.net_payout ?? 0
+    const insuredAmt = s.insurance_payout ?? 0
+    return {
+      slip_id: s.slip_id,
+      stake: s.stake,
+      total_odds: s.total_odds,
+      max_payout: s.max_payout,
+      winning_tax: s.winning_tax,
+      net_payout: isInsured ? insuredAmt : netAmt,
+      payout_status: isRedeemed ? 'redeemed' : 'pending',
+      is_anonymous: s.is_anonymous,
+      insurance_applied: s.insurance_applied,
+      created_at: s.created_at,
+      redeemed_at: s.redeemed_at ?? null,
+      bettor: s.bettor,
+      is_jackpot: false,
+      is_insured: isInsured,
+    }
+  })
+
+  // Normalize jackpot slips
+  // near_win = insured stake refund (no tax), won = 15% tax, paid = redeemed
   const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => {
+    const isRedeemed = j.status === 'paid'
+    const isInsured = j.status === 'near_win' || (j.status === 'paid' && (j.reward_amount ?? 0) < (j.stake ?? 0) * 2)
     const gross = j.reward_amount ?? 0
-    // Jackpot: won slips pay 15% tax, near_win (insured) is stake refund = tax-free
-    const tax = j.status === 'won' ? gross * 0.15 : 0
+    const tax = isInsured ? 0 : gross * 0.15 // near_win = stake refund, no tax
     const net = gross - tax
     return {
       slip_id: j.slip_id,
@@ -357,30 +362,48 @@ export async function getCashierPayoutsReport(
       max_payout: gross,
       winning_tax: tax,
       net_payout: net,
-      status: j.status,
+      payout_status: isRedeemed ? 'redeemed' : 'pending',
       is_anonymous: j.is_anonymous,
-      insurance_applied: j.status === 'near_win',
-      insurance_payout: j.status === 'near_win' ? gross : 0,
+      insurance_applied: isInsured,
       created_at: j.created_at,
-      updated_at: j.updated_at,
       redeemed_at: j.redeemed_at ?? null,
       bettor: j.bettor,
       is_jackpot: true,
       jackpot_name: j.jackpots?.name,
+      is_insured: isInsured,
     }
   })
-  const regularPayouts = (slips ?? []).map((s: any) => ({
-    ...s,
-    redeemed_at: s.redeemed_at ?? null,
-    is_jackpot: false,
-  }))
+
   const allSlips = [...regularPayouts, ...jackpotPayouts].sort(
     (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
-  const totalGross = allSlips.reduce((a: any, s: any) => a + (s.max_payout ?? 0), 0)
-  const totalTax = allSlips.reduce((a: any, s: any) => a + (s.winning_tax ?? 0), 0)
-  const totalNet = allSlips.reduce((a: any, s: any) => a + (s.net_payout ?? 0), 0)
-  const totalStake = allSlips.reduce((a: any, s: any) => a + (s.stake ?? 0), 0)
+
+  // ── Summary card calculations ──
+  // 1. Total Won = all won slips net (pending + redeemed, excl insured)
+  const totalWonNet = allSlips
+    .filter(s => !s.is_insured)
+    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
+
+  // 2. Won Redeemed = redeemed won slips net
+  const wonRedeemedNet = allSlips
+    .filter(s => !s.is_insured && s.payout_status === 'redeemed')
+    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
+
+  // 3. Insured Redeemed = redeemed insured slips net
+  const insuredRedeemedNet = allSlips
+    .filter(s => s.is_insured && s.payout_status === 'redeemed')
+    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
+
+  // 4. Pending Payout = all slips not yet redeemed
+  const pendingPayoutNet = allSlips
+    .filter(s => s.payout_status === 'pending')
+    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
+
+  const totalGross = allSlips.reduce((a, s) => a + (s.max_payout ?? 0), 0)
+  const totalTax   = allSlips.reduce((a, s) => a + (s.winning_tax ?? 0), 0)
+  const totalNet   = allSlips.reduce((a, s) => a + (s.net_payout ?? 0), 0)
+  const totalStake = allSlips.reduce((a, s) => a + (s.stake ?? 0), 0)
+
   return {
     slips: allSlips,
     totals: {
@@ -388,6 +411,14 @@ export async function getCashierPayoutsReport(
       taxTotal: totalTax,
       netPayoutTotal: totalNet,
       stakeTotal: totalStake,
+      totalWonNet,
+      wonRedeemedNet,
+      insuredRedeemedNet,
+      pendingPayoutNet,
+      totalWonCount: allSlips.filter(s => !s.is_insured).length,
+      wonRedeemedCount: allSlips.filter(s => !s.is_insured && s.payout_status === 'redeemed').length,
+      insuredRedeemedCount: allSlips.filter(s => s.is_insured && s.payout_status === 'redeemed').length,
+      pendingCount: allSlips.filter(s => s.payout_status === 'pending').length,
     },
   }
 }

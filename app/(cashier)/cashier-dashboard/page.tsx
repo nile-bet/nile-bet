@@ -231,10 +231,15 @@ export default function CashierDashboard() {
       ),
     },
     {
-      key: 'status',
+    {
+      key: 'payout_status',
       label: 'Status',
       render: (v: any) => (
-        <StatusBadge status={v} type="slip" />
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+          v === 'redeemed'
+            ? 'text-nile-success border-nile-success/30 bg-nile-success/10'
+            : 'text-nile-orange border-nile-orange/30 bg-nile-orange/10'
+        }`}>{v === 'redeemed' ? 'REDEEMED' : 'PENDING'}</span>
       ),
     },
     {
@@ -646,9 +651,9 @@ export default function CashierDashboard() {
                   <CheckCircle className="w-3.5 h-3.5 text-nile-success" />
                 </div>
               </div>
-              <p className="text-nile-success font-mono text-2xl font-bold leading-none">{formatETB(stats.totalWon)}</p>
+              <p className="text-nile-success font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.totalWonNet ?? stats.totalWon ?? 0)}</p>
               <div className="mt-2.5 pt-2.5 border-t border-nile-success/10">
-                <p className="text-white/35 text-[10px]">{(stats.wonRedeemed ?? 0) + (stats.wonPending ?? 0)} winning slips · net after 15% tax</p>
+                <p className="text-white/35 text-[10px]">{payouts?.totals?.totalWonCount ?? 0} winning slips · net after 15% tax</p>
               </div>
             </div>
 
@@ -660,11 +665,11 @@ export default function CashierDashboard() {
                   <CheckCircle className="w-3.5 h-3.5 text-nile-blue-light" />
                 </div>
               </div>
-              <p className="text-nile-blue-light font-mono text-2xl font-bold leading-none">{formatETB(stats.wonRedeemedAmount)}</p>
+              <p className="text-nile-blue-light font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.wonRedeemedNet ?? 0)}</p>
               <div className="mt-2.5 pt-2.5 border-t border-nile-blue-light/10 flex items-center justify-between">
-                <span className="text-white/35 text-[10px]">{stats.wonRedeemed ?? 0} slips paid out</span>
-                {(stats.wonPendingAmount ?? 0) > 0 && (
-                  <span className="text-nile-orange/70 text-[10px] font-medium">{formatETB(stats.wonPendingAmount)} due</span>
+                <span className="text-white/35 text-[10px]">{payouts?.totals?.wonRedeemedCount ?? 0} slips paid out</span>
+                {(payouts?.totals?.pendingPayoutNet ?? 0 ?? 0) > 0 && (
+                  <span className="text-nile-orange/70 text-[10px] font-medium">{formatETB(payouts?.totals?.pendingPayoutNet ?? 0)} due</span>
                 )}
               </div>
             </div>
@@ -677,11 +682,11 @@ export default function CashierDashboard() {
                   <CheckCircle className="w-3.5 h-3.5 text-gold" />
                 </div>
               </div>
-              <p className="text-gold font-mono text-2xl font-bold leading-none">{formatETB(stats.insuredTotal)}</p>
+              <p className="text-gold font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.insuredRedeemedNet ?? 0)}</p>
               <div className="mt-2.5 pt-2.5 border-t border-gold/10 flex items-center justify-between">
-                <span className="text-white/35 text-[10px]">✓ {stats.insuredRedeemed ?? 0} paid</span>
-                {(stats.insuredPending ?? 0) > 0
-                  ? <span className="text-nile-orange/70 text-[10px] font-medium">⏳ {stats.insuredPending} pending</span>
+                  <span className="text-white/35 text-[10px]">✓ {payouts?.totals?.insuredRedeemedCount ?? 0} paid</span>
+                {(payouts?.totals?.pendingCount ?? 0) > 0
+                  ? <span className="text-nile-orange/70 text-[10px] font-medium">⏳ {payouts?.totals?.pendingCount ?? 0} pending</span>
                   : <span className="text-white/25 text-[10px]">all settled</span>
                 }
               </div>
@@ -689,8 +694,8 @@ export default function CashierDashboard() {
 
             {/* Pending Payout */}
             <div className="rounded-xl p-3.5" style={{
-              background: (stats.pendingPayout ?? 0) > 0 ? 'rgba(249,115,22,0.08)' : 'rgba(255,255,255,0.03)',
-              border: (stats.pendingPayout ?? 0) > 0 ? '1px solid rgba(249,115,22,0.25)' : '1px solid rgba(255,255,255,0.06)'
+              background: (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? 'rgba(249,115,22,0.08)' : 'rgba(255,255,255,0.03)',
+              border: (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? '1px solid rgba(249,115,22,0.25)' : '1px solid rgba(255,255,255,0.06)'
             }}>
               <div className="flex items-center justify-between mb-2.5">
                 <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Pending Payout</span>
@@ -698,12 +703,12 @@ export default function CashierDashboard() {
                   <Clock className="w-3.5 h-3.5 text-nile-orange" />
                 </div>
               </div>
-              <p className={cn('font-mono text-2xl font-bold leading-none', (stats.pendingPayout ?? 0) > 0 ? 'text-nile-orange' : 'text-white/30')}>
+              <p className={cn('font-mono text-2xl font-bold leading-none', (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? 'text-nile-orange' : 'text-white/30')}>
                 {formatETB(stats.pendingPayout ?? 0)}
               </p>
               <div className="mt-2.5 pt-2.5 border-t border-nile-orange/10">
                 <p className="text-white/35 text-[10px]">
-                  {stats.pendingPayoutSlips ?? 0} slips awaiting payment
+                <p className="text-white/35 text-[10px]">{payouts?.totals?.pendingCount ?? 0} slips awaiting payment</p>
                 </p>
               </div>
             </div>
