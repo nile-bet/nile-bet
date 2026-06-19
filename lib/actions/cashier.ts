@@ -441,8 +441,13 @@ export async function getRecentSlipsCashier(
       stake,
       total_odds,
       net_payout,
+      max_payout,
+      winning_tax,
       status,
       is_anonymous,
+      insurance_applied,
+      insurance_payout,
+      redeemed_at,
       created_at,
       bettor:profiles!slips_bettor_id_fkey (username)
     `
@@ -469,7 +474,8 @@ export async function getRecentSlipsCashier(
       status,
       is_anonymous,
       created_at,
-      jackpots (name),
+      redeemed_at,
+      jackpots (name, fixed_stake),
       bettor:profiles!jackpot_slips_bettor_id_fkey (username)
     `)
     .eq('placed_by', cashierId)
@@ -480,21 +486,59 @@ export async function getRecentSlipsCashier(
   }
   const { data: jackpotData } = await jjq
 
-  const jackpotMapped = (jackpotData ?? []).map((j: any) => ({
-    id: j.id,
-    slip_id: j.slip_id,
-    stake: j.stake,
-    total_odds: null,
-    net_payout: j.reward_amount,
-    status: j.status,
-    is_anonymous: j.is_anonymous,
-    created_at: j.created_at,
-    bettor: j.bettor,
-    is_jackpot: true,
-    jackpot_name: j.jackpots?.name,
-  }))
+  // Regular slips: compute payout_status + is_insured to match Payouts Report semantics
+  const regularMapped = (data ?? []).map((s: any) => {
+    const isRedeemed = s.status === 'paid'
+    const isInsured = s.insurance_applied === true || s.status === 'near_win'
+    const netAmt = isInsured ? (s.insurance_payout ?? s.stake ?? 0) : (s.net_payout ?? 0)
+    return {
+      id: s.id,
+      slip_id: s.slip_id,
+      stake: s.stake,
+      total_odds: s.total_odds,
+      net_payout: netAmt,
+      status: s.status,
+      payout_status: ['won', 'near_win', 'paid'].includes(s.status)
+        ? (isRedeemed ? 'redeemed' : 'pending')
+        : null,
+      is_insured: isInsured,
+      is_anonymous: s.is_anonymous,
+      redeemed_at: s.redeemed_at ?? null,
+      created_at: s.created_at,
+      bettor: s.bettor,
+      is_jackpot: false,
+    }
+  })
 
-  const combined = [...(data ?? []), ...jackpotMapped]
+  // Jackpot slips: same tax-adjusted net + payout_status logic as Payouts Report
+  const jackpotMapped = (jackpotData ?? []).map((j: any) => {
+    const isRedeemed = j.status === 'paid'
+    const isInsured = j.status === 'near_win' ||
+      (isRedeemed && (j.reward_amount ?? 0) <= (j.jackpots?.fixed_stake ?? j.stake ?? 0) * 1.1)
+    const gross = j.reward_amount ?? 0
+    const tax = isInsured ? 0 : Math.round(gross * 0.15 * 100) / 100
+    const net = Math.round((gross - tax) * 100) / 100
+    return {
+      id: j.id,
+      slip_id: j.slip_id,
+      stake: j.stake,
+      total_odds: null,
+      net_payout: ['won', 'near_win', 'paid'].includes(j.status) ? net : gross,
+      status: j.status,
+      payout_status: ['won', 'near_win', 'paid'].includes(j.status)
+        ? (isRedeemed ? 'redeemed' : 'pending')
+        : null,
+      is_insured: isInsured,
+      is_anonymous: j.is_anonymous,
+      redeemed_at: j.redeemed_at ?? null,
+      created_at: j.created_at,
+      bettor: j.bettor,
+      is_jackpot: true,
+      jackpot_name: j.jackpots?.name,
+    }
+  })
+
+  const combined = [...regularMapped, ...jackpotMapped]
     .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 50)
 

@@ -231,14 +231,35 @@ export default function CashierDashboard() {
       ),
     },
     {
-      key: 'payout_status',
+      key: 'status',
       label: 'Status',
+      render: (v: any, row: any) => {
+        if (row.payout_status) {
+          // won/near_win/paid slips → show redeemed/pending + insured badge
+          return row.payout_status === 'redeemed' ? (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border text-nile-blue-light border-nile-blue-light/25 bg-nile-blue-light/15">
+              {row.is_insured ? '🛡️ PAID' : '✓ PAID'}
+            </span>
+          ) : (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border text-nile-orange border-nile-orange/25 bg-nile-orange/12">
+              {row.is_insured ? '🛡️ PENDING' : '⏳ PENDING'}
+            </span>
+          )
+        }
+        return <StatusBadge status={v} type="slip" />
+      },
+    },
+    {
+      key: 'redeemed_at',
+      label: 'Redeemed At',
       render: (v: any) => (
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-          v === 'redeemed'
-            ? 'text-nile-success border-nile-success/30 bg-nile-success/10'
-            : 'text-nile-orange border-nile-orange/30 bg-nile-orange/10'
-        }`}>{v === 'redeemed' ? 'REDEEMED' : 'PENDING'}</span>
+        v ? (
+          <span className="text-nile-success/80 text-[10px] font-medium">
+            {new Date(v).toLocaleString('en-ET', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          </span>
+        ) : (
+          <span className="text-white/20 text-[10px]">—</span>
+        )
       ),
     },
     {
@@ -703,12 +724,10 @@ export default function CashierDashboard() {
                 </div>
               </div>
               <p className={cn('font-mono text-2xl font-bold leading-none', (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? 'text-nile-orange' : 'text-white/30')}>
-                {formatETB(stats.pendingPayout ?? 0)}
+                {formatETB(payouts?.totals?.pendingPayoutNet ?? 0)}
               </p>
               <div className="mt-2.5 pt-2.5 border-t border-nile-orange/10">
-                <p className="text-white/35 text-[10px]">
                 <p className="text-white/35 text-[10px]">{payouts?.totals?.pendingCount ?? 0} slips awaiting payment</p>
-                </p>
               </div>
             </div>
           </div>
@@ -768,11 +787,17 @@ export default function CashierDashboard() {
                       <span className="text-nile-success font-mono font-bold">{formatETB(row.net_payout)}</span>
                     </td>
                     <td className="px-4 py-2.5 text-center">
-                      {row.status === 'paid' ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
-                          ✓ PAID
-                        </span>
-                      ) : row.status === 'near_win' ? (
+                      {row.payout_status === 'redeemed' ? (
+                        row.is_insured ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
+                            🛡️ INSURED · PAID
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
+                            ✓ PAID
+                          </span>
+                        )
+                      ) : row.is_insured ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold/12 text-gold border border-gold/25">
                           🛡️ INSURED
                         </span>
