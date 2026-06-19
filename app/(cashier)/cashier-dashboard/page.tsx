@@ -231,7 +231,6 @@ export default function CashierDashboard() {
       ),
     },
     {
-    {
       key: 'payout_status',
       label: 'Status',
       render: (v: any) => (
@@ -668,7 +667,7 @@ export default function CashierDashboard() {
               <p className="text-nile-blue-light font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.wonRedeemedNet ?? 0)}</p>
               <div className="mt-2.5 pt-2.5 border-t border-nile-blue-light/10 flex items-center justify-between">
                 <span className="text-white/35 text-[10px]">{payouts?.totals?.wonRedeemedCount ?? 0} slips paid out</span>
-                {(payouts?.totals?.pendingPayoutNet ?? 0 ?? 0) > 0 && (
+                {(payouts?.totals?.pendingPayoutNet ?? 0) > 0 && (
                   <span className="text-nile-orange/70 text-[10px] font-medium">{formatETB(payouts?.totals?.pendingPayoutNet ?? 0)} due</span>
                 )}
               </div>
