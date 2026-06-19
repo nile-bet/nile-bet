@@ -48,6 +48,8 @@ export default function CashierDashboard() {
     useState<any[]>([])
   const [slipStatus, setSlipStatus] =
     useState('all')
+  const [slipCategory, setSlipCategory] =
+    useState<'all' | 'regular' | 'jackpot'>('all')
   const [loading, setLoading] =
     useState(true)
   const [jackpotExpanded, setJackpotExpanded] = useState(false)
@@ -191,9 +193,14 @@ export default function CashierDashboard() {
       key: 'slip_id',
       label: 'Slip ID',
       render: (v: any, row: any) => (
-        <span className="text-gold font-mono text-xs">
-          {row.is_jackpot && '🏆 '}#{v}
-        </span>
+        <div>
+          <span className="text-gold font-mono text-xs">
+            {row.is_jackpot && '🏆 '}#{v}
+          </span>
+          {row.is_jackpot && row.jackpot_name && (
+            <span className="text-gold/50 text-[9px] block">{row.jackpot_name}</span>
+          )}
+        </div>
       ),
     },
     {
@@ -756,10 +763,13 @@ export default function CashierDashboard() {
                 ) : (payouts.slips ?? []).map((row: any, i: number) => (
                   <tr key={row.slip_id ?? i} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-4 py-2.5">
-                      <span className="font-mono text-white/40 text-[11px]">
-                        {row.is_jackpot ? <span className="text-gold mr-1">🏆</span> : null}
+                      <span className="font-mono text-white/40 text-[11px] flex items-center gap-1">
+                        {row.is_jackpot ? <span className="text-gold">🏆</span> : null}
                         ···{String(row.slip_id ?? '').slice(-6)}
                       </span>
+                      {row.is_jackpot && row.jackpot_name && (
+                        <span className="text-gold/50 text-[9px] block mt-0.5">{row.jackpot_name}</span>
+                      )}
                     </td>
                     <td className="px-4 py-2.5">
                       <span className="text-white/80 font-medium">
@@ -858,32 +868,49 @@ export default function CashierDashboard() {
           <h3 className="font-semibold text-white">
             🔀 Recent Slips
           </h3>
-          <select
-            value={slipStatus}
-            onChange={(e) =>
-              setSlipStatus(e.target.value)
-            }
-            className="bg-charcoal border border-nile-blue/30 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none"
-          >
-            <option value="all">
-              All Status
-            </option>
-            <option value="pending">
-              Pending
-            </option>
-            <option value="won">Won</option>
-            <option value="lost">Lost</option>
-            <option value="near_win">
-              Near Win
-            </option>
-            <option value="cancelled">
-              Cancelled
-            </option>
-          </select>
+          <div className="flex items-center gap-2">
+            <select
+              value={slipCategory}
+              onChange={(e) =>
+                setSlipCategory(e.target.value as 'all' | 'regular' | 'jackpot')
+              }
+              className="bg-charcoal border border-nile-blue/30 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none"
+            >
+              <option value="all">⚽🏆 All Types</option>
+              <option value="regular">⚽ Regular Only</option>
+              <option value="jackpot">🏆 Jackpot Only</option>
+            </select>
+            <select
+              value={slipStatus}
+              onChange={(e) =>
+                setSlipStatus(e.target.value)
+              }
+              className="bg-charcoal border border-nile-blue/30 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none"
+            >
+              <option value="all">
+                All Status
+              </option>
+              <option value="pending">
+                Pending
+              </option>
+              <option value="won">Won</option>
+              <option value="lost">Lost</option>
+              <option value="near_win">
+                Near Win
+              </option>
+              <option value="cancelled">
+                Cancelled
+              </option>
+            </select>
+          </div>
         </div>
         <DataTable
           columns={recentSlipsColumns}
-          data={recentSlips}
+          data={recentSlips.filter((s: any) =>
+            slipCategory === 'all' ? true :
+            slipCategory === 'jackpot' ? s.is_jackpot :
+            !s.is_jackpot
+          )}
           isLoading={loading}
           emptyMessage="No slips placed yet"
         />
