@@ -1756,8 +1756,8 @@ export async function settleJackpot(
       : isNearWin
       ? (jackpot?.near_win_reward ?? 25000)
       : 0
-    // Insured (near-win) rewards are taxed; full jackpot wins are not.
-    const rewardTax = isNearWin
+    // Both full jackpot wins and insured (near-win) rewards are taxed.
+    const rewardTax = (isWin || isNearWin)
       ? Math.round(grossReward * (taxPct / 100) * 100) / 100
       : 0
     const reward = grossReward - rewardTax
@@ -1821,8 +1821,8 @@ export async function settleJackpot(
           .insert({
             to_user_id: slip.bettor_id,
             message: isWin
-              ? `🏆🏆 JACKPOT WINNER! All 12 correct! ETB ${reward.toLocaleString()} credited!`
-              : `🥈 So close! 11/12 correct. ETB ${reward.toLocaleString()} credited!`,
+              ? `🏆🏆 JACKPOT WINNER! All 12 correct! ETB ${reward.toLocaleString()} credited (after ${taxPct}% tax)!`
+              : `🥈 So close! 11/12 correct. ETB ${reward.toLocaleString()} credited (after ${taxPct}% tax)!`,
             type: isWin
               ? 'jackpot_won'
               : 'jackpot_won',
