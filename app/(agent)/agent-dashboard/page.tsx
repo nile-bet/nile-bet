@@ -168,31 +168,43 @@ export default function AgentDashboard() {
             <Ticket className="w-5 h-5 text-white/50 mx-auto mb-1" />
             <p className="text-2xl font-bold text-white font-mono">{stats.totalSlips}</p>
             <p className="text-white/50 text-xs">Total</p>
+            <p className="text-white/25 text-[10px]">{stats.regularSlips ?? 0} reg · {stats.jackpotSlipsCount ?? 0} jp</p>
           </div>
           <div className="bg-nile-success/10 border border-nile-success/30 rounded-xl p-3 text-center">
             <CheckCircle className="w-5 h-5 text-nile-success mx-auto mb-1" />
             <p className="text-2xl font-bold text-nile-success font-mono">{stats.wonSlips}</p>
             <p className="text-white/50 text-xs">Won</p>
+            <div className="mt-1 space-y-0.5">
+              <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.wonRedeemed ?? 0} redeemed</p>
+              <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.wonPending ?? 0} pending</p>
+            </div>
           </div>
           <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center">
             <span className="text-xl block mb-1">🛡️</span>
             <p className="text-2xl font-bold text-gold font-mono">{stats.insuredSlips}</p>
             <p className="text-white/50 text-xs">Insured</p>
+            <div className="mt-1 space-y-0.5">
+              <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.insuredRedeemed ?? 0} redeemed</p>
+              <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.insuredPending ?? 0} pending</p>
+            </div>
           </div>
           <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-3 text-center">
             <XCircle className="w-5 h-5 text-nile-danger mx-auto mb-1" />
             <p className="text-2xl font-bold text-nile-danger font-mono">{stats.lostSlips}</p>
             <p className="text-white/50 text-xs">Lost</p>
+            <p className="text-white/25 text-[10px]">{stats.lostRegular ?? 0} reg · {stats.lostJackpot ?? 0} jp</p>
           </div>
           <div className="bg-nile-blue/20 border border-nile-blue/30 rounded-xl p-3 text-center">
             <Clock className="w-5 h-5 text-gold mx-auto mb-1" />
             <p className="text-2xl font-bold text-gold font-mono">{stats.pendingSlips}</p>
             <p className="text-white/50 text-xs">Pending</p>
+            <p className="text-white/25 text-[10px]">{stats.pendingRegular ?? 0} reg · {stats.pendingJackpot ?? 0} jp</p>
           </div>
           <div className="bg-nile-blue/10 border border-nile-blue/20 rounded-xl p-3 text-center">
             <RefreshCw className="w-5 h-5 text-nile-blue-light mx-auto mb-1" />
             <p className="text-2xl font-bold text-nile-blue-light font-mono">{stats.inProgressSlips}</p>
             <p className="text-white/50 text-xs">In Progress</p>
+            <p className="text-white/25 text-[10px]">awaiting settlement</p>
           </div>
         </div>
       )}
@@ -319,6 +331,73 @@ export default function AgentDashboard() {
         <h3 className="font-semibold text-white mb-4 flex items-center gap-2">🏆 Network Payout Report</h3>
         {payouts && (
           <>
+            {/* 4 summary cards — network-wide across all cashiers */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              <div className="rounded-xl p-3.5" style={{background:'rgba(34,197,94,0.08)', border:'1px solid rgba(34,197,94,0.18)'}}>
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Total Won</span>
+                  <div className="p-1 rounded-md" style={{background:'rgba(34,197,94,0.15)'}}>
+                    <CheckCircle className="w-3.5 h-3.5 text-nile-success" />
+                  </div>
+                </div>
+                <p className="text-nile-success font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.totalWonNet ?? 0)}</p>
+                <div className="mt-2.5 pt-2.5 border-t border-nile-success/10">
+                  <p className="text-white/35 text-[10px]">{payouts?.totals?.totalWonCount ?? 0} winning slips · net after 15% tax</p>
+                </div>
+              </div>
+
+              <div className="rounded-xl p-3.5" style={{background:'rgba(59,130,246,0.08)', border:'1px solid rgba(59,130,246,0.18)'}}>
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Redeemed</span>
+                  <div className="p-1 rounded-md" style={{background:'rgba(59,130,246,0.15)'}}>
+                    <CheckCircle className="w-3.5 h-3.5 text-nile-blue-light" />
+                  </div>
+                </div>
+                <p className="text-nile-blue-light font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.wonRedeemedNet ?? 0)}</p>
+                <div className="mt-2.5 pt-2.5 border-t border-nile-blue-light/10 flex items-center justify-between">
+                  <span className="text-white/35 text-[10px]">{payouts?.totals?.wonRedeemedCount ?? 0} slips paid out</span>
+                  {(payouts?.totals?.pendingPayoutNet ?? 0) > 0 && (
+                    <span className="text-nile-orange/70 text-[10px] font-medium">{formatETB(payouts?.totals?.pendingPayoutNet ?? 0)} due</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-xl p-3.5" style={{background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.18)'}}>
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">🛡️ Insured</span>
+                  <div className="p-1 rounded-md" style={{background:'rgba(201,168,76,0.15)'}}>
+                    <CheckCircle className="w-3.5 h-3.5 text-gold" />
+                  </div>
+                </div>
+                <p className="text-gold font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.insuredRedeemedNet ?? 0)}</p>
+                <div className="mt-2.5 pt-2.5 border-t border-gold/10 flex items-center justify-between">
+                  <span className="text-white/35 text-[10px]">✓ {payouts?.totals?.insuredRedeemedCount ?? 0} paid</span>
+                  {(payouts?.totals?.pendingCount ?? 0) > 0
+                    ? <span className="text-nile-orange/70 text-[10px] font-medium">⏳ {payouts?.totals?.pendingCount ?? 0} pending</span>
+                    : <span className="text-white/25 text-[10px]">all settled</span>
+                  }
+                </div>
+              </div>
+
+              <div className="rounded-xl p-3.5" style={{
+                background: (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? 'rgba(249,115,22,0.08)' : 'rgba(255,255,255,0.03)',
+                border: (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? '1px solid rgba(249,115,22,0.25)' : '1px solid rgba(255,255,255,0.06)'
+              }}>
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Pending Payout</span>
+                  <div className="p-1 rounded-md" style={{background:'rgba(249,115,22,0.12)'}}>
+                    <Clock className="w-3.5 h-3.5 text-nile-orange" />
+                  </div>
+                </div>
+                <p className={cn('font-mono text-2xl font-bold leading-none', (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? 'text-nile-orange' : 'text-white/30')}>
+                  {formatETB(payouts?.totals?.pendingPayoutNet ?? 0)}
+                </p>
+                <div className="mt-2.5 pt-2.5 border-t border-nile-orange/10">
+                  <p className="text-white/35 text-[10px]">{payouts?.totals?.pendingCount ?? 0} slips awaiting payment, network-wide</p>
+                </div>
+              </div>
+            </div>
+
             <DataTable
               columns={[
                 { key: 'slip_id', label: 'Slip ID', render: (v: any, row: any) => <span className="text-gold font-mono text-xs">{row?.is_jackpot && '🏆 '}#{v}</span> },
