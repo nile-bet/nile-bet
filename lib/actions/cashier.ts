@@ -304,7 +304,7 @@ export async function getCashierPayoutsReport(
     .from('jackpot_slips')
     .select(`
       id, slip_id, stake, reward_amount, status, is_anonymous,
-      created_at, updated_at, redeemed_at,
+      created_at, updated_at,
       jackpots (name, fixed_stake),
       bettor:profiles!jackpot_slips_bettor_id_fkey (username)
     `)
@@ -313,7 +313,8 @@ export async function getCashierPayoutsReport(
     .order('created_at', { ascending: false })
   if (startDate) jq = jq.gte('created_at', startDate)
   if (endDate) jq = jq.lte('created_at', endDate)
-  const { data: jackpotSlips } = await jq
+  const { data: jackpotSlips, error: jackpotSlipsError } = await jq
+  if (jackpotSlipsError) console.error('[getCashierPayoutsReport] jackpot query error:', jackpotSlipsError)
 
   // Normalize regular slips
   // - status 'won'   → pending, not insured
@@ -366,7 +367,7 @@ export async function getCashierPayoutsReport(
       is_anonymous: j.is_anonymous,
       insurance_applied: isInsured,
       created_at: j.created_at,
-      redeemed_at: j.redeemed_at ?? null,
+      redeemed_at: isRedeemed ? (j.updated_at ?? null) : null,
       bettor: j.bettor,
       is_jackpot: true,
       jackpot_name: j.jackpots?.name,
@@ -461,9 +462,10 @@ export async function getRecentSlipsCashier(
   ) {
     q = q.eq('status', statusFilter)
   }
-  const { data } = await q
+  const { data, error: slipsError } = await q
+  if (slipsError) console.error('[getRecentSlipsCashier] slips query error:', slipsError)
 
-  // Jackpot slips
+  // Jackpot slips — mirrors the regular slips query exactly (same filter behavior)
   let jjq = supabase
     .from('jackpot_slips')
     .select(`
@@ -474,7 +476,7 @@ export async function getRecentSlipsCashier(
       status,
       is_anonymous,
       created_at,
-      redeemed_at,
+      updated_at,
       jackpots (name, fixed_stake),
       bettor:profiles!jackpot_slips_bettor_id_fkey (username)
     `)
@@ -484,7 +486,8 @@ export async function getRecentSlipsCashier(
   if (statusFilter && statusFilter !== 'all') {
     jjq = jjq.eq('status', statusFilter)
   }
-  const { data: jackpotData } = await jjq
+  const { data: jackpotData, error: jackpotError } = await jjq
+  if (jackpotError) console.error('[getRecentSlipsCashier] jackpot query error:', jackpotError)
 
   // Regular slips: compute payout_status + is_insured to match Payouts Report semantics
   const regularMapped = (data ?? []).map((s: any) => {
@@ -530,7 +533,7 @@ export async function getRecentSlipsCashier(
         : null,
       is_insured: isInsured,
       is_anonymous: j.is_anonymous,
-      redeemed_at: j.redeemed_at ?? null,
+      redeemed_at: isRedeemed ? (j.updated_at ?? null) : null,
       created_at: j.created_at,
       bettor: j.bettor,
       is_jackpot: true,

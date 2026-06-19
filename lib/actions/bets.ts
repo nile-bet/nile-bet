@@ -621,7 +621,7 @@ export async function redeemJackpotWinningSlip(
 
   if (!cashier) return { success: false, error: 'Cashier not found' }
 
-  await supabase.from('jackpot_slips').update({ status: 'paid', redeemed_at: new Date().toISOString(), redeemed_by: cashierId }).eq('id', slip.id)
+  await supabase.from('jackpot_slips').update({ status: 'paid' }).eq('id', slip.id)
   // Log transaction only — no balance change on redeem
   await supabase.from('transactions').insert({
     profile_id: cashierId,
