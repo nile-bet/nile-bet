@@ -166,6 +166,7 @@ export interface Slip {
   correct_count: number
   insurance_applied: boolean
   insurance_payout: number
+  insurance_tax: number
   cancellation_deadline: string | null
   is_anonymous: boolean
   created_at: string
@@ -321,6 +322,7 @@ export interface JackpotSlip {
   status: 'pending' | 'won' | 'near_win' | 'lost'
   correct_count: number
   reward_amount: number
+  reward_tax: number
   is_anonymous: boolean
   created_at: string
   updated_at: string

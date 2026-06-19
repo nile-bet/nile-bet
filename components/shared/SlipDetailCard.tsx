@@ -178,8 +178,11 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
         )}
 
         {slip.insurance_applied && (
-          <div className="mt-2 bg-gold/10 border border-gold/30 rounded-lg p-2 text-center">
+          <div className="mt-2 bg-gold/10 border border-gold/30 rounded-lg p-2 text-center space-y-1">
             <p className="text-gold text-xs font-semibold">🛡️ Insurance Applied — {formatETB(slip.insurance_payout)} credited</p>
+            {(slip.insurance_tax ?? 0) > 0 && (
+              <p className="text-white/40 text-[10px]">Tax of {formatETB(slip.insurance_tax)} already deducted</p>
+            )}
           </div>
         )}
       </div>

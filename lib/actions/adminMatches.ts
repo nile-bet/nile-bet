@@ -1702,6 +1702,22 @@ export async function settleJackpot(
     .eq('id', jackpotId)
     .single()
 
+  // Tax % for insured (near-win) jackpot rewards — same setting used for regular slip wins
+  const { data: taxSetting } = await supabase
+    .from('platform_settings')
+    .select('value')
+    .eq('key', 'winning_tax_percent')
+    .single()
+  const taxPct = parseFloat(taxSetting?.value ?? '15') || 15
+
+  // Platform admin profile that receives the tax cut
+  const { data: platformAdmin } = await supabase
+    .from('profiles')
+    .select('id, credit_balance')
+    .eq('role', 'admin')
+    .limit(1)
+    .single()
+
   for (const slip of slips) {
     const selections =
       (slip as any).jackpot_slip_selections ?? []
@@ -1735,11 +1751,16 @@ export async function settleJackpot(
 
     const isWin = correctCount === 12
     const isNearWin = correctCount === 11
-    const reward = isWin
+    const grossReward = isWin
       ? (jackpot?.win_all_reward ?? 250000)
       : isNearWin
       ? (jackpot?.near_win_reward ?? 25000)
       : 0
+    // Insured (near-win) rewards are taxed; full jackpot wins are not.
+    const rewardTax = isNearWin
+      ? Math.round(grossReward * (taxPct / 100) * 100) / 100
+      : 0
+    const reward = grossReward - rewardTax
     const status = isWin
       ? 'won'
       : isNearWin
@@ -1755,6 +1776,7 @@ export async function settleJackpot(
         status,
         correct_count: correctCount,
         reward_amount: reward,
+        reward_tax: rewardTax,
       })
       .eq('id', slip.id)
 
@@ -1780,6 +1802,17 @@ export async function settleJackpot(
               bettor.credit_balance + reward,
           })
           .eq('id', slip.bettor_id)
+      }
+
+      // Credit insured-tier tax to the platform admin
+      if (rewardTax > 0 && platformAdmin) {
+        await supabase
+          .from('profiles')
+          .update({
+            credit_balance: platformAdmin.credit_balance + rewardTax,
+          })
+          .eq('id', platformAdmin.id)
+        platformAdmin.credit_balance += rewardTax
       }
 
       if (bettor) {

@@ -173,6 +173,11 @@ export function SlipCard({
               )}{' '}
               credited
             </span>
+            {(slip.insurance_tax ?? 0) > 0 && (
+              <span className="block text-white/40 text-[10px] mt-0.5">
+                Tax of {formatETB(slip.insurance_tax)} already deducted
+              </span>
+            )}
           </div>
         )}
 

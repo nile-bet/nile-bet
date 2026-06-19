@@ -301,7 +301,7 @@ export async function getCashierPayoutsReport(
     .select(`
       slip_id, stake, total_odds, max_payout, winning_tax,
       net_payout, status, is_anonymous, insurance_applied,
-      insurance_payout, redeemed_at, created_at, updated_at,
+      insurance_payout, insurance_tax, redeemed_at, created_at, updated_at,
       bettor:profiles!slips_bettor_id_fkey (username)
     `)
     .eq('placed_by', cashierId)
@@ -315,7 +315,7 @@ export async function getCashierPayoutsReport(
   let jq = supabase
     .from('jackpot_slips')
     .select(`
-      id, slip_id, stake, reward_amount, status, is_anonymous,
+      id, slip_id, stake, reward_amount, reward_tax, status, is_anonymous,
       created_at, updated_at,
       jackpots (name, fixed_stake),
       bettor:profiles!jackpot_slips_bettor_id_fkey (username)
@@ -335,9 +335,9 @@ export async function getCashierPayoutsReport(
   const regularPayouts = (slips ?? []).map((s: any) => {
     const isRedeemed = s.status === 'paid'
     const isInsured = s.insurance_applied === true || s.status === 'near_win'
+    const taxAmt = isInsured ? (s.insurance_tax ?? 0) : (s.winning_tax ?? 0)
     const netAmt = isInsured ? (s.insurance_payout ?? s.stake ?? 0) : (s.net_payout ?? 0)
-    const taxAmt = isInsured ? 0 : (s.winning_tax ?? 0)
-    const grossAmt = isInsured ? (s.insurance_payout ?? s.stake ?? 0) : (s.max_payout ?? 0)
+    const grossAmt = isInsured ? (netAmt + taxAmt) : (s.max_payout ?? 0)
     return {
       slip_id: s.slip_id,
       stake: s.stake,
@@ -362,12 +362,11 @@ export async function getCashierPayoutsReport(
   // - status 'paid'     → redeemed. Use redeemed_at presence + original reward to judge insured
   const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => {
     const isRedeemed = j.status === 'paid'
-    // near_win jackpot = insured stake refund; reward_amount <= stake means it was near_win/refund
     const isInsured = j.status === 'near_win' ||
       (isRedeemed && (j.reward_amount ?? 0) <= (j.jackpots?.fixed_stake ?? j.stake ?? 0) * 1.1)
-    const gross = j.reward_amount ?? 0
-    const tax = isInsured ? 0 : Math.round(gross * 0.15 * 100) / 100
-    const net = Math.round((gross - tax) * 100) / 100
+    const tax = j.reward_tax ?? 0
+    const net = j.reward_amount ?? 0
+    const gross = net + tax
     return {
       slip_id: j.slip_id,
       stake: j.stake,
@@ -460,6 +459,7 @@ export async function getRecentSlipsCashier(
       is_anonymous,
       insurance_applied,
       insurance_payout,
+      insurance_tax,
       redeemed_at,
       created_at,
       bettor:profiles!slips_bettor_id_fkey (username)
@@ -485,6 +485,7 @@ export async function getRecentSlipsCashier(
       slip_id,
       stake,
       reward_amount,
+      reward_tax,
       status,
       is_anonymous,
       created_at,
@@ -530,15 +531,14 @@ export async function getRecentSlipsCashier(
     const isRedeemed = j.status === 'paid'
     const isInsured = j.status === 'near_win' ||
       (isRedeemed && (j.reward_amount ?? 0) <= (j.jackpots?.fixed_stake ?? j.stake ?? 0) * 1.1)
-    const gross = j.reward_amount ?? 0
-    const tax = isInsured ? 0 : Math.round(gross * 0.15 * 100) / 100
-    const net = Math.round((gross - tax) * 100) / 100
+    // reward_amount is already net (tax deducted at settlement time)
+    const net = j.reward_amount ?? 0
     return {
       id: j.id,
       slip_id: j.slip_id,
       stake: j.stake,
       total_odds: null,
-      net_payout: ['won', 'near_win', 'paid'].includes(j.status) ? net : gross,
+      net_payout: net,
       status: j.status,
       payout_status: ['won', 'near_win', 'paid'].includes(j.status)
         ? (isRedeemed ? 'redeemed' : 'pending')
