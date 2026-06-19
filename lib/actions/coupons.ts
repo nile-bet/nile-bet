@@ -394,19 +394,26 @@ export async function getBettorStats(
   const s = slips ?? []
   const j = jackpotSlips ?? []
 
-  const regularWon    = s.filter(x => x.status === 'won').length
+  // 'won'  = won, awaiting payout | 'paid' = won and already redeemed — both count as "won"
+  const regularWon    = s.filter(x => x.status === 'won' || x.status === 'paid').length
   const regularLost   = s.filter(x => x.status === 'lost').length
   const regularCancel = s.filter(x => x.status === 'cancelled').length
   const regularNear   = s.filter(x => x.status === 'near_win').length
   const regularStaked = s.reduce((a, x) => a + (x.stake ?? 0), 0)
-  const regularWonAmt = s.filter(x => x.status === 'won').reduce((a, x) => a + (x.net_payout ?? 0), 0)
+  const regularWonAmt = s
+    .filter(x => x.status === 'won' || x.status === 'paid')
+    .reduce((a, x) => a + (x.net_payout ?? 0), 0)
 
-  const jpWon     = j.filter(x => x.status === 'won').length
+  // jackpot_slips: 'won' = pending redemption, 'paid' = redeemed by cashier — both count as "won"
+  const jpWon     = j.filter(x => x.status === 'won' || x.status === 'paid').length
   const jpLost    = j.filter(x => x.status === 'lost').length
   const jpNear    = j.filter(x => x.status === 'near_win').length
   const jpStaked  = j.reduce((a, x) => a + (x.stake ?? 0), 0)
-  const jpWonAmt  = j.filter(x => x.status === 'won').reduce((a, x) => a + ((x.reward_amount ?? 0) * 0.85), 0)
-  const jpNearAmt = j.filter(x => x.status === 'near_win').reduce((a, x) => a + ((x.reward_amount ?? 0) * 0.85), 0)
+  // 15% tax applies to 'won'/'paid' jackpot rewards; near_win (insured) is a tax-free stake refund
+  const jpWonAmt  = j
+    .filter(x => x.status === 'won' || x.status === 'paid')
+    .reduce((a, x) => a + ((x.reward_amount ?? 0) * 0.85), 0)
+  const jpNearAmt = j.filter(x => x.status === 'near_win').reduce((a, x) => a + (x.reward_amount ?? 0), 0)
 
   const totalBets     = s.length + j.length
   const wonBets       = regularWon + jpWon
@@ -431,6 +438,7 @@ export async function getBettorStats(
     jackpotNearWin: jpNear,
     jackpotStaked: jpStaked,
     jackpotWonAmount: jpWonAmt,
+    jackpotNearWinAmount: jpNearAmt,
   }
 }
 export async function getActiveCoupon(

@@ -334,10 +334,16 @@ export default function ProfilePage() {
                   <span className="text-white/50">Total Won:</span>
                   <span className="text-nile-success font-mono">{formatETB(stats?.totalWon ?? 0)}</span>
                 </div>
-                {(stats?.jackpotWon_amount ?? 0) > 0 && (
+                {(stats?.jackpotWonAmount ?? 0) > 0 && (
                   <div className="flex justify-between text-xs">
                     <span className="text-white/30">· Jackpot Won (after tax):</span>
-                    <span className="text-nile-success/70 font-mono">{formatETB(stats?.jackpotWon_amount ?? 0)}</span>
+                    <span className="text-nile-success/70 font-mono">{formatETB(stats?.jackpotWonAmount ?? 0)}</span>
+                  </div>
+                )}
+                {(stats?.jackpotNearWinAmount ?? 0) > 0 && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-white/30">· Jackpot Insured (refund):</span>
+                    <span className="text-gold/70 font-mono">{formatETB(stats?.jackpotNearWinAmount ?? 0)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm font-semibold border-t border-white/10 pt-2 mt-1">

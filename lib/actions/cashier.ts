@@ -126,17 +126,29 @@ export async function getCashierDashboardStats(
   const { data: jackpotSlips } = await jq
   const allJackpot = jackpotSlips ?? []
 
+  // 'won'      = won, awaiting cashier redemption (15% tax applies on payout)
+  // 'near_win' = insured/stake-refund, awaiting cashier redemption (no tax)
+  // 'paid'     = already redeemed by cashier (was won or near_win before redemption —
+  //              cannot distinguish post-redemption without insurance flag, so treated as won)
+  // 'lost'/'pending' = self-explanatory
   const jackpotTotal = allJackpot.length
-  const jackpotWon = allJackpot.filter((s) => s.status === 'won')
-  const jackpotNearWin = allJackpot.filter((s) => s.status === 'near_win')
+  const jackpotWonUnredeemed = allJackpot.filter((s) => s.status === 'won')
+  const jackpotNearWinUnredeemed = allJackpot.filter((s) => s.status === 'near_win')
+  const jackpotPaidSlips = allJackpot.filter((s) => s.status === 'paid')
   const jackpotLost = allJackpot.filter((s) => s.status === 'lost').length
   const jackpotPending = allJackpot.filter((s) => s.status === 'pending')
+
+  // Combined won (includes redeemed) for display/count purposes
+  const jackpotWon = [...jackpotWonUnredeemed, ...jackpotPaidSlips]
+  const jackpotNearWin = jackpotNearWinUnredeemed
   const jackpotInsured = jackpotNearWin.length
   const jackpotInProgress = 0
 
   const jackpotCollected = allJackpot.reduce((a, s) => a + (s.stake ?? 0), 0)
-  const jackpotPaidOut = [...jackpotWon, ...jackpotNearWin].reduce((a, s) => a + (s.reward_amount ?? 0), 0)
-  const jackpotPendingLiability = jackpotPending.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
+  // Paid out = redeemed (paid) + near_win (insured, always auto-payable) reward amounts
+  const jackpotPaidOut = [...jackpotPaidSlips, ...jackpotNearWinUnredeemed].reduce((a, s) => a + (s.reward_amount ?? 0), 0)
+  // Pending liability = won (not yet redeemed) + pending (not yet settled) reward amounts
+  const jackpotPendingLiability = [...jackpotWonUnredeemed, ...jackpotPending].reduce((a, s) => a + (s.reward_amount ?? 0), 0)
   const jackpotWonTotal = jackpotWon.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
   const jackpotInsuredTotal = jackpotNearWin.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
 
@@ -191,8 +203,8 @@ export async function getCashierDashboardStats(
   const totalWon = totalWonSlips + jackpotWonTotal
   const insuredTotal = insuredTotalSlips + jackpotInsuredTotal
 
-  // Pending payout = won slips not yet paid + near_win not yet redeemed + jackpot won pending
-  const jackpotWonPendingAmount = jackpotWon.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
+  // Pending payout = won slips not yet paid + near_win not yet redeemed + jackpot won pending (not yet redeemed)
+  const jackpotWonPendingAmount = jackpotWonUnredeemed.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
   const pendingPayout = wonPendingAmount + insuredPendingAmount + jackpotWonPendingAmount
   const redeemedSlips = wonRedeemed + insuredRedeemed
   const pendingPayoutSlips = wonPending + insuredPending + jackpotPending.length
