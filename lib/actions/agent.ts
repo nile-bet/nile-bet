@@ -902,14 +902,14 @@ export async function getAgentReport(
   }
   const totalCollectedSlips = allSlips.reduce((a, s) => a + (s.stake ?? 0), 0)
   const totalPaidSlips = allSlips
-    .filter((s) => s.status === 'won' || s.status === 'near_win')
+    .filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
     .reduce((a, s) => a + (s.net_payout ?? 0), 0)
   const taxCollected = allSlips
-    .filter((s) => s.status === 'won')
+    .filter((s) => s.status === 'won' || s.status === 'paid')
     .reduce((a, s) => a + (s.winning_tax ?? 0), 0)
   const jackpotCollectedR = allJackpotSlips.reduce((a: number, s: any) => a + (s.stake ?? 0), 0)
   const jackpotPaidR = allJackpotSlips
-    .filter((s: any) => s.status === 'won' || s.status === 'near_win')
+    .filter((s: any) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
     .reduce((a: number, s: any) => a + (s.reward_amount ?? 0), 0)
   const totalCollected = totalCollectedSlips + jackpotCollectedR
   const totalPaid = totalPaidSlips + jackpotPaidR
@@ -920,14 +920,14 @@ export async function getAgentReport(
     const date = slip.created_at.split('T')[0]
     if (!grouped[date]) grouped[date] = { date, collected: 0, paid: 0, profit: 0 }
     grouped[date].collected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'near_win') grouped[date].paid += slip.net_payout ?? 0
+    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') grouped[date].paid += slip.net_payout ?? 0
     grouped[date].profit = grouped[date].collected - grouped[date].paid
   })
   allJackpotSlips.forEach((slip: any) => {
     const date = slip.created_at.split('T')[0]
     if (!grouped[date]) grouped[date] = { date, collected: 0, paid: 0, profit: 0 }
     grouped[date].collected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'near_win') grouped[date].paid += slip.reward_amount ?? 0
+    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') grouped[date].paid += slip.reward_amount ?? 0
     grouped[date].profit = grouped[date].collected - grouped[date].paid
   })
 
@@ -940,15 +940,15 @@ export async function getAgentReport(
     if (!c) continue
     c.slipCount += 1
     c.totalCollected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'near_win') c.totalPaid += slip.net_payout ?? 0
-    if (slip.status === 'won') c.taxCollected += slip.winning_tax ?? 0
+    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') c.totalPaid += slip.net_payout ?? 0
+    if (slip.status === 'won' || slip.status === 'paid') c.taxCollected += slip.winning_tax ?? 0
   }
   for (const slip of allJackpotSlips) {
     const c = cashierMap[(slip as any).placed_by]
     if (!c) continue
     c.slipCount += 1
     c.totalCollected += (slip as any).stake ?? 0
-    if ((slip as any).status === 'won' || (slip as any).status === 'near_win') c.totalPaid += (slip as any).reward_amount ?? 0
+    if ((slip as any).status === 'won' || (slip as any).status === 'paid' || (slip as any).status === 'near_win') c.totalPaid += (slip as any).reward_amount ?? 0
   }
   for (const c of Object.values(cashierMap) as any[]) {
     c.grossProfit = c.totalCollected - c.totalPaid - c.taxCollected
@@ -1279,23 +1279,24 @@ export async function getAgentNetworkStats(
   }
 
   const totalSlips = all.length + allJackpot.length
-  const wonSlips = all.filter((s) => s.status === 'won').length + allJackpot.filter((s) => s.status === 'won').length
+  const wonSlips = all.filter((s) => s.status === 'won' || s.status === 'paid').length + allJackpot.filter((s) => s.status === 'won' || s.status === 'paid').length
   const lostSlips = all.filter((s) => s.status === 'lost').length + allJackpot.filter((s) => s.status === 'lost').length
   const pendingSlips = all.filter((s) => s.status === 'pending').length + allJackpot.filter((s) => s.status === 'pending').length
   const inProgressSlips = all.filter((s) => s.status === 'in_progress').length
+  const cancelledSlips = all.filter((s) => s.status === 'cancelled').length
   const insuredSlips = all.filter((s) => s.status === 'near_win' || s.insurance_applied).length + allJackpot.filter((s) => s.status === 'near_win').length
 
   const totalCollectedSlips = all.reduce((a, s) => a + (s.stake ?? 0), 0)
-  const totalPaidOutSlips = all.filter((s) => s.status === 'won' || s.status === 'near_win')
+  const totalPaidOutSlips = all.filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
     .reduce((a, s) => a + (s.net_payout ?? 0), 0)
-  const taxCollected = all.filter((s) => s.status === 'won')
+  const taxCollected = all.filter((s) => s.status === 'won' || s.status === 'paid')
     .reduce((a, s) => a + (s.winning_tax ?? 0), 0)
   const pendingLiabilitySlips = all.filter((s) => s.status === 'pending')
     .reduce((a, s) => a + (s.max_payout ?? s.net_payout ?? 0), 0)
 
   // Jackpot financials
   const jackpotCollected = allJackpot.reduce((a, s) => a + (s.stake ?? 0), 0)
-  const jackpotPaidOut = allJackpot.filter((s) => s.status === 'won' || s.status === 'near_win')
+  const jackpotPaidOut = allJackpot.filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
     .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
   const jackpotPendingLiability = allJackpot.filter((s) => s.status === 'pending')
     .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
@@ -1310,12 +1311,12 @@ export async function getAgentNetworkStats(
 
   // Jackpot status breakdown
   const jackpotTotal = allJackpot.length
-  const jackpotWon = allJackpot.filter((s) => s.status === 'won').length
+  const jackpotWon = allJackpot.filter((s) => s.status === 'won' || s.status === 'paid').length
   const jackpotPending = allJackpot.filter((s) => s.status === 'pending').length
   const jackpotInsured = allJackpot.filter((s) => s.status === 'near_win').length
   const jackpotLost = allJackpot.filter((s) => s.status === 'lost').length
   const jackpotInProgress = 0
-  const jackpotWonTotal = allJackpot.filter((s) => s.status === 'won')
+  const jackpotWonTotal = allJackpot.filter((s) => s.status === 'won' || s.status === 'paid')
     .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
 
   // Pending credit requests
@@ -1335,6 +1336,7 @@ export async function getAgentNetworkStats(
     lostSlips,
     pendingSlips,
     inProgressSlips,
+    cancelledSlips,
     insuredSlips,
     // Financial
     totalCollected,
@@ -1395,23 +1397,41 @@ export async function getAgentPayoutsReport(
     .from('slips')
     .select(`
       slip_id, stake, max_payout, winning_tax, net_payout, status,
-      is_anonymous, created_at, placed_by,
+      is_anonymous, insurance_applied, insurance_payout, redeemed_at,
+      created_at, placed_by,
       bettor:profiles!slips_bettor_id_fkey (username)
     `)
     .in('placed_by', cashierIds)
-    .in('status', ['won', 'near_win'])
+    .in('status', ['won', 'near_win', 'paid'])
     .order('created_at', { ascending: false })
     .limit(100)
   if (startDate) q = q.gte('created_at', startDate)
   if (endDate) q = q.lte('created_at', endDate)
   const { data: slips } = await q
 
-  // Attach cashier username
+  // Attach cashier username + normalize insured/redeemed amounts (mirrors getCashierPayoutsReport)
   const cashierMap = Object.fromEntries((cashiers ?? []).map((c) => [c.id, c.username]))
-  const enriched = (slips ?? []).map((s: any) => ({
-    ...s,
-    cashier_username: cashierMap[s.placed_by] ?? '—',
-  }))
+  const enriched = (slips ?? []).map((s: any) => {
+    const isRedeemed = s.status === 'paid'
+    const isInsured = s.insurance_applied === true || s.status === 'near_win'
+    const netAmt = isInsured ? (s.insurance_payout ?? s.stake ?? 0) : (s.net_payout ?? 0)
+    const taxAmt = isInsured ? 0 : (s.winning_tax ?? 0)
+    const grossAmt = isInsured ? (s.insurance_payout ?? s.stake ?? 0) : (s.max_payout ?? 0)
+    return {
+      slip_id: s.slip_id,
+      stake: s.stake,
+      max_payout: grossAmt,
+      winning_tax: taxAmt,
+      net_payout: netAmt,
+      status: isRedeemed ? 'redeemed' : 'pending',
+      is_anonymous: s.is_anonymous,
+      is_insured: isInsured,
+      created_at: s.created_at,
+      redeemed_at: s.redeemed_at ?? null,
+      bettor: s.bettor,
+      cashier_username: cashierMap[s.placed_by] ?? '—',
+    }
+  })
 
   const grossWinTotal = enriched.reduce((a, s) => a + (s.max_payout ?? 0), 0)
   const taxTotal = enriched.reduce((a, s) => a + (s.winning_tax ?? 0), 0)

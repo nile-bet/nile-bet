@@ -328,7 +328,32 @@ export default function AgentDashboard() {
                 { key: 'max_payout', label: 'Gross Win', render: (v: any) => <span className="text-white/60 font-mono text-xs">{formatETB(v)}</span> },
                 { key: 'winning_tax', label: 'Tax (15%)', render: (v: any) => <span className="text-nile-danger font-mono text-xs">-{formatETB(v)}</span> },
                 { key: 'net_payout', label: 'Net Payout', render: (v: any) => <span className="text-nile-success font-mono text-xs font-bold">{formatETB(v)}</span> },
-                { key: 'status', label: 'Status', render: (v: any) => <StatusBadge status={v} type="slip" /> },
+                {
+                  key: 'status',
+                  label: 'Status',
+                  render: (v: any, row: any) => {
+                    if (v === 'redeemed') {
+                      return row.is_insured ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
+                          🛡️ INSURED · PAID
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
+                          ✓ PAID
+                        </span>
+                      )
+                    }
+                    return row.is_insured ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold/12 text-gold border border-gold/25">
+                        🛡️ INSURED
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-success/12 text-nile-success border border-nile-success/25">
+                        ⏳ WON
+                      </span>
+                    )
+                  },
+                },
               ]}
               data={payouts.slips ?? []}
               isLoading={loading}
