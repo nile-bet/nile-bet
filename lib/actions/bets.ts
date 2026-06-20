@@ -546,50 +546,31 @@ export async function redeemWinningSlip(
   cashierId: string
 ): Promise<{ success: boolean; amount?: number; error?: string }> {
   const supabase = await createClient()
-
-  // Fetch slip
   const { data: slip } = await supabase
     .from('slips')
     .select('id, slip_id, status, net_payout, bettor_id, placed_by')
     .eq('slip_id', slipId)
     .single()
-
   if (!slip) return { success: false, error: 'Slip not found' }
   if (slip.status === 'paid') return { success: false, error: 'Slip already redeemed' }
-  if (slip.status !== 'won') return { success: false, error: `Slip is ${slip.status} — only won slips can be redeemed` }
-
-  // Fetch redeemer balance
-  const { data: cashier } = await supabase
-    .from('profiles')
-    .select('credit_balance')
-    .eq('id', cashierId)
-    .single()
-
-  if (!cashier) return { success: false, error: 'Cashier not found' }
-
-  // Mark slip as paid
-  const { error: slipErr } = await supabase
+  if (slip.status !== 'won') return { success: false, error: 'Slip is ' + slip.status + ', only won slips can be redeemed' }
+  const { data: updatedRows, error: slipErr } = await supabase
     .from('slips')
     .update({ status: 'paid', redeemed_at: new Date().toISOString(), redeemed_by: cashierId })
     .eq('id', slip.id)
-
-  if (slipErr) return { success: false, error: 'Failed to update slip status' }
-
-  // Credit the redeemer (cashier/agent/admin) with the payout amount
-  await supabase
-    .from('profiles')
-    .update({ credit_balance: cashier.credit_balance + slip.net_payout })
-    .eq('id', cashierId)
-
-  // Log transaction
+    .eq('status', 'won')
+    .select('id')
+  if (slipErr) return { success: false, error: 'Failed to update slip status: ' + slipErr.message }
+  if ((updatedRows ?? []).length === 0) {
+    return { success: false, error: 'Slip was already redeemed (possibly by another cashier)' }
+  }
   await supabase.from('transactions').insert({
     profile_id: cashierId,
     type: 'winning_payout',
     amount: slip.net_payout,
     reference_id: slip.id,
-    note: `Winning payout redeemed for slip ${slipId}`,
+    note: 'Winning payout redeemed for slip ' + slipId,
   })
-
   return { success: true, amount: slip.net_payout }
 }
 
@@ -606,6 +587,9 @@ export async function redeemJackpotWinningSlip(
     .single()
 
   if (!slip) return { success: false, error: 'Jackpot slip not found' }
+  if (slip.status === 'paid') {
+    return { success: false, error: 'Slip already redeemed', status: slip.status }
+  }
   if (!['won', 'near_win'].includes(slip.status)) {
     return { success: false, error: `Slip is ${slip.status} — only won/near_win slips can be redeemed`, status: slip.status }
   }
@@ -613,16 +597,21 @@ export async function redeemJackpotWinningSlip(
     return { success: false, error: 'No reward amount for this slip' }
   }
 
-  const { data: cashier } = await supabase
-    .from('profiles')
-    .select('credit_balance')
-    .eq('id', cashierId)
-    .single()
+  // Atomic mark-as-paid: WHERE re-checks the original status at the DB level,
+  // so concurrent/duplicate redemption attempts can only succeed once.
+  const { data: updatedRows, error: slipErr } = await supabase
+    .from('jackpot_slips')
+    .update({ status: 'paid', redeemed_at: new Date().toISOString(), redeemed_by: cashierId })
+    .eq('id', slip.id)
+    .eq('status', slip.status)
+    .select('id')
 
-  if (!cashier) return { success: false, error: 'Cashier not found' }
+  if (slipErr) return { success: false, error: 'Failed to update slip status: ' + slipErr.message }
+  if (!updatedRows || updatedRows.length === 0) {
+    return { success: false, error: 'Slip was already redeemed (possibly by another cashier)' }
+  }
 
-  await supabase.from('jackpot_slips').update({ status: 'paid' }).eq('id', slip.id)
-  // Log transaction only — no balance change on redeem
+  // Log transaction only — redemption does not change the redeemer's wallet balance.
   await supabase.from('transactions').insert({
     profile_id: cashierId,
     type: 'jackpot_payout',
