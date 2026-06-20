@@ -1475,7 +1475,6 @@ export async function updateJackpot(
   data: {
     name: string
     closesAt: string
-    gamesFinishAt?: string
     fixedStake: number
     winAllReward: number
     nearWinReward: number
@@ -1496,7 +1495,8 @@ export async function updateJackpot(
     .from('jackpots')
     .update({
       name: data.name,
-      closes_at: data.gamesFinishAt || data.closesAt,
+      // closes_at is the single source of truth: betting cutoff AND result-entry unlock time
+      closes_at: data.closesAt,
       fixed_stake: data.fixedStake,
       win_all_reward: data.winAllReward,
       near_win_reward: data.nearWinReward,
@@ -1524,7 +1524,6 @@ export async function createJackpot(data: {
   name: string
   opensAt: string
   closesAt: string
-  gamesFinishAt?: string
   fixedStake: number
   winAllReward: number
   nearWinReward: number
@@ -1563,7 +1562,8 @@ export async function createJackpot(data: {
         win_all_reward: data.winAllReward,
         near_win_reward: data.nearWinReward,
         opens_at: data.opensAt,
-        closes_at: data.gamesFinishAt || data.closesAt,
+        // closes_at is the single source of truth: betting cutoff AND result-entry unlock time
+        closes_at: data.closesAt,
         created_by: data.createdBy,
       })
       .select('id')

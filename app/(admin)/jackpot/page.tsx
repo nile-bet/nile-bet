@@ -49,7 +49,6 @@ export default function AdminJackpotPage() {
   const [editJackpot, setEditJackpot] = useState<any>(null)
   const [editName, setEditName] = useState('')
   const [editClosesAt, setEditClosesAt] = useState('')
-  const [editGamesFinishAt, setEditGamesFinishAt] = useState('')
   const [editStake, setEditStake] = useState('')
   const [editWinAll, setEditWinAll] = useState('')
   const [editNearWin, setEditNearWin] = useState('')
@@ -61,7 +60,6 @@ export default function AdminJackpotPage() {
     useState('Weekend Jackpot')
   const [opensAt, setOpensAt] = useState('')
   const [closesAt, setClosesAt] = useState('')
-  const [gamesFinishAt, setGamesFinishAt] = useState('')
   const [stake, setStake] = useState('50')
   const [winAll, setWinAll] =
     useState('250000')
@@ -120,7 +118,6 @@ export default function AdminJackpotPage() {
     setEditJackpot(jp)
     setEditName(jp.name)
     setEditClosesAt(jp.closes_at ? new Date(jp.closes_at).toISOString().slice(0,16) : '')
-    setEditGamesFinishAt(jp.closes_at ? new Date(jp.closes_at).toISOString().slice(0,16) : '')
     setEditStake(String(jp.fixed_stake))
     setEditWinAll(String(jp.win_all_reward))
     setEditNearWin(String(jp.near_win_reward))
@@ -143,7 +140,6 @@ export default function AdminJackpotPage() {
     const result = await updateJackpot(editJackpot.id, {
       name: editName,
       closesAt: editClosesAt,
-      gamesFinishAt: editGamesFinishAt,
       fixedStake: parseFloat(editStake) || 50,
       winAllReward: parseFloat(editWinAll) || 250000,
       nearWinReward: parseFloat(editNearWin) || 25000,
@@ -191,15 +187,14 @@ export default function AdminJackpotPage() {
       )
       return
     }
-    if (!closesAt && !gamesFinishAt) {
+    if (!closesAt) {
       toast.error('Please set the betting close date/time')
       return
     }
     const result = await createJackpot({
       name: jackpotName,
       opensAt: opensAt || new Date().toISOString(),
-      closesAt: closesAt || gamesFinishAt,
-      gamesFinishAt: gamesFinishAt || closesAt,
+      closesAt: closesAt,
       fixedStake: parseFloat(stake) || 50,
       winAllReward: parseFloat(winAll) || 250000,
       nearWinReward: parseFloat(nearWin) || 25000,
@@ -474,9 +469,9 @@ export default function AdminJackpotPage() {
                   className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
                 />
               </div>
-              <div>
+              <div className="col-span-2">
                 <label className="text-xs text-white/60 block mb-1">
-                  Betting Closes At
+                  Betting Closes At 🕐 (results unlock after this time)
                 </label>
                 <input
                   type="datetime-local"
@@ -486,29 +481,7 @@ export default function AdminJackpotPage() {
                   }
                   className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
                 />
-              </div>
-              <div>
-                <label className="text-xs text-white/60 block mb-1">
-                  All Games Finish At (for result entry)
-                </label>
-                <input
-                  type="datetime-local"
-                  value={gamesFinishAt}
-                  onChange={(e) => setGamesFinishAt(e.target.value)}
-                  className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-white/60 block mb-1">
-                  All Games Finish At 🕐 (results unlock)
-                </label>
-                <input
-                  type="datetime-local"
-                  value={gamesFinishAt}
-                  onChange={(e) => setGamesFinishAt(e.target.value)}
-                  className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
-                />
-                <p className="text-[10px] text-white/30 mt-1">Admin can enter results after this time</p>
+                <p className="text-[10px] text-white/30 mt-1">Admin can enter results once this time passes</p>
               </div>
               <div>
                 <label className="text-xs text-white/60 block mb-1">
@@ -693,13 +666,9 @@ export default function AdminJackpotPage() {
                 <label className="text-xs text-white/60 block mb-1">Jackpot Name</label>
                 <input value={editName} onChange={e => setEditName(e.target.value)} className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none" />
               </div>
-              <div>
-                <label className="text-xs text-white/60 block mb-1">Betting Closes At</label>
+              <div className="col-span-2">
+                <label className="text-xs text-white/60 block mb-1">Betting Closes At 🕐 (results unlock after this time)</label>
                 <input type="datetime-local" value={editClosesAt} onChange={e => setEditClosesAt(e.target.value)} className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none" />
-              </div>
-              <div>
-                <label className="text-xs text-white/60 block mb-1">Games Finish At</label>
-                <input type="datetime-local" value={editGamesFinishAt} onChange={e => setEditGamesFinishAt(e.target.value)} className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none" />
               </div>
               <div>
                 <label className="text-xs text-white/60 block mb-1">Fixed Stake (ETB)</label>
