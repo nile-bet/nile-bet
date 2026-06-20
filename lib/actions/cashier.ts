@@ -315,7 +315,7 @@ export async function getCashierPayoutsReport(
   let jq = supabase
     .from('jackpot_slips')
     .select(`
-      id, slip_id, stake, reward_amount, reward_tax, status, is_anonymous,
+      id, slip_id, stake, reward_amount, reward_tax, status, is_anonymous, is_insured,
       created_at, updated_at,
       jackpots (name, fixed_stake),
       bettor:profiles!jackpot_slips_bettor_id_fkey (username)
@@ -362,7 +362,7 @@ export async function getCashierPayoutsReport(
   // - status 'paid'     → redeemed. Use redeemed_at presence + original reward to judge insured
   const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => {
     const isRedeemed = j.status === 'paid'
-    const isInsured = j.status === 'near_win' ||
+    const isInsured = j.is_insured === true || j.status === 'near_win' ||
       (isRedeemed && (j.reward_amount ?? 0) <= (j.jackpots?.fixed_stake ?? j.stake ?? 0) * 1.1)
     const tax = j.reward_tax ?? 0
     const net = j.reward_amount ?? 0
@@ -490,6 +490,7 @@ export async function getRecentSlipsCashier(
       stake,
       reward_amount,
       reward_tax,
+      is_insured,
       status,
       is_anonymous,
       created_at,
@@ -533,7 +534,7 @@ export async function getRecentSlipsCashier(
   // Jackpot slips: same tax-adjusted net + payout_status logic as Payouts Report
   const jackpotMapped = (jackpotData ?? []).map((j: any) => {
     const isRedeemed = j.status === 'paid'
-    const isInsured = j.status === 'near_win' ||
+    const isInsured = j.is_insured === true || j.status === 'near_win' ||
       (isRedeemed && (j.reward_amount ?? 0) <= (j.jackpots?.fixed_stake ?? j.stake ?? 0) * 1.1)
     // reward_amount is already net (tax deducted at settlement time)
     const net = j.reward_amount ?? 0

@@ -1777,6 +1777,7 @@ export async function settleJackpot(
         correct_count: correctCount,
         reward_amount: reward,
         reward_tax: rewardTax,
+        is_insured: isNearWin,
       })
       .eq('id', slip.id)
 

@@ -1457,7 +1457,7 @@ export async function getAgentPayoutsReport(
   let jq = supabase
     .from('jackpot_slips')
     .select(`
-      slip_id, stake, reward_amount, reward_tax, status, is_anonymous, placed_by,
+      slip_id, stake, reward_amount, reward_tax, status, is_anonymous, is_insured, placed_by,
       created_at, updated_at,
       jackpots (name, fixed_stake),
       bettor:profiles!jackpot_slips_bettor_id_fkey (username)
@@ -1499,7 +1499,7 @@ export async function getAgentPayoutsReport(
   // Normalize jackpot slips (mirrors getCashierPayoutsReport)
   const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => {
     const isRedeemed = j.status === 'paid'
-    const isInsured = j.status === 'near_win' ||
+    const isInsured = j.is_insured === true || j.status === 'near_win' ||
       (isRedeemed && (j.reward_amount ?? 0) <= (j.jackpots?.fixed_stake ?? j.stake ?? 0) * 1.1)
     const tax = j.reward_tax ?? 0
     const net = j.reward_amount ?? 0
