@@ -565,8 +565,8 @@ export async function redeemWinningSlip(
     return { success: false, error: 'Slip was already redeemed (possibly by another cashier)' }
   }
   await supabase.from('transactions').insert({
-    profile_id: cashierId,
-    type: 'winning_payout',
+    to_user_id: cashierId,
+    type: 'payout',
     amount: slip.net_payout,
     reference_id: slip.id,
     note: 'Winning payout redeemed for slip ' + slipId,
@@ -613,8 +613,8 @@ export async function redeemJackpotWinningSlip(
 
   // Log transaction only — redemption does not change the redeemer's wallet balance.
   await supabase.from('transactions').insert({
-    profile_id: cashierId,
-    type: 'jackpot_payout',
+    to_user_id: cashierId,
+    type: slip.status === 'near_win' ? 'jackpot_near_win' : 'jackpot_win',
     amount: slip.reward_amount,
     reference_id: slip.id,
     note: `Jackpot payout redeemed for slip ${slipId}`,
