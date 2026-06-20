@@ -1864,6 +1864,16 @@ export async function settleJackpot(
 export async function getAllJackpots() {
   const supabase = await createClient()
 
+  // Auto-close any 'open' jackpot whose betting window has passed.
+  // This makes the close happen the moment closes_at is reached, without a cron job —
+  // it self-heals on every admin page load. Result entry already unlocks by time check
+  // alone, so this only updates the status field for accuracy/display purposes.
+  await supabase
+    .from('jackpots')
+    .update({ status: 'closed' })
+    .eq('status', 'open')
+    .lt('closes_at', new Date().toISOString())
+
   const { data } = await supabase
     .from('jackpots')
     .select(
