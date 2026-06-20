@@ -712,8 +712,8 @@ export default function CashierDashboard() {
               <p className="text-gold font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.insuredRedeemedNet ?? 0)}</p>
               <div className="mt-2.5 pt-2.5 border-t border-gold/10 flex items-center justify-between">
                   <span className="text-white/35 text-[10px]">✓ {payouts?.totals?.insuredRedeemedCount ?? 0} paid</span>
-                {(payouts?.totals?.pendingCount ?? 0) > 0
-                  ? <span className="text-nile-orange/70 text-[10px] font-medium">⏳ {payouts?.totals?.pendingCount ?? 0} pending</span>
+                {(payouts?.totals?.insuredPendingCount ?? 0) > 0
+                  ? <span className="text-nile-orange/70 text-[10px] font-medium">⏳ {payouts?.totals?.insuredPendingCount ?? 0} pending</span>
                   : <span className="text-white/25 text-[10px]">all settled</span>
                 }
               </div>

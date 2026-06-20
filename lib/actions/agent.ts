@@ -1430,7 +1430,7 @@ export async function getAgentPayoutsReport(
     totalWonNet: 0, totalWonCount: 0,
     wonRedeemedNet: 0, wonRedeemedCount: 0,
     insuredRedeemedNet: 0, insuredRedeemedCount: 0,
-    pendingPayoutNet: 0, pendingCount: 0,
+    pendingPayoutNet: 0, pendingCount: 0, insuredPendingNet: 0, insuredPendingCount: 0,
   }
   if (cashierIds.length === 0) return { slips: [], totals: emptyTotals }
 
@@ -1538,6 +1538,8 @@ export async function getAgentPayoutsReport(
 
   // ── Card 3: Insured Redeemed ──
   const insuredRedeemedNet = enriched.filter(s => s.is_insured && s.payout_status === 'redeemed').reduce((a, s) => a + (s.net_payout ?? 0), 0)
+  const insuredPendingNet = enriched.filter(s => s.is_insured && s.payout_status === 'pending').reduce((a, s) => a + (s.net_payout ?? 0), 0)
+  const insuredPendingCount = enriched.filter(s => s.is_insured && s.payout_status === 'pending').length
   const insuredRedeemedCount = enriched.filter(s => s.is_insured && s.payout_status === 'redeemed').length
 
   // ── Card 4: Pending Payout = won + insured but NOT redeemed ──
@@ -1556,7 +1558,7 @@ export async function getAgentPayoutsReport(
       totalWonNet, totalWonCount,
       wonRedeemedNet, wonRedeemedCount,
       insuredRedeemedNet, insuredRedeemedCount,
-      pendingPayoutNet, pendingCount,
+      pendingPayoutNet, pendingCount, insuredPendingNet, insuredPendingCount,
     },
   }
 }

@@ -407,6 +407,8 @@ export async function getCashierPayoutsReport(
     .filter(s => s.is_insured && s.payout_status === 'redeemed')
     .reduce((a, s) => a + (s.net_payout ?? 0), 0)
   const insuredRedeemedCount = allSlips.filter(s => s.is_insured && s.payout_status === 'redeemed').length
+  const insuredPendingNet = allSlips.filter(s => s.is_insured && s.payout_status === 'pending').reduce((a, s) => a + (s.net_payout ?? 0), 0)
+  const insuredPendingCount = allSlips.filter(s => s.is_insured && s.payout_status === 'pending').length
 
   // ── Card 4: Pending Payout = won + insured but NOT redeemed ──
   const pendingPayoutNet = allSlips
@@ -433,6 +435,8 @@ export async function getCashierPayoutsReport(
       insuredRedeemedNet,
       insuredRedeemedCount,
       pendingPayoutNet,
+      insuredPendingNet,
+      insuredPendingCount,
       pendingCount,
     },
   }
