@@ -1499,8 +1499,7 @@ export async function getAgentPayoutsReport(
   // Normalize jackpot slips (mirrors getCashierPayoutsReport)
   const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => {
     const isRedeemed = j.status === 'paid'
-    const isInsured = j.is_insured === true || j.status === 'near_win' ||
-      (isRedeemed && (j.reward_amount ?? 0) <= (j.jackpots?.fixed_stake ?? j.stake ?? 0) * 1.1)
+    const isInsured = j.is_insured === true || j.status === 'near_win'
     const tax = j.reward_tax ?? 0
     const net = j.reward_amount ?? 0
     const gross = net + tax

@@ -362,8 +362,7 @@ export async function getCashierPayoutsReport(
   // - status 'paid'     → redeemed. Use redeemed_at presence + original reward to judge insured
   const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => {
     const isRedeemed = j.status === 'paid'
-    const isInsured = j.is_insured === true || j.status === 'near_win' ||
-      (isRedeemed && (j.reward_amount ?? 0) <= (j.jackpots?.fixed_stake ?? j.stake ?? 0) * 1.1)
+    const isInsured = j.is_insured === true || j.status === 'near_win'
     const tax = j.reward_tax ?? 0
     const net = j.reward_amount ?? 0
     const gross = net + tax
@@ -534,8 +533,7 @@ export async function getRecentSlipsCashier(
   // Jackpot slips: same tax-adjusted net + payout_status logic as Payouts Report
   const jackpotMapped = (jackpotData ?? []).map((j: any) => {
     const isRedeemed = j.status === 'paid'
-    const isInsured = j.is_insured === true || j.status === 'near_win' ||
-      (isRedeemed && (j.reward_amount ?? 0) <= (j.jackpots?.fixed_stake ?? j.stake ?? 0) * 1.1)
+    const isInsured = j.is_insured === true || j.status === 'near_win'
     // reward_amount is already net (tax deducted at settlement time)
     const net = j.reward_amount ?? 0
     return {
