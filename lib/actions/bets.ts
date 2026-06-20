@@ -601,7 +601,7 @@ export async function redeemJackpotWinningSlip(
   // so concurrent/duplicate redemption attempts can only succeed once.
   const { data: updatedRows, error: slipErr } = await supabase
     .from('jackpot_slips')
-    .update({ status: 'paid', redeemed_at: new Date().toISOString(), redeemed_by: cashierId })
+    .update({ status: 'paid' })
     .eq('id', slip.id)
     .eq('status', slip.status)
     .select('id')
