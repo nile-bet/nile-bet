@@ -1285,11 +1285,29 @@ export async function enterMatchResult(data: {
 }): Promise<{
   success: boolean
   settledCount?: number
+  failedCount?: number
   error?: string
 }> {
   const supabase = await createClient()
 
-  // Validate
+  // ── Validate match exists and isn't already settled ──
+  const { data: matchCheck } = await supabase
+    .from('matches')
+    .select('id, status, home_team, away_team')
+    .eq('id', data.matchId)
+    .single()
+
+  if (!matchCheck) {
+    return { success: false, error: 'Match not found' }
+  }
+  if (matchCheck.status === 'finished') {
+    return {
+      success: false,
+      error: `Match "${matchCheck.home_team} vs ${matchCheck.away_team}" has already been settled. Re-settling is not allowed to prevent double-processing of payouts.`,
+    }
+  }
+
+  // ── Validate score/stat values ──
   if (data.htHome > data.ftHome) {
     return {
       success: false,
@@ -1302,6 +1320,21 @@ export async function enterMatchResult(data: {
       success: false,
       error:
         'HT away goals cannot exceed FT away goals',
+    }
+  }
+  const negativeFields: [string, number][] = [
+    ['HT home goals', data.htHome],
+    ['HT away goals', data.htAway],
+    ['FT home goals', data.ftHome],
+    ['FT away goals', data.ftAway],
+    ['Home corners', data.homeCorners],
+    ['Away corners', data.awayCorners],
+    ['Home cards', data.homeCards],
+    ['Away cards', data.awayCards],
+  ]
+  for (const [label, value] of negativeFields) {
+    if (value == null || value < 0 || !Number.isFinite(value)) {
+      return { success: false, error: `${label} must be a valid non-negative number` }
     }
   }
 
@@ -1399,12 +1432,27 @@ export async function enterMatchResult(data: {
   ]
 
   let settledCount = 0
+  const failedSlipIds: string[] = []
   for (const slipId of affectedSlipIds) {
     const { error } = await supabase.rpc(
       'settle_slip',
       { p_slip_id: slipId }
     )
-    if (!error) settledCount++
+    if (!error) {
+      settledCount++
+    } else {
+      failedSlipIds.push(slipId)
+      console.error(`settle_slip failed for slip ${slipId}:`, error)
+    }
+  }
+  if (failedSlipIds.length > 0) {
+    // Surface failures in activity log so admins can find and manually resolve stuck slips
+    // instead of them silently sitting in a half-settled state with no trace.
+    await supabase.from('activity_logs').insert({
+      user_id: data.settledBy,
+      action: 'slip_settlement_failed',
+      details: { match_id: data.matchId, failed_slip_ids: failedSlipIds },
+    })
   }
 
   // Update market statuses
@@ -1461,10 +1509,11 @@ export async function enterMatchResult(data: {
         match_id: data.matchId,
         score: `${data.ftHome}-${data.ftAway}`,
         slips_settled: settledCount,
+        slips_failed: failedSlipIds.length,
       },
     })
 
-  return { success: true, settledCount }
+  return { success: true, settledCount, failedCount: failedSlipIds.length }
 }
 
 // ─── JACKPOT MANAGEMENT ───────────────

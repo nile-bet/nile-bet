@@ -215,9 +215,16 @@ export default function ResultEntryPage({
     })
 
     if (result.success) {
-      toast.success(
-        `Match settled! ${result.settledCount} slips processed.`
-      )
+      if ((result.failedCount ?? 0) > 0) {
+        toast.warning(
+          `Match settled with issues: ${result.settledCount} slips processed, ${result.failedCount} FAILED to settle. Check Activity Log for details and resolve manually.`,
+          { duration: 10000 }
+        )
+      } else {
+        toast.success(
+          `Match settled! ${result.settledCount} slips processed.`
+        )
+      }
       router.push('/matches')
     } else {
       toast.error(
