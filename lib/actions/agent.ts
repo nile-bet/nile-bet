@@ -849,7 +849,7 @@ export async function getAgentReport(
   if (cashierIds.length > 0) {
     let q = supabase
       .from('slips')
-      .select('stake, net_payout, winning_tax, status, insurance_tax, insurance_applied, created_at, placed_by')
+      .select('stake, net_payout, winning_tax, status, insurance_tax, insurance_applied, insurance_payout, created_at, placed_by')
       .in('placed_by', cashierIds)
     if (filters.startDate) q = q.gte('created_at', filters.startDate)
     if (filters.endDate) q = q.lte('created_at', filters.endDate)
@@ -868,7 +868,7 @@ export async function getAgentReport(
   const totalCollectedSlips = allSlips.reduce((a, s) => a + (s.stake ?? 0), 0)
   const totalPaidSlips = allSlips
     .filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
-    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
+    .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_payout ?? s.net_payout ?? 0) : (s.net_payout ?? 0)), 0)
   const taxCollected = allSlips
     .filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_tax ?? 0) : (s.winning_tax ?? 0)), 0)
@@ -887,7 +887,7 @@ export async function getAgentReport(
     const date = slip.created_at.split('T')[0]
     if (!grouped[date]) grouped[date] = { date, collected: 0, paid: 0, profit: 0 }
     grouped[date].collected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') grouped[date].paid += slip.net_payout ?? 0
+    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') grouped[date].paid += (slip.status === 'near_win' || slip.insurance_applied) ? (slip.insurance_payout ?? slip.net_payout ?? 0) : (slip.net_payout ?? 0)
     grouped[date].profit = grouped[date].collected - grouped[date].paid
   })
   allJackpotSlips.forEach((slip: any) => {
@@ -907,7 +907,7 @@ export async function getAgentReport(
     if (!c) continue
     c.slipCount += 1
     c.totalCollected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') c.totalPaid += slip.net_payout ?? 0
+    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') c.totalPaid += (slip.status === 'near_win' || slip.insurance_applied) ? (slip.insurance_payout ?? slip.net_payout ?? 0) : (slip.net_payout ?? 0)
     if (slip.status === 'won' || slip.status === 'paid') c.taxCollected += slip.winning_tax ?? 0
     if (slip.status === 'near_win' || slip.insurance_applied) c.taxCollected += slip.insurance_tax ?? 0
   }
@@ -1245,7 +1245,7 @@ export async function getAgentNetworkStats(
 
   const totalCollectedSlips = all.reduce((a, s) => a + (s.stake ?? 0), 0)
   const totalPaidOutSlips = all.filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
-    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
+    .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_payout ?? s.net_payout ?? 0) : (s.net_payout ?? 0)), 0)
   const taxCollectedSlips = all.filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_tax ?? 0) : (s.winning_tax ?? 0)), 0)
   const pendingLiabilitySlips = all.filter((s) => s.status === 'pending')
