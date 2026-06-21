@@ -77,11 +77,12 @@ export default function AdminCheckSlipPage() {
               </div>
             </div>
             <span className={`text-xs px-2.5 py-1 rounded-full border font-semibold ${
+              jackpotSlip.status === 'paid' ? 'text-sky-400 border-sky-400/30 bg-sky-400/10' :
               jackpotSlip.status === 'won' ? 'text-yellow-400 border-yellow-400/30 bg-yellow-400/10' :
               jackpotSlip.status === 'near_win' ? 'text-green-400 border-green-400/30 bg-green-400/10' :
               jackpotSlip.status === 'lost' ? 'text-red-400 border-red-400/30 bg-red-400/10' :
               'text-white/50 border-white/20 bg-white/5'
-            }`}>{jackpotSlip.status?.toUpperCase()}</span>
+            }`}>{jackpotSlip.status === 'paid' ? '✓ PAID' : jackpotSlip.status?.toUpperCase()}</span>
           </div>
           {/* Info */}
           <div className="px-5 py-3 grid grid-cols-2 gap-3 border-b border-nile-blue/20 text-sm">
@@ -98,10 +99,17 @@ export default function AdminCheckSlipPage() {
               <p className="text-white font-mono">{jackpotSlip.correct_count !== null ? `${jackpotSlip.correct_count}/12` : 'Pending'}</p>
             </div>
             <div>
-              <p className="text-white/40 text-xs">Prize (net after 15% tax)</p>
-              <p className={`font-mono font-bold ${(jackpotSlip.reward_amount ?? 0) > 0 ? 'text-green-400' : 'text-white/30'}`}>
-        {(jackpotSlip.reward_amount ?? 0) > 0 ? `+ETB ${(jackpotSlip.reward_amount * 0.85).toLocaleString()}` : '—'}
+              <p className="text-white/40 text-xs">
+                {jackpotSlip.status === 'paid' ? 'Prize (Paid)' : jackpotSlip.status === 'near_win' ? 'Insured Refund (no tax)' : 'Prize (after 15% tax)'}
               </p>
+              <p className={`font-mono font-bold ${(jackpotSlip.reward_amount ?? 0) > 0 ? (jackpotSlip.status === 'paid' ? 'text-sky-400' : 'text-green-400') : 'text-white/30'}`}>
+                {(jackpotSlip.reward_amount ?? 0) > 0
+                  ? `+ETB ${(jackpotSlip.status === 'near_win' ? jackpotSlip.reward_amount : jackpotSlip.reward_amount * 0.85).toLocaleString()}`
+                  : '—'}
+              </p>
+              {jackpotSlip.status === 'paid' && (
+                <p className="text-sky-400/60 text-[10px] mt-0.5">✓ Already redeemed</p>
+              )}
             </div>
             <div>
               <p className="text-white/40 text-xs">Placed At</p>
