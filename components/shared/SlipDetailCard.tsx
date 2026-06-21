@@ -156,16 +156,21 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
         </div>
         <div className="border-t border-gold/10 my-2" />
         <div className="flex justify-between items-center">
-          <span className="text-white font-medium text-sm">Net Payout</span>
+          <span className="text-white font-medium text-sm">{slip.status === 'paid' ? 'Net Payout (Paid)' : 'Net Payout'}</span>
           <span className={cn(
             'font-mono font-bold text-lg',
-            slip.status === 'won' ? 'text-nile-success' : 'text-gold'
+            slip.status === 'paid' ? 'text-nile-blue-light' : slip.status === 'won' ? 'text-nile-success' : 'text-gold'
           )}>
             {formatETB(slip.net_payout)}
           </span>
         </div>
 
         {/* Status message */}
+        {slip.status === 'paid' && (
+          <div className="mt-2 bg-nile-blue-light/10 border border-nile-blue-light/30 rounded-lg p-3 text-center">
+            <p className="text-nile-blue-light font-semibold text-sm">✓ Paid — Redeemed by cashier</p>
+          </div>
+        )}
         {slip.status === 'won' && (
           <div className="mt-2 bg-nile-success/10 border border-nile-success/30 rounded-lg p-3 text-center">
             <p className="text-nile-success font-semibold text-sm">🎉 You Won! Visit a cashier to claim your prize.</p>
