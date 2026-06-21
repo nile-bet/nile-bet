@@ -331,7 +331,15 @@ export async function getMyJackpotSlips(
     .order('created_at', { ascending: false })
     .limit(50)
 
-  return data ?? []
+  // Compute tax/net payout server-side per slip — same logic as getJackpotSlipById.
+  // 'near_win' = insured stake refund, tax-free. 'won'/'paid' = real win, 15% tax.
+  return (data ?? []).map((slip: any) => {
+    const isInsured = slip.status === 'near_win'
+    const gross = slip.reward_amount ?? 0
+    const winning_tax = isInsured ? 0 : Math.round(gross * 0.15 * 100) / 100
+    const net_payout = Math.round((gross - winning_tax) * 100) / 100
+    return { ...slip, is_insured: isInsured, winning_tax, net_payout }
+  })
 }
 
 // ─── Get jackpot leaderboard ──────────
