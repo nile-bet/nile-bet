@@ -201,6 +201,48 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                   !isTeamGoalOU(m.market_templates?.name ?? '')
                 )
                 const rendered: React.ReactNode[] = []
+                const renderOULines = (group: any[], categoryFallback: string) => {
+                  const chunks: any[][] = []
+                  for (let i = 0; i < group.length; i += 3) chunks.push(group.slice(i, i + 3))
+                  return chunks.map((chunk, ci) => (
+                    <div key={ci} className="grid border-b border-white/5 last:border-0" style={{ gridTemplateColumns: `repeat(${chunk.length}, 1fr)` }}>
+                      {chunk.map((market, mi) => {
+                        const odds = market.match_market_odds ?? []
+                        const allNums = (market.market_templates?.name ?? '').match(/[\d.]+/g) ?? []
+                        const line = allNums[allNums.length - 1] ?? ''
+                        const overOdd = odds.find((o: any) => /over/i.test(o.selection))
+                        const underOdd = odds.find((o: any) => /under/i.test(o.selection))
+                        return (
+                          <div key={market.id} className={cn('bg-[#1E1E26]', mi < chunk.length - 1 ? 'border-r border-white/5' : '')}>
+                            <OddButton
+                              {...commonProps}
+                              label={`Over ${line}`}
+                              odd={overOdd?.odd_value ?? null}
+                              matchMarketId={market.id}
+                              selection={overOdd?.selection ?? ''}
+                              marketName={market.market_templates?.name ?? ''}
+                              categoryName={(market.market_templates as any)?.market_categories?.name ?? categoryFallback}
+                              size="col"
+                              darker={true}
+                            />
+                            <div className="border-t border-white/5" />
+                            <OddButton
+                              {...commonProps}
+                              label={`Under ${line}`}
+                              odd={underOdd?.odd_value ?? null}
+                              matchMarketId={market.id}
+                              selection={underOdd?.selection ?? ''}
+                              marketName={market.market_templates?.name ?? ''}
+                              categoryName={(market.market_templates as any)?.market_categories?.name ?? categoryFallback}
+                              size="col"
+                              darker={true}
+                            />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))
+                }
 
                 // Render Over/Under FIRST
                 if (overUnderMarkets.length > 0) {
@@ -213,40 +255,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                         <ChevronUp className="w-3 h-3 text-white/30" />
                       </div>
                       <div className="border-t border-white/5">
-                        {overUnderMarkets.map((market) => {
-                          const odds = market.match_market_odds ?? []
-                          const allNums = (market.market_templates?.name ?? '').match(/[\d.]+/g) ?? []
-                          const line = allNums[allNums.length - 1] ?? ''
-                          const overOdd = odds.find(o => /over/i.test(o.selection))
-                          const underOdd = odds.find(o => /under/i.test(o.selection))
-                          return (
-                            <div key={market.id} className="grid border-b border-white/5 last:border-0 bg-[#1E1E26]" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
-                              <OddButton
-                                {...commonProps}
-                                label={`Over ${line}`}
-                                odd={overOdd?.odd_value ?? null}
-                                matchMarketId={market.id}
-                                selection={overOdd?.selection ?? ''}
-                                marketName={market.market_templates?.name ?? ''}
-                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'GOALS'}
-                                size="col"
-                              darker={true}
-                              />
-                              <div className="bg-[rgba(255,255,255,0.06)]" />
-                              <OddButton
-                                {...commonProps}
-                                label={`Under ${line}`}
-                                odd={underOdd?.odd_value ?? null}
-                                matchMarketId={market.id}
-                                selection={underOdd?.selection ?? ''}
-                                marketName={market.market_templates?.name ?? ''}
-                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'GOALS'}
-                                size="col"
-                              darker={true}
-                              />
-                            </div>
-                          )
-                        })}
+                        {renderOULines(overUnderMarkets, 'GOALS')}
                       </div>
                     </div>
                   )
@@ -271,40 +280,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                         <ChevronUp className="w-3 h-3 text-white/30" />
                       </div>
                       <div className="border-t border-white/5">
-                        {group.map((market) => {
-                          const odds = market.match_market_odds ?? []
-                          const lineMatch = (market.market_templates?.name ?? '').match(/O\/U\s*([\d.]+)/i)
-                          const line = lineMatch ? lineMatch[1] : ''
-                          const overOdd = odds.find(o => /over/i.test(o.selection))
-                          const underOdd = odds.find(o => /under/i.test(o.selection))
-                          return (
-                            <div key={market.id} className="grid border-b border-white/5 last:border-0 bg-[#1E1E26]" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
-                              <OddButton
-                                {...commonProps}
-                                label={`Over ${line}`}
-                                odd={overOdd?.odd_value ?? null}
-                                matchMarketId={market.id}
-                                selection={overOdd?.selection ?? ''}
-                                marketName={market.market_templates?.name ?? ''}
-                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CORNERS'}
-                                size="col"
-                              darker={true}
-                              />
-                              <div className="bg-[rgba(255,255,255,0.06)]" />
-                              <OddButton
-                                {...commonProps}
-                                label={`Under ${line}`}
-                                odd={underOdd?.odd_value ?? null}
-                                matchMarketId={market.id}
-                                selection={underOdd?.selection ?? ''}
-                                marketName={market.market_templates?.name ?? ''}
-                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CORNERS'}
-                                size="col"
-                              darker={true}
-                              />
-                            </div>
-                          )
-                        })}
+                        {renderOULines(group, 'CORNERS')}
                       </div>
                     </div>
                   )
@@ -327,40 +303,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                         <ChevronUp className="w-3 h-3 text-white/30" />
                       </div>
                       <div className="border-t border-white/5">
-                        {group.map((market) => {
-                          const odds = market.match_market_odds ?? []
-                          const allNums = (market.market_templates?.name ?? '').match(/[\d.]+/g) ?? []
-                          const line = allNums[allNums.length - 1] ?? ''
-                          const overOdd = odds.find(o => /over/i.test(o.selection))
-                          const underOdd = odds.find(o => /under/i.test(o.selection))
-                          return (
-                            <div key={market.id} className="grid border-b border-white/5 last:border-0 bg-[#1E1E26]" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
-                              <OddButton
-                                {...commonProps}
-                                label={`Over ${line}`}
-                                odd={overOdd?.odd_value ?? null}
-                                matchMarketId={market.id}
-                                selection={overOdd?.selection ?? ''}
-                                marketName={market.market_templates?.name ?? ''}
-                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'TEAM GOALS'}
-                                size="col"
-                              darker={true}
-                              />
-                              <div className="bg-[rgba(255,255,255,0.06)]" />
-                              <OddButton
-                                {...commonProps}
-                                label={`Under ${line}`}
-                                odd={underOdd?.odd_value ?? null}
-                                matchMarketId={market.id}
-                                selection={underOdd?.selection ?? ''}
-                                marketName={market.market_templates?.name ?? ''}
-                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'TEAM GOALS'}
-                                size="col"
-                              darker={true}
-                              />
-                            </div>
-                          )
-                        })}
+                        {renderOULines(group, 'TEAM GOALS')}
                       </div>
                     </div>
                   )
@@ -385,40 +328,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
                         <ChevronUp className="w-3 h-3 text-white/30" />
                       </div>
                       <div className="border-t border-white/5">
-                        {group.map((market) => {
-                          const odds = market.match_market_odds ?? []
-                          const allNums = (market.market_templates?.name ?? '').match(/[\d.]+/g) ?? []
-                          const line = allNums[allNums.length - 1] ?? ''
-                          const overOdd = odds.find(o => /over/i.test(o.selection))
-                          const underOdd = odds.find(o => /under/i.test(o.selection))
-                          return (
-                            <div key={market.id} className="grid border-b border-white/5 last:border-0 bg-[#1E1E26]" style={{ gridTemplateColumns: '1fr 1px 1fr' }}>
-                              <OddButton
-                                {...commonProps}
-                                label={`Over ${line}`}
-                                odd={overOdd?.odd_value ?? null}
-                                matchMarketId={market.id}
-                                selection={overOdd?.selection ?? ''}
-                                marketName={market.market_templates?.name ?? ''}
-                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CARDS'}
-                                size="col"
-                              darker={true}
-                              />
-                              <div className="bg-[rgba(255,255,255,0.06)]" />
-                              <OddButton
-                                {...commonProps}
-                                label={`Under ${line}`}
-                                odd={underOdd?.odd_value ?? null}
-                                matchMarketId={market.id}
-                                selection={underOdd?.selection ?? ''}
-                                marketName={market.market_templates?.name ?? ''}
-                                categoryName={(market.market_templates as any)?.market_categories?.name ?? 'CARDS'}
-                                size="col"
-                              darker={true}
-                              />
-                            </div>
-                          )
-                        })}
+                        {renderOULines(group, 'CARDS')}
                       </div>
                     </div>
                   )
