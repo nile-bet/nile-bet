@@ -157,17 +157,17 @@ export async function getCashiersUnderAgent(
           })
           .eq('created_by', cashier.id)
           .eq('role', 'bettor')
-
       const { data: slips } = await supabase
         .from('slips')
         .select('stake, status')
         .eq('placed_by', cashier.id)
-
-      const slipCount = slips?.length ?? 0
-      const totalCollected = (slips ?? [])
-        .reduce(
-          (a, s) => a + (s.stake ?? 0), 0
-        )
+      const { data: jackpotSlips } = await supabase
+        .from('jackpot_slips')
+        .select('stake')
+        .eq('placed_by', cashier.id)
+      const slipCount = (slips?.length ?? 0) + (jackpotSlips?.length ?? 0)
+      const totalCollected = (slips ?? []).reduce((a, s) => a + (s.stake ?? 0), 0) + (jackpotSlips ?? [])
+        .reduce((a, s) => a + (s.stake ?? 0), 0)
 
       return {
         ...cashier,
