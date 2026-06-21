@@ -204,63 +204,66 @@ export async function getCreditRequests({
 }
 
 export async function approveCreditRequest(requestId: string, adminId?: string) {
-  const supabase = await createClient()
   const adminClient = await createAdminClient()
-
-  const { data: req } = await supabase
+  const { data: req } = await adminClient
     .from('credit_requests')
     .select('*')
     .eq('id', requestId)
     .single()
-  if (!req || req.status !== 'pending') return { success: false, error: 'Invalid request' }
-
-  // Get current balance of requester
-  const { data: profile } = await adminClient
+  if (req == null || req.status !== 'pending') return { success: false, error: 'Invalid or already processed request' }
+  const resolvedAdminId = adminId ?? req.to_user_id
+  const { data: adminProfile } = await adminClient
     .from('profiles')
     .select('credit_balance, username')
+    .eq('id', resolvedAdminId)
+    .single()
+  if (adminProfile == null) return { success: false, error: 'Admin profile not found' }
+  if ((adminProfile.credit_balance ?? 0) < Number(req.amount)) {
+    return { success: false, error: 'Insufficient admin balance to approve this request' }
+  }
+  const { data: requesterProfile } = await adminClient
+    .from('profiles')
+    .select('username')
     .eq('id', req.requester_id)
     .single()
-  if (!profile) return { success: false, error: 'User not found' }
-
-  const newBalance = (profile.credit_balance ?? 0) + Number(req.amount)
-
-  // Add credits to requester balance using admin client to bypass RLS
-  const { error: balanceError } = await adminClient
-    .from('profiles')
-    .update({ credit_balance: newBalance })
-    .eq('id', req.requester_id)
-  if (balanceError) return { success: false, error: 'Failed to update balance: ' + balanceError.message }
-
-  // Mark request approved
+  if (requesterProfile == null) return { success: false, error: 'Requester not found' }
+  const { error: debitErr } = await adminClient.rpc('increment_balance', { user_id: resolvedAdminId, delta: -Number(req.amount) })
+  if (debitErr != null) return { success: false, error: 'Failed to debit admin balance: ' + debitErr.message }
+  const { error: creditErr } = await adminClient.rpc('increment_balance', { user_id: req.requester_id, delta: Number(req.amount) })
+  if (creditErr != null) {
+    await adminClient.rpc('increment_balance', { user_id: resolvedAdminId, delta: Number(req.amount) })
+    return { success: false, error: 'Failed to credit requester balance: ' + creditErr.message }
+  }
   await adminClient.from('credit_requests').update({
     status: 'approved',
     updated_at: new Date().toISOString()
   }).eq('id', requestId)
-
-  // Log transaction
   await adminClient.from('transactions').insert({
-    from_user_id: adminId ?? req.to_user_id,
+    from_user_id: resolvedAdminId,
     to_user_id: req.requester_id,
     amount: req.amount,
     type: 'credit_assigned',
     note: 'Credit request approved' + (req.note ? ': ' + req.note : ''),
   })
-
-  // Notify requester
   await adminClient.from('notifications').insert({
     to_user_id: req.requester_id,
-    from_user_id: adminId ?? req.to_user_id,
+    from_user_id: resolvedAdminId,
     message: 'Your credit request of ETB ' + Number(req.amount).toLocaleString() + ' has been approved!',
     type: 'balance_updated',
     priority: 'normal',
   })
-
   return { success: true }
 }
 
 export async function declineCreditRequest(requestId: string, note?: string, adminId?: string) {
-  const supabase = await createClient()
-  const { error } = await supabase
+  const adminClient = await createAdminClient()
+  const { data: req } = await adminClient
+    .from('credit_requests')
+    .select('*')
+    .eq('id', requestId)
+    .single()
+  if (req == null || req.status !== 'pending') return { success: false, error: 'Invalid or already processed request' }
+  const { error } = await adminClient
     .from('credit_requests')
     .update({
       status: 'declined',
@@ -268,7 +271,15 @@ export async function declineCreditRequest(requestId: string, note?: string, adm
       updated_at: new Date().toISOString()
     })
     .eq('id', requestId)
-  return { success: !error }
+  if (error != null) return { success: false, error: error.message }
+  await adminClient.from('notifications').insert({
+    to_user_id: req.requester_id,
+    from_user_id: adminId ?? req.to_user_id,
+    message: 'Your credit request of ETB ' + Number(req.amount).toLocaleString() + ' was declined.' + (note ? ' Reason: ' + note : ''),
+    type: 'balance_updated',
+    priority: 'normal',
+  })
+  return { success: true }
 }
 
 // =====================

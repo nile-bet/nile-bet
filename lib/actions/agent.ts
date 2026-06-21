@@ -426,9 +426,6 @@ export async function createCashierByAgent(data: {
     return { success: false, error: e?.message ?? 'Unexpected error' }
   }
 }
-
-// ─── ASSIGN CREDITS ───────────────────
-
 export async function assignCreditsToSubUser(
   agentId: string,
   targetId: string,
@@ -437,54 +434,31 @@ export async function assignCreditsToSubUser(
   success: boolean
   error?: string
 }> {
-  const supabase = await createClient()
-
-  const { data: agent } = await supabase
+  const adminClient = await createAdminClient()
+  const { data: agent } = await adminClient
     .from('profiles')
     .select('credit_balance, username')
     .eq('id', agentId)
     .single()
-
-  if (!agent || agent.credit_balance < amount) {
-    return {
-      success: false,
-      error: 'Insufficient balance',
-    }
+  if (agent == null || agent.credit_balance < amount) {
+    return { success: false, error: 'Insufficient balance' }
   }
-
-  const { data: target } = await supabase
+  const { data: target } = await adminClient
     .from('profiles')
     .select('credit_balance, username, created_by')
     .eq('id', targetId)
     .single()
-
-  if (
-    !target ||
-    target.created_by !== agentId
-  ) {
-    return {
-      success: false,
-      error: 'Unauthorized',
-    }
+  if (target == null || target.created_by !== agentId) {
+    return { success: false, error: 'Unauthorized' }
   }
-
-  await supabase
-    .from('profiles')
-    .update({
-      credit_balance:
-        agent.credit_balance - amount,
-    })
-    .eq('id', agentId)
-
-  await supabase
-    .from('profiles')
-    .update({
-      credit_balance:
-        target.credit_balance + amount,
-    })
-    .eq('id', targetId)
-
-  await supabase
+  const { error: debitErr } = await adminClient.rpc('increment_balance', { user_id: agentId, delta: -amount })
+  if (debitErr != null) return { success: false, error: 'Failed to debit agent balance: ' + debitErr.message }
+  const { error: creditErr } = await adminClient.rpc('increment_balance', { user_id: targetId, delta: amount })
+  if (creditErr != null) {
+    await adminClient.rpc('increment_balance', { user_id: agentId, delta: amount })
+    return { success: false, error: 'Failed to credit target balance: ' + creditErr.message }
+  }
+  await adminClient
     .from('credit_assignments')
     .insert({
       from_user_id: agentId,
@@ -492,44 +466,35 @@ export async function assignCreditsToSubUser(
       amount,
       note: 'Agent credit assignment',
     })
-
-  await supabase
+  await adminClient
     .from('notifications')
     .insert({
       to_user_id: targetId,
-      message: `ETB ${amount.toLocaleString()} credited by your agent (@${agent.username})`,
+      message: 'ETB ' + amount.toLocaleString() + ' credited by your agent (@' + agent.username + ')',
       type: 'balance_updated',
     })
-
-  // Notify admin
-  const { data: admin } = await supabase
+  const { data: admin } = await adminClient
     .from('profiles')
     .select('id')
     .eq('role', 'admin')
     .limit(1)
     .single()
-
-  if (admin) {
-    await supabase
+  if (admin != null) {
+    await adminClient
       .from('notifications')
       .insert({
         to_user_id: admin.id,
-        message: `@${agent.username} assigned ETB ${amount.toLocaleString()} to @${target.username}`,
+        message: '@' + agent.username + ' assigned ETB ' + amount.toLocaleString() + ' to @' + target.username,
         type: 'broadcast',
       })
   }
-
-  await supabase
+  await adminClient
     .from('activity_logs')
     .insert({
       user_id: agentId,
       action: 'credits_assigned',
-      details: {
-        target: target.username,
-        amount,
-      },
+      details: { target: target.username, amount },
     })
-
   return { success: true }
 }
 
@@ -1075,67 +1040,43 @@ export async function declineCouponByAgent(
 
   return { success: true }
 }
-
-// ─── AGENT APPROVE/DECLINE CASHIER CREDIT REQUEST ─────────────────────────
 export async function agentApproveCreditRequest(
   requestId: string,
   agentId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
   const adminClient = await createAdminClient()
-
-  // Fetch request using regular client
-  const { data: req } = await supabase
+  const { data: req } = await adminClient
     .from('credit_requests')
     .select('*')
     .eq('id', requestId)
     .single()
-
-  if (!req || req.status !== 'pending') return { success: false, error: 'Invalid or already processed request' }
-
-  // Get requester (cashier) current balance using adminClient
+  if (req == null || req.status !== 'pending') return { success: false, error: 'Invalid or already processed request' }
   const { data: cashierProfile } = await adminClient
     .from('profiles')
-    .select('credit_balance, username')
+    .select('username')
     .eq('id', req.requester_id)
     .single()
-  if (!cashierProfile) return { success: false, error: 'Cashier profile not found' }
-
-  // Get agent current balance
+  if (cashierProfile == null) return { success: false, error: 'Cashier profile not found' }
   const { data: agentProfile } = await adminClient
     .from('profiles')
     .select('credit_balance, username')
     .eq('id', agentId)
     .single()
-  if (!agentProfile) return { success: false, error: 'Agent profile not found' }
+  if (agentProfile == null) return { success: false, error: 'Agent profile not found' }
   if ((agentProfile.credit_balance ?? 0) < Number(req.amount)) {
     return { success: false, error: 'Insufficient agent balance' }
   }
-
-  const newCashierBalance = (cashierProfile.credit_balance ?? 0) + Number(req.amount)
-  const newAgentBalance = (agentProfile.credit_balance ?? 0) - Number(req.amount)
-
-  // Update cashier balance
-  const { error: cashierUpdateErr } = await adminClient
-    .from('profiles')
-    .update({ credit_balance: newCashierBalance })
-    .eq('id', req.requester_id)
-  if (cashierUpdateErr) return { success: false, error: 'Failed to update cashier balance: ' + cashierUpdateErr.message }
-
-  // Update agent balance
-  const { error: agentUpdateErr } = await adminClient
-    .from('profiles')
-    .update({ credit_balance: newAgentBalance })
-    .eq('id', agentId)
-  if (agentUpdateErr) return { success: false, error: 'Failed to update agent balance: ' + agentUpdateErr.message }
-
-  // Mark request approved
+  const { error: debitErr } = await adminClient.rpc('increment_balance', { user_id: agentId, delta: -Number(req.amount) })
+  if (debitErr != null) return { success: false, error: 'Failed to debit agent balance: ' + debitErr.message }
+  const { error: creditErr } = await adminClient.rpc('increment_balance', { user_id: req.requester_id, delta: Number(req.amount) })
+  if (creditErr != null) {
+    await adminClient.rpc('increment_balance', { user_id: agentId, delta: Number(req.amount) })
+    return { success: false, error: 'Failed to credit cashier balance: ' + creditErr.message }
+  }
   await adminClient.from('credit_requests').update({
     status: 'approved',
     updated_at: new Date().toISOString(),
   }).eq('id', requestId)
-
-  // Log transaction
   await adminClient.from('transactions').insert({
     from_user_id: agentId,
     to_user_id: req.requester_id,
@@ -1143,8 +1084,6 @@ export async function agentApproveCreditRequest(
     type: 'credit_assigned',
     note: 'Agent approved cashier credit request: ' + (req.note ?? ''),
   })
-
-  // Notify cashier
   await adminClient.from('notifications').insert({
     to_user_id: req.requester_id,
     from_user_id: agentId,
@@ -1152,15 +1091,14 @@ export async function agentApproveCreditRequest(
     type: 'balance_updated',
     priority: 'normal',
   })
-
   await adminClient.from('activity_logs').insert({
     user_id: agentId,
     action: 'credit_request_approved',
     details: { request_id: requestId, amount: req.amount, requester_id: req.requester_id },
   })
-
   return { success: true }
 }
+// ─── AGENT APPROVE/DECLINE CASHIER CREDIT REQUEST ─────────────────────────
 
 
 export async function agentDeclineCreditRequest(
@@ -1170,7 +1108,10 @@ export async function agentDeclineCreditRequest(
   try {
     const adminClient = await createAdminClient()
     const { data: req } = await adminClient
-      .from('credit_requests').select('requester_id').eq('id', requestId).single()
+      .from('credit_requests').select('requester_id, status').eq('id', requestId).single()
+    if (req == null || req.status !== 'pending') {
+      return { success: false, error: 'Invalid or already processed request' }
+    }
 
     await adminClient.from('credit_requests')
       .update({ status: 'declined', updated_at: new Date().toISOString() })
