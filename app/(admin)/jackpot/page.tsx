@@ -95,7 +95,7 @@ export default function AdminJackpotPage() {
   const handleDelete = async () => {
     if (!deletingId) return
     setDeleting(true)
-    const result = await deleteJackpot(deletingId)
+    const result = await deleteJackpot(deletingId, user?.id)
     if (result.success) {
       toast.success('Jackpot deleted!')
       setShowDeleteConfirm(false)

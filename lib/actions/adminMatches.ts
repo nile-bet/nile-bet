@@ -1594,6 +1594,12 @@ export async function createJackpot(data: {
       }))
     )
 
+  await supabase.from('activity_logs').insert({
+    user_id: data.createdBy,
+    action: 'jackpot_created',
+    details: { jackpot_id: jackpot.id, name: data.name, fixed_stake: data.fixedStake },
+  })
+
   return { success: true, jackpotId: jackpot.id }
 }
 
@@ -2032,9 +2038,16 @@ export async function deleteMatches(
 }
 
 export async function deleteJackpot(
-  jackpotId: string
+  jackpotId: string,
+  adminId?: string
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
+
+  const { data: jp } = await supabase
+    .from('jackpots')
+    .select('name')
+    .eq('id', jackpotId)
+    .single()
 
   // Delete related data first
   await supabase
@@ -2064,5 +2077,13 @@ export async function deleteJackpot(
     .eq('id', jackpotId)
 
   if (error) return { success: false, error: error.message }
+  if (adminId) {
+    await supabase.from('activity_logs').insert({
+      user_id: adminId,
+      action: 'jackpot_deleted',
+      details: { jackpot_id: jackpotId, name: jp?.name ?? null },
+    })
+  }
+
   return { success: true }
 }

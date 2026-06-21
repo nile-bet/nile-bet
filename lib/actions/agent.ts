@@ -1153,6 +1153,12 @@ export async function agentApproveCreditRequest(
     priority: 'normal',
   })
 
+  await adminClient.from('activity_logs').insert({
+    user_id: agentId,
+    action: 'credit_request_approved',
+    details: { request_id: requestId, amount: req.amount, requester_id: req.requester_id },
+  })
+
   return { success: true }
 }
 
@@ -1179,6 +1185,12 @@ export async function agentDeclineCreditRequest(
         priority: 'normal',
       })
     }
+
+    await adminClient.from('activity_logs').insert({
+      user_id: agentId,
+      action: 'credit_request_declined',
+      details: { request_id: requestId, requester_id: req?.requester_id ?? null },
+    })
 
     return { success: true }
   } catch (e: any) {

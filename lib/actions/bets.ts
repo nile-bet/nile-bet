@@ -578,6 +578,11 @@ export async function redeemWinningSlip(
     reference_id: slip.id,
     note: 'Winning payout redeemed for slip ' + slipId,
   })
+  await supabase.from('activity_logs').insert({
+    user_id: cashierId,
+    action: 'slip_redeemed',
+    details: { slip_id: slipId, amount: payoutAmount, is_insured: isInsured, bettor_id: slip.bettor_id },
+  })
   return { success: true, amount: payoutAmount }
 }
 export async function redeemJackpotWinningSlip(
@@ -619,6 +624,11 @@ export async function redeemJackpotWinningSlip(
     amount: slip.reward_amount,
     reference_id: slip.id,
     note: 'Jackpot payout redeemed for slip ' + slipId,
+  })
+  await supabase.from('activity_logs').insert({
+    user_id: cashierId,
+    action: 'jackpot_slip_redeemed',
+    details: { slip_id: slipId, amount: slip.reward_amount, is_insured: isInsured, bettor_id: slip.bettor_id },
   })
   return { success: true, amount: slip.reward_amount }
 }
