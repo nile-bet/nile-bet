@@ -166,12 +166,10 @@ export default function AgentCheckSlipPage() {
             </div>
             <div>
               <p className="text-white/40 text-xs">
-                {jackpotSlip.status === 'paid' ? 'Prize (Paid)' : jackpotSlip.status === 'near_win' ? 'Insured Refund (no tax)' : 'Prize (after 15% tax)'}
+                {jackpotSlip.status === 'paid' ? 'Prize (Paid)' : jackpotSlip.is_insured ? 'Insured Refund (no tax)' : 'Prize (after 15% tax)'}
               </p>
-              <p className={`font-mono font-bold ${(jackpotSlip.reward_amount ?? 0) > 0 ? (jackpotSlip.status === 'paid' ? 'text-sky-400' : 'text-green-400') : 'text-white/30'}`}>
-                {(jackpotSlip.reward_amount ?? 0) > 0
-                  ? `+ETB ${(jackpotSlip.status === 'near_win' ? jackpotSlip.reward_amount : jackpotSlip.reward_amount * 0.85).toLocaleString()}`
-                  : '—'}
+              <p className={`font-mono font-bold ${(jackpotSlip.net_payout ?? 0) > 0 ? (jackpotSlip.status === 'paid' ? 'text-sky-400' : 'text-green-400') : 'text-white/30'}`}>
+                {(jackpotSlip.net_payout ?? 0) > 0 ? `+ETB ${jackpotSlip.net_payout.toLocaleString()}` : '—'}
               </p>
               {jackpotSlip.status === 'paid' && (
                 <p className="text-sky-400/60 text-[10px] mt-0.5">✓ Already redeemed</p>
