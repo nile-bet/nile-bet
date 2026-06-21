@@ -1274,7 +1274,7 @@ export async function getAgentNetworkStats(
   if (cashierIds.length > 0) {
     let jq = supabase
       .from('jackpot_slips')
-      .select('stake, reward_amount, reward_tax, status, placed_by, created_at')
+      .select('stake, reward_amount, reward_tax, status, is_insured, redeemed_at, placed_by, created_at')
       .in('placed_by', cashierIds)
     if (startDate) jq = jq.gte('created_at', startDate)
     if (endDate) jq = jq.lte('created_at', endDate)
@@ -1283,12 +1283,12 @@ export async function getAgentNetworkStats(
   }
 
   const totalSlips = all.length + allJackpot.length
-  const wonSlips = all.filter((s) => s.status === 'won' || s.status === 'paid').length + allJackpot.filter((s) => s.status === 'won' || s.status === 'paid').length
+  const wonSlips = all.filter((s) => s.status === 'won' || s.status === 'paid').length + allJackpot.filter((s) => s.status === 'won' || (s.status === 'paid' && s.is_insured !== true)).length
   const lostSlips = all.filter((s) => s.status === 'lost').length + allJackpot.filter((s) => s.status === 'lost').length
   const pendingSlips = all.filter((s) => s.status === 'pending').length + allJackpot.filter((s) => s.status === 'pending').length
   const inProgressSlips = all.filter((s) => s.status === 'in_progress').length
   const cancelledSlips = all.filter((s) => s.status === 'cancelled').length
-  const insuredSlips = all.filter((s) => s.status === 'near_win' || s.insurance_applied).length + allJackpot.filter((s) => s.status === 'near_win').length
+  const insuredSlips = all.filter((s) => s.status === 'near_win' || s.insurance_applied).length + allJackpot.filter((s) => s.status === 'near_win' || s.is_insured === true).length
 
   const totalCollectedSlips = all.reduce((a, s) => a + (s.stake ?? 0), 0)
   const totalPaidOutSlips = all.filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
@@ -1310,15 +1310,19 @@ export async function getAgentNetworkStats(
   // Regular vs jackpot split counts
   const regularSlips = all.length
   const jackpotSlipsCount = allJackpot.length
-
-  // Won: redeemed (paid) vs awaiting payout (won)
-  const wonRedeemed = all.filter((s) => s.status === 'paid').length + allJackpot.filter((s) => s.status === 'paid').length
+  // Won: redeemed (paid) vs awaiting payout (won). Jackpot 'paid' rows that
+  // are legacy-insured (is_insured=true, settled before this design) are excluded.
+  const wonRedeemed = all.filter((s) => s.status === 'paid').length + allJackpot.filter((s) => s.status === 'paid' && s.is_insured !== true).length
   const wonPending = all.filter((s) => s.status === 'won').length + allJackpot.filter((s) => s.status === 'won').length
-
-  // Insured: redeemed (has redeemed_at) vs pending (jackpot insured can't be split post-redemption)
+  // Insured: regular near_win uses redeemed_at (status never changes); jackpot
+  // near_win is the same going forward, plus legacy paid+is_insured rows count as redeemed.
   const insuredRegular = all.filter((s) => s.status === 'near_win')
-  const insuredRedeemed = insuredRegular.filter((s: any) => s.redeemed_at).length
-  const insuredPending = (insuredRegular.length - insuredRedeemed) + allJackpot.filter((s) => s.status === 'near_win').length
+  const insuredRegularRedeemed = insuredRegular.filter((s: any) => s.redeemed_at).length
+  const jackpotInsuredRedeemed = allJackpot.filter((s) => (s.status === 'near_win' && s.redeemed_at != null) || (s.status === 'paid' && s.is_insured === true)).length
+  const jackpotInsuredPending = allJackpot.filter((s) => s.status === 'near_win' && s.redeemed_at == null).length
+  const insuredRedeemed = insuredRegularRedeemed + jackpotInsuredRedeemed
+  const insuredPending = (insuredRegular.length - insuredRegularRedeemed) + jackpotInsuredPending
+
 
   // Lost / pending split
   const lostRegular = all.filter((s) => s.status === 'lost').length
@@ -1457,7 +1461,7 @@ export async function getAgentPayoutsReport(
   let jq = supabase
     .from('jackpot_slips')
     .select(`
-      slip_id, stake, reward_amount, reward_tax, status, is_anonymous, is_insured, placed_by,
+      slip_id, stake, reward_amount, reward_tax, status, is_anonymous, is_insured, redeemed_at, placed_by,
       created_at, updated_at,
       jackpots (name, fixed_stake),
       bettor:profiles!jackpot_slips_bettor_id_fkey (username)
@@ -1472,7 +1476,7 @@ export async function getAgentPayoutsReport(
 
   // Normalize regular slips (mirrors getCashierPayoutsReport)
   const regularPayouts = (slips ?? []).map((s: any) => {
-    const isRedeemed = s.status === 'paid'
+    const isRedeemed = s.status === 'paid' || ((s.insurance_applied === true || s.status === 'near_win') && s.redeemed_at != null)
     const isInsured = s.insurance_applied === true || s.status === 'near_win'
     const taxAmt = isInsured ? (s.insurance_tax ?? 0) : (s.winning_tax ?? 0)
     const netAmt = isInsured ? (s.insurance_payout ?? s.stake ?? 0) : (s.net_payout ?? 0)
@@ -1498,7 +1502,7 @@ export async function getAgentPayoutsReport(
 
   // Normalize jackpot slips (mirrors getCashierPayoutsReport)
   const jackpotPayouts = (jackpotSlips ?? []).map((j: any) => {
-    const isRedeemed = j.status === 'paid'
+    const isRedeemed = j.status === 'paid' || ((j.is_insured === true || j.status === 'near_win') && j.redeemed_at != null)
     const isInsured = j.is_insured === true || j.status === 'near_win'
     const tax = j.reward_tax ?? 0
     const net = j.reward_amount ?? 0

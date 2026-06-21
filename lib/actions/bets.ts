@@ -548,78 +548,78 @@ export async function redeemWinningSlip(
   const supabase = await createClient()
   const { data: slip } = await supabase
     .from('slips')
-    .select('id, slip_id, status, net_payout, bettor_id, placed_by')
+    .select('id, slip_id, status, net_payout, insurance_payout, insurance_applied, redeemed_at, bettor_id, placed_by')
     .eq('slip_id', slipId)
     .single()
-  if (!slip) return { success: false, error: 'Slip not found' }
+  if (slip == null) return { success: false, error: 'Slip not found' }
+  const isInsured = slip.insurance_applied === true || slip.status === 'near_win'
   if (slip.status === 'paid') return { success: false, error: 'Slip already redeemed' }
-  if (slip.status !== 'won') return { success: false, error: 'Slip is ' + slip.status + ', only won slips can be redeemed' }
+  if (isInsured === true && slip.redeemed_at != null) return { success: false, error: 'Slip already redeemed' }
+  if (isInsured === false && slip.status !== 'won') return { success: false, error: 'Slip is ' + slip.status + ', only won slips can be redeemed' }
+  if (isInsured === true && slip.status !== 'near_win') return { success: false, error: 'Slip is ' + slip.status + ', not an insured slip' }
+  const payoutAmount = isInsured === true ? (slip.insurance_payout ?? 0) : (slip.net_payout ?? 0)
+  const updateFields: any = { redeemed_at: new Date().toISOString(), redeemed_by: cashierId }
+  if (isInsured === false) updateFields.status = 'paid'
   const { data: updatedRows, error: slipErr } = await supabase
     .from('slips')
-    .update({ status: 'paid', redeemed_at: new Date().toISOString(), redeemed_by: cashierId })
+    .update(updateFields)
     .eq('id', slip.id)
-    .eq('status', 'won')
+    .eq('status', slip.status)
+    .is('redeemed_at', null)
     .select('id')
-  if (slipErr) return { success: false, error: 'Failed to update slip status: ' + slipErr.message }
+  if (slipErr != null) return { success: false, error: 'Failed to update slip status: ' + slipErr.message }
   if ((updatedRows ?? []).length === 0) {
     return { success: false, error: 'Slip was already redeemed (possibly by another cashier)' }
   }
   await supabase.from('transactions').insert({
     to_user_id: cashierId,
     type: 'payout',
-    amount: slip.net_payout,
+    amount: payoutAmount,
     reference_id: slip.id,
     note: 'Winning payout redeemed for slip ' + slipId,
   })
-  return { success: true, amount: slip.net_payout }
+  return { success: true, amount: payoutAmount }
 }
-
 export async function redeemJackpotWinningSlip(
   slipId: string,
   cashierId: string
 ): Promise<{ success: boolean; amount?: number; status?: string; correctCount?: number; error?: string }> {
   const supabase = await createClient()
-
   const { data: slip } = await supabase
     .from('jackpot_slips')
-    .select('id, slip_id, status, reward_amount, bettor_id')
+    .select('id, slip_id, status, reward_amount, is_insured, redeemed_at, bettor_id')
     .eq('slip_id', slipId)
     .single()
-
-  if (!slip) return { success: false, error: 'Jackpot slip not found' }
-  if (slip.status === 'paid') {
-    return { success: false, error: 'Slip already redeemed', status: slip.status }
+  if (slip == null) return { success: false, error: 'Jackpot slip not found' }
+  const isInsured = slip.is_insured === true || slip.status === 'near_win'
+  if (slip.status === 'paid') return { success: false, error: 'Slip already redeemed', status: slip.status }
+  if (isInsured === true && slip.redeemed_at != null) return { success: false, error: 'Slip already redeemed', status: slip.status }
+  if (['won', 'near_win'].includes(slip.status) === false) {
+    return { success: false, error: 'Slip is ' + slip.status + ', only won/near_win slips can be redeemed', status: slip.status }
   }
-  if (!['won', 'near_win'].includes(slip.status)) {
-    return { success: false, error: `Slip is ${slip.status} — only won/near_win slips can be redeemed`, status: slip.status }
-  }
-  if (!slip.reward_amount || slip.reward_amount <= 0) {
+  if (slip.reward_amount == null || slip.reward_amount <= 0) {
     return { success: false, error: 'No reward amount for this slip' }
   }
-
-  // Atomic mark-as-paid: WHERE re-checks the original status at the DB level,
-  // so concurrent/duplicate redemption attempts can only succeed once.
+  const updateFields: any = { redeemed_at: new Date().toISOString(), redeemed_by: cashierId }
+  if (isInsured === false) updateFields.status = 'paid'
   const { data: updatedRows, error: slipErr } = await supabase
     .from('jackpot_slips')
-    .update({ status: 'paid' })
+    .update(updateFields)
     .eq('id', slip.id)
     .eq('status', slip.status)
+    .is('redeemed_at', null)
     .select('id')
-
-  if (slipErr) return { success: false, error: 'Failed to update slip status: ' + slipErr.message }
-  if (!updatedRows || updatedRows.length === 0) {
+  if (slipErr != null) return { success: false, error: 'Failed to update slip status: ' + slipErr.message }
+  if (updatedRows == null || updatedRows.length === 0) {
     return { success: false, error: 'Slip was already redeemed (possibly by another cashier)' }
   }
-
-  // Log transaction only — redemption does not change the redeemer's wallet balance.
   await supabase.from('transactions').insert({
     to_user_id: cashierId,
-    type: slip.status === 'near_win' ? 'jackpot_near_win' : 'jackpot_win',
+    type: isInsured === true ? 'jackpot_near_win' : 'jackpot_win',
     amount: slip.reward_amount,
     reference_id: slip.id,
-    note: `Jackpot payout redeemed for slip ${slipId}`,
+    note: 'Jackpot payout redeemed for slip ' + slipId,
   })
-
   return { success: true, amount: slip.reward_amount }
 }
 
