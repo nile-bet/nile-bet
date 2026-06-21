@@ -229,8 +229,8 @@ function JackpotSlipCard({ slip }: { slip: any }) {
             <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full" style={{ background: 'rgba(37,46,109,0.6)', color: slip.status !== 'pending' ? '#D4AF37' : 'rgba(255,255,255,0.4)' }}>
               {slip.correct_count !== null && slip.status !== 'pending' ? `${slip.correct_count}/12` : `${selections.length}/12 picks`}
             </span>
-            {(slip.net_payout ?? slip.reward_amount ?? 0) > 0 && (
-              <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>+{(slip.net_payout ?? slip.reward_amount)?.toLocaleString('en-ET', { style: 'currency', currency: 'ETB' })}</span>
+            {(slip.reward_amount ?? 0) > 0 && (
+              <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>+{slip.reward_amount?.toLocaleString('en-ET', { style: 'currency', currency: 'ETB' })}</span>
             )}
           </div>
         </div>

@@ -199,11 +199,14 @@ export default function CashierCheckSlipPage() {
             </div>
             <div>
               <p className="text-white/40 text-xs">
-                {jackpotSlip.status === 'paid' ? 'Prize (Paid)' : jackpotSlip.is_insured ? 'Insured Refund (no tax)' : 'Prize (after 15% tax)'}
+                {jackpotSlip.status === 'paid' ? 'Prize (Paid, net of tax)' : 'Prize (net of tax)'}
               </p>
-              <p className={`font-mono font-bold ${(jackpotSlip.net_payout ?? 0) > 0 ? (jackpotSlip.status === 'paid' ? 'text-sky-400' : 'text-green-400') : 'text-white/30'}`}>
-                {(jackpotSlip.net_payout ?? 0) > 0 ? `+ETB ${jackpotSlip.net_payout.toLocaleString()}` : '—'}
+              <p className={`font-mono font-bold ${(jackpotSlip.reward_amount ?? 0) > 0 ? (jackpotSlip.status === 'paid' ? 'text-sky-400' : 'text-green-400') : 'text-white/30'}`}>
+                {(jackpotSlip.reward_amount ?? 0) > 0 ? `+ETB ${jackpotSlip.reward_amount.toLocaleString()}` : '—'}
               </p>
+              {(jackpotSlip.reward_tax ?? 0) > 0 && (
+                <p className="text-white/25 text-[10px] mt-0.5">Tax deducted: ETB {jackpotSlip.reward_tax.toLocaleString()}</p>
+              )}
               {jackpotSlip.status === 'paid' && (
                 <p className="text-sky-400/60 text-[10px] mt-0.5">✓ Already redeemed</p>
               )}

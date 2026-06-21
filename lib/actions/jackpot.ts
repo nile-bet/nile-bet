@@ -272,20 +272,11 @@ export async function getJackpotSlipById(
   if (error) console.error('getJackpotSlipById error:', error)
   if (!data) return null
 
-  // Compute tax/net payout server-side so every consumer (check-slip pages,
-  // receipts, etc.) reads a single correct value instead of re-deriving tax client-side.
-  // 'near_win' = insured stake refund, tax-free. 'won'/'paid' = real win, 15% tax.
-  const isInsured = data.status === 'near_win'
-  const gross = data.reward_amount ?? 0
-  const winning_tax = isInsured ? 0 : Math.round(gross * 0.15 * 100) / 100
-  const net_payout = Math.round((gross - winning_tax) * 100) / 100
-
-  return {
-    ...data,
-    is_insured: isInsured,
-    winning_tax,
-    net_payout,
-  }
+  // reward_amount is ALREADY the net (post-tax) amount, computed and stored at
+  // settlement time in settleJackpot (adminMatches.ts). reward_tax holds the tax
+  // amount. Do NOT recompute tax here — both 'won' and 'near_win' are taxed at
+  // settlement, this is by design. Just pass the real stored values through.
+  return data
 }
 
 // ─── Get bettor's jackpot slips ───────
@@ -331,15 +322,9 @@ export async function getMyJackpotSlips(
     .order('created_at', { ascending: false })
     .limit(50)
 
-  // Compute tax/net payout server-side per slip — same logic as getJackpotSlipById.
-  // 'near_win' = insured stake refund, tax-free. 'won'/'paid' = real win, 15% tax.
-  return (data ?? []).map((slip: any) => {
-    const isInsured = slip.status === 'near_win'
-    const gross = slip.reward_amount ?? 0
-    const winning_tax = isInsured ? 0 : Math.round(gross * 0.15 * 100) / 100
-    const net_payout = Math.round((gross - winning_tax) * 100) / 100
-    return { ...slip, is_insured: isInsured, winning_tax, net_payout }
-  })
+  // reward_amount is ALREADY the net (post-tax) amount, computed and stored at
+  // settlement time. reward_tax holds the tax. Do NOT recompute here.
+  return data ?? []
 }
 
 // ─── Get jackpot leaderboard ──────────

@@ -711,19 +711,16 @@ function JackpotSlipCard({ slip, onPrint }: { slip: any; onPrint: (slipId: strin
             <span className="text-xs px-3 py-1 rounded-full font-mono font-bold" style={{ background: 'rgba(37,46,109,0.6)', color: slip.status !== 'pending' ? '#D4AF37' : 'rgba(255,255,255,0.5)' }}>
               {slip.correct_count !== null && slip.status !== 'pending' ? `${slip.correct_count}/12 ✓` : `${selections.length}/12 picks`}
             </span>
-            {(slip.net_payout ?? slip.reward_amount ?? 0) > 0 && (
+            {(slip.reward_amount ?? 0) > 0 && (
               <div className="flex flex-col items-end">
                 <div className="flex items-center gap-1">
-                  {!slip.is_insured && (
+                  {(slip.reward_tax ?? 0) > 0 && (
                     <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ color: '#ef4444', background: 'rgba(239,68,68,0.12)' }}>-15%</span>
                   )}
-                  <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>+{formatETB(slip.net_payout ?? netAfterTax(slip.reward_amount))}</span>
+                  <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>+{formatETB(slip.reward_amount)}</span>
                 </div>
-                {!slip.is_insured && (
-                  <span className="text-[9px] text-white/25">gross {formatETB(slip.reward_amount)}</span>
-                )}
-                {slip.is_insured && (
-                  <span className="text-[9px] text-white/25">insured refund (no tax)</span>
+                {(slip.reward_tax ?? 0) > 0 && (
+                  <span className="text-[9px] text-white/25">tax {formatETB(slip.reward_tax)} deducted</span>
                 )}
               </div>
             )}
