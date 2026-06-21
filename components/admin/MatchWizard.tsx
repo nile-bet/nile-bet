@@ -234,8 +234,7 @@ export function MatchWizard({
 
   const kickOffWarning =
     kickOff &&
-    new Date(kickOff) 
-      new Date(Date.now() + 3600000)
+    new Date(kickOff) < new Date(Date.now() + 3600000)
 
   return (
     <Dialog open onOpenChange={onClose}>
