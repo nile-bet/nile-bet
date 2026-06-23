@@ -4,21 +4,24 @@ import { createClient } from '@/lib/supabase/client'
 import { useNotificationStore } from '@/lib/stores/notificationStore'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { Bell, Check } from 'lucide-react'
+import { markNotificationRead, markAllNotificationsRead } from '@/lib/actions/notifications'
 import { formatDistanceToNow } from 'date-fns'
 
 export default function AdminNotificationsPage() {
   const { user } = useAuthStore()
-  const { notifications, setNotifications, markAllAsRead, markAsRead } = useNotificationStore()
-  const supabase = createClient()
+  const { notifications, setNotifications, markAsRead: markAsReadLocal, markAllAsRead: markAllAsReadLocal } = useNotificationStore()
+  const markAsRead = async (id: string) => { markAsReadLocal(id); await markNotificationRead(id) }
+  const markAllAsRead = async () => { if (user) { markAllAsReadLocal(); await markAllNotificationsRead(user.id) } }
 
   useEffect(() => {
     if (!user) return
+    const supabase = createClient()
     supabase
       .from('notifications')
       .select('*')
       .eq('to_user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(50)
+      .limit(100)
       .then(({ data }) => {
         if (data) setNotifications(data)
       })

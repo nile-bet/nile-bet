@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useNotificationStore } from '@/lib/stores/notificationStore'
+import { markNotificationRead, markAllNotificationsRead } from '@/lib/actions/notifications'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { createClient } from '@/lib/supabase/client'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -29,7 +30,9 @@ function getIcon(type: string) {
 
 export default function AgentNotificationsPage() {
   const { user } = useAuthStore()
-  const { notifications, setNotifications, markAsRead, markAllAsRead } = useNotificationStore()
+  const { notifications, setNotifications, markAsRead: markAsReadLocal, markAllAsRead: markAllAsReadLocal } = useNotificationStore()
+  const markAsRead = async (id: string) => { markAsReadLocal(id); await markNotificationRead(id) }
+  const markAllAsRead = async () => { if (user) { markAllAsReadLocal(); await markAllNotificationsRead(user.id) } }
 
   useEffect(() => {
     if (!user) return
