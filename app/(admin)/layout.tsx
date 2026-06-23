@@ -2,6 +2,7 @@
 
 import { useAuth }
   from '@/lib/hooks/useAuth'
+import { useRealtimeAdmin } from '@/lib/hooks/useRealtimeAdmin'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -85,6 +86,7 @@ const adminNav: NavItem[] = [
 
 function AdminInitializer() {
   useAuth()
+  useRealtimeAdmin()
   const { user, isLoading } = useAuthStore()
   const router = useRouter()
   useEffect(() => {

@@ -137,8 +137,8 @@ export function NotificationBell() {
               No notifications yet
             </div>
           ) : (() => {
-            const unread = notifications.filter((n: Notification) => !n.is_read).slice(0, 20)
-            const read = notifications.filter((n: Notification) => n.is_read).slice(0, 10)
+            const unread = notifications.filter((n: Notification) => !n.is_read).slice(0, 50)
+            const read = notifications.filter((n: Notification) => n.is_read).slice(0, 20)
 
             const renderNotif = (notif: Notification) => {
               const { icon: Icon, color } = getNotifIcon(notif.type)
