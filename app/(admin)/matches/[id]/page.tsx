@@ -62,6 +62,15 @@ export default function ResultEntryPage({
     useState(0)
   const [homeCards, setHomeCards] = useState(0)
   const [awayCards, setAwayCards] = useState(0)
+  // Step 2: Extra stats for additional markets
+  const [htHomeCorners, setHtHomeCorners] = useState(0)
+  const [htAwayCorners, setHtAwayCorners] = useState(0)
+  const [htHomeCards, setHtHomeCards] = useState(0)
+  const [htAwayCards, setHtAwayCards] = useState(0)
+  const [firstCorner, setFirstCorner] = useState<'home' | 'away' | 'none'>('none')
+  const [lastCorner, setLastCorner] = useState<'home' | 'away' | 'none'>('none')
+  const [firstCard, setFirstCard] = useState<'home' | 'away' | 'none'>('none')
+
   const [specials, setSpecials] = useState<
     Record<string, boolean>
   >({
@@ -104,6 +113,7 @@ export default function ResultEntryPage({
     useState('no_goal')
   const [goalscorers, setGoalscorers] =
     useState<string[]>([])
+  const [hasScorerMarkets, setHasScorerMarkets] = useState(false)
   const [matchPlayers, setMatchPlayers] =
     useState<any[]>([])
 
@@ -114,7 +124,7 @@ export default function ResultEntryPage({
       supabase
         .from('matches')
         .select(
-          `*, leagues(name, countries(flag_emoji)), match_players(*)`
+          `*, leagues(name, countries(flag_emoji)), match_players(*), match_markets(id, status, market_templates(name))`
         )
         .eq('id', id)
         .single()
@@ -124,6 +134,9 @@ export default function ResultEntryPage({
             setMatchPlayers(
               data.match_players ?? []
             )
+            const scorerNames = ["Anytime Scorer","First Scorer","Last Scorer"]
+            const hasScorers = (data.match_markets ?? []).some((mm: any) => scorerNames.includes(mm.market_templates?.name ?? "") && mm.status !== "settled")
+            setHasScorerMarkets(hasScorers)
           }
         })
     })
@@ -167,6 +180,13 @@ export default function ResultEntryPage({
     away_cards: awayCards,
     minute_scores: minuteScores,
     scorers: { firstScorer, lastScorer, goalscorers },
+    ht_home_corners: htHomeCorners,
+    ht_away_corners: htAwayCorners,
+    ht_home_cards: htHomeCards,
+    ht_away_cards: htAwayCards,
+    first_corner: firstCorner,
+    last_corner: lastCorner,
+    first_card: firstCard,
     specials: {
       ...specials,
       firstTeamToScore: firstTeamScore,
@@ -205,6 +225,13 @@ export default function ResultEntryPage({
         lastScorer,
         goalscorers,
       },
+      htHomeCorners,
+      htAwayCorners,
+      htHomeCards,
+      htAwayCards,
+      firstCorner,
+      lastCorner,
+      firstCard,
       specials: {
         ...specials,
         firstTeamToScore: firstTeamScore,
@@ -547,6 +574,90 @@ export default function ResultEntryPage({
             </div>
           </div>
 
+          {/* HT Corners & Cards */}
+          <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
+            <h2 className="text-white font-semibold mb-4">
+              1st Half Corners & Cards
+            </h2>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <p className="text-white/60 text-sm mb-3">HT Corners</p>
+                <div className="flex gap-4">
+                  <div>
+                    <label className="text-xs text-white/40">{match.home_team}</label>
+                    <input type="number" min={0} max={homeCorners} value={htHomeCorners}
+                      onChange={(e) => setHtHomeCorners(parseInt(e.target.value) || 0)}
+                      className="w-16 h-10 text-center text-lg font-bold bg-charcoal border border-nile-blue/40 rounded-lg text-white font-mono focus:outline-none mt-1 block" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40">{match.away_team}</label>
+                    <input type="number" min={0} max={awayCorners} value={htAwayCorners}
+                      onChange={(e) => setHtAwayCorners(parseInt(e.target.value) || 0)}
+                      className="w-16 h-10 text-center text-lg font-bold bg-charcoal border border-nile-blue/40 rounded-lg text-white font-mono focus:outline-none mt-1 block" />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="text-white/60 text-sm mb-3">HT Cards</p>
+                <div className="flex gap-4">
+                  <div>
+                    <label className="text-xs text-white/40">{match.home_team}</label>
+                    <input type="number" min={0} max={homeCards} value={htHomeCards}
+                      onChange={(e) => setHtHomeCards(parseInt(e.target.value) || 0)}
+                      className="w-16 h-10 text-center text-lg font-bold bg-charcoal border border-nile-blue/40 rounded-lg text-white font-mono focus:outline-none mt-1 block" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40">{match.away_team}</label>
+                    <input type="number" min={0} max={awayCards} value={htAwayCards}
+                      onChange={(e) => setHtAwayCards(parseInt(e.target.value) || 0)}
+                      className="w-16 h-10 text-center text-lg font-bold bg-charcoal border border-nile-blue/40 rounded-lg text-white font-mono focus:outline-none mt-1 block" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* First/Last Corner & First Card */}
+          <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5 space-y-4">
+            <h2 className="text-white font-semibold mb-2">Corner & Card Events</h2>
+            <div>
+              <p className="text-white/60 text-sm mb-2">First Corner</p>
+              <div className="flex gap-2">
+                {(['home', 'away', 'none'] as const).map((v) => (
+                  <button key={v} onClick={() => setFirstCorner(v)}
+                    className={cn('px-3 py-1.5 rounded-lg text-xs border capitalize',
+                      firstCorner === v ? 'bg-gold border-gold text-charcoal font-semibold' : 'border-nile-blue/30 text-white/50 hover:text-white')}>
+                    {v === 'none' ? 'No Corner' : v === 'home' ? match.home_team : match.away_team}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-white/60 text-sm mb-2">Last Corner</p>
+              <div className="flex gap-2">
+                {(['home', 'away', 'none'] as const).map((v) => (
+                  <button key={v} onClick={() => setLastCorner(v)}
+                    className={cn('px-3 py-1.5 rounded-lg text-xs border capitalize',
+                      lastCorner === v ? 'bg-gold border-gold text-charcoal font-semibold' : 'border-nile-blue/30 text-white/50 hover:text-white')}>
+                    {v === 'none' ? 'No Corner' : v === 'home' ? match.home_team : match.away_team}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-white/60 text-sm mb-2">First Card</p>
+              <div className="flex gap-2">
+                {(['home', 'away', 'none'] as const).map((v) => (
+                  <button key={v} onClick={() => setFirstCard(v)}
+                    className={cn('px-3 py-1.5 rounded-lg text-xs border capitalize',
+                      firstCard === v ? 'bg-gold border-gold text-charcoal font-semibold' : 'border-nile-blue/30 text-white/50 hover:text-white')}>
+                    {v === 'none' ? 'No Card' : v === 'home' ? match.home_team : match.away_team}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* Specials */}
           <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
             <h2 className="text-white font-semibold mb-4">
@@ -769,6 +880,12 @@ export default function ResultEntryPage({
       {step === 4 && (
         <div className="space-y-6">
           {/* Scorers */}
+          {hasScorerMarkets && matchPlayers.length === 0 && (
+            <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-4 mb-2">
+              <p className="text-nile-danger font-semibold text-sm mb-1">⚠️ No Players Added</p>
+              <p className="text-white/60 text-xs">This match has Scorer markets (Anytime/First/Last Scorer) but no players were added. All scorer bets will be settled as LOST. Go back to the match edit page to add players first.</p>
+            </div>
+          )}
           {matchPlayers.length > 0 && (
             <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5 space-y-4">
               <h2 className="text-white font-semibold">

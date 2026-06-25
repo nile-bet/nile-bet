@@ -657,6 +657,13 @@ function calculateSelectionResult(
     away_corners: number
     home_cards: number
     away_cards: number
+    ht_home_corners: number
+    ht_away_corners: number
+    ht_home_cards: number
+    ht_away_cards: number
+    first_corner: string
+    last_corner: string
+    first_card: string
     minute_scores: Record<
       string,
       { home: number; away: number }
@@ -678,6 +685,13 @@ function calculateSelectionResult(
     away_corners,
     home_cards,
     away_cards,
+    ht_home_corners,
+    ht_away_corners,
+    ht_home_cards,
+    ht_away_cards,
+    first_corner,
+    last_corner,
+    first_card,
     minute_scores,
     scorers,
     specials,
@@ -1175,6 +1189,353 @@ function calculateSelectionResult(
     }
   }
 
+  // ── MAIN EXTRAS ──
+  if (marketName === 'Match Result & BTTS') {
+    const btts = ft_home > 0 && ft_away > 0
+    const ftResult = homeWin ? 'Home' : awayWin ? 'Away' : 'Draw'
+    const expected = `${ftResult} & ${btts ? 'Yes' : 'No'}`
+    return expected === selection ? won : lost
+  }
+
+  // ── HALVES EXTRAS ──
+  if (marketName === '1st Half Double Chance') {
+    if (selection === '1X') return (htHomeWin || htDraw) ? won : lost
+    if (selection === 'X2') return (htAwayWin || htDraw) ? won : lost
+    if (selection === '12') return (htHomeWin || htAwayWin) ? won : lost
+  }
+
+  if (marketName === '2nd Half Double Chance') {
+    const sh_home = ft_home - ht_home
+    const sh_away = ft_away - ht_away
+    const shHomeWin = sh_home > sh_away
+    const shAwayWin = sh_away > sh_home
+    const shDraw = sh_home === sh_away
+    if (selection === '1X') return (shHomeWin || shDraw) ? won : lost
+    if (selection === 'X2') return (shAwayWin || shDraw) ? won : lost
+    if (selection === '12') return (shHomeWin || shAwayWin) ? won : lost
+  }
+
+  const shOuMatch = marketName.match(/2nd Half Over\/Under (\d+(?:\.\d+)?)/)
+  if (shOuMatch) {
+    const line = parseFloat(shOuMatch[1])
+    const sh_total = (ft_home - ht_home) + (ft_away - ht_away)
+    if (selection === 'Over') return sh_total > line ? won : lost
+    if (selection === 'Under') return sh_total < line ? won : lost
+  }
+
+  if (marketName === '2nd Half BTTS') {
+    const sh_home = ft_home - ht_home
+    const sh_away = ft_away - ht_away
+    const btts = sh_home > 0 && sh_away > 0
+    if (selection === 'Yes') return btts ? won : lost
+    if (selection === 'No') return !btts ? won : lost
+  }
+
+  if (marketName === '1st Half Draw No Bet') {
+    if (htDraw) return voidResult
+    if (selection === 'Home') return htHomeWin ? won : lost
+    if (selection === 'Away') return htAwayWin ? won : lost
+  }
+
+  if (marketName === '2nd Half Draw No Bet') {
+    const sh_home = ft_home - ht_home
+    const sh_away = ft_away - ht_away
+    const shDraw = sh_home === sh_away
+    if (shDraw) return voidResult
+    if (selection === 'Home') return sh_home > sh_away ? won : lost
+    if (selection === 'Away') return sh_away > sh_home ? won : lost
+  }
+
+  const htAhMatch = marketName.match(/1st Half AH ([+-]\d+(?:\.\d+)?)/)
+  if (htAhMatch) {
+    const hc = parseFloat(htAhMatch[1])
+    const adjHome = ht_home + hc
+    if (adjHome > ht_away) return selection === 'Home' ? won : lost
+    if (adjHome < ht_away) return selection === 'Away' ? won : lost
+    return voidResult
+  }
+
+  if (marketName === 'Highest Scoring Half') {
+    const htTotal = ht_home + ht_away
+    const shTotal = (ft_home - ht_home) + (ft_away - ht_away)
+    if (selection === '1st Half') return htTotal > shTotal ? won : lost
+    if (selection === '2nd Half') return shTotal > htTotal ? won : lost
+    if (selection === 'Equal') return htTotal === shTotal ? won : lost
+  }
+
+  const bothHalvesOuMatch = marketName.match(/Both Halves Over (\d+(?:\.\d+)?)/)
+  if (bothHalvesOuMatch) {
+    const line = parseFloat(bothHalvesOuMatch[1])
+    const htTotal = ht_home + ht_away
+    const shTotal = (ft_home - ht_home) + (ft_away - ht_away)
+    return htTotal > line && shTotal > line ? won : lost
+  }
+
+  if (marketName === 'Home Win Both Halves') {
+    const shHomeWin = (ft_home - ht_home) > (ft_away - ht_away)
+    return htHomeWin && shHomeWin ? won : lost
+  }
+
+  if (marketName === 'Away Win Both Halves') {
+    const shAwayWin = (ft_away - ht_away) > (ft_home - ht_home)
+    return htAwayWin && shAwayWin ? won : lost
+  }
+
+  if (marketName === '1st Half + 2nd Half Result') {
+    const htResult = htHomeWin ? '1' : htAwayWin ? '2' : 'X'
+    const sh_home = ft_home - ht_home
+    const sh_away = ft_away - ht_away
+    const shResult = sh_home > sh_away ? '1' : sh_away > sh_home ? '2' : 'X'
+    return `${htResult}/${shResult}` === selection ? won : lost
+  }
+
+  // ── HANDICAP EXTRAS ──
+  const euHcMatch = marketName.match(/European Handicap ([+-]\d+)/)
+  if (euHcMatch) {
+    const hc = parseInt(euHcMatch[1])
+    const adjHome = ft_home + hc
+    if (selection === 'Home') return adjHome > ft_away ? won : adjHome === ft_away ? voidResult : lost
+    if (selection === 'Draw') return adjHome === ft_away ? won : lost
+    if (selection === 'Away') return ft_away > adjHome ? won : adjHome === ft_away ? voidResult : lost
+  }
+
+  // ── GOALS EXTRAS ──
+  if (marketName === 'BTTS & Over 2.5') {
+    const btts = ft_home > 0 && ft_away > 0
+    if (selection === 'Yes') return (btts && totalGoals > 2.5) ? won : lost
+    if (selection === 'No') return (!btts || totalGoals <= 2.5) ? won : lost
+  }
+
+  if (marketName === 'BTTS & Under 2.5') {
+    const btts = ft_home > 0 && ft_away > 0
+    if (selection === 'Yes') return (btts && totalGoals < 2.5) ? won : lost
+    if (selection === 'No') return (!btts || totalGoals >= 2.5) ? won : lost
+  }
+
+  // ── CORNERS EXTRAS ──
+  const homeCornerOuMatch = marketName.match(/Home Corners O\/U (\d+(?:\.\d+)?)/)
+  if (homeCornerOuMatch) {
+    const line = parseFloat(homeCornerOuMatch[1])
+    if (selection === 'Over') return home_corners > line ? won : lost
+    if (selection === 'Under') return home_corners < line ? won : lost
+  }
+
+  const awayCornerOuMatch = marketName.match(/Away Corners O\/U (\d+(?:\.\d+)?)/)
+  if (awayCornerOuMatch) {
+    const line = parseFloat(awayCornerOuMatch[1])
+    if (selection === 'Over') return away_corners > line ? won : lost
+    if (selection === 'Under') return away_corners < line ? won : lost
+  }
+
+  if (marketName === 'Exact Corners') {
+    if (selection === '12+') return totalCorners >= 12 ? won : lost
+    const n = parseInt(selection)
+    if (!isNaN(n)) return totalCorners === n ? won : lost
+  }
+
+  // ── CARDS EXTRAS ──
+  const homeCardOuMatch = marketName.match(/Home Cards O\/U (\d+(?:\.\d+)?)/)
+  if (homeCardOuMatch) {
+    const line = parseFloat(homeCardOuMatch[1])
+    if (selection === 'Over') return home_cards > line ? won : lost
+    if (selection === 'Under') return home_cards < line ? won : lost
+  }
+
+  const awayCardOuMatch = marketName.match(/Away Cards O\/U (\d+(?:\.\d+)?)/)
+  if (awayCardOuMatch) {
+    const line = parseFloat(awayCardOuMatch[1])
+    if (selection === 'Over') return away_cards > line ? won : lost
+    if (selection === 'Under') return away_cards < line ? won : lost
+  }
+
+  // ── GOALS ODD/EVEN EXTRAS ──
+  if (marketName === 'Total Goals Odd/Even (1st Half)') {
+    const htTotal = ht_home + ht_away
+    const isOdd = htTotal % 2 !== 0
+    if (selection === 'Odd') return isOdd ? won : lost
+    if (selection === 'Even') return !isOdd ? won : lost
+  }
+
+  if (marketName === 'Total Goals Odd/Even (2nd Half)') {
+    const shTotal = (ft_home - ht_home) + (ft_away - ht_away)
+    const isOdd = shTotal % 2 !== 0
+    if (selection === 'Odd') return isOdd ? won : lost
+    if (selection === 'Even') return !isOdd ? won : lost
+  }
+
+  if (marketName === 'Home Goals Odd/Even') {
+    const isOdd = ft_home % 2 !== 0
+    if (selection === 'Odd') return isOdd ? won : lost
+    if (selection === 'Even') return !isOdd ? won : lost
+  }
+
+  if (marketName === 'Away Goals Odd/Even') {
+    const isOdd = ft_away % 2 !== 0
+    if (selection === 'Odd') return isOdd ? won : lost
+    if (selection === 'Even') return !isOdd ? won : lost
+  }
+
+  if (marketName === 'Total Corners Odd/Even') {
+    const isOdd = totalCorners % 2 !== 0
+    if (selection === 'Odd') return isOdd ? won : lost
+    if (selection === 'Even') return !isOdd ? won : lost
+  }
+
+  if (marketName === 'Total Cards Odd/Even') {
+    const isOdd = totalCards % 2 !== 0
+    if (selection === 'Odd') return isOdd ? won : lost
+    if (selection === 'Even') return !isOdd ? won : lost
+  }
+
+  // ── CLEAN SHEET EXTRAS ──
+  if (marketName === 'Either Team Clean Sheet') {
+    const cs = ft_home === 0 || ft_away === 0
+    if (selection === 'Yes') return cs ? won : lost
+    if (selection === 'No') return !cs ? won : lost
+  }
+
+  if (marketName === '1st Half Home Clean Sheet') {
+    const cs = ht_away === 0
+    if (selection === 'Yes') return cs ? won : lost
+    if (selection === 'No') return !cs ? won : lost
+  }
+
+  if (marketName === '1st Half Away Clean Sheet') {
+    const cs = ht_home === 0
+    if (selection === 'Yes') return cs ? won : lost
+    if (selection === 'No') return !cs ? won : lost
+  }
+
+  if (marketName === 'Home Clean Sheet & Win') {
+    const result = homeWin && ft_away === 0
+    if (selection === 'Yes') return result ? won : lost
+    if (selection === 'No') return !result ? won : lost
+  }
+
+  if (marketName === 'Away Clean Sheet & Win') {
+    const result = awayWin && ft_home === 0
+    if (selection === 'Yes') return result ? won : lost
+    if (selection === 'No') return !result ? won : lost
+  }
+
+  // ── TEAM GOALS EXTRAS ──
+  if (marketName === 'Home Exact Goals') {
+    if (selection === '3+') return ft_home >= 3 ? won : lost
+    return ft_home === parseInt(selection) ? won : lost
+  }
+
+  if (marketName === 'Away Exact Goals') {
+    if (selection === '3+') return ft_away >= 3 ? won : lost
+    return ft_away === parseInt(selection) ? won : lost
+  }
+
+  if (marketName === 'Home Score Both Halves') {
+    const scoredBoth = ht_home > 0 && (ft_home - ht_home) > 0
+    if (selection === 'Yes') return scoredBoth ? won : lost
+    if (selection === 'No') return !scoredBoth ? won : lost
+  }
+
+  if (marketName === 'Away Score Both Halves') {
+    const scoredBoth = ht_away > 0 && (ft_away - ht_away) > 0
+    if (selection === 'Yes') return scoredBoth ? won : lost
+    if (selection === 'No') return !scoredBoth ? won : lost
+  }
+
+  if (marketName === 'Home Team to Score') {
+    if (selection === 'Yes') return ft_home > 0 ? won : lost
+    if (selection === 'No') return ft_home === 0 ? won : lost
+  }
+
+  if (marketName === 'Away Team to Score') {
+    if (selection === 'Yes') return ft_away > 0 ? won : lost
+    if (selection === 'No') return ft_away === 0 ? won : lost
+  }
+
+  // ── SCORE EXTRAS ──
+  if (marketName === 'Winning Margin') {
+    const margin = Math.abs(ft_home - ft_away)
+    if (selection === 'Draw') return draw ? won : lost
+    if (selection === 'Home 1') return homeWin && margin === 1 ? won : lost
+    if (selection === 'Home 2') return homeWin && margin === 2 ? won : lost
+    if (selection === 'Home 3+') return homeWin && margin >= 3 ? won : lost
+    if (selection === 'Away 1') return awayWin && margin === 1 ? won : lost
+    if (selection === 'Away 2') return awayWin && margin === 2 ? won : lost
+    if (selection === 'Away 3+') return awayWin && margin >= 3 ? won : lost
+  }
+
+  // ── COMBO EXTRAS ──
+  if (marketName === '1X2 + Total Goal') {
+    const ftResult = homeWin ? 'Home' : awayWin ? 'Away' : 'Draw'
+    const [resPart, goalPart] = selection.split(' & ')
+    if (!resPart || !goalPart) return voidResult
+    const resMatch = ftResult === resPart
+    let goalMatch = false
+    if (goalPart === '0-1') goalMatch = totalGoals <= 1
+    else if (goalPart === '2-3') goalMatch = totalGoals >= 2 && totalGoals <= 3
+    else if (goalPart === '4+') goalMatch = totalGoals >= 4
+    else goalMatch = totalGoals === parseInt(goalPart)
+    return resMatch && goalMatch ? won : lost
+  }
+
+  if (marketName === '1X2 + O/U 1.5 (1st Half)') {
+    const htTotal = ht_home + ht_away
+    const ftResult = homeWin ? 'Home' : awayWin ? 'Away' : 'Draw'
+    const ou = htTotal > 1.5 ? 'Over' : 'Under'
+    return `${ftResult} & ${ou}` === selection ? won : lost
+  }
+
+  if (marketName === 'BTTS + Over/Under 2.5') {
+    const btts = ft_home > 0 && ft_away > 0 ? 'Yes' : 'No'
+    const ou = totalGoals > 2.5 ? 'Over' : 'Under'
+    return `${btts} & ${ou}` === selection ? won : lost
+  }
+
+  if (marketName === 'BTTS + Over/Under 3.5') {
+    const btts = ft_home > 0 && ft_away > 0 ? 'Yes' : 'No'
+    const ou = totalGoals > 3.5 ? 'Over' : 'Under'
+    return `${btts} & ${ou}` === selection ? won : lost
+  }
+
+  if (marketName === 'Double Chance + O/U 2.5') {
+    const ou = totalGoals > 2.5 ? 'Over 2.5' : 'Under 2.5'
+    const dcWins = homeWin ? ['1X', '12'] : awayWin ? ['X2', '12'] : ['1X', 'X2']
+    const [dcPart, ouPart] = selection.split(' & ')
+    return dcWins.includes(dcPart) && ouPart === ou ? won : lost
+  }
+
+  if (marketName === 'Double Chance + BTTS') {
+    const btts = ft_home > 0 && ft_away > 0 ? 'Yes' : 'No'
+    const dcWins = homeWin ? ['1X', '12'] : awayWin ? ['X2', '12'] : ['1X', 'X2']
+    const [dcPart, bttsPart] = selection.split(' & ')
+    return dcWins.includes(dcPart) && bttsPart === btts ? won : lost
+  }
+
+  if (marketName === 'Home Win + Over/Under 2.5') {
+    const ou = totalGoals > 2.5 ? 'Over 2.5' : 'Under 2.5'
+    const [resPart, ouPart] = selection.split(' & ')
+    const resMatch = resPart === 'Home Win' ? homeWin : !homeWin
+    return resMatch && ouPart === ou ? won : lost
+  }
+
+  if (marketName === 'Away Win + Over/Under 2.5') {
+    const ou = totalGoals > 2.5 ? 'Over 2.5' : 'Under 2.5'
+    const [resPart, ouPart] = selection.split(' & ')
+    const resMatch = resPart === 'Away Win' ? awayWin : !awayWin
+    return resMatch && ouPart === ou ? won : lost
+  }
+
+  if (marketName === 'Win & Over 2.5') {
+    const winAndOver = (homeWin || awayWin) && totalGoals > 2.5
+    if (selection === 'Yes') return winAndOver ? won : lost
+    if (selection === 'No') return !winAndOver ? won : lost
+  }
+
+  if (marketName === 'Win & Under 2.5') {
+    const winAndUnder = (homeWin || awayWin) && totalGoals < 2.5
+    if (selection === 'Yes') return winAndUnder ? won : lost
+    if (selection === 'No') return !winAndUnder ? won : lost
+  }
+
   // Default: void unknown markets
   return voidResult
 }
@@ -1192,6 +1553,13 @@ export async function getSettlementPreview(
     away_corners: number
     home_cards: number
     away_cards: number
+    ht_home_corners?: number
+    ht_away_corners?: number
+    ht_home_cards?: number
+    ht_away_cards?: number
+    first_corner?: string
+    last_corner?: string
+    first_card?: string
     minute_scores: Record<string, any>
     scorers: any
     specials: any
@@ -1230,6 +1598,17 @@ export async function getSettlementPreview(
   let lostCount = 0
   let voidCount = 0
 
+  const fullResultData = {
+    ...resultData,
+    ht_home_corners: resultData.ht_home_corners ?? 0,
+    ht_away_corners: resultData.ht_away_corners ?? 0,
+    ht_home_cards: resultData.ht_home_cards ?? 0,
+    ht_away_cards: resultData.ht_away_cards ?? 0,
+    first_corner: resultData.first_corner ?? 'none',
+    last_corner: resultData.last_corner ?? 'none',
+    first_card: resultData.first_card ?? 'none',
+  }
+
   for (const sel of slipSelections) {
     const marketName =
       (sel as any).match_markets
@@ -1237,7 +1616,7 @@ export async function getSettlementPreview(
     const result = calculateSelectionResult(
       sel.selection,
       marketName,
-      resultData
+      fullResultData
     )
     if (result === 'won') wonCount++
     else if (result === 'lost') lostCount++
@@ -1271,6 +1650,13 @@ export async function enterMatchResult(data: {
   awayCorners: number
   homeCards: number
   awayCards: number
+  htHomeCorners: number
+  htAwayCorners: number
+  htHomeCards: number
+  htAwayCards: number
+  firstCorner: 'home' | 'away' | 'none'
+  lastCorner: 'home' | 'away' | 'none'
+  firstCard: 'home' | 'away' | 'none'
   minuteScores: Record<
     string,
     { home: number; away: number }
@@ -1347,6 +1733,13 @@ export async function enterMatchResult(data: {
     away_corners: data.awayCorners,
     home_cards: data.homeCards,
     away_cards: data.awayCards,
+    ht_home_corners: data.htHomeCorners,
+    ht_away_corners: data.htAwayCorners,
+    ht_home_cards: data.htHomeCards,
+    ht_away_cards: data.htAwayCards,
+    first_corner: data.firstCorner,
+    last_corner: data.lastCorner,
+    first_card: data.firstCard,
     minute_scores: data.minuteScores,
     scorers: data.scorers,
     specials: data.specials,
