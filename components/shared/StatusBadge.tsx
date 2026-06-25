@@ -26,7 +26,7 @@ function getConfig(
       pending: {
         label: 'PENDING',
         className:
-          'bg-nile-blue-light/20 text-nile-blue-light border-nile-blue-light/40',
+          'bg-nile-orange/20 text-nile-orange border-nile-orange/40',
       },
       won: {
         label: 'WON ✓',
