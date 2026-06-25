@@ -1536,6 +1536,56 @@ function calculateSelectionResult(
     if (selection === 'No') return !winAndUnder ? won : lost
   }
 
+  // ── 1ST HALF CORNERS O/U ──
+  const htCornerOuMatch = marketName.match(/1st Half Corners O\/U (\d+(?:\.\d+)?)/)
+  if (htCornerOuMatch) {
+    const line = parseFloat(htCornerOuMatch[1])
+    const htCorners = ht_home_corners + ht_away_corners
+    if (selection === 'Over') return htCorners > line ? won : lost
+    if (selection === 'Under') return htCorners < line ? won : lost
+  }
+
+  // ── 1ST HALF CARDS O/U ──
+  const htCardOuMatch = marketName.match(/1st Half Cards O\/U (\d+(?:\.\d+)?)/)
+  if (htCardOuMatch) {
+    const line = parseFloat(htCardOuMatch[1])
+    const htCards = ht_home_cards + ht_away_cards
+    if (selection === 'Over') return htCards > line ? won : lost
+    if (selection === 'Under') return htCards < line ? won : lost
+  }
+
+  // ── FIRST / LAST CORNER ──
+  if (marketName === 'First Corner') {
+    if (selection === 'Home') return first_corner === 'home' ? won : lost
+    if (selection === 'Away') return first_corner === 'away' ? won : lost
+    if (selection === 'No Corner') return first_corner === 'none' ? won : lost
+  }
+
+  if (marketName === 'Last Corner') {
+    if (selection === 'Home') return last_corner === 'home' ? won : lost
+    if (selection === 'Away') return last_corner === 'away' ? won : lost
+    if (selection === 'No Corner') return last_corner === 'none' ? won : lost
+  }
+
+  // ── FIRST CARD ──
+  if (marketName === 'First Card') {
+    if (selection === 'Home') return first_card === 'home' ? won : lost
+    if (selection === 'Away') return first_card === 'away' ? won : lost
+    if (selection === 'No Card') return first_card === 'none' ? won : lost
+  }
+
+  // ── ASIAN HANDICAP CORNERS ──
+  // Requires a handicap line stored per match — not in result entry; void safely
+  if (marketName === 'Asian Handicap Corners') return voidResult
+
+  // ── ASIAN HANDICAP CARDS ──
+  // Requires a handicap line stored per match — not in result entry; void safely
+  if (marketName === 'Asian Handicap Cards') return voidResult
+
+  // ── NEXT GOAL MINUTE GROUP ──
+  // Requires per-event goal timing — not in result entry; void safely
+  if (marketName === 'Next Goal Minute Group') return voidResult
+
   // Default: void unknown markets
   return voidResult
 }
