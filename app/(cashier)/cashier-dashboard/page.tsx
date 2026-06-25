@@ -281,7 +281,7 @@ export default function CashierDashboard() {
   ]
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="py-3 space-y-2" style={{ paddingLeft: "8.75rem", paddingRight: "8.75rem" }}>
       {/* Low balance banner */}
       {!loading && isLowBalance && (
         <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-4 flex items-center justify-between">
@@ -327,15 +327,15 @@ export default function CashierDashboard() {
 
       {/* ── ROW 1: 4 Main Stats ── */}
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {[...Array(4)].map((_, i) => (
             <SkeletonStatCard key={i} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-slate-dark border border-gold/30 rounded-xl p-3">
-            <div className="flex justify-between items-start mb-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="bg-slate-dark border border-gold/30 rounded-xl p-2.5">
+            <div className="flex justify-between items-start mb-1">
               <p className="text-white/60 text-sm">
                 Wallet Balance
               </p>
@@ -343,7 +343,7 @@ export default function CashierDashboard() {
                 <Wallet className="w-5 h-5 text-gold" />
               </div>
             </div>
-            <p className="text-gold font-mono text-2xl font-bold">
+            <p className="text-gold font-mono text-xl font-bold">
               {formatETB(
                 stats?.walletBalance ?? 0
               )}
@@ -398,16 +398,16 @@ export default function CashierDashboard() {
       {!loading && stats && (
         <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
           {/* Total */}
-          <div className="bg-slate-dark border border-nile-blue/40 rounded-lg p-2 text-center">
+          <div className="bg-slate-dark border border-nile-blue/40 rounded-lg p-1.5 text-center">
             <Ticket className="w-4 h-4 text-white/50 mx-auto mb-0.5" />
-            <p className="text-xl font-bold text-white font-mono">{stats.totalSlips}</p>
+            <p className="text-lg font-bold text-white font-mono">{stats.totalSlips}</p>
             <p className="text-white/50 text-xs">Total</p>
             <p className="text-white/25 text-[10px]">{stats.regularSlips ?? 0} reg · {stats.jackpotSlipsCount ?? 0} jp</p>
           </div>
           {/* Won */}
-          <div className="bg-nile-success/10 border border-nile-success/30 rounded-lg p-2 text-center">
+          <div className="bg-nile-success/10 border border-nile-success/30 rounded-lg p-1.5 text-center">
             <CheckCircle className="w-4 h-4 text-nile-success mx-auto mb-0.5" />
-            <p className="text-xl font-bold text-nile-success font-mono">{stats.wonSlips}</p>
+            <p className="text-lg font-bold text-nile-success font-mono">{stats.wonSlips}</p>
             <p className="text-white/50 text-xs">Won</p>
             <div className="mt-1 space-y-0.5">
               <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.wonRedeemed ?? 0} redeemed</p>
@@ -415,9 +415,9 @@ export default function CashierDashboard() {
             </div>
           </div>
           {/* Insured */}
-          <div className="bg-gold/10 border border-gold/30 rounded-lg p-2 text-center">
+          <div className="bg-gold/10 border border-gold/30 rounded-lg p-1.5 text-center">
             <span className="text-base block mb-0.5">🛡️</span>
-            <p className="text-xl font-bold text-gold font-mono">{stats.insuredSlips}</p>
+            <p className="text-lg font-bold text-gold font-mono">{stats.insuredSlips}</p>
             <p className="text-white/50 text-xs">Insured</p>
             <div className="mt-1 space-y-0.5">
               <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.insuredRedeemed ?? 0} redeemed</p>
@@ -425,23 +425,23 @@ export default function CashierDashboard() {
             </div>
           </div>
           {/* Lost */}
-          <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-2 text-center">
+          <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-1.5 text-center">
             <XCircle className="w-4 h-4 text-nile-danger mx-auto mb-0.5" />
-            <p className="text-xl font-bold text-nile-danger font-mono">{stats.lostSlips}</p>
+            <p className="text-lg font-bold text-nile-danger font-mono">{stats.lostSlips}</p>
             <p className="text-white/50 text-xs">Lost</p>
             <p className="text-white/25 text-[10px]">{stats.lostRegular ?? 0} reg · {stats.lostJackpot ?? 0} jp</p>
           </div>
           {/* Pending */}
-          <div className="bg-nile-blue/20 border border-nile-blue/30 rounded-lg p-2 text-center">
+          <div className="bg-nile-blue/20 border border-nile-blue/30 rounded-lg p-1.5 text-center">
             <Clock className="w-4 h-4 text-gold mx-auto mb-0.5" />
-            <p className="text-xl font-bold text-gold font-mono">{stats.pendingSlips}</p>
+            <p className="text-lg font-bold text-gold font-mono">{stats.pendingSlips}</p>
             <p className="text-white/50 text-xs">Pending</p>
             <p className="text-white/25 text-[10px]">{stats.pendingRegular ?? 0} reg · {stats.pendingJackpot ?? 0} jp</p>
           </div>
           {/* Cancelled */}
-          <div className="bg-nile-blue/10 border border-nile-blue/20 rounded-lg p-2 text-center">
+          <div className="bg-nile-blue/10 border border-nile-blue/20 rounded-lg p-1.5 text-center">
             <RefreshCw className="w-4 h-4 text-nile-blue-light mx-auto mb-0.5" />
-            <p className="text-xl font-bold text-nile-blue-light font-mono">{stats.cancelledSlips}</p>
+            <p className="text-lg font-bold text-nile-blue-light font-mono">{stats.cancelledSlips}</p>
             <p className="text-white/50 text-xs">Cancelled</p>
             <p className="text-white/25 text-[10px]">voided slips</p>
           </div>
@@ -474,7 +474,7 @@ export default function CashierDashboard() {
         <div className="bg-slate-dark border border-gold/20 rounded-xl overflow-hidden">
           <button
             onClick={() => setJackpotExpanded(!jackpotExpanded)}
-            className="w-full flex items-center justify-between p-4 hover:bg-gold/5 transition-colors"
+            className="w-full flex items-center justify-between p-3 hover:bg-gold/5 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gold/10 rounded-lg">
@@ -490,7 +490,7 @@ export default function CashierDashboard() {
             <span className="text-gold text-sm">{jackpotExpanded ? '▲ Hide' : '▼ Expand'}</span>
           </button>
           {jackpotExpanded && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 pt-0">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-3 pt-0">
               <div className="bg-charcoal/50 rounded-lg p-3 text-center">
                 <p className="text-white font-mono text-lg font-bold">{stats.jackpot?.total ?? 0}</p>
                 <p className="text-white/50 text-xs">Total</p>
@@ -527,7 +527,7 @@ export default function CashierDashboard() {
       {/* ── ROW 4: Account + Net Balance ── */}
       {!loading && stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="bg-gradient-to-br from-nile-blue to-charcoal border border-gold/30 rounded-xl p-4">
+          <div className="bg-gradient-to-br from-nile-blue to-charcoal border border-gold/30 rounded-xl p-3">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-white/60 text-sm">
@@ -551,7 +551,7 @@ export default function CashierDashboard() {
 
           <div
             className={cn(
-              'border rounded-xl p-5',
+              'border rounded-xl p-3',
               (stats.netBalance ?? 0) >= 0
                 ? 'bg-nile-success/10 border-nile-success/30'
                 : 'bg-nile-danger/10 border-nile-danger/30'
@@ -564,7 +564,7 @@ export default function CashierDashboard() {
                 </p>
                 <p
                   className={cn(
-                    'font-mono text-2xl font-bold mt-2',
+                    'font-mono text-xl font-bold mt-1',
                     (stats.netBalance ?? 0) >= 0
                       ? 'text-nile-success'
                       : 'text-nile-danger'
@@ -596,7 +596,7 @@ export default function CashierDashboard() {
       {/* ── ROW 5: Profit Split ── */}
       {!loading && stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="bg-nile-success/10 border border-nile-success/20 rounded-xl p-4">
+          <div className="bg-nile-success/10 border border-nile-success/20 rounded-xl p-3">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-white/60 text-sm">
@@ -627,7 +627,7 @@ export default function CashierDashboard() {
             </div>
           </div>
 
-          <div className="bg-nile-danger/10 border border-nile-danger/20 rounded-xl p-5">
+          <div className="bg-nile-danger/10 border border-nile-danger/20 rounded-xl p-3">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-white/60 text-sm">
@@ -659,7 +659,7 @@ export default function CashierDashboard() {
       {/* ── ROW 6: Payouts Report ── */}
       <div className="bg-slate-dark border border-nile-blue/30 rounded-2xl overflow-hidden">
         {/* Header */}
-        <div className="px-5 py-3.5 border-b border-nile-blue/20 flex items-center gap-2.5">
+        <div className="px-4 py-2.5 border-b border-nile-blue/20 flex items-center gap-2.5">
           <div className="p-1.5 bg-gold/10 rounded-lg">
             <TrendingUp className="w-4 h-4 text-gold" />
           </div>
@@ -671,29 +671,29 @@ export default function CashierDashboard() {
         {!loading && stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 border-b border-nile-blue/20">
             {/* Total Won */}
-            <div className="rounded-xl p-3.5" style={{background:'rgba(34,197,94,0.08)', border:'1px solid rgba(34,197,94,0.18)'}}>
-              <div className="flex items-center justify-between mb-2.5">
+            <div className="rounded-xl p-2.5" style={{background:'rgba(34,197,94,0.08)', border:'1px solid rgba(34,197,94,0.18)'}}>
+              <div className="flex items-center justify-between mb-1.5">
                 <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Total Won</span>
                 <div className="p-1 rounded-md" style={{background:'rgba(34,197,94,0.15)'}}>
                   <CheckCircle className="w-3.5 h-3.5 text-nile-success" />
                 </div>
               </div>
-              <p className="text-nile-success font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.totalWonNet ?? stats.totalWon ?? 0)}</p>
-              <div className="mt-2.5 pt-2.5 border-t border-nile-success/10">
+              <p className="text-nile-success font-mono text-xl font-bold leading-none">{formatETB(payouts?.totals?.totalWonNet ?? stats.totalWon ?? 0)}</p>
+              <div className="mt-1.5 pt-1.5 border-t border-nile-success/10">
                 <p className="text-white/35 text-[10px]">{payouts?.totals?.totalWonCount ?? 0} winning slips · net after 15% tax</p>
               </div>
             </div>
 
             {/* Won Redeemed */}
-            <div className="rounded-xl p-3.5" style={{background:'rgba(59,130,246,0.08)', border:'1px solid rgba(59,130,246,0.18)'}}>
-              <div className="flex items-center justify-between mb-2.5">
+            <div className="rounded-xl p-2.5" style={{background:'rgba(59,130,246,0.08)', border:'1px solid rgba(59,130,246,0.18)'}}>
+              <div className="flex items-center justify-between mb-1.5">
                 <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Redeemed</span>
                 <div className="p-1 rounded-md" style={{background:'rgba(59,130,246,0.15)'}}>
                   <CheckCircle className="w-3.5 h-3.5 text-nile-blue-light" />
                 </div>
               </div>
-              <p className="text-nile-blue-light font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.wonRedeemedNet ?? 0)}</p>
-              <div className="mt-2.5 pt-2.5 border-t border-nile-blue-light/10 flex items-center justify-between">
+              <p className="text-nile-blue-light font-mono text-xl font-bold leading-none">{formatETB(payouts?.totals?.wonRedeemedNet ?? 0)}</p>
+              <div className="mt-1.5 pt-1.5 border-t border-nile-blue-light/10 flex items-center justify-between">
                 <span className="text-white/35 text-[10px]">{payouts?.totals?.wonRedeemedCount ?? 0} slips paid out</span>
                 {(payouts?.totals?.pendingPayoutNet ?? 0) > 0 && (
                   <span className="text-nile-orange/70 text-[10px] font-medium">{formatETB(payouts?.totals?.pendingPayoutNet ?? 0)} due</span>
@@ -702,15 +702,15 @@ export default function CashierDashboard() {
             </div>
 
             {/* Insured */}
-            <div className="rounded-xl p-3.5" style={{background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.18)'}}>
-              <div className="flex items-center justify-between mb-2.5">
+            <div className="rounded-xl p-2.5" style={{background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.18)'}}>
+              <div className="flex items-center justify-between mb-1.5">
                 <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">🛡️ Insured</span>
                 <div className="p-1 rounded-md" style={{background:'rgba(201,168,76,0.15)'}}>
                   <CheckCircle className="w-3.5 h-3.5 text-gold" />
                 </div>
               </div>
-              <p className="text-gold font-mono text-2xl font-bold leading-none">{formatETB(payouts?.totals?.insuredRedeemedNet ?? 0)}</p>
-              <div className="mt-2.5 pt-2.5 border-t border-gold/10 flex items-center justify-between">
+              <p className="text-gold font-mono text-xl font-bold leading-none">{formatETB(payouts?.totals?.insuredRedeemedNet ?? 0)}</p>
+              <div className="mt-1.5 pt-1.5 border-t border-gold/10 flex items-center justify-between">
                   <span className="text-white/35 text-[10px]">✓ {payouts?.totals?.insuredRedeemedCount ?? 0} paid</span>
                 {(payouts?.totals?.insuredPendingCount ?? 0) > 0
                   ? <span className="text-nile-orange/70 text-[10px] font-medium">⏳ {payouts?.totals?.insuredPendingCount ?? 0} pending</span>
@@ -720,20 +720,20 @@ export default function CashierDashboard() {
             </div>
 
             {/* Pending Payout */}
-            <div className="rounded-xl p-3.5" style={{
+            <div className="rounded-xl p-2.5" style={{
               background: (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? 'rgba(249,115,22,0.08)' : 'rgba(255,255,255,0.03)',
               border: (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? '1px solid rgba(249,115,22,0.25)' : '1px solid rgba(255,255,255,0.06)'
             }}>
-              <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center justify-between mb-1.5">
                 <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Pending Payout</span>
                 <div className="p-1 rounded-md" style={{background:'rgba(249,115,22,0.12)'}}>
                   <Clock className="w-3.5 h-3.5 text-nile-orange" />
                 </div>
               </div>
-              <p className={cn('font-mono text-2xl font-bold leading-none', (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? 'text-nile-orange' : 'text-white/30')}>
+              <p className={cn('font-mono text-xl font-bold leading-none', (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? 'text-nile-orange' : 'text-white/30')}>
                 {formatETB(payouts?.totals?.pendingPayoutNet ?? 0)}
               </p>
-              <div className="mt-2.5 pt-2.5 border-t border-nile-orange/10">
+              <div className="mt-1.5 pt-1.5 border-t border-nile-orange/10">
                 <p className="text-white/35 text-[10px]">{payouts?.totals?.pendingCount ?? 0} slips awaiting payment</p>
               </div>
             </div>
@@ -863,8 +863,8 @@ export default function CashierDashboard() {
       </div>
 
       {/* ── ROW 7: Recent Slips ── */}
-      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-4">
-        <div className="flex items-center justify-between mb-3">
+      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-3">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-white">
             🔀 Recent Slips
           </h3>
