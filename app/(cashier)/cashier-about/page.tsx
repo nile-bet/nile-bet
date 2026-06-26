@@ -3,7 +3,7 @@ import { Logo } from '@/components/shared/Logo'
 
 export default function CashierAboutPage() {
   return (
-    <div className="p-6 max-w-3xl">
+    <div className="py-4 max-w-3xl" style={{ paddingLeft: "8.75rem", paddingRight: "8.75rem" }}>
       <div className="flex justify-center mb-8">
         <Logo size="lg" showTagline />
       </div>

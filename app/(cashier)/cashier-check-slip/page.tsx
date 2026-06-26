@@ -72,7 +72,7 @@ export default function CashierCheckSlipPage() {
   }
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="py-4 max-w-2xl" style={{ paddingLeft: "8.75rem", paddingRight: "8.75rem" }}>
       <h1 className="font-display text-2xl font-bold text-white mb-2">
         Check Slip
       </h1>

@@ -84,7 +84,7 @@ export default function CashierSlipHistoryPage() {
   const totalPages = Math.ceil(total / LIMIT)
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="py-4 space-y-5" style={{ paddingLeft: "8.75rem", paddingRight: "8.75rem" }}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

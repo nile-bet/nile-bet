@@ -51,7 +51,7 @@ export default function CashierNotificationsPage() {
   const unread = notifications.filter(n => !n.is_read)
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="py-4 max-w-2xl" style={{ paddingLeft: "8.75rem", paddingRight: "8.75rem" }}>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-display text-2xl font-bold text-white">Notifications</h1>

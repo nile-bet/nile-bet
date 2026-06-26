@@ -7,7 +7,11 @@ const config: Config = {
     './app/**/*.{ts,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      spacing: {
+        '35': '8.75rem',
+      },
+    },
   },
   plugins: [],
 }

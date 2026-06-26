@@ -145,7 +145,7 @@ export default function CashierActivityPage() {
   ]
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="py-4 space-y-6" style={{ paddingLeft: "8.75rem", paddingRight: "8.75rem" }}>
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold text-white">My Activity</h1>
         <button
