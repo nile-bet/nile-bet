@@ -571,6 +571,7 @@ export async function redeemWinningSlip(
   if ((updatedRows ?? []).length === 0) {
     return { success: false, error: 'Slip was already redeemed (possibly by another cashier)' }
   }
+  await supabase.rpc('increment_balance', { user_id: cashierId, delta: payoutAmount })
   await supabase.from('transactions').insert({
     to_user_id: cashierId,
     type: 'payout',
@@ -630,6 +631,7 @@ export async function redeemJackpotWinningSlip(
     action: 'jackpot_slip_redeemed',
     details: { slip_id: slipId, amount: slip.reward_amount, is_insured: isInsured, bettor_id: slip.bettor_id },
   })
+  await supabase.rpc('increment_balance', { user_id: cashierId, delta: slip.reward_amount })
   return { success: true, amount: slip.reward_amount }
 }
 
