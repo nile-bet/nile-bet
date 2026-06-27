@@ -12,12 +12,16 @@ export async function getAllCoupons({
   limit = 20,
   status,
   username,
+  dateFrom,
+  dateTo,
 }: {
   type?: string
   page?: number
   limit?: number
   status?: string
   username?: string
+  dateFrom?: string
+  dateTo?: string
 } = {}) {
   const supabase = await createClient()
   let query = supabase
@@ -34,6 +38,12 @@ export async function getAllCoupons({
   }
   if (status && status !== 'all') {
     query = query.eq('status', status)
+  }
+  if (dateFrom) {
+    query = query.gte('created_at', dateFrom)
+  }
+  if (dateTo) {
+    query = query.lte('created_at', dateTo)
   }
 
   const from = (page - 1) * limit
