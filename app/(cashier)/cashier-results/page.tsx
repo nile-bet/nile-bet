@@ -60,7 +60,7 @@ export default function CashierResultsPage() {
   return (
     <div className="flex flex-col">
 
-    <div className="py-4 max-w-4xl" style={{ paddingLeft: "8.75rem", paddingRight: "8.75rem" }}>
+    <div className="px-35 py-4 max-w-4xl">
       <h1 className="font-display text-2xl font-bold text-white mb-6">Results</h1>
 
       {/* Tabs */}

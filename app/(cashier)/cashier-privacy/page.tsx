@@ -2,7 +2,7 @@ import { CashierFooter } from '@/components/shared/CashierFooter'
 
 export default function CashierPrivacyPage() {
   return (
-    <div className="py-4 max-w-3xl" style={{ paddingLeft: "8.75rem", paddingRight: "8.75rem" }}>
+    <div className="px-35 py-4 max-w-3xl">
       <h1 className="font-display text-3xl font-bold text-white mb-2">Privacy Policy</h1>
       <p className="text-white/40 text-sm mb-8">Last updated: January 2026</p>
       <div className="space-y-8 text-white/70 text-sm leading-relaxed">

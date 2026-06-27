@@ -281,7 +281,7 @@ export default function CashierDashboard() {
   ]
 
   return (
-    <div className="py-3 space-y-2" style={{ paddingLeft: "8.75rem", paddingRight: "8.75rem" }}>
+    <div className="px-35 py-3 space-y-2">
       {/* Low balance banner */}
       {!loading && isLowBalance && (
         <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-4 flex items-center justify-between">
