@@ -101,7 +101,7 @@ export function PublicNavbar() {
         <div className="hidden md:flex items-center gap-6">
           <button
             onClick={handleSportsClick}
-            className="flex items-center gap-1.5 text-sm text-white/70 hover:text-gold transition-colors"
+            className="flex items-center gap-1.5 text-sm text-white/70 hover:text-gold transition-colors cursor-pointer"
           >
             <Globe className="w-4 h-4" />
             Sports
@@ -110,7 +110,7 @@ export function PublicNavbar() {
             <Link
               key={link.href}
               href={link.href}
-              className="flex items-center gap-1.5 text-sm text-white/70 hover:text-gold transition-colors"
+              className="flex items-center gap-1.5 text-sm text-white/70 hover:text-gold transition-colors cursor-pointer"
             >
               <link.icon className="w-4 h-4" />
               {link.label}
@@ -136,19 +136,10 @@ export function PublicNavbar() {
               </Link>
               <Link href="/login">
                 <Button
-                  variant="ghost"
                   size="sm"
-                  className="text-white/60 hover:text-white text-xs"
+                  className="bg-gold text-charcoal hover:bg-gold-light font-semibold text-xs cursor-pointer"
                 >
                   Login
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button
-                  size="sm"
-                  className="bg-gold text-charcoal hover:bg-gold-light font-semibold text-xs"
-                >
-                  Register
                 </Button>
               </Link>
             </>
@@ -305,19 +296,8 @@ export function PublicNavbar() {
                         href="/login"
                         className="flex-1"
                       >
-                        <Button
-                          variant="outline"
-                          className="w-full border-gold/30 text-gold"
-                        >
+                        <Button className="w-full bg-gold text-charcoal hover:bg-gold-light font-semibold cursor-pointer">
                           Login
-                        </Button>
-                      </Link>
-                      <Link
-                        href="/register"
-                        className="flex-1"
-                      >
-                        <Button className="w-full bg-gold text-charcoal">
-                          Register
                         </Button>
                       </Link>
                     </div>
