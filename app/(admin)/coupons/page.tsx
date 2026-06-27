@@ -21,6 +21,7 @@ import { useAuthStore } from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Ticket, TrendingUp, Check, X, Clock, Search } from 'lucide-react'
+import { DateRangeFilter, type DateFilterValue } from '@/components/shared/DateRangeFilter'
 
 export default function AdminCouponsPage() {
   const { user } = useAuthStore()
@@ -36,6 +37,9 @@ export default function AdminCouponsPage() {
   const [filterUsername, setFilterUsername] = useState('')
   const [filterUsernameInput, setFilterUsernameInput] = useState('')
 
+  // Date filter
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'lifetime' })
+
   // Lookup
   const [code, setCode] = useState('')
   const [lookedUp, setLookedUp] = useState<any>(null)
@@ -44,7 +48,7 @@ export default function AdminCouponsPage() {
   const [approving, setApproving] = useState(false)
 
   useEffect(() => { loadStats() }, [])
-  useEffect(() => { loadCoupons() }, [activeTab, page, filterStatus, filterUsername])
+  useEffect(() => { loadCoupons() }, [activeTab, page, filterStatus, filterUsername, dateFilter])
 
   const loadStats = async () => {
     const s = await getCouponStats()
@@ -53,12 +57,30 @@ export default function AdminCouponsPage() {
 
   const loadCoupons = async () => {
     setLoading(true)
+    // Build date range
+    let dateFrom: string | undefined
+    let dateTo: string | undefined
+    const now = new Date()
+    if (dateFilter.type === 'daily') {
+      const d = new Date(now); d.setHours(0,0,0,0)
+      dateFrom = d.toISOString(); dateTo = now.toISOString()
+    } else if (dateFilter.type === 'weekly') {
+      const d = new Date(now); d.setDate(d.getDate() - 7)
+      dateFrom = d.toISOString(); dateTo = now.toISOString()
+    } else if (dateFilter.type === 'monthly') {
+      const d = new Date(now); d.setDate(1); d.setHours(0,0,0,0)
+      dateFrom = d.toISOString(); dateTo = now.toISOString()
+    } else if (dateFilter.type === 'custom') {
+      dateFrom = dateFilter.startDate; dateTo = dateFilter.endDate
+    }
     const { coupons: data, total: t } = await getAllCoupons({
       type: activeTab,
       page,
       limit: 20,
       status: filterStatus !== 'all' ? filterStatus : undefined,
       username: filterUsername || undefined,
+      dateFrom,
+      dateTo,
     })
     setCoupons(data)
     setTotal(t)
@@ -113,6 +135,7 @@ export default function AdminCouponsPage() {
     setFilterStatus('all')
     setFilterUsername('')
     setFilterUsernameInput('')
+    setDateFilter({ type: 'lifetime' })
     setPage(1)
   }
 
@@ -316,6 +339,10 @@ export default function AdminCouponsPage() {
 
       {/* Filters */}
       <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-4 flex flex-wrap gap-3 items-end">
+        <DateRangeFilter
+          value={dateFilter}
+          onChange={(v) => { setDateFilter(v); setPage(1) }}
+        />
         <div className="flex flex-col gap-1">
           <label className="text-white/50 text-xs">Status</label>
           <select
@@ -351,7 +378,7 @@ export default function AdminCouponsPage() {
           </div>
         </div>
 
-        {(filterStatus !== 'all' || filterUsername) && (
+        {(filterStatus !== 'all' || filterUsername || dateFilter.type !== 'lifetime') && (
           <button
             onClick={resetFilters}
             className="text-xs text-white/40 hover:text-white border border-white/10 px-3 py-2 rounded-lg"

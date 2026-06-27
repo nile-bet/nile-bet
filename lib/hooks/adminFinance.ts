@@ -241,6 +241,9 @@ export async function getAllCoupons(
     status?: string
     page?: number
     limit?: number
+    dateFrom?: string
+    dateTo?: string
+    username?: string
   } = {}
 ) {
   const supabase = await createClient()
@@ -249,6 +252,9 @@ export async function getAllCoupons(
     status,
     page = 1,
     limit = 20,
+    dateFrom,
+    dateTo,
+    username,
   } = filters
   const offset = (page - 1) * limit
 
