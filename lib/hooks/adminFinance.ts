@@ -422,7 +422,7 @@ export async function approveTopupByAdmin(
   await applyWelcomeBonus(
     coupon.bettor_id,
     coupon.amount
-  ).catch(() => {})
+  ).catch((e) => console.error('Welcome bonus failed:', e))
 
   await supabase
     .from('activity_logs')

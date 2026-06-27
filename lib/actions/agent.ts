@@ -755,7 +755,7 @@ export async function approveCouponByAgent(
     await applyWelcomeBonus(
       coupon.bettor_id,
       coupon.amount
-    ).catch(() => {})
+    ).catch((e) => console.error('Welcome bonus failed:', e))
   } else {
     // Withdrawal: credit_balance already deducted on creation, only release reserved_balance
     await adminClient

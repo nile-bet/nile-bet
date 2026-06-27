@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient }
+import { createClient, createAdminClient }
   from '@/lib/supabase/server'
 
 export async function generateTopupCoupon(
@@ -461,7 +461,7 @@ export async function applyWelcomeBonus(
   bettorId: string,
   topupAmount: number
 ): Promise<void> {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // Get settings
   const { data: settings } = await supabase
