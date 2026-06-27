@@ -499,25 +499,41 @@ export async function applyWelcomeBonus(
   if (!profile || profile.welcome_bonus_claimed)
     return
 
-  // Apply bonus
-  try {
-    await supabase.rpc(
-      'apply_welcome_bonus_to_bettor',
-      { p_bettor_id: bettorId, p_amount: bonusAmount }
-    )
-  } catch {
-    // Fallback manual apply
-    await supabase
-      .from('profiles')
-      .update({ welcome_bonus_claimed: true })
-      .eq('id', bettorId)
-  }
-
-  // Mark claimed
-  await supabase
+  // Fetch current balance
+  const { data: bettor } = await supabase
     .from('profiles')
-    .update({ welcome_bonus_claimed: true })
+    .select('credit_balance')
     .eq('id', bettorId)
+    .single()
+
+  if (!bettor) return
+
+  // Credit bonus and mark claimed — eq on welcome_bonus_claimed=false prevents race condition
+  const { error: creditError } = await supabase
+    .from('profiles')
+    .update({
+      credit_balance: bettor.credit_balance + bonusAmount,
+      welcome_bonus_claimed: true,
+    })
+    .eq('id', bettorId)
+    .eq('welcome_bonus_claimed', false)
+
+  if (creditError) return
+
+  // Log transaction
+  await supabase.from('transactions').insert({
+    to_user_id: bettorId,
+    amount: bonusAmount,
+    type: 'welcome_bonus',
+    note: `Welcome bonus of ETB ${bonusAmount} credited`,
+  })
+
+  // Log activity
+  await supabase.from('activity_logs').insert({
+    user_id: bettorId,
+    action: 'welcome_bonus_credited',
+    details: { amount: bonusAmount, bettor_id: bettorId },
+  })
 
   // Notify bettor
   await supabase.from('notifications').insert({
