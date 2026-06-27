@@ -75,11 +75,11 @@ export const useBetSlipStore =
 
     addSelection: (s) => {
       const existing = get().selections
-      // Remove if same market different pick
+      // Remove if same match — only 1 selection per match allowed
       const filtered = existing.filter(
         (sel) =>
-          sel.matchMarketId !==
-          s.matchMarketId
+          sel.matchId !==
+          s.matchId
       )
       const newSelections = [...filtered, s]
       const calc = calculateSlip(
