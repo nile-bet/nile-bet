@@ -147,15 +147,6 @@ export default function AgentCashiersPage() {
       ),
     },
     {
-      key: 'bettor_count',
-      label: 'Bettors',
-      render: (v: any) => (
-        <span className="text-white/60 text-xs">
-          {v}
-        </span>
-      ),
-    },
-    {
       key: 'slip_count',
       label: 'Slips',
       render: (v: any) => (
