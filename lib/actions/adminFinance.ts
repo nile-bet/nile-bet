@@ -339,7 +339,7 @@ export async function getAgentProfitReport(filters?: DateFilters) {
 
   let query = supabase
     .from('slips')
-    .select('stake, net_payout, winning_tax, status, placed_by, created_at')
+    .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, placed_by, created_at')
     .in('placed_by', cashierIds)
     .order('created_at', { ascending: false })
     .limit(5000)
@@ -350,7 +350,7 @@ export async function getAgentProfitReport(filters?: DateFilters) {
 
   let jpQuery = supabase
     .from('jackpot_slips')
-    .select('stake, reward_amount, status, placed_by, created_at')
+    .select('stake, reward_amount, reward_tax, status, placed_by, created_at')
     .in('placed_by', cashierIds)
     .order('created_at', { ascending: false })
     .limit(5000)
@@ -369,9 +369,13 @@ export async function getAgentProfitReport(filters?: DateFilters) {
       map[agentId] = { username, totalCollected: 0, totalPaidOut: 0, grossProfit: 0, taxCollected: 0, agentShare: 0, cashierShare: 0 }
     }
     map[agentId].totalCollected += slip.stake ?? 0
-    if (slip.status === 'won') {
-      map[agentId].totalPaidOut += slip.net_payout ?? 0
-      map[agentId].taxCollected += slip.winning_tax ?? 0
+    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') {
+      map[agentId].totalPaidOut += (slip.status === 'near_win' || slip.insurance_applied)
+        ? (slip.insurance_payout ?? slip.net_payout ?? 0)
+        : (slip.net_payout ?? 0)
+      map[agentId].taxCollected += (slip.status === 'near_win' || slip.insurance_applied)
+        ? (slip.insurance_tax ?? 0)
+        : (slip.winning_tax ?? 0)
     }
   }
 
@@ -383,8 +387,8 @@ export async function getAgentProfitReport(filters?: DateFilters) {
       map[agentId] = { username, totalCollected: 0, totalPaidOut: 0, grossProfit: 0, taxCollected: 0, agentShare: 0, cashierShare: 0 }
     }
     map[agentId].totalCollected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'near_win') {
-      const tax = (slip.reward_amount ?? 0) * 0.15
+    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') {
+      const tax = slip.reward_tax ?? (slip.reward_amount ?? 0) * 0.15
       map[agentId].totalPaidOut += (slip.reward_amount ?? 0) - tax
       map[agentId].taxCollected += tax
     }
@@ -403,7 +407,7 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
 
   let query = supabase
     .from('slips')
-    .select('bettor_id, placed_by, stake, net_payout, status, created_at, profiles!slips_bettor_id_fkey(username)')
+    .select('bettor_id, placed_by, stake, net_payout, insurance_applied, insurance_payout, insurance_tax, status, created_at, profiles!slips_bettor_id_fkey(username)')
     .order('created_at', { ascending: false })
     .limit(1000)
 
@@ -415,7 +419,7 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
 
   let jpQuery = supabase
     .from('jackpot_slips')
-    .select('bettor_id, placed_by, stake, reward_amount, status, created_at, profiles!jackpot_slips_bettor_id_fkey(username)')
+    .select('bettor_id, placed_by, stake, reward_amount, reward_tax, status, created_at, profiles!jackpot_slips_bettor_id_fkey(username)')
     .order('created_at', { ascending: false })
     .limit(1000)
   if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
@@ -451,8 +455,10 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       }
       map[key].slipCount += 1
       map[key].totalStaked += slip.stake ?? 0
-      if (slip.status === 'won') {
-        map[key].totalPaid += slip.net_payout ?? 0
+      if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') {
+        map[key].totalPaid += (slip.status === 'near_win' || slip.insurance_applied)
+          ? (slip.insurance_payout ?? slip.net_payout ?? 0)
+          : (slip.net_payout ?? 0)
       }
     }
     for (const slip of jackpotSlips) {
@@ -464,8 +470,9 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       map[key].slipCount += 1
       map[key].jackpotSlipCount += 1
       map[key].totalStaked += slip.stake ?? 0
-      if (slip.status === 'won' || slip.status === 'near_win') {
-        map[key].totalPaid += (slip.reward_amount ?? 0) * 0.85
+      if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') {
+        const tax = slip.reward_tax ?? (slip.reward_amount ?? 0) * 0.15
+        map[key].totalPaid += (slip.reward_amount ?? 0) - tax
       }
     }
     return Object.values(map)
@@ -515,7 +522,7 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
   const supabase = await createClient()
   let query = supabase
     .from('slips')
-    .select('stake, net_payout, winning_tax, status, created_at')
+    .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, created_at')
     .order('created_at', { ascending: false })
     .limit(2000)
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
@@ -525,7 +532,7 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
 
   let jpQuery = supabase
     .from('jackpot_slips')
-    .select('stake, reward_amount, status, created_at')
+    .select('stake, reward_amount, reward_tax, status, created_at')
     .order('created_at', { ascending: false })
     .limit(2000)
   if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
@@ -553,9 +560,13 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
     }
     map[period].slipCount += 1
     map[period].totalStaked += slip.stake ?? 0
-    if (slip.status === 'won') {
-      map[period].totalPaidOut += slip.net_payout ?? 0
-      map[period].taxCollected += slip.winning_tax ?? 0
+    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') {
+      map[period].totalPaidOut += (slip.status === 'near_win' || slip.insurance_applied)
+        ? (slip.insurance_payout ?? slip.net_payout ?? 0)
+        : (slip.net_payout ?? 0)
+      map[period].taxCollected += (slip.status === 'near_win' || slip.insurance_applied)
+        ? (slip.insurance_tax ?? 0)
+        : (slip.winning_tax ?? 0)
     }
   }
 
@@ -566,8 +577,8 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
     }
     map[period].slipCount += 1
     map[period].totalStaked += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'near_win') {
-      const tax = (slip.reward_amount ?? 0) * 0.15
+    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') {
+      const tax = slip.reward_tax ?? (slip.reward_amount ?? 0) * 0.15
       map[period].totalPaidOut += (slip.reward_amount ?? 0) - tax
       map[period].taxCollected += tax
     }

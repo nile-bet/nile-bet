@@ -21,14 +21,12 @@ export default function CashierCouponsPage() {
   const { user } = useAuthStore()
   const [tab, setTab] = useState<Tab>('redeem')
 
-  // Redeem state
   const [code, setCode] = useState('')
   const [lookedUp, setLookedUp] = useState<any>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [approving, setApproving] = useState(false)
 
-  // History state
   const [coupons, setCoupons] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [historyLoading, setHistoryLoading] = useState(false)
@@ -72,54 +70,56 @@ export default function CashierCouponsPage() {
   const totalPages = Math.ceil(total / LIMIT)
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-8 px-4">
-      <div className="w-full max-w-xl space-y-6">
+    <div className="p-4 lg:p-6">
+      <div className="max-w-5xl mx-auto">
 
         {/* Header */}
-        <div className="text-center space-y-1">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gold/10 border border-gold/20 mb-2">
-            <Ticket className="w-6 h-6 text-gold" />
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center flex-shrink-0">
+              <Ticket className="w-4.5 h-4.5 text-gold" />
+            </div>
+            <div>
+              <h1 className="font-display text-lg font-bold text-white leading-tight">Coupons</h1>
+              <p className="text-white/40 text-xs">Redeem bettor coupons &amp; view history</p>
+            </div>
           </div>
-          <h1 className="font-display text-2xl font-bold text-white">Coupons</h1>
-          <p className="text-white/40 text-sm">Redeem bettor coupons &amp; view history</p>
-        </div>
-
-        {/* Balance pill */}
-        <div className="flex items-center justify-center">
-          <div className="flex items-center gap-3 bg-slate-dark border border-gold/25 rounded-2xl px-5 py-3">
-            <Wallet className="w-4 h-4 text-gold/60" />
-            <span className="text-white/50 text-sm">Your balance</span>
-            <span className="text-gold font-mono font-bold text-lg">{formatETB(user?.credit_balance ?? 0)}</span>
+          {/* Balance pill */}
+          <div className="flex items-center gap-2 bg-slate-dark border border-gold/20 rounded-lg px-3 py-2">
+            <Wallet className="w-3.5 h-3.5 text-gold/60" />
+            <span className="text-white/40 text-xs">Balance</span>
+            <span className="text-gold font-mono font-bold text-sm">{formatETB(user?.credit_balance ?? 0)}</span>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex bg-charcoal rounded-2xl p-1 gap-1">
+        <div className="flex bg-charcoal rounded-lg p-0.5 gap-0.5 mb-4 max-w-xs">
           {([
-            { key: 'redeem', label: 'Redeem Coupon', icon: Ticket },
+            { key: 'redeem', label: 'Redeem', icon: Ticket },
             { key: 'history', label: 'History', icon: History },
           ] as { key: Tab; label: string; icon: any }[]).map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setTab(key)}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all',
+                'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-semibold transition-all',
                 tab === key ? 'bg-gold text-charcoal shadow' : 'text-white/50 hover:text-white'
               )}>
-              <Icon className="w-4 h-4" />{label}
+              <Icon className="w-3.5 h-3.5" />{label}
             </button>
           ))}
         </div>
 
         {/* ── REDEEM TAB ── */}
         {tab === 'redeem' && (
-          <div className="space-y-4">
-            <div className="bg-slate-dark border border-white/8 rounded-2xl p-6 space-y-5">
-              <div className="space-y-1">
-                <label className="text-white/60 text-xs font-medium uppercase tracking-wider">Coupon Code</label>
-                <p className="text-white/30 text-xs">Enter the 6-digit code from the bettor's app</p>
+          <div className="lg:grid lg:grid-cols-[320px_1fr] gap-5">
+
+            {/* Left: input */}
+            <div className="bg-slate-dark border border-white/8 rounded-xl p-4 space-y-4 h-fit">
+              <div>
+                <label className="text-white/50 text-[11px] font-semibold uppercase tracking-wider block mb-0.5">Coupon Code</label>
+                <p className="text-white/30 text-[11px]">6-digit code from the bettor's app</p>
               </div>
 
-              {/* Code input — large, centered, easy to type */}
-              <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col items-center gap-3">
                 <input
                   type="text"
                   value={code}
@@ -131,13 +131,13 @@ export default function CashierCouponsPage() {
                   placeholder="000000"
                   maxLength={6}
                   autoFocus
-                  className="w-52 bg-charcoal border-2 border-gold/30 focus:border-gold rounded-2xl px-4 py-4 text-gold font-mono text-3xl text-center tracking-[0.5em] focus:outline-none placeholder:text-white/15 placeholder:tracking-[0.3em] transition-colors"
+                  className="w-40 bg-charcoal border border-gold/30 focus:border-gold rounded-xl px-3 py-3 text-gold font-mono text-2xl text-center tracking-[0.5em] focus:outline-none placeholder:text-white/15 placeholder:tracking-[0.3em] transition-colors"
                 />
                 <button
                   onClick={handleLookup}
                   disabled={code.length !== 6 || loading}
                   className={cn(
-                    'w-full py-3.5 rounded-xl font-bold text-sm transition-all',
+                    'w-full py-2.5 rounded-lg font-bold text-sm transition-all',
                     code.length === 6 && !loading
                       ? 'bg-gold text-charcoal hover:bg-gold/90 active:scale-[0.98]'
                       : 'bg-white/8 text-white/25 cursor-not-allowed'
@@ -147,109 +147,113 @@ export default function CashierCouponsPage() {
               </div>
 
               {error && (
-                <div className="bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-3 text-center">
-                  <p className="text-red-400 text-sm font-medium">❌ {error}</p>
+                <div className="bg-red-500/10 border border-red-500/25 rounded-lg px-3 py-2.5 text-center">
+                  <p className="text-red-400 text-xs font-medium">❌ {error}</p>
                 </div>
               )}
             </div>
 
-            {/* Coupon result card */}
-            {lookedUp && (
-              <div className="bg-slate-dark border border-gold/30 rounded-2xl overflow-hidden">
-                {/* Type banner */}
-                <div className={cn(
-                  'px-5 py-3 flex items-center justify-between border-b',
-                  lookedUp.type === 'topup' ? 'bg-emerald-500/8 border-emerald-500/20' : 'bg-amber-500/8 border-amber-500/20'
-                )}>
-                  <div className="flex items-center gap-2">
-                    {lookedUp.type === 'topup'
-                      ? <ArrowUpCircle className="w-4 h-4 text-emerald-400" />
-                      : <ArrowDownCircle className="w-4 h-4 text-amber-400" />}
-                    <span className={cn('text-sm font-bold capitalize', lookedUp.type === 'topup' ? 'text-emerald-400' : 'text-amber-400')}>
-                      {lookedUp.type === 'topup' ? 'Top-up Request' : 'Withdrawal Request'}
-                    </span>
-                  </div>
-                  <span className="text-white/40 text-xs font-mono">Expires {formatCountdown(lookedUp.expires_at)}</span>
+            {/* Right: result */}
+            <div>
+              {!lookedUp && !error && (
+                <div className="border border-dashed border-white/8 rounded-xl p-10 text-center">
+                  <Ticket className="w-8 h-8 text-white/10 mx-auto mb-2" />
+                  <p className="text-white/20 text-sm">Enter a coupon code to look it up</p>
                 </div>
+              )}
 
-                <div className="p-5 space-y-4">
-                  {/* Bettor + amount */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-white/40 text-xs mb-0.5">Bettor</p>
-                      <p className="text-white font-semibold text-lg">@{lookedUp.bettor?.username}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-white/40 text-xs mb-0.5">Amount</p>
-                      <p className="text-gold font-mono font-bold text-2xl">{formatETB(lookedUp.amount)}</p>
-                    </div>
-                  </div>
-
-                  {/* Balance impact */}
-                  {lookedUp.type === 'topup' && (
-                    <div className="bg-charcoal rounded-xl px-4 py-3 flex justify-between items-center">
-                      <span className="text-white/50 text-sm">Your balance after</span>
-                      <span className={cn('font-mono font-bold', isInsufficient ? 'text-red-400' : 'text-emerald-400')}>
-                        {formatETB((user?.credit_balance ?? 0) - (lookedUp.amount ?? 0))}
+              {lookedUp && (
+                <div className="bg-slate-dark border border-gold/30 rounded-xl overflow-hidden">
+                  <div className={cn(
+                    'px-4 py-3 flex items-center justify-between border-b',
+                    lookedUp.type === 'topup' ? 'bg-emerald-500/8 border-emerald-500/20' : 'bg-amber-500/8 border-amber-500/20'
+                  )}>
+                    <div className="flex items-center gap-2">
+                      {lookedUp.type === 'topup'
+                        ? <ArrowUpCircle className="w-4 h-4 text-emerald-400" />
+                        : <ArrowDownCircle className="w-4 h-4 text-amber-400" />}
+                      <span className={cn('text-sm font-bold capitalize', lookedUp.type === 'topup' ? 'text-emerald-400' : 'text-amber-400')}>
+                        {lookedUp.type === 'topup' ? 'Top-up Request' : 'Withdrawal Request'}
                       </span>
                     </div>
-                  )}
+                    <span className="text-white/40 text-xs font-mono">Expires {formatCountdown(lookedUp.expires_at)}</span>
+                  </div>
 
-                  {lookedUp.type === 'withdrawal' && (
-                    <div className="bg-emerald-500/8 border border-emerald-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
-                      <span className="text-2xl">💵</span>
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-emerald-400 font-semibold text-sm">Hand bettor {formatETB(lookedUp.amount)} cash</p>
-                        <p className="text-white/40 text-xs mt-0.5">Your balance increases by this amount after approval</p>
+                        <p className="text-white/40 text-xs mb-0.5">Bettor</p>
+                        <p className="text-white font-semibold text-lg">@{lookedUp.bettor?.username}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-white/40 text-xs mb-0.5">Amount</p>
+                        <p className="text-gold font-mono font-bold text-2xl">{formatETB(lookedUp.amount)}</p>
                       </div>
                     </div>
-                  )}
 
-                  {isInsufficient && (
-                    <div className="bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-3">
-                      <p className="text-red-400 font-semibold text-sm">⚠️ Insufficient balance</p>
-                      <p className="text-white/50 text-xs mt-1">
-                        You need {formatETB(lookedUp.amount)} but only have {formatETB(user?.credit_balance ?? 0)}
-                      </p>
-                      <p className="text-amber-400 text-xs mt-1">→ Request credits from your agent first</p>
+                    {lookedUp.type === 'topup' && (
+                      <div className="bg-charcoal rounded-lg px-3 py-2.5 flex justify-between items-center">
+                        <span className="text-white/50 text-sm">Your balance after</span>
+                        <span className={cn('font-mono font-bold text-sm', isInsufficient ? 'text-red-400' : 'text-emerald-400')}>
+                          {formatETB((user?.credit_balance ?? 0) - (lookedUp.amount ?? 0))}
+                        </span>
+                      </div>
+                    )}
+
+                    {lookedUp.type === 'withdrawal' && (
+                      <div className="bg-emerald-500/8 border border-emerald-500/20 rounded-lg px-3 py-2.5 flex items-center gap-2.5">
+                        <span className="text-xl">💵</span>
+                        <div>
+                          <p className="text-emerald-400 font-semibold text-sm">Hand bettor {formatETB(lookedUp.amount)} cash</p>
+                          <p className="text-white/40 text-xs">Your balance increases after approval</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {isInsufficient && (
+                      <div className="bg-red-500/10 border border-red-500/25 rounded-lg px-3 py-2.5">
+                        <p className="text-red-400 font-semibold text-sm">⚠️ Insufficient balance</p>
+                        <p className="text-white/50 text-xs mt-0.5">
+                          Need {formatETB(lookedUp.amount)} · have {formatETB(user?.credit_balance ?? 0)}
+                        </p>
+                        <p className="text-amber-400 text-xs mt-0.5">→ Request credits from your agent first</p>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        onClick={handleApprove}
+                        disabled={approving || isInsufficient}
+                        className={cn(
+                          'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-bold text-sm transition-all',
+                          !approving && !isInsufficient
+                            ? 'bg-emerald-500 text-white hover:bg-emerald-500/85 active:scale-[0.98]'
+                            : 'bg-white/8 text-white/25 cursor-not-allowed'
+                        )}>
+                        <Check className="w-4 h-4" />
+                        {approving ? 'Processing...' : 'Approve'}
+                      </button>
+                      <button
+                        onClick={() => { setLookedUp(null); setCode('') }}
+                        className="flex-1 flex items-center justify-center gap-2 border border-red-500/30 text-red-400 py-2.5 rounded-lg font-bold text-sm hover:bg-red-500/10 transition-all">
+                        <X className="w-4 h-4" />Decline
+                      </button>
                     </div>
-                  )}
-
-                  {/* Action buttons */}
-                  <div className="flex gap-3 pt-1">
-                    <button
-                      onClick={handleApprove}
-                      disabled={approving || isInsufficient}
-                      className={cn(
-                        'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all',
-                        !approving && !isInsufficient
-                          ? 'bg-emerald-500 text-white hover:bg-emerald-500/85 active:scale-[0.98]'
-                          : 'bg-white/8 text-white/25 cursor-not-allowed'
-                      )}>
-                      <Check className="w-4 h-4" />
-                      {approving ? 'Processing...' : 'Approve'}
-                    </button>
-                    <button
-                      onClick={() => { setLookedUp(null); setCode('') }}
-                      className="flex-1 flex items-center justify-center gap-2 border border-red-500/30 text-red-400 py-3 rounded-xl font-bold text-sm hover:bg-red-500/10 transition-all">
-                      <X className="w-4 h-4" />Decline
-                    </button>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
 
         {/* ── HISTORY TAB ── */}
         {tab === 'history' && (
-          <div className="space-y-4">
-            {/* Type filter */}
+          <div className="space-y-3">
             <div className="flex gap-2">
               {(['all', 'topup', 'withdrawal'] as const).map(t => (
                 <button key={t} onClick={() => { setTypeFilter(t); setPage(1) }}
                   className={cn(
-                    'px-4 py-2 rounded-xl text-xs font-semibold border transition-all capitalize',
+                    'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all capitalize',
                     typeFilter === t
                       ? 'bg-gold/15 border-gold/40 text-gold'
                       : 'border-white/10 text-white/40 hover:text-white hover:border-white/20'
@@ -259,12 +263,12 @@ export default function CashierCouponsPage() {
               ))}
             </div>
 
-            <div className="bg-slate-dark border border-white/8 rounded-2xl overflow-hidden">
+            <div className="bg-slate-dark border border-white/8 rounded-xl overflow-hidden">
               {historyLoading ? (
-                <div className="py-16 text-center text-white/30 text-sm">Loading...</div>
+                <div className="py-12 text-center text-white/30 text-sm">Loading...</div>
               ) : coupons.length === 0 ? (
-                <div className="py-16 text-center">
-                  <History className="w-8 h-8 text-white/15 mx-auto mb-3" />
+                <div className="py-12 text-center">
+                  <History className="w-7 h-7 text-white/15 mx-auto mb-2" />
                   <p className="text-white/30 text-sm">No coupon history yet</p>
                 </div>
               ) : (
@@ -273,7 +277,7 @@ export default function CashierCouponsPage() {
                     <tr className="border-b border-white/8">
                       {['Code', 'Bettor', 'Type', 'Amount', 'Status', 'Date'].map(h => (
                         <th key={h} className={cn(
-                          'text-[10px] text-white/30 font-semibold uppercase tracking-wider py-3 px-4',
+                          'text-[10px] text-white/30 font-semibold uppercase tracking-wider py-2.5 px-4',
                           h === 'Amount' ? 'text-right' : h === 'Status' ? 'text-center' : 'text-left'
                         )}>{h}</th>
                       ))}
@@ -282,29 +286,20 @@ export default function CashierCouponsPage() {
                   <tbody className="divide-y divide-white/5">
                     {coupons.map(c => (
                       <tr key={c.id} className="hover:bg-white/3 transition-colors">
-                        <td className="px-4 py-3.5">
-                          <span className="text-gold font-mono font-bold text-sm">{c.code}</span>
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <span className="text-white/60 text-sm">@{c.bettor?.username ?? '—'}</span>
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <span className={cn(
-                            'text-xs font-medium capitalize px-2.5 py-1 rounded-lg',
+                        <td className="px-4 py-3"><span className="text-gold font-mono font-bold text-sm">{c.code}</span></td>
+                        <td className="px-4 py-3"><span className="text-white/60 text-sm">@{c.bettor?.username ?? '—'}</span></td>
+                        <td className="px-4 py-3">
+                          <span className={cn('text-xs font-medium capitalize px-2 py-0.5 rounded-md',
                             c.type === 'topup' ? 'text-emerald-400 bg-emerald-400/10' : 'text-amber-400 bg-amber-400/10'
                           )}>{c.type}</span>
                         </td>
-                        <td className="px-4 py-3.5 text-right">
-                          <span className="text-white font-mono text-sm">{formatETB(c.amount)}</span>
-                        </td>
-                        <td className="px-4 py-3.5 text-center">
-                          <span className={cn('text-[11px] font-semibold px-2.5 py-1 rounded-full border capitalize', STATUS_STYLES[c.status] ?? 'text-white/30 bg-white/5 border-white/10')}>
+                        <td className="px-4 py-3 text-right"><span className="text-white font-mono text-sm">{formatETB(c.amount)}</span></td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full border capitalize', STATUS_STYLES[c.status] ?? 'text-white/30 bg-white/5 border-white/10')}>
                             {c.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3.5">
-                          <span className="text-white/35 text-xs">{formatDate(c.created_at)}</span>
-                        </td>
+                        <td className="px-4 py-3"><span className="text-white/35 text-xs">{formatDate(c.created_at)}</span></td>
                       </tr>
                     ))}
                   </tbody>
@@ -313,14 +308,14 @@ export default function CashierCouponsPage() {
             </div>
 
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center justify-center gap-3">
                 <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                  className="px-4 py-2 border border-white/10 text-white/50 rounded-xl text-sm hover:text-white hover:border-white/25 disabled:opacity-30 transition-all">
+                  className="px-3 py-1.5 border border-white/10 text-white/50 rounded-lg text-xs hover:text-white hover:border-white/25 disabled:opacity-30 transition-all">
                   ← Prev
                 </button>
-                <span className="text-white/40 text-sm tabular-nums">{page} / {totalPages}</span>
+                <span className="text-white/40 text-xs tabular-nums">{page} / {totalPages}</span>
                 <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}
-                  className="px-4 py-2 border border-white/10 text-white/50 rounded-xl text-sm hover:text-white hover:border-white/25 disabled:opacity-30 transition-all">
+                  className="px-3 py-1.5 border border-white/10 text-white/50 rounded-lg text-xs hover:text-white hover:border-white/25 disabled:opacity-30 transition-all">
                   Next →
                 </button>
               </div>
