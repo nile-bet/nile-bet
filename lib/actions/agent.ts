@@ -876,7 +876,7 @@ export async function getAgentReport(
   const jackpotCollectedR = allJackpotSlips.reduce((a: number, s: any) => a + (s.stake ?? 0), 0)
   const jackpotPaidR = allJackpotSlips
     .filter((s: any) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
-    .reduce((a: number, s: any) => a + (s.reward_amount ?? 0), 0)
+    .reduce((a: number, s: any) => a + ((s.reward_amount ?? 0) - (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15)), 0)
   const totalCollected = totalCollectedSlips + jackpotCollectedR
   const totalPaid = totalPaidSlips + jackpotPaidR
   const taxCollectedAll = taxCollected + jackpotTaxCollectedR
@@ -894,7 +894,7 @@ export async function getAgentReport(
     const date = slip.created_at.split('T')[0]
     if (!grouped[date]) grouped[date] = { date, collected: 0, paid: 0, profit: 0 }
     grouped[date].collected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') grouped[date].paid += slip.reward_amount ?? 0
+    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') grouped[date].paid += (slip.reward_amount ?? 0) - (slip.reward_tax ?? (slip.reward_amount ?? 0) * 0.15)
     grouped[date].profit = grouped[date].collected - grouped[date].paid
   })
 

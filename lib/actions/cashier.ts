@@ -58,7 +58,7 @@ export async function getCashierDashboardStats(
   let q = supabase
     .from('slips')
     .select(
-      'stake, net_payout, winning_tax, status, insurance_applied, insurance_payout, redeemed_at, placed_by, created_at, updated_at'
+      'stake, net_payout, winning_tax, insurance_tax, status, insurance_applied, insurance_payout, redeemed_at, placed_by, created_at, updated_at'
     )
     .eq('placed_by', cashierId)
 
@@ -103,7 +103,9 @@ export async function getCashierDashboardStats(
   const totalPaidOutSlips = [
     ...paidSlips,
     ...nearWinSlips,
-  ].reduce((a, s) => a + (s.net_payout ?? 0), 0)
+  ].reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied)
+    ? (s.insurance_payout ?? s.net_payout ?? 0)
+    : (s.net_payout ?? 0)), 0)
 
   const pendingLiabilitySlips = pendingSlips.reduce(
     (a, s) => a + (s.net_payout ?? 0),
@@ -113,7 +115,7 @@ export async function getCashierDashboardStats(
   // Jackpot slips for this cashier
   let jq = supabase
     .from('jackpot_slips')
-    .select('stake, status, reward_amount, is_insured, redeemed_at, placed_by, created_at')
+    .select('stake, status, reward_amount, reward_tax, is_insured, redeemed_at, placed_by, created_at')
     .eq('placed_by', cashierId)
 
   if (startDate) {
@@ -146,7 +148,7 @@ export async function getCashierDashboardStats(
   const jackpotInsuredPending = jackpotNearWinUnredeemed.length
   const jackpotInProgress = 0
   const jackpotCollected = allJackpot.reduce((a, s) => a + (s.stake ?? 0), 0)
-  const jackpotPaidOut = [...jackpotPaidWon, ...jackpotNearWinRedeemed, ...jackpotPaidInsuredLegacy].reduce((a: number, s: any) => a + (s.reward_amount ?? 0), 0)
+  const jackpotPaidOut = [...jackpotPaidWon, ...jackpotNearWinRedeemed, ...jackpotPaidInsuredLegacy].reduce((a: number, s: any) => a + ((s.reward_amount ?? 0) - (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15)), 0)
   const jackpotPendingLiability = [...jackpotWonUnredeemed, ...jackpotNearWinUnredeemed, ...jackpotPending].reduce((a, s) => a + (s.reward_amount ?? 0), 0)
   const jackpotWonTotal = jackpotWon.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
   const jackpotInsuredTotal = jackpotNearWin.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
@@ -169,10 +171,19 @@ export async function getCashierDashboardStats(
   const topupTransactions =
     couponsRedeemed?.length ?? 0
 
+  // Tax collected
+  const taxCollectedSlips = [...paidSlips, ...nearWinSlips]
+    .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied)
+      ? (s.insurance_tax ?? 0)
+      : (s.winning_tax ?? 0)), 0)
+  const jackpotTaxCollected = [...jackpotPaidWon, ...jackpotNearWinRedeemed, ...jackpotPaidInsuredLegacy]
+    .reduce((a: number, s: any) => a + (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15), 0)
+  const taxCollected = taxCollectedSlips + jackpotTaxCollected
+
   // Combine slip + jackpot totals
   const totalCollected = totalCollectedSlips + jackpotCollected
   const totalPaidOut = totalPaidOutSlips + jackpotPaidOut
-  const grossProfitLoss = totalCollected - totalPaidOut
+  const grossProfitLoss = totalCollected - totalPaidOut - taxCollected
   const pendingLiability = pendingLiabilitySlips + jackpotPendingLiability
 
   const walletBalance =
@@ -237,6 +248,7 @@ export async function getCashierDashboardStats(
     accountTotal,
     netBalance,
     cashierProfit,
+    taxCollected,
     agentPayable,
     totalWon,
     insuredTotal,
