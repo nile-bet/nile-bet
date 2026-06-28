@@ -917,7 +917,7 @@ export async function getAgentReport(
     c.slipCount += 1
     c.totalCollected += (slip as any).stake ?? 0
     c.taxCollected += (slip as any).reward_tax ?? 0
-    if ((slip as any).status === 'won' || (slip as any).status === 'paid' || (slip as any).status === 'near_win') c.totalPaid += (slip as any).reward_amount ?? 0
+    if ((slip as any).status === 'won' || (slip as any).status === 'paid' || (slip as any).status === 'near_win') c.totalPaid += ((slip as any).reward_amount ?? 0) - ((slip as any).reward_tax ?? ((slip as any).reward_amount ?? 0) * 0.15)
   }
   for (const c of Object.values(cashierMap) as any[]) {
     c.grossProfit = c.totalCollected - c.totalPaid - c.taxCollected
