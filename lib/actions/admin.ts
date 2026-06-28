@@ -1222,3 +1222,19 @@ export async function getJackpotDashboardStats(
     inProgress: inProgress ?? 0,
   }
 }
+
+export async function resetUserBalance(targetUserId: string, adminId: string) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('profiles')
+    .update({ credit_balance: 0 })
+    .eq('id', targetUserId)
+  if (error) return { success: false, error: error.message }
+  await supabase.from('activity_logs').insert({
+    action: 'balance_reset',
+    performed_by: adminId,
+    target_user_id: targetUserId,
+    metadata: { note: 'Balance reset to zero by admin' },
+  })
+  return { success: true }
+}

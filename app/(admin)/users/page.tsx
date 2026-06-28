@@ -10,6 +10,7 @@ import {
   createUser,
   deleteUser,
   changeUserPassword,
+  resetUserBalance,
 } from '@/lib/actions/admin'
 import { DataTable }
   from '@/components/shared/DataTable'
@@ -177,6 +178,7 @@ export default function UsersPage() {
   const [passwordUser, setPasswordUser] = useState<any>(null)
   const [changePassword, setChangePassword] = useState('')
   const [changingPassword, setChangingPassword] = useState(false)
+  const [resettingBalance, setResettingBalance] = useState<string | null>(null)
   const [showAddCredits, setShowAddCredits] =
     useState(false)
   const [selectedUser, setSelectedUser] =
@@ -296,6 +298,19 @@ export default function UsersPage() {
     } else {
       toast.error(result.error ?? 'Failed to delete')
     }
+  }
+
+  const handleResetBalance = async (targetUser: any) => {
+    if (!user) return
+    setResettingBalance(targetUser.id)
+    const result = await resetUserBalance(targetUser.id, user.id)
+    if (result.success) {
+      toast.success(`@${targetUser.username} balance reset to zero`)
+      loadUsers()
+    } else {
+      toast.error(result.error ?? 'Failed to reset balance')
+    }
+    setResettingBalance(null)
   }
 
   const handleForceLogout = async (
@@ -423,6 +438,18 @@ export default function UsersPage() {
             className="text-xs border border-gold/30 text-gold px-2 py-1 rounded hover:bg-gold/10"
           >
             💰
+          </button>
+          <button
+            onClick={() => {
+              setSelectedUser(row)
+              setConfirmData({ action: 'reset_balance', user: row })
+              setShowConfirm(true)
+            }}
+            disabled={resettingBalance === row.id}
+            className="text-xs border border-white/20 text-white/50 px-2 py-1 rounded hover:bg-white/10 hover:text-white disabled:opacity-40"
+            title="Reset balance to zero"
+          >
+            🔄
           </button>
           <button
             onClick={() => {
@@ -646,6 +673,8 @@ export default function UsersPage() {
           if (!confirmData) return
           if (confirmData.action === 'delete') {
             handleDeleteUser(confirmData.user)
+          } else if (confirmData.action === 'reset_balance') {
+            handleResetBalance(confirmData.user)
           } else {
             handleStatusChange(
               confirmData.user,
@@ -657,19 +686,25 @@ export default function UsersPage() {
         title={
           confirmData?.action === 'delete'
             ? 'Delete User?'
+            : confirmData?.action === 'reset_balance'
+            ? 'Reset Balance?'
             : confirmData?.action === 'suspend'
             ? 'Suspend User?'
             : 'Activate User?'
         }
-        variant={confirmData?.action === 'delete' ? 'danger' : 'warning'}
+        variant={confirmData?.action === 'delete' ? 'danger' : confirmData?.action === 'reset_balance' ? 'warning' : 'warning'}
         message={
           confirmData?.action === 'suspend'
             ? `Suspend @${confirmData?.user?.username}? They will be logged out.`
+            : confirmData?.action === 'reset_balance'
+            ? `Reset @${confirmData?.user?.username}'s balance to ETB 0? This cannot be undone.`
             : `Reactivate @${confirmData?.user?.username}?`
         }
         confirmText={
           confirmData?.action === 'suspend'
             ? 'Yes, Suspend'
+            : confirmData?.action === 'reset_balance'
+            ? 'Yes, Reset to Zero'
             : 'Yes, Activate'
         }
       />
