@@ -62,7 +62,7 @@ const PIE_COLORS = {
 
 export default function AdminDashboard() {
   const { user } = useAuthStore()
-  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'daily' })
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'lifetime' })
   const [stats, setStats] =
     useState<any>(null)
   const [revenueData, setRevenueData] =
