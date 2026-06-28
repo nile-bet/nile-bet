@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import {
   getCashiersUnderAgent,
-  createCashierByAgent,
   assignCreditsToSubUser,
   suspendUserByAgent,
 } from '@/lib/actions/agent'
@@ -19,12 +18,7 @@ import { useAuthStore }
   from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import {
-  Plus,
-  RefreshCw,
-  Eye,
-  EyeOff,
-} from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -32,17 +26,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-function genPassword() {
-  const chars =
-    'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!'
-  let pw = 'Nile'
-  for (let i = 0; i < 8; i++) {
-    pw += chars[
-      Math.floor(Math.random() * chars.length)
-    ]
-  }
-  return pw
-}
 
 export default function AgentCashiersPage() {
   const { user } = useAuthStore()
@@ -51,18 +34,6 @@ export default function AgentCashiersPage() {
   const [loading, setLoading] =
     useState(true)
 
-  // Create modal
-  const [showCreate, setShowCreate] =
-    useState(false)
-  const [newUsername, setNewUsername] =
-    useState('')
-  const [newPassword, setNewPassword] =
-    useState('')
-  const [newBalance, setNewBalance] =
-    useState('')
-  const [showPw, setShowPw] = useState(false)
-  const [creating, setCreating] =
-    useState(false)
 
   // Credits modal
   const [showCredits, setShowCredits] =
@@ -73,6 +44,7 @@ export default function AgentCashiersPage() {
     useState('')
   const [addingCredits, setAddingCredits] =
     useState(false)
+  const [resettingBalance, setResettingBalance] = useState<string | null>(null)
 
   // Confirm modal
   const [showConfirm, setShowConfirm] =
@@ -93,32 +65,6 @@ export default function AgentCashiersPage() {
     setLoading(false)
   }
 
-  const handleCreate = async () => {
-    if (!user) return
-    setCreating(true)
-    const result = await createCashierByAgent(
-      {
-        username: newUsername.trim(),
-        password: newPassword,
-        initialBalance:
-          parseFloat(newBalance) || 0,
-        agentId: user.id,
-      }
-    )
-    if (result.success) {
-      toast.success(
-        `@${newUsername} created!`
-      )
-      setShowCreate(false)
-      setNewUsername('')
-      setNewPassword('')
-      setNewBalance('')
-      loadCashiers()
-    } else {
-      toast.error(result.error)
-    }
-    setCreating(false)
-  }
 
   const handleAddCredits = async () => {
     if (!user || !selectedCashier) return
@@ -140,6 +86,22 @@ export default function AgentCashiersPage() {
       toast.error(result.error)
     }
     setAddingCredits(false)
+  }
+
+  const handleResetBalance = async (cashier: any) => {
+    setResettingBalance(cashier.id)
+    const supabase = (await import('@/lib/supabase/client')).createClient()
+    const { error } = await supabase
+      .from('profiles')
+      .update({ credit_balance: 0 })
+      .eq('id', cashier.id)
+    if (!error) {
+      toast.success(`@${cashier.username} balance reset to zero`)
+      loadCashiers()
+    } else {
+      toast.error('Failed to reset balance')
+    }
+    setResettingBalance(null)
   }
 
   const handleSuspend = async () => {
@@ -244,6 +206,18 @@ export default function AgentCashiersPage() {
           </button>
           <button
             onClick={() => {
+              setSelectedCashier(row)
+              setConfirmData({ action: 'reset_balance', cashier: row })
+              setShowConfirm(true)
+            }}
+            disabled={resettingBalance === row.id}
+            className="text-xs border border-white/20 text-white/50 px-2 py-1 rounded hover:bg-white/10 hover:text-white disabled:opacity-40"
+            title="Reset balance to zero"
+          >
+            <RotateCcw className="w-3 h-3" />
+          </button>
+          <button
+            onClick={() => {
               setConfirmData(row)
               setShowConfirm(true)
             }}
@@ -278,15 +252,7 @@ export default function AgentCashiersPage() {
               )}
             </span>
           </div>
-          <button
-            onClick={() =>
-              setShowCreate(true)
-            }
-            className="bg-gold text-charcoal px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Create Cashier
-          </button>
+
         </div>
       </div>
 
@@ -294,146 +260,9 @@ export default function AgentCashiersPage() {
         columns={columns}
         data={cashiers}
         isLoading={loading}
-        emptyMessage="No cashiers yet. Create your first cashier!"
+        emptyMessage="No cashiers assigned yet"
       />
 
-      {/* Create cashier modal */}
-      <Dialog
-        open={showCreate}
-        onOpenChange={setShowCreate}
-      >
-        <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              Create New Cashier
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs text-white/60 block mb-1">
-                Username
-              </label>
-              <input
-                value={newUsername}
-                onChange={(e) =>
-                  setNewUsername(
-                    e.target.value
-                      .toLowerCase()
-                      .replace(/[^a-z0-9_]/g, '')
-                  )
-                }
-                placeholder="cashier_username"
-                className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs text-white/60 block mb-1">
-                Password
-              </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <input
-                    type={
-                      showPw
-                        ? 'text'
-                        : 'password'
-                    }
-                    value={newPassword}
-                    onChange={(e) =>
-                      setNewPassword(
-                        e.target.value
-                      )
-                    }
-                    placeholder="password"
-                    className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2.5 text-white text-sm font-mono focus:outline-none pr-8"
-                  />
-                  <button
-                    onClick={() =>
-                      setShowPw(!showPw)
-                    }
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40"
-                  >
-                    {showPw ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-                <button
-                  onClick={() => {
-                    setNewPassword(
-                      genPassword()
-                    )
-                    setShowPw(true)
-                  }}
-                  className="p-2 border border-nile-blue/30 text-white/60 rounded-lg hover:text-white"
-                  title="Generate password"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs text-white/60 block mb-1">
-                Initial Balance (ETB)
-              </label>
-              <input
-                type="number"
-                value={newBalance}
-                onChange={(e) =>
-                  setNewBalance(e.target.value)
-                }
-                placeholder="0"
-                min="0"
-                className="w-full bg-charcoal border border-gold/20 rounded-lg px-3 py-2.5 text-white text-sm font-mono focus:outline-none"
-              />
-              {newBalance && (
-                <p className="text-xs text-white/30 mt-1">
-                  Your balance after:{' '}
-                  {formatETB(
-                    (user?.credit_balance ?? 0) -
-                      (parseFloat(newBalance) || 0)
-                  )}
-                </p>
-              )}
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={() =>
-                  setShowCreate(false)
-                }
-                className="flex-1 border border-white/20 text-white/60 py-2.5 rounded-lg text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreate}
-                disabled={
-                  creating ||
-                  !newUsername ||
-                  !newPassword
-                }
-                className={cn(
-                  'flex-1 py-2.5 rounded-lg text-sm font-semibold',
-                  !creating &&
-                    newUsername &&
-                    newPassword
-                    ? 'bg-gold text-charcoal hover:bg-gold-light'
-                    : 'bg-white/10 text-white/30 cursor-not-allowed'
-                )}
-              >
-                {creating
-                  ? 'Creating...'
-                  : 'Create Cashier'}
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Add credits modal */}
       <Dialog
@@ -536,24 +365,39 @@ export default function AgentCashiersPage() {
       <ConfirmModal
         isOpen={showConfirm}
         onClose={() => setShowConfirm(false)}
-        onConfirm={handleSuspend}
+        onConfirm={() => {
+          if (confirmData?.action === 'reset_balance') {
+            handleResetBalance(confirmData.cashier)
+            setShowConfirm(false)
+          } else {
+            handleSuspend()
+          }
+        }}
         title={
-          confirmData?.status === 'active'
+          confirmData?.action === 'reset_balance'
+            ? 'Reset Balance?'
+            : confirmData?.status === 'active'
             ? 'Suspend Cashier?'
             : 'Activate Cashier?'
         }
         message={
-          confirmData?.status === 'active'
+          confirmData?.action === 'reset_balance'
+            ? `Reset @${confirmData?.cashier?.username}'s balance to ETB 0? This cannot be undone.`
+            : confirmData?.status === 'active'
             ? `Suspend @${confirmData?.username}? They will be logged out.`
             : `Reactivate @${confirmData?.username}?`
         }
         confirmText={
-          confirmData?.status === 'active'
+          confirmData?.action === 'reset_balance'
+            ? 'Yes, Reset to Zero'
+            : confirmData?.status === 'active'
             ? 'Yes, Suspend'
             : 'Yes, Activate'
         }
         variant={
-          confirmData?.status === 'active'
+          confirmData?.action === 'reset_balance'
+            ? 'warning'
+            : confirmData?.status === 'active'
             ? 'danger'
             : 'warning'
         }
