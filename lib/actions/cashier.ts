@@ -183,7 +183,7 @@ export async function getCashierDashboardStats(
   // Combine slip + jackpot totals
   const totalCollected = totalCollectedSlips + jackpotCollected
   const totalPaidOut = totalPaidOutSlips + jackpotPaidOut
-  const grossProfitLoss = totalCollected - totalPaidOut
+  const grossProfitLoss = totalCollected - totalPaidOut - taxCollected
   const pendingLiability = pendingLiabilitySlips + jackpotPendingLiability
 
   const walletBalance =
