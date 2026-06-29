@@ -382,25 +382,6 @@ export function BetSlipSidebar({
       {/* Footer: stake + calculation */}
       {selections.length > 0 && (
         <div className="border-t border-gold/10 p-4 space-y-3">
-          {/* Selection count */}
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-white/40">
-              Selections:
-            </span>
-            <span
-              className={cn(
-                'text-xs font-medium',
-                selections.length >=
-                  settings.minSelections
-                  ? 'text-nile-success'
-                  : 'text-nile-orange'
-              )}
-            >
-              {selections.length} /{' '}
-              {settings.minSelections} min
-            </span>
-          </div>
-
           {/* Selection progress bar */}
           <div>
             <div className="flex justify-between items-center mb-1">
