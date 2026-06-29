@@ -552,7 +552,7 @@ export default function CashierDashboard() {
           <div
             className={cn(
               'border rounded-xl p-3',
-              (stats.netBalance ?? 0) >= 0
+              (stats.grossProfitLoss ?? 0) >= 0
                 ? 'bg-nile-success/10 border-nile-success/30'
                 : 'bg-nile-danger/10 border-nile-danger/30'
             )}
@@ -565,15 +565,13 @@ export default function CashierDashboard() {
                 <p
                   className={cn(
                     'font-mono text-xl font-bold mt-1',
-                    (stats.netBalance ?? 0) >= 0
+                    (stats.grossProfitLoss ?? 0) >= 0
                       ? 'text-nile-success'
                       : 'text-nile-danger'
                   )}
                 >
-                  {(stats.netBalance ?? 0) >= 0
-                    ? '+'
-                    : ''}
-                  {formatETB(stats.netBalance)}
+                  {(stats.grossProfitLoss ?? 0) >= 0 ? '+' : ''}
+                  {formatETB(stats.grossProfitLoss)}
                 </p>
                 <p className="text-white/40 text-xs mt-1">
                   Paid out:{' '}
@@ -583,7 +581,7 @@ export default function CashierDashboard() {
               <TrendingUp
                 className={cn(
                   'w-8 h-8',
-                  (stats.netBalance ?? 0) >= 0
+                  (stats.grossProfitLoss ?? 0) >= 0
                     ? 'text-nile-success/40'
                     : 'text-nile-danger/40'
                 )}
@@ -596,7 +594,12 @@ export default function CashierDashboard() {
       {/* ── ROW 5: Profit Split ── */}
       {!loading && stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="bg-nile-success/10 border border-nile-success/20 rounded-xl p-3">
+          <div className={cn(
+              'border rounded-xl p-3',
+              (stats.cashierProfit ?? 0) >= 0
+                ? 'bg-nile-success/10 border-nile-success/20'
+                : 'bg-nile-danger/10 border-nile-danger/20'
+            )}>
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-white/60 text-sm">
@@ -605,29 +608,28 @@ export default function CashierDashboard() {
                 <p
                   className={cn(
                     'font-mono text-xl font-bold mt-1',
-                    (stats.cashierProfit ??
-                      0) >= 0
+                    (stats.cashierProfit ?? 0) >= 0
                       ? 'text-nile-success'
                       : 'text-nile-danger'
                   )}
                 >
-                  {(stats.cashierProfit ?? 0) >=
-                  0
-                    ? '+'
-                    : ''}
-                  {formatETB(
-                    stats.cashierProfit
-                  )}
+                  {(stats.cashierProfit ?? 0) >= 0 ? '+' : ''}
+                  {formatETB(stats.cashierProfit)}
                 </p>
                 <p className="text-white/40 text-xs mt-1">
                   Your share of profit
                 </p>
               </div>
-              <Wallet className="w-6 h-6 text-nile-success/40" />
+              <Wallet className={cn('w-6 h-6', (stats.cashierProfit ?? 0) >= 0 ? 'text-nile-success/40' : 'text-nile-danger/40')} />
             </div>
           </div>
 
-          <div className="bg-nile-danger/10 border border-nile-danger/20 rounded-xl p-3">
+          <div className={cn(
+              'border rounded-xl p-3',
+              (stats.agentPayable ?? 0) >= 0
+                ? 'bg-nile-danger/10 border-nile-danger/20'
+                : 'bg-nile-success/10 border-nile-success/20'
+            )}>
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-white/60 text-sm">
@@ -636,21 +638,18 @@ export default function CashierDashboard() {
                 <p
                   className={cn(
                     'font-mono text-xl font-bold mt-1',
-                    (stats.agentPayable ?? 0) >=
-                    0
+                    (stats.agentPayable ?? 0) >= 0
                       ? 'text-nile-danger'
                       : 'text-nile-success'
                   )}
                 >
-                  {formatETB(
-                    stats.agentPayable
-                  )}
+                  {formatETB(stats.agentPayable)}
                 </p>
                 <p className="text-white/40 text-xs mt-1">
-                  To pay your agent
+                  {(stats.agentPayable ?? 0) >= 0 ? 'To pay your agent' : 'Agent owes you'}
                 </p>
               </div>
-              <ArrowUpRight className="w-6 h-6 text-nile-danger/40" />
+              <ArrowUpRight className={cn('w-6 h-6', (stats.agentPayable ?? 0) >= 0 ? 'text-nile-danger/40' : 'text-nile-success/40')} />
             </div>
           </div>
         </div>
