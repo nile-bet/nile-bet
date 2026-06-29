@@ -1248,8 +1248,8 @@ export async function getAgentNetworkStats(
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_payout ?? s.net_payout ?? 0) : (s.net_payout ?? 0)), 0)
   const taxCollectedSlips = all.filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_tax ?? 0) : (s.winning_tax ?? 0)), 0)
-  const pendingLiabilitySlips = all.filter((s) => s.status === 'pending')
-    .reduce((a, s) => a + (s.max_payout ?? s.net_payout ?? 0), 0)
+  const pendingLiabilitySlips = all.filter((s) => s.status === 'pending' || s.status === 'won' || (s.status === 'near_win' && !(s as any).redeemed_at))
+    .reduce((a, s) => a + (s.status === 'near_win' ? (s.insurance_payout ?? s.net_payout ?? 0) : (s.net_payout ?? s.max_payout ?? 0)), 0)
 
   // Jackpot financials
   const jackpotTaxCollected = allJackpot.filter((s) => s.status === 'paid' || (s.status === 'near_win' && s.redeemed_at != null))
@@ -1258,7 +1258,7 @@ export async function getAgentNetworkStats(
   const jackpotCollected = allJackpot.reduce((a, s) => a + (s.stake ?? 0), 0)
   const jackpotPaidOut = allJackpot.filter((s) => s.status === 'paid' || (s.status === 'near_win' && s.redeemed_at != null))
     .reduce((a, s) => a + ((s.reward_amount ?? 0) - (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15)), 0)
-  const jackpotPendingLiability = allJackpot.filter((s) => s.status === 'pending')
+  const jackpotPendingLiability = allJackpot.filter((s) => s.status === 'pending' || s.status === 'won' || (s.status === 'near_win' && s.redeemed_at == null))
     .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
 
   // Regular vs jackpot split counts
