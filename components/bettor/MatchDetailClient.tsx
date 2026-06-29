@@ -134,7 +134,7 @@ function MarketBlock({ mm, match, commonProps, activeCategory }: any) {
           <div
             key={rowIdx}
             className="grid border-t border-white/[0.04]"
-            style={{ gridTemplateColumns: `repeat(${chunk.length}, 1fr)` }}
+            style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
           >
             {chunk.map((sel, i) => {
               const oddRow = odds.find((o: any) => o.selection === sel)
@@ -267,9 +267,9 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
             <p className="text-white/20 text-xs mt-1">{activeCategory} markets not available for this match</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.04] p-px">
+          <div className="flex flex-col">
             {activeMarkets.map((mm) => (
-              <div key={mm.id} className="bg-[#181818]">
+              <div key={mm.id}>
                 <MarketBlock
                   mm={mm}
                   match={match}
