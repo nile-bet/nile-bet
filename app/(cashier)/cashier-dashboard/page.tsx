@@ -575,7 +575,7 @@ export default function CashierDashboard() {
                 </p>
                 <p className="text-white/40 text-xs mt-1">
                   Paid out:{' '}
-                  {formatETB(stats.totalWon)}
+                  {formatETB((payouts?.totals?.wonRedeemedNet ?? 0) + (payouts?.totals?.insuredRedeemedNet ?? 0))}
                 </p>
               </div>
               <TrendingUp

@@ -183,6 +183,7 @@ export async function getCashierDashboardStats(
   // Combine slip + jackpot totals
   const totalCollected = totalCollectedSlips + jackpotCollected
   const totalPaidOut = totalPaidOutSlips + jackpotPaidOut
+  const actualPaidOut = totalPaidOut  // only redeemed slips (normal + insured paid)
   const grossProfitLoss = totalCollected - totalPaidOut - taxCollected
   const pendingLiability = pendingLiabilitySlips + jackpotPendingLiability
 
@@ -251,6 +252,7 @@ export async function getCashierDashboardStats(
     taxCollected,
     agentPayable,
     totalWon,
+    actualPaidOut,
     insuredTotal,
     wonRedeemedAmount,
     wonPendingAmount,
