@@ -8,6 +8,7 @@ import { useAuthStore }
   from '@/lib/stores/authStore'
 import {
   formatETB,
+  formatKickOff,
 } from '@/lib/utils/formatCurrency'
 import { cn } from '@/lib/utils'
 import { getSlipById } from '@/lib/actions/bets'
@@ -269,7 +270,7 @@ export function BetSlipSidebar({
             <span className="text-xs text-white/50">
               Wallet:
             </span>
-            <span className="text-gold font-mono text-sm font-medium">
+            <span className="text-gold font-mono text-xs font-semibold">
               {formatETB(user.credit_balance)}
             </span>
           </div>
@@ -314,12 +315,12 @@ export function BetSlipSidebar({
                 <div
                   key={`${s.matchMarketId}-${s.selection}`}
                   className={cn(
-                    'bg-charcoal rounded-lg p-2.5 border transition-colors',
+                    'rounded-lg p-2.5 border transition-colors',
                     started
                       ? 'border-nile-danger/50 bg-nile-danger/10'
                       : countdown
-                      ? 'border-nile-orange/30 bg-nile-orange/5'
-                      : 'border-nile-blue/20'
+                      ? 'border-nile-orange/40 bg-nile-orange/10'
+                      : 'border-gold/25 bg-gold/5'
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -329,7 +330,7 @@ export function BetSlipSidebar({
                       </p>
                       <p className="text-[10px] text-white/30 flex items-center gap-0.5">
                         <Clock className="w-2.5 h-2.5" />
-                        {new Date(s.kickOffTime).toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Addis_Ababa' })}
+                        {formatKickOff(s.kickOffTime)}
                       </p>
                       <p className="text-[11px] text-white/40 truncate">
                         {s.marketName}
@@ -348,9 +349,9 @@ export function BetSlipSidebar({
                         </p>
                       ) : null}
                     </div>
-                    <div className="flex flex-col items-end gap-1">
+                    <div className="flex flex-col items-end gap-1.5 ml-2">
                       <span className={cn(
-                        'font-mono text-[13px] font-medium transition-all duration-300',
+                        'font-mono text-[14px] font-bold transition-all duration-300',
                         flashedOdds[`${s.matchMarketId}-${s.selection}`] ? 'text-nile-orange scale-110' : 'text-gold'
                       )}>
                         {s.odd.toFixed(2)}
@@ -408,9 +409,9 @@ export function BetSlipSidebar({
                 {selections.length}/{settings.minSelections} min
               </span>
             </div>
-            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
               <div
-                className={cn('h-full rounded-full transition-all duration-300', selections.length >= settings.minSelections ? 'bg-nile-success' : 'bg-nile-orange')}
+                className={cn('h-full rounded-full transition-all duration-300', selections.length >= settings.minSelections ? 'bg-nile-success shadow-[0_0_6px_rgba(34,197,94,0.6)]' : 'bg-nile-orange')}
                 style={{ width: `${Math.min((selections.length / settings.minSelections) * 100, 100)}%` }}
               />
             </div>
@@ -451,11 +452,11 @@ export function BetSlipSidebar({
               Min: ETB {settings.minStake} | Max: ETB {settings.maxStakePerSlip.toLocaleString()}
             </p>
             {/* Quick stake presets */}
-            <div className="flex gap-1 mt-1.5 flex-wrap">
-              {[10, 20, 50, 100].map(amt => (
+            <div className="flex gap-1 mt-1.5 overflow-x-auto scrollbar-hide pb-0.5">
+              {[25, 50, 100, 200].map(amt => (
                 <button key={amt} onClick={() => setStake(amt)}
-                  className={cn('text-[10px] px-2 py-0.5 rounded border transition-colors',
-                    stake === amt ? 'bg-gold border-gold text-charcoal font-bold' : 'border-gold/20 text-gold/60 hover:border-gold/50 hover:text-gold'
+                  className={cn('text-[10px] px-2.5 py-1 rounded-full border flex-shrink-0 transition-colors',
+                    stake === amt ? 'bg-gold border-gold text-charcoal font-bold' : 'border-gold/25 text-gold/70 hover:border-gold/60 hover:text-gold'
                   )}>
                   {amt}
                 </button>
@@ -466,8 +467,8 @@ export function BetSlipSidebar({
                   if (amt < settings.minStake) return null
                   return (
                     <button key={pct} onClick={() => setStake(amt)}
-                      className={cn('text-[10px] px-2 py-0.5 rounded border transition-colors',
-                        stake === amt ? 'bg-gold border-gold text-charcoal font-bold' : 'border-gold/20 text-gold/60 hover:border-gold/50 hover:text-gold'
+                      className={cn('text-[10px] px-2.5 py-1 rounded-full border flex-shrink-0 transition-colors',
+                        stake === amt ? 'bg-gold border-gold text-charcoal font-bold' : 'border-gold/25 text-gold/70 hover:border-gold/60 hover:text-gold'
                       )}>
                       {pct === 1 ? 'MAX' : `${pct * 100}%`}
                     </button>
@@ -477,8 +478,8 @@ export function BetSlipSidebar({
             </div>
           </div>
 
-          {/* Calculation */}
-          <div className="space-y-1 text-sm">
+          {/* Calculation — only show when stake entered */}
+          {stake > 0 && <div className="space-y-1 text-sm">
             <div className="flex justify-between">
               <span className="text-white/50 text-xs">
                 Stake:
@@ -530,17 +531,15 @@ export function BetSlipSidebar({
                 )}
               </span>
             </div>
-          </div>
+          </div>}
 
-          {/* Validation errors */}
+          {/* Validation errors — single pill */}
           {errors.length > 0 && (
-            <div className="space-y-1">
+            <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg px-2.5 py-2 space-y-0.5">
               {errors.map((e, i) => (
-                <p
-                  key={i}
-                  className="text-[10px] text-nile-danger"
-                >
-                  ⚠️ {e}
+                <p key={i} className="text-[10px] text-nile-danger flex items-start gap-1">
+                  <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                  {e}
                 </p>
               ))}
             </div>
@@ -607,9 +606,9 @@ export function BetSlipSidebar({
               onClick={onPlaceBet}
               disabled={!canPlace || hasStarted}
               className={cn(
-                'w-full py-2.5 rounded-lg font-semibold text-sm transition-colors',
+                'w-full py-3 rounded-xl font-bold text-sm transition-all',
                 canPlace && !hasStarted
-                  ? 'bg-gold text-charcoal hover:bg-gold-light'
+                  ? 'bg-gold text-charcoal hover:bg-gold-light shadow-lg shadow-gold/20 hover:shadow-gold/40'
                   : 'bg-white/10 text-white/30 cursor-not-allowed'
               )}
             >
