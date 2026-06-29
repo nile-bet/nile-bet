@@ -849,7 +849,7 @@ export async function getAgentReport(
   if (cashierIds.length > 0) {
     let q = supabase
       .from('slips')
-      .select('stake, net_payout, winning_tax, status, insurance_tax, insurance_applied, insurance_payout, created_at, placed_by')
+      .select('stake, net_payout, winning_tax, status, insurance_tax, insurance_applied, insurance_payout, redeemed_at, created_at, placed_by')
       .in('placed_by', cashierIds)
     if (filters.startDate) q = q.gte('created_at', filters.startDate)
     if (filters.endDate) q = q.lte('created_at', filters.endDate)
@@ -858,7 +858,7 @@ export async function getAgentReport(
 
     let jq = supabase
       .from('jackpot_slips')
-      .select('stake, reward_amount, reward_tax, status, created_at, placed_by')
+      .select('stake, reward_amount, reward_tax, status, is_insured, redeemed_at, created_at, placed_by')
       .in('placed_by', cashierIds)
     if (filters.startDate) jq = jq.gte('created_at', filters.startDate)
     if (filters.endDate) jq = jq.lte('created_at', filters.endDate)
@@ -867,15 +867,16 @@ export async function getAgentReport(
   }
   const totalCollectedSlips = allSlips.reduce((a, s) => a + (s.stake ?? 0), 0)
   const totalPaidSlips = allSlips
-    .filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
+    .filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_payout ?? s.net_payout ?? 0) : (s.net_payout ?? 0)), 0)
   const taxCollected = allSlips
-    .filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
+    .filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_tax ?? 0) : (s.winning_tax ?? 0)), 0)
-  const jackpotTaxCollectedR = allJackpotSlips.reduce((a: number, s: any) => a + (s.reward_tax ?? 0), 0)
+  const jackpotTaxCollectedR = allJackpotSlips.filter((s: any) => s.status === 'paid' || (s.status === 'near_win' && s.redeemed_at != null))
+    .reduce((a: number, s: any) => a + (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15), 0)
   const jackpotCollectedR = allJackpotSlips.reduce((a: number, s: any) => a + (s.stake ?? 0), 0)
   const jackpotPaidR = allJackpotSlips
-    .filter((s: any) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
+    .filter((s: any) => s.status === 'paid' || (s.status === 'near_win' && s.redeemed_at != null))
     .reduce((a: number, s: any) => a + ((s.reward_amount ?? 0) - (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15)), 0)
   const totalCollected = totalCollectedSlips + jackpotCollectedR
   const totalPaid = totalPaidSlips + jackpotPaidR
@@ -887,14 +888,14 @@ export async function getAgentReport(
     const date = slip.created_at.split('T')[0]
     if (!grouped[date]) grouped[date] = { date, collected: 0, paid: 0, profit: 0 }
     grouped[date].collected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') grouped[date].paid += (slip.status === 'near_win' || slip.insurance_applied) ? (slip.insurance_payout ?? slip.net_payout ?? 0) : (slip.net_payout ?? 0)
+    if (slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)) grouped[date].paid += (slip.status === 'near_win' || slip.insurance_applied) ? (slip.insurance_payout ?? slip.net_payout ?? 0) : (slip.net_payout ?? 0)
     grouped[date].profit = grouped[date].collected - grouped[date].paid
   })
   allJackpotSlips.forEach((slip: any) => {
     const date = slip.created_at.split('T')[0]
     if (!grouped[date]) grouped[date] = { date, collected: 0, paid: 0, profit: 0 }
     grouped[date].collected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') grouped[date].paid += (slip.reward_amount ?? 0) - (slip.reward_tax ?? (slip.reward_amount ?? 0) * 0.15)
+    if (slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)) grouped[date].paid += (slip.reward_amount ?? 0) - (slip.reward_tax ?? (slip.reward_amount ?? 0) * 0.15)
     grouped[date].profit = grouped[date].collected - grouped[date].paid
   })
 
@@ -907,17 +908,19 @@ export async function getAgentReport(
     if (!c) continue
     c.slipCount += 1
     c.totalCollected += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') c.totalPaid += (slip.status === 'near_win' || slip.insurance_applied) ? (slip.insurance_payout ?? slip.net_payout ?? 0) : (slip.net_payout ?? 0)
-    if (slip.status === 'won' || slip.status === 'paid') c.taxCollected += slip.winning_tax ?? 0
-    if (slip.status === 'near_win' || slip.insurance_applied) c.taxCollected += slip.insurance_tax ?? 0
+    if (slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)) c.totalPaid += (slip.status === 'near_win' || slip.insurance_applied) ? (slip.insurance_payout ?? slip.net_payout ?? 0) : (slip.net_payout ?? 0)
+    if (slip.status === 'paid') c.taxCollected += slip.winning_tax ?? 0
+    if (slip.status === 'near_win' && (slip as any).redeemed_at) c.taxCollected += slip.insurance_tax ?? 0
   }
   for (const slip of allJackpotSlips) {
     const c = cashierMap[(slip as any).placed_by]
     if (!c) continue
     c.slipCount += 1
     c.totalCollected += (slip as any).stake ?? 0
-    c.taxCollected += (slip as any).reward_tax ?? 0
-    if ((slip as any).status === 'won' || (slip as any).status === 'paid' || (slip as any).status === 'near_win') c.totalPaid += ((slip as any).reward_amount ?? 0) - ((slip as any).reward_tax ?? ((slip as any).reward_amount ?? 0) * 0.15)
+    if ((slip as any).status === 'paid' || ((slip as any).status === 'near_win' && (slip as any).redeemed_at)) {
+      c.taxCollected += (slip as any).reward_tax ?? ((slip as any).reward_amount ?? 0) * 0.15
+      c.totalPaid += ((slip as any).reward_amount ?? 0) - ((slip as any).reward_tax ?? ((slip as any).reward_amount ?? 0) * 0.15)
+    }
   }
   for (const c of Object.values(cashierMap) as any[]) {
     c.grossProfit = c.totalCollected - c.totalPaid - c.taxCollected
