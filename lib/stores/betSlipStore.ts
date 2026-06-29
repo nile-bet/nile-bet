@@ -48,10 +48,8 @@ interface BetSlipState {
     matchMarketId: string,
     selection: string
   ) => boolean
-  hasStartedMatches: () => boolean
-  getValidationErrors: (
-    settings: PlatformSettings
-  ) => string[]
+  getValidationErrors: (settings: PlatformSettings) => string[]
+  removeStartedSelections: () => void
 }
 
 const emptyCalc: SlipCalculation = {
@@ -168,6 +166,14 @@ export const useBetSlipStore =
             matchMarketId &&
           s.selection === selection
       ),
+
+    removeStartedSelections: () => {
+      const newSelections = get().selections.filter(
+        (s) => s.matchStatus !== 'closed' && s.matchStatus !== 'finished'
+      )
+      const calc = calculateSlip(get().stake, newSelections.map((s) => s.odd), getTaxRate())
+      set({ selections: newSelections, calculation: calc })
+    },
 
     hasStartedMatches: () =>
       get().selections.some(

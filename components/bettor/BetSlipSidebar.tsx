@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Ticket, AlertTriangle, Search, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { useBetSlipStore } from '@/lib/stores/betSlipStore'
 import { useAuthStore }
   from '@/lib/stores/authStore'
@@ -11,6 +12,7 @@ import {
 import { cn } from '@/lib/utils'
 import { getSlipById } from '@/lib/actions/bets'
 import { AnonymousSlipModal } from './AnonymousSlipModal'
+import { createClient } from '@/lib/supabase/client'
 import type { PlatformSettings }
   from '@/types/database.types'
 
@@ -78,6 +80,57 @@ export function BetSlipSidebar({
     window.addEventListener('platform-settings-updated', fetchSettings)
     return () => window.removeEventListener('platform-settings-updated', fetchSettings)
   }, [])
+  // Countdown ticker
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 30000)
+    return () => clearInterval(t)
+  }, [])
+
+  // Realtime: auto-flag and auto-remove selections when match goes closed
+  useEffect(() => {
+    const supabase = createClient()
+    const matchIds = useBetSlipStore.getState().selections.map(s => s.matchId)
+    if (!matchIds.length) return
+    const channel = supabase
+      .channel('betslip-match-status')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'matches',
+      }, (payload) => {
+        const updated = payload.new as any
+        if (updated.status === 'closed' || updated.status === 'finished') {
+          const store = useBetSlipStore.getState()
+          const affected = store.selections.filter(s => s.matchId === updated.id)
+          if (affected.length > 0) {
+            const matchName = `${affected[0].homeTeam} vs ${affected[0].awayTeam}`
+            // Update matchStatus in selections
+            const newSelections = store.selections.map(s =>
+              s.matchId === updated.id ? { ...s, matchStatus: updated.status } : s
+            )
+            useBetSlipStore.setState({ selections: newSelections })
+            toast.warning(`⚠️ ${matchName} has started — remove it to place your bet`)
+          }
+        }
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [])
+
+  // Helper: countdown string
+  function getCountdown(kickOffTime: string): string | null {
+    const target = new Date(kickOffTime).getTime()
+    const diff = target - now
+    if (diff <= 0) return null
+    const mins = Math.floor(diff / 60000)
+    const hours = Math.floor(mins / 60)
+    if (hours > 0) return null // don't show for far-off matches
+    if (mins < 1) return 'Starts < 1min'
+    if (mins <= 60) return `Starts in ${mins}min`
+    return null
+  }
+
   const [copySlipId, setCopySlipId] =
     useState('')
   const [slipCode, setSlipCode] = useState('')
@@ -92,6 +145,7 @@ export function BetSlipSidebar({
     calculation,
     setStake,
     removeSelection,
+    removeStartedSelections,
     clearSlip,
     getValidationErrors,
   } = useBetSlipStore()
@@ -104,11 +158,10 @@ export function BetSlipSidebar({
     selections.length >= settings.minSelections &&
     stake >= settings.minStake
 
-  const hasStarted = selections.some(
-    (s) =>
-      s.matchStatus === 'closed' ||
-      s.matchStatus === 'finished'
+  const startedSelections = selections.filter(
+    (s) => s.matchStatus === 'closed' || s.matchStatus === 'finished'
   )
+  const hasStarted = startedSelections.length > 0
 
   return (
     <div className="w-[240px] flex-shrink-0 bg-[#1C2155] border-l border-[rgba(212,175,55,0.15)] rounded-none flex flex-col" style={{ fontSize: "78%", position: "sticky", top: "60px" }}>
@@ -218,25 +271,41 @@ export function BetSlipSidebar({
           </div>
         ) : (
           <div className="p-3 space-y-2">
+            {/* Remove all started button */}
+            {hasStarted && (
+              <button
+                onClick={() => {
+                  removeStartedSelections()
+                  toast.success('Started matches removed')
+                }}
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-nile-danger/20 border border-nile-danger/40 text-nile-danger text-[11px] font-semibold hover:bg-nile-danger/30 transition-colors"
+              >
+                <AlertTriangle className="w-3 h-3" />
+                Remove {startedSelections.length} started match{startedSelections.length > 1 ? 'es' : ''}
+              </button>
+            )}
+
             {selections.map((s) => {
               const started =
                 s.matchStatus === 'closed' ||
                 s.matchStatus === 'finished'
+              const countdown = getCountdown(s.kickOffTime)
               return (
                 <div
                   key={`${s.matchMarketId}-${s.selection}`}
                   className={cn(
-                    'bg-charcoal rounded-lg p-2.5 border',
+                    'bg-charcoal rounded-lg p-2.5 border transition-colors',
                     started
                       ? 'border-nile-danger/50 bg-nile-danger/10'
+                      : countdown
+                      ? 'border-nile-orange/30 bg-nile-orange/5'
                       : 'border-nile-blue/20'
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] text-white/50 truncate">
-                        {s.homeTeam} vs{' '}
-                        {s.awayTeam}
+                        {s.homeTeam} vs {s.awayTeam}
                       </p>
                       <p className="text-[11px] text-white/40 truncate">
                         {s.marketName}
@@ -244,12 +313,16 @@ export function BetSlipSidebar({
                       <p className="text-[13px] text-white font-medium">
                         {s.selection}
                       </p>
-                      {started && (
+                      {started ? (
                         <p className="text-[10px] text-nile-danger flex items-center gap-1 mt-0.5">
                           <AlertTriangle className="w-3 h-3" />
                           Match started!
                         </p>
-                      )}
+                      ) : countdown ? (
+                        <p className="text-[10px] text-nile-orange flex items-center gap-1 mt-0.5">
+                          ⏱ {countdown}
+                        </p>
+                      ) : null}
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <span className="text-gold font-mono text-[13px] font-medium">
@@ -257,10 +330,7 @@ export function BetSlipSidebar({
                       </span>
                       <button
                         onClick={() =>
-                          removeSelection(
-                            s.matchMarketId,
-                            s.selection
-                          )
+                          removeSelection(s.matchMarketId, s.selection)
                         }
                         className={cn(
                           'text-[11px] px-1.5 py-0.5 rounded',
@@ -269,9 +339,7 @@ export function BetSlipSidebar({
                             : 'text-nile-danger hover:text-nile-danger/80'
                         )}
                       >
-                        {started
-                          ? 'Remove ✕'
-                          : '✕'}
+                        ✕
                       </button>
                     </div>
                   </div>
@@ -466,7 +534,7 @@ export function BetSlipSidebar({
                   : 'bg-white/10 text-white/30 cursor-not-allowed'
               )}
             >
-              {hasStarted ? 'Remove started matches' : 'Place Bet'}
+              {hasStarted ? `Remove ${startedSelections.length} started match${startedSelections.length > 1 ? 'es' : ''} first` : 'Place Bet'}
             </button>
           )}
 
