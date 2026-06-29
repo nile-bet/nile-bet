@@ -172,7 +172,7 @@ export async function getCashierDashboardStats(
     couponsRedeemed?.length ?? 0
 
   // Tax collected
-  const taxCollectedSlips = [...paidSlips, ...nearWinSlips]
+  const taxCollectedSlips = [...paidSlips, ...nearWinSlips.filter((s: any) => s.redeemed_at)]
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied)
       ? (s.insurance_tax ?? 0)
       : (s.winning_tax ?? 0)), 0)
@@ -183,7 +183,7 @@ export async function getCashierDashboardStats(
   // Combine slip + jackpot totals
   const totalCollected = totalCollectedSlips + jackpotCollected
   const totalPaidOut = totalPaidOutSlips + jackpotPaidOut
-  const grossProfitLoss = totalCollected - totalPaidOut - taxCollected
+  const grossProfitLoss = totalCollected - totalPaidOut
   const pendingLiability = pendingLiabilitySlips + jackpotPendingLiability
 
   const walletBalance =
