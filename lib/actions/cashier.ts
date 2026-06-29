@@ -102,7 +102,7 @@ export async function getCashierDashboardStats(
   // Paid out = all slips that have been settled with payout (paid + near_win)
   const totalPaidOutSlips = [
     ...paidSlips,
-    ...nearWinSlips,
+    ...nearWinSlips.filter((s: any) => s.redeemed_at),
   ].reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied)
     ? (s.insurance_payout ?? s.net_payout ?? 0)
     : (s.net_payout ?? 0)), 0)
