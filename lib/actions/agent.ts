@@ -1244,19 +1244,20 @@ export async function getAgentNetworkStats(
   const insuredSlips = all.filter((s) => s.status === 'near_win' || s.insurance_applied).length + allJackpot.filter((s) => s.status === 'near_win' || s.is_insured === true).length
 
   const totalCollectedSlips = all.reduce((a, s) => a + (s.stake ?? 0), 0)
-  const totalPaidOutSlips = all.filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
+  const totalPaidOutSlips = all.filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_payout ?? s.net_payout ?? 0) : (s.net_payout ?? 0)), 0)
-  const taxCollectedSlips = all.filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
+  const taxCollectedSlips = all.filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_tax ?? 0) : (s.winning_tax ?? 0)), 0)
   const pendingLiabilitySlips = all.filter((s) => s.status === 'pending')
     .reduce((a, s) => a + (s.max_payout ?? s.net_payout ?? 0), 0)
 
   // Jackpot financials
-  const jackpotTaxCollected = allJackpot.reduce((a, s) => a + (s.reward_tax ?? 0), 0)
+  const jackpotTaxCollected = allJackpot.filter((s) => s.status === 'paid' || (s.status === 'near_win' && s.redeemed_at != null))
+    .reduce((a, s) => a + (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15), 0)
   const taxCollected = taxCollectedSlips + jackpotTaxCollected
   const jackpotCollected = allJackpot.reduce((a, s) => a + (s.stake ?? 0), 0)
-  const jackpotPaidOut = allJackpot.filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
-    .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
+  const jackpotPaidOut = allJackpot.filter((s) => s.status === 'paid' || (s.status === 'near_win' && s.redeemed_at != null))
+    .reduce((a, s) => a + ((s.reward_amount ?? 0) - (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15)), 0)
   const jackpotPendingLiability = allJackpot.filter((s) => s.status === 'pending')
     .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
 
