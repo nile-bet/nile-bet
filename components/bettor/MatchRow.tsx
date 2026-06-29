@@ -9,9 +9,9 @@ import type { MatchWithMarkets } from '@/types/database.types'
 const CATEGORY_ORDER = [
   'MAIN', 'GOALS', 'HANDICAP', 'HALVES',
   'CORNERS', 'CARDS', 'TEAM GOALS',
-  'CLEAN SHEET', 'GOALS ODD/EVEN',
+  'CLEAN SHEET', 'ODD/EVEN',
   'SCORERS', 'SCORE', 'COMBO',
-  'MIN 1X2', 'MIN GOALS', 'SPECIALS',
+  'MINUTES', 'SPECIALS',
 ]
 
 interface MatchRowProps {

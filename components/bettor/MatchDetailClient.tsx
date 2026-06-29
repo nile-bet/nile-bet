@@ -13,9 +13,9 @@ import type { MatchWithMarkets } from '@/types/database.types'
 const CATEGORY_ORDER = [
   'MAIN', 'GOALS', 'HANDICAP', 'HALVES',
   'CORNERS', 'CARDS', 'TEAM GOALS',
-  'CLEAN SHEET', 'GOALS ODD/EVEN',
+  'CLEAN SHEET', 'ODD/EVEN',
   'SCORERS', 'SCORE', 'COMBO',
-  'MIN 1X2', 'MIN GOALS', 'SPECIALS',
+  'MINUTES', 'SPECIALS',
 ]
 
 // Market name overrides: key = original market name (lowercase), value = display name
@@ -210,13 +210,6 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
 
   const activeMarkets = byCategory.get(activeCategory) ?? []
 
-  // DEBUG: log market names — remove after fixing
-  if (typeof window !== 'undefined' && activeMarkets.length > 0) {
-    console.log('[Markets]', activeCategory, activeMarkets.map((mm: any) => ({
-      cat: mm.market_templates?.market_categories?.name,
-      name: mm.market_templates?.name,
-    })))
-  }
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: '#181818' }}>

@@ -1040,7 +1040,7 @@ function calculateSelectionResult(
       : lost
   }
 
-  // ── MIN 1X2 ──
+  // ── MINUTES (Result at X min) ──
   const minMatch = marketName.match(
     /Result at (\d+) Minutes/
   )
@@ -1061,7 +1061,7 @@ function calculateSelectionResult(
       return mAwayWin ? won : lost
   }
 
-  // ── MIN GOALS ──
+  // ── MINUTES (Goal Before X min) ──
   const goalMinMatch = marketName.match(
     /Goal Before (\d+) Minutes/
   )
