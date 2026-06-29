@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { X, Ticket, AlertTriangle, Search, Loader2 } from 'lucide-react'
+import { X, Ticket, AlertTriangle, Search, Loader2, Clock, Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { useBetSlipStore } from '@/lib/stores/betSlipStore'
 import { useAuthStore }
@@ -139,6 +139,9 @@ export function BetSlipSidebar({
   const [loadError, setLoadError] = useState('')
   const [showSlipModal, setShowSlipModal] = useState(false)
   const [generatedSlipData, setGeneratedSlipData] = useState<any>(null)
+  const [flashedOdds, setFlashedOdds] = useState<Record<string, number>>({})
+  const [copiedCode, setCopiedCode] = useState(false)
+  const prevOddsRef = useRef<Record<string, number>>({})
   const {
     selections,
     stake,
@@ -151,6 +154,23 @@ export function BetSlipSidebar({
   } = useBetSlipStore()
   const { user, isAuthenticated } =
     useAuthStore()
+
+  // Odd change flash detection
+  useEffect(() => {
+    const newFlashed: Record<string, number> = {}
+    selections.forEach(s => {
+      const key = `${s.matchMarketId}-${s.selection}`
+      const prev = prevOddsRef.current[key]
+      if (prev !== undefined && prev !== s.odd) {
+        newFlashed[key] = s.odd
+      }
+      prevOddsRef.current[key] = s.odd
+    })
+    if (Object.keys(newFlashed).length > 0) {
+      setFlashedOdds(newFlashed)
+      setTimeout(() => setFlashedOdds({}), 1500)
+    }
+  }, [selections])
 
   const errors = getValidationErrors(settings)
   const canPlace =
@@ -307,6 +327,10 @@ export function BetSlipSidebar({
                       <p className="text-[11px] text-white/50 truncate">
                         {s.homeTeam} vs {s.awayTeam}
                       </p>
+                      <p className="text-[10px] text-white/30 flex items-center gap-0.5">
+                        <Clock className="w-2.5 h-2.5" />
+                        {new Date(s.kickOffTime).toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Addis_Ababa' })}
+                      </p>
                       <p className="text-[11px] text-white/40 truncate">
                         {s.marketName}
                       </p>
@@ -325,8 +349,12 @@ export function BetSlipSidebar({
                       ) : null}
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <span className="text-gold font-mono text-[13px] font-medium">
+                      <span className={cn(
+                        'font-mono text-[13px] font-medium transition-all duration-300',
+                        flashedOdds[`${s.matchMarketId}-${s.selection}`] ? 'text-nile-orange scale-110' : 'text-gold'
+                      )}>
                         {s.odd.toFixed(2)}
+                        {flashedOdds[`${s.matchMarketId}-${s.selection}`] && <span className="text-[9px] ml-0.5">▲</span>}
                       </span>
                       <button
                         onClick={() =>
@@ -372,6 +400,34 @@ export function BetSlipSidebar({
             </span>
           </div>
 
+          {/* Selection progress bar */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[10px] text-white/40">Progress</span>
+              <span className={cn('text-[10px] font-medium', selections.length >= settings.minSelections ? 'text-nile-success' : 'text-nile-orange')}>
+                {selections.length}/{settings.minSelections} min
+              </span>
+            </div>
+            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className={cn('h-full rounded-full transition-all duration-300', selections.length >= settings.minSelections ? 'bg-nile-success' : 'bg-nile-orange')}
+                style={{ width: `${Math.min((selections.length / settings.minSelections) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Total odds warning */}
+          {calculation.totalOdds > 0 && (() => {
+            const pct = calculation.totalOdds / settings.maxTotalOdds
+            if (pct < 0.7) return null
+            return (
+              <div className={cn('flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[10px] font-medium border', pct >= 1 ? 'bg-nile-danger/20 border-nile-danger/40 text-nile-danger' : 'bg-nile-orange/20 border-nile-orange/40 text-nile-orange')}>
+                <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                {pct >= 1 ? `Max odds reached (${settings.maxTotalOdds.toLocaleString()})` : `Odds at ${Math.round(pct * 100)}% of max (${settings.maxTotalOdds.toLocaleString()})`}
+              </div>
+            )
+          })()}
+
           {/* Stake input */}
           <div>
             <label className="text-xs text-white/50 mb-1 block">
@@ -392,10 +448,33 @@ export function BetSlipSidebar({
               className="w-full bg-charcoal border border-gold/30 rounded-md px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-gold"
             />
             <p className="text-[10px] text-white/30 mt-1">
-              Min: ETB {settings.minStake} |
-              Max: ETB{' '}
-              {settings.maxStakePerSlip.toLocaleString()}
+              Min: ETB {settings.minStake} | Max: ETB {settings.maxStakePerSlip.toLocaleString()}
             </p>
+            {/* Quick stake presets */}
+            <div className="flex gap-1 mt-1.5 flex-wrap">
+              {[10, 20, 50, 100].map(amt => (
+                <button key={amt} onClick={() => setStake(amt)}
+                  className={cn('text-[10px] px-2 py-0.5 rounded border transition-colors',
+                    stake === amt ? 'bg-gold border-gold text-charcoal font-bold' : 'border-gold/20 text-gold/60 hover:border-gold/50 hover:text-gold'
+                  )}>
+                  {amt}
+                </button>
+              ))}
+              {isAuthenticated && user && user.credit_balance > 0 && (<>
+                {[0.25, 0.5, 1].map(pct => {
+                  const amt = Math.floor(user.credit_balance * pct)
+                  if (amt < settings.minStake) return null
+                  return (
+                    <button key={pct} onClick={() => setStake(amt)}
+                      className={cn('text-[10px] px-2 py-0.5 rounded border transition-colors',
+                        stake === amt ? 'bg-gold border-gold text-charcoal font-bold' : 'border-gold/20 text-gold/60 hover:border-gold/50 hover:text-gold'
+                      )}>
+                      {pct === 1 ? 'MAX' : `${pct * 100}%`}
+                    </button>
+                  )
+                })}
+              </>)}
+            </div>
           </div>
 
           {/* Calculation */}
@@ -538,6 +617,21 @@ export function BetSlipSidebar({
             </button>
           )}
 
+          {/* Copy slip code button */}
+          {!isAuthenticated && slipCode && (
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(slipCode)
+                setCopiedCode(true)
+                setTimeout(() => setCopiedCode(false), 2000)
+              }}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-gold/30 text-gold text-[11px] hover:bg-gold/10 transition-colors"
+            >
+              {copiedCode ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {copiedCode ? 'Copied!' : `Copy Code: ${slipCode}`}
+            </button>
+          )}
+
           {isAuthenticated && (
             <button
               onClick={onTopup}
@@ -567,6 +661,27 @@ export function BetSlipSidebar({
           setShowSlipModal(false)
         }}
       />
+    )}
+    {/* Mobile floating bottom bar */}
+    {selections.length > 0 && (
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1C2155] border-t border-gold/20 px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-white/50">{selections.length} selections · {calculation.totalOdds.toFixed(2)}x</span>
+          <span className="text-gold font-mono text-sm font-bold">{formatETB(calculation.netPayout)}</span>
+        </div>
+        <button
+          onClick={isAuthenticated ? onPlaceBet : undefined}
+          disabled={isAuthenticated ? (!canPlace || hasStarted) : false}
+          className={cn(
+            'flex-1 py-2.5 rounded-xl text-sm font-bold transition-colors',
+            (!isAuthenticated || (canPlace && !hasStarted))
+              ? 'bg-gold text-charcoal hover:bg-gold-light'
+              : 'bg-white/10 text-white/30 cursor-not-allowed'
+          )}
+        >
+          {hasStarted ? 'Remove started' : isAuthenticated ? 'Place Bet' : '🎟️ Place Bet'}
+        </button>
+      </div>
     )}
     </div>
   )
