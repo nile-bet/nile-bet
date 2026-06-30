@@ -291,7 +291,7 @@ export function BetSlipSidebar({
             </p>
           </div>
         ) : (
-          <div className="p-3 space-y-2">
+          <div className="p-3 space-y-1.5">
             {/* Remove all started button */}
             {hasStarted && (
               <button
@@ -306,6 +306,7 @@ export function BetSlipSidebar({
               </button>
             )}
 
+            <div className="max-h-[200px] overflow-y-auto space-y-1.5 pr-0.5 scrollbar-thin">
             {selections.map((s) => {
               const started =
                 s.matchStatus === 'closed' ||
@@ -315,36 +316,36 @@ export function BetSlipSidebar({
                 <div
                   key={`${s.matchMarketId}-${s.selection}`}
                   className={cn(
-                    'rounded-lg p-2.5 border transition-colors',
+                    'rounded-lg p-2 border transition-colors',
                     started
-                      ? 'border-nile-danger/50 bg-nile-danger/10'
+                      ? 'border-nile-danger/60 bg-nile-danger/15'
                       : countdown
                       ? 'border-nile-orange/40 bg-nile-orange/10'
-                      : 'border-gold/25 bg-gold/5'
+                      : 'border-gold/40 bg-gold/10'
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] text-white/50 truncate">
+                      <p className="text-[12px] text-white font-semibold truncate leading-tight">
                         {s.homeTeam} vs {s.awayTeam}
                       </p>
-                      <p className="text-[10px] text-white/30 flex items-center gap-0.5">
+                      <p className="text-[9px] text-gold/50 truncate leading-tight mt-0.5">
+                        {s.leagueName}
+                      </p>
+                      <p className="text-[9px] text-white/30 flex items-center gap-0.5 leading-tight mt-0.5">
                         <Clock className="w-2.5 h-2.5" />
                         {formatKickOff(s.kickOffTime)}
                       </p>
-                      <p className="text-[11px] text-white/40 truncate">
-                        {s.marketName}
-                      </p>
-                      <p className="text-[13px] text-white font-medium">
-                        {s.selection}
+                      <p className="text-[10px] text-white/40 truncate leading-tight mt-0.5">
+                        {s.marketName}: <span className="text-white font-medium">{s.selection}</span>
                       </p>
                       {started ? (
-                        <p className="text-[10px] text-nile-danger flex items-center gap-1 mt-0.5">
-                          <AlertTriangle className="w-3 h-3" />
+                        <p className="text-[9px] text-nile-danger flex items-center gap-1 mt-0.5">
+                          <AlertTriangle className="w-2.5 h-2.5" />
                           Match started!
                         </p>
                       ) : countdown ? (
-                        <p className="text-[10px] text-nile-orange flex items-center gap-1 mt-0.5">
+                        <p className="text-[9px] text-nile-orange flex items-center gap-1 mt-0.5">
                           ⏱ {countdown}
                         </p>
                       ) : null}
@@ -375,6 +376,7 @@ export function BetSlipSidebar({
                 </div>
               )
             })}
+            </div>
           </div>
         )}
       </div>
