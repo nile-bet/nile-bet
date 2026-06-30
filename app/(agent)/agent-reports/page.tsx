@@ -29,7 +29,7 @@ export default function AgentReportsPage() {
     useState<any>(null)
   const [loading, setLoading] =
     useState(true)
-  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'monthly' })
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>({ type: 'lifetime' })
 
   useEffect(() => {
     if (!user) return
