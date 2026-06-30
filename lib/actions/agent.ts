@@ -908,7 +908,8 @@ export async function getAgentReport(
     if (!c) continue
     c.slipCount += 1
     c.totalCollected += slip.stake ?? 0
-    if (slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)) c.totalPaid += (slip.status === 'near_win' || slip.insurance_applied) ? (slip.insurance_payout ?? slip.net_payout ?? 0) : (slip.net_payout ?? 0)
+    if (slip.status === 'paid') c.totalPaid += slip.net_payout ?? 0
+    if (slip.status === 'near_win' && (slip as any).redeemed_at) c.totalPaid += slip.insurance_payout ?? slip.net_payout ?? 0
     if (slip.status === 'paid') c.taxCollected += slip.winning_tax ?? 0
     if (slip.status === 'near_win' && (slip as any).redeemed_at) c.taxCollected += slip.insurance_tax ?? 0
   }
