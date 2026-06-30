@@ -44,6 +44,8 @@ export function PlaceBetModal({
     calculation,
     removeSelection,
     clearSlip,
+    selectedBettorId,
+    selectedBettorName,
   } = useBetSlipStore()
   const { totalOdds, maxPayout, netPayout, winningTax } = calculation
   const insuranceApplied = false
@@ -92,9 +94,17 @@ export function PlaceBetModal({
   const canPlace =
     errors.length === 0 && !placing
 
+  const isStaffPlacing = user?.role === 'cashier' || user?.role === 'agent'
+
   const handlePlace = async () => {
     if (!canPlace || !user) return
+    if (isStaffPlacing && forceNamed && !selectedBettorId) {
+      toast.error('Select a bettor before placing a named bet')
+      return
+    }
     setPlacing(true)
+
+    const effectiveBettorId = isStaffPlacing && selectedBettorId ? selectedBettorId : user.id
 
     const result = await placeBet({
       selections: selections.map((s) => ({
@@ -105,7 +115,7 @@ export function PlaceBetModal({
         odd: s.odd,
       })),
       stake: stakeNum,
-      bettorId: user.id,
+      bettorId: effectiveBettorId,
       placedById: user.id,
       isAnonymous: forceNamed ? false : isAnonymous,
     })
@@ -130,9 +140,14 @@ export function PlaceBetModal({
         isAnonymous: effectiveAnonymous,
         bettorUsername: effectiveAnonymous
           ? undefined
+          : isStaffPlacing
+          ? (selectedBettorName ?? undefined)
           : user.username,
         cashierUsername:
-          user.role === 'cashier' ||
+          user.role === 'cashier'
+            ? user.username
+            : undefined,
+        agentUsername:
           user.role === 'agent'
             ? user.username
             : undefined,
