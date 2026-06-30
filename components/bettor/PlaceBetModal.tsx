@@ -125,6 +125,7 @@ export function PlaceBetModal({
         maxPayout,
         netPayout,
         winningTax,
+        taxPercent: settings?.winningTaxPercent ?? 15,
         insuranceApplied,
         isAnonymous: effectiveAnonymous,
         bettorUsername: effectiveAnonymous

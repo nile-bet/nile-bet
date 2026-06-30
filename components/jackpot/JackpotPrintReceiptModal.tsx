@@ -39,9 +39,22 @@ export function JackpotPrintReceiptModal({
 
   useEffect(() => {
     if (!isOpen || !slipId) return
-    setTimeout(() => {
-      getJackpotSlipById(slipId).then(setSlip)
-    }, 2500)
+    // Fetch immediately, then retry a couple times if selections aren't attached yet
+    // (slip_selections may be inserted a moment after the slip row itself)
+    let attempts = 0
+    let cancelled = false
+    const tryFetch = () => {
+      getJackpotSlipById(slipId).then((s) => {
+        if (cancelled) return
+        setSlip(s)
+        const sels = s?.jackpot_slip_selections ?? []
+        if (sels.length === 0 && attempts < 3) {
+          attempts++
+          setTimeout(tryFetch, 1000)
+        }
+      })
+    }
+    tryFetch()
     const url = `${window.location.origin}/slip/${slipId}`
     QRCode.toDataURL(url, { width: 120, margin: 1 })
       .then(setQrDataUrl)
@@ -63,6 +76,7 @@ export function JackpotPrintReceiptModal({
       })
       setBarcodeDataUrl(canvas.toDataURL('image/png'))
     }).catch(console.error)
+    return () => { cancelled = true }
   }, [isOpen, slipId])
 
   const handlePrint = usePrint(receiptRef, {

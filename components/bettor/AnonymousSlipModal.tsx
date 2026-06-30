@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Copy, Check, Ticket } from 'lucide-react'
+import { Copy, Check, Ticket, Printer } from 'lucide-react'
+import { usePrint } from '@/lib/hooks/usePrint'
+import { toast } from 'sonner'
 import { formatETB } from '@/lib/utils/formatCurrency'
 import { cn } from '@/lib/utils'
 
@@ -38,6 +40,20 @@ export function AnonymousSlipModal({
   onOk,
 }: AnonymousSlipModalProps) {
   const [copied, setCopied] = useState(false)
+  const receiptRef = useRef<HTMLDivElement>(null)
+
+  const handlePrint = usePrint(receiptRef, {
+    documentTitle: `NILE-Bet-${slipCode}`,
+    onAfterPrint: () => toast.success('Receipt printed!'),
+    onPrintError: () => toast.error('Print failed. Check printer connection.'),
+    pageStyle: `
+      @page { size: 80mm auto; margin: 0; }
+      @media print {
+        body { margin: 0; padding: 0; }
+        .thermal-receipt { width: 80mm !important; }
+      }
+    `,
+  })
 
   const handleCopy = () => {
     navigator.clipboard.writeText(slipCode)
@@ -82,7 +98,7 @@ export function AnonymousSlipModal({
 
         {/* Receipt preview */}
         <div className="border border-dashed border-nile-blue/30 rounded-lg overflow-hidden" style={{ maxHeight: "45vh", overflowY: "auto" }}>
-          <div className="bg-white text-black font-mono text-[11px] p-4" style={{ lineHeight: '1.5' }}>
+          <div ref={receiptRef} className="thermal-receipt bg-white text-black font-mono text-[11px] p-4" style={{ lineHeight: '1.5' }}>
             {/* Header */}
             <div className="text-center border-b border-dashed border-black pb-2 mb-3">
               <div className="text-lg font-bold tracking-widest">NILE BET</div>
@@ -148,12 +164,21 @@ export function AnonymousSlipModal({
           </div>
         </div>
 
-        <button
-          onClick={handleOk}
-          className="w-full bg-gold text-charcoal py-2.5 rounded-lg text-sm font-semibold hover:bg-gold-light mt-2"
-        >
-          OK — Done
-        </button>
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={handlePrint}
+            className="flex-1 flex items-center justify-center gap-2 border border-gold/30 text-gold py-2.5 rounded-lg text-sm font-semibold hover:bg-gold/10"
+          >
+            <Printer className="w-4 h-4" />
+            Print
+          </button>
+          <button
+            onClick={handleOk}
+            className="flex-1 bg-gold text-charcoal py-2.5 rounded-lg text-sm font-semibold hover:bg-gold-light"
+          >
+            OK — Done
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   )

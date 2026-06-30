@@ -22,6 +22,7 @@ interface ThermalReceiptProps {
   maxPayout?: number
   netPayout?: number
   winningTax?: number
+  taxPercent?: number
   jackpotWinAll?: number
   jackpotMiss1?: number
   selections: ReceiptSelection[]
@@ -48,6 +49,7 @@ export const ThermalReceipt = forwardRef<
     maxPayout,
     netPayout,
     winningTax,
+    taxPercent = 15,
     jackpotWinAll,
     jackpotMiss1,
     selections,
@@ -376,12 +378,12 @@ export const ThermalReceipt = forwardRef<
               <span>{formatETB(maxPayout)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#c00' }}>
-              <span>Tax (15%):</span>
-              <span>-{formatETB(maxPayout * 0.15)}</span>
+              <span>Tax ({taxPercent}%):</span>
+              <span>-{formatETB(maxPayout * (taxPercent / 100))}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', borderTop: '1px solid #000', paddingTop: '2px', marginTop: '2px' }}>
               <span>Win All 12 (net):</span>
-              <span>{formatETB(maxPayout * 0.85)}</span>
+              <span>{formatETB(maxPayout * (1 - taxPercent / 100))}</span>
             </div>
             {jackpotMiss1 && jackpotMiss1 > 0 && (
               <>
@@ -391,12 +393,12 @@ export const ThermalReceipt = forwardRef<
                   <span>{formatETB(jackpotMiss1)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: '#c00' }}>
-                  <span>Tax (15%):</span>
-                  <span>-{formatETB(jackpotMiss1 * 0.15)}</span>
+                  <span>Tax ({taxPercent}%):</span>
+                  <span>-{formatETB(jackpotMiss1 * (taxPercent / 100))}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
                   <span>Miss 1 (net):</span>
-                  <span>{formatETB(jackpotMiss1 * 0.85)}</span>
+                  <span>{formatETB(jackpotMiss1 * (1 - taxPercent / 100))}</span>
                 </div>
               </>
             )}
@@ -412,7 +414,7 @@ export const ThermalReceipt = forwardRef<
         )}
         {!isJackpot && winningTax !== undefined && (
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#555' }}>
-            <span>Tax (15%):</span>
+            <span>Tax ({taxPercent}%):</span>
             <span>-{formatETB(winningTax)}</span>
           </div>
         )}

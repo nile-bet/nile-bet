@@ -104,6 +104,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
     maxPayout: slip.max_payout,
     netPayout: slip.net_payout,
     winningTax: slip.winning_tax,
+    taxPercent: slip.tax_percent ?? 15,
     placedAt: slip.created_at,
     isAnonymous: slip.is_anonymous,
     insuranceApplied: slip.insurance_applied,
