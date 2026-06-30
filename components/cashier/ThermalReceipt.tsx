@@ -34,7 +34,6 @@ interface ThermalReceiptProps {
   platformSlogan?: string
   isAnonymous?: boolean
   insuranceApplied?: boolean
-  cancellationDeadline?: string
 }
 
 export const ThermalReceipt = forwardRef<
@@ -60,7 +59,6 @@ export const ThermalReceipt = forwardRef<
     platformSlogan = 'Flow into Wins',
     isAnonymous = false,
     insuranceApplied = false,
-    cancellationDeadline,
   } = props
 
   const [qrDataUrl, setQrDataUrl] =
@@ -430,28 +428,6 @@ export const ThermalReceipt = forwardRef<
           </div>
         )}
       </div>
-
-      {/* Cancellation notice */}
-      {cancellationDeadline && (
-        <div
-          style={{
-            textAlign: 'center',
-            fontSize: '9px',
-            color: '#555',
-            marginTop: '4px',
-            padding: '2px',
-            border: '1px dashed #ccc',
-          }}
-        >
-          Cancel by:{' '}
-          {new Date(
-            cancellationDeadline
-          ).toLocaleTimeString('en-ET', {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </div>
-      )}
 
       {/* QR Code */}
       {qrDataUrl && (

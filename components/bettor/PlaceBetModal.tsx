@@ -136,14 +136,6 @@ export function PlaceBetModal({
             ? user.username
             : undefined,
         placedAt: new Date().toISOString(),
-        cancellationDeadline: settings
-          ?.cancellationWindowMins
-          ? new Date(
-              Date.now() +
-                settings.cancellationWindowMins *
-                  60000
-            ).toISOString()
-          : undefined,
         selections: selections.map((s) => ({
           matchName: `${s.homeTeam} vs ${s.awayTeam}`,
           marketName: s.marketName,

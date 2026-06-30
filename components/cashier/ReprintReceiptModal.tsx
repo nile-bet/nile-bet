@@ -107,7 +107,6 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
     placedAt: slip.created_at,
     isAnonymous: slip.is_anonymous,
     insuranceApplied: slip.insurance_applied,
-    cancellationDeadline: slip.cancellation_deadline,
     bettorUsername: (slip as any).bettor?.username,
     cashierUsername: (slip as any).cashier?.username,
     agentUsername: (slip as any).agent?.username,

@@ -38,7 +38,6 @@ interface PrintReceiptModalProps {
     placedAt: string
     isAnonymous?: boolean
     insuranceApplied?: boolean
-    cancellationDeadline?: string
   }
 }
 
