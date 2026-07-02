@@ -868,9 +868,7 @@ export async function getAgentReport(
   const totalCollectedSlips = allSlips.reduce((a, s) => a + (s.stake ?? 0), 0)
   const totalPaidSlips = allSlips
     .filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
-    .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied)
-      ? ((s.insurance_payout ?? 0) + (s.insurance_tax ?? 0))
-      : ((s.net_payout ?? 0) + (s.winning_tax ?? 0))), 0)
+    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
   const taxCollected = allSlips
     .filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_tax ?? 0) : (s.winning_tax ?? 0)), 0)
@@ -890,9 +888,7 @@ export async function getAgentReport(
     const date = slip.created_at.split('T')[0]
     if (!grouped[date]) grouped[date] = { date, collected: 0, paid: 0, profit: 0 }
     grouped[date].collected += slip.stake ?? 0
-    if (slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)) grouped[date].paid += (slip.status === 'near_win' || slip.insurance_applied)
-      ? ((slip.insurance_payout ?? 0) + (slip.insurance_tax ?? 0))
-      : ((slip.net_payout ?? 0) + (slip.winning_tax ?? 0))
+    if (slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)) grouped[date].paid += slip.net_payout ?? 0
     grouped[date].profit = grouped[date].collected - grouped[date].paid
   })
   allJackpotSlips.forEach((slip: any) => {
@@ -912,8 +908,8 @@ export async function getAgentReport(
     if (!c) continue
     c.slipCount += 1
     c.totalCollected += slip.stake ?? 0
-    if (slip.status === 'paid') c.totalPaid += (slip.net_payout ?? 0) + (slip.winning_tax ?? 0)
-    if (slip.status === 'near_win' && (slip as any).redeemed_at) c.totalPaid += (slip.insurance_payout ?? 0) + (slip.insurance_tax ?? 0)
+    if (slip.status === 'paid') c.totalPaid += slip.net_payout ?? 0
+    if (slip.status === 'near_win' && (slip as any).redeemed_at) c.totalPaid += slip.net_payout ?? 0
     if (slip.status === 'paid') c.taxCollected += slip.winning_tax ?? 0
     if (slip.status === 'near_win' && (slip as any).redeemed_at) c.taxCollected += slip.insurance_tax ?? 0
   }
@@ -1252,7 +1248,7 @@ export async function getAgentNetworkStats(
 
   const totalCollectedSlips = all.reduce((a, s) => a + (s.stake ?? 0), 0)
   const totalPaidOutSlips = all.filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
-    .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_payout ?? s.net_payout ?? 0) : (s.net_payout ?? 0)), 0)
+    .reduce((a, s) => a + (s.net_payout ?? 0), 0)
   const taxCollectedSlips = all.filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
     .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_tax ?? 0) : (s.winning_tax ?? 0)), 0)
   const pendingLiabilitySlips = all.filter((s) => s.status === 'pending' || s.status === 'won' || (s.status === 'near_win' && !(s as any).redeemed_at))
@@ -1264,7 +1260,7 @@ export async function getAgentNetworkStats(
   const taxCollected = taxCollectedSlips + jackpotTaxCollected
   const jackpotCollected = allJackpot.reduce((a, s) => a + (s.stake ?? 0), 0)
   const jackpotPaidOut = allJackpot.filter((s) => s.status === 'paid' || (s.status === 'near_win' && s.redeemed_at != null))
-    .reduce((a, s) => a + ((s.reward_amount ?? 0) - (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15)), 0)
+    .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
   const jackpotPendingLiability = allJackpot.filter((s) => s.status === 'pending' || s.status === 'won' || (s.status === 'near_win' && s.redeemed_at == null))
     .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
 
@@ -1295,7 +1291,7 @@ export async function getAgentNetworkStats(
   const totalPaidOut = totalPaidOutSlips + jackpotPaidOut
   const pendingLiability = pendingLiabilitySlips + jackpotPendingLiability
 
-  const grossProfit = totalCollected - totalPaidOut - taxCollected
+  const grossProfit = totalCollected - totalPaidOut
   const agentProfit = grossProfit * 0.6
   const cashierProfit = grossProfit * 0.4
 
