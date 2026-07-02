@@ -20,6 +20,7 @@ import {
   ClipboardList,
   Settings,
   ScanLine,
+  UserCheck,
 } from 'lucide-react'
 import { SidebarLayout }
   from '@/components/shared/SidebarLayout'
@@ -66,6 +67,11 @@ const adminNav: NavItem[] = [
     href: '/reports',
     label: 'Reports',
     icon: BarChart3,
+  },
+  {
+    href: '/bettor-report',
+    label: 'Bettors',
+    icon: UserCheck,
   },
   {
     href: '/broadcast',
