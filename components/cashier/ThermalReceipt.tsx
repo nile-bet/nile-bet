@@ -12,6 +12,8 @@ interface ReceiptSelection {
   marketName: string
   selection: string
   odd: number
+  leagueName?: string
+  kickOffTime?: string
 }
 
 interface ThermalReceiptProps {
@@ -327,6 +329,24 @@ export const ThermalReceipt = forwardRef<
             >
               {i + 1}. {sel.matchName}
             </div>
+            {(sel.leagueName || sel.kickOffTime) && (
+              <div
+                style={{
+                  fontSize: '8px',
+                  color: '#888',
+                  marginTop: '1px',
+                }}
+              >
+                {sel.leagueName}
+                {sel.leagueName && sel.kickOffTime ? ' \u00b7 ' : ''}
+                {sel.kickOffTime && new Date(sel.kickOffTime).toLocaleString('en-ET', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </div>
+            )}
             <div
               style={{
                 display: 'flex',
@@ -439,6 +459,16 @@ export const ThermalReceipt = forwardRef<
             marginTop: '6px',
           }}
         >
+          <div
+            style={{
+              fontSize: '8px',
+              color: '#555',
+              fontWeight: 'bold',
+              marginBottom: '3px',
+            }}
+          >
+            Valid for 15 days from creation
+          </div>
           <img
             src={qrDataUrl}
             alt="Scan to verify"

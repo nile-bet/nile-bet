@@ -154,6 +154,8 @@ export function PlaceBetModal({
         placedAt: new Date().toISOString(),
         selections: selections.map((s) => ({
           matchName: `${s.homeTeam} vs ${s.awayTeam}`,
+          leagueName: s.leagueName,
+          kickOffTime: s.kickOffTime,
           marketName: s.marketName,
           selection: s.selection,
           odd: s.odd,

@@ -118,6 +118,8 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
       marketName: sel.match_markets?.market_templates?.name ?? '',
       selection: sel.selection,
       odd: sel.odd_at_placement ?? 0,
+      leagueName: sel.matches?.leagues?.name ?? '',
+      kickOffTime: sel.matches?.kick_off_time ?? '',
     })),
   } : null
 

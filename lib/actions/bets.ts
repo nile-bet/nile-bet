@@ -415,7 +415,8 @@ export async function getSlipById(
           home_team,
           away_team,
           status,
-          kick_off_time
+          kick_off_time,
+          leagues (name)
         ),
         match_markets (
           market_templates (
