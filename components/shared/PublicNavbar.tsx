@@ -146,8 +146,8 @@ export function PublicNavbar() {
           ) : (
             <>
               {/* Balance */}
-              <div className="hidden md:flex items-center bg-gold/10 border border-gold/30 rounded-md px-2.5 py-1">
-                <span className="text-gold font-mono text-sm font-medium">
+              <div className="flex items-center bg-gold/10 border border-gold/30 rounded-md px-2 py-1">
+                <span className="text-gold font-mono text-xs md:text-sm font-medium">
                   {formatETB(
                     user?.credit_balance ?? 0
                   )}
@@ -156,7 +156,7 @@ export function PublicNavbar() {
 
               {/* Bettor Badge */}
               {isAuthenticated && (
-                <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/20 to-nile-blue/20 border border-gold/40 text-gold animate-pulse-gold">
+                <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/20 to-nile-blue/20 border border-gold/40 text-gold animate-pulse-gold">
                   ⚡ BETTOR
                 </span>
               )}

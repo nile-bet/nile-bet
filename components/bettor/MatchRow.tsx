@@ -90,13 +90,13 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
               ⭐ FEATURED
             </span>
           )}
-          <span className="text-[13px] font-semibold text-white tracking-wide">
+          <span className="text-[13px] font-semibold text-white tracking-wide truncate max-w-[180px] md:max-w-none">
             {match.home_team} <span className="text-white/30 mx-1">vs</span> {match.away_team}
           </span>
         </div>
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-[#A9B4D0] text-[11px] bg-[#172540] border border-white/10 px-2 py-0.5 rounded hover:bg-[#1A2945] transition-colors flex-shrink-0 ml-2 flex items-center gap-1"
+          className="text-[#A9B4D0] text-[11px] bg-[#172540] border border-white/10 px-2.5 py-1.5 md:py-0.5 rounded hover:bg-[#1A2945] transition-colors flex-shrink-0 ml-2 flex items-center gap-1"
         >
           +{totalMarkets} more
           {expanded
@@ -106,11 +106,19 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
         </button>
       </div>
 
-      {/* Quick odds row — 1X2 + DC + BTTS */}
-      <div
-        className="grid border-t border-[rgba(255,255,255,0.04)] mt-1"
-        style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}
-      >
+      {/* Quick odds row — mobile: 1X2 only | desktop: 1X2 + DC + BTTS */}
+      {/* Mobile: 3-col 1X2 only */}
+      <div className="grid md:hidden border-t border-[rgba(255,255,255,0.04)] mt-1"
+        style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr' }}>
+        <OddButton {...commonProps} label="1" odd={getOdd(market1x2, 'Home')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-1`} selection="Home" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
+        <div className="bg-[rgba(255,255,255,0.06)]" />
+        <OddButton {...commonProps} label="X" odd={getOdd(market1x2, 'Draw')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-x`} selection="Draw" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
+        <div className="bg-[rgba(255,255,255,0.06)]" />
+        <OddButton {...commonProps} label="2" odd={getOdd(market1x2, 'Away')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-2`} selection="Away" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
+      </div>
+      {/* Desktop: all 8 cols */}
+      <div className="hidden md:grid border-t border-[rgba(255,255,255,0.04)] mt-1"
+        style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}>
         <OddButton {...commonProps} label="1" odd={getOdd(market1x2, 'Home')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-1`} selection="Home" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
         <div className="bg-[rgba(255,255,255,0.06)]" />
         <OddButton {...commonProps} label="X" odd={getOdd(market1x2, 'Draw')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-x`} selection="Draw" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />

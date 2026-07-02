@@ -185,7 +185,7 @@ export function BetSlipSidebar({
   const hasStarted = startedSelections.length > 0
 
   return (
-    <div className="w-[240px] flex-shrink-0 bg-[#1C2155] border-l border-[rgba(212,175,55,0.15)] rounded-none flex flex-col" style={{ fontSize: "78%", position: "sticky", top: "60px" }}>
+    <div className="hidden md:flex w-[240px] flex-shrink-0 bg-[#1C2155] border-l border-[rgba(212,175,55,0.15)] rounded-none flex-col" style={{ fontSize: "78%", position: "sticky", top: "60px", height: "calc(100vh - 60px)" }}>
       {/* Header */}
       <div className="px-4 py-3 border-b border-gold/10 flex items-center justify-between">
         <h3 className="font-semibold text-white text-sm flex items-center gap-2">

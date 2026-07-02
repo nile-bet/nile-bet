@@ -183,7 +183,7 @@ export function MatchListClient({
         </div>
 
         {/* Match List */}
-        <div className="flex-1 overflow-y-auto overscroll-auto border-r border-nile-blue/20" style={{ height: "calc(100vh - 120px)", backgroundColor: "#0D1526" }}>
+        <div className="flex-1 overflow-y-auto overscroll-auto border-r border-nile-blue/20" style={{ height: "calc(100vh - 120px)", minHeight: "60vh", backgroundColor: "#0D1526" }}>
           {/* Column headers */}
           <div className="sticky top-0 z-10 bg-[#141F36] border-b border-gold/20 hidden md:flex items-stretch">
             <div className="flex-1">
