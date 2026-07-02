@@ -300,11 +300,19 @@ export default function AdminDashboard() {
             <CheckCircle className="w-5 h-5 text-nile-success mx-auto mb-1" />
             <p className="text-2xl font-bold text-nile-success font-mono">{stats.wonSlips ?? 0}</p>
             <p className="text-white/50 text-xs">Won</p>
+            <div className="mt-1 space-y-0.5">
+              <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.wonRedeemed ?? 0} redeemed</p>
+              <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.wonPending ?? 0} pending</p>
+            </div>
           </div>
           <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center">
             <span className="text-xl block mb-1">🛡️</span>
             <p className="text-2xl font-bold text-gold font-mono">{stats.insuredSlips ?? 0}</p>
             <p className="text-white/50 text-xs">Insured</p>
+            <div className="mt-1 space-y-0.5">
+              <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.insuredRedeemed ?? 0} redeemed</p>
+              <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.insuredPending ?? 0} pending</p>
+            </div>
           </div>
           <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-3 text-center">
             <XCircle className="w-5 h-5 text-nile-danger mx-auto mb-1" />

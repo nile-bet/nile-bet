@@ -107,10 +107,11 @@ export async function getCashierDashboardStats(
     ? (s.insurance_payout ?? s.net_payout ?? 0)
     : (s.net_payout ?? 0)), 0)
 
-  const pendingLiabilitySlips = pendingSlips.reduce(
-    (a, s) => a + (s.net_payout ?? 0),
-    0
-  )
+  const pendingLiabilitySlips = [
+    ...pendingSlips,
+    ...wonSlips,
+    ...nearWinSlips.filter((s: any) => !s.redeemed_at),
+  ].reduce((a, s) => a + (s.status === 'near_win' ? (s.insurance_payout ?? s.net_payout ?? 0) : (s.net_payout ?? 0)), 0)
 
   // Jackpot slips for this cashier
   let jq = supabase

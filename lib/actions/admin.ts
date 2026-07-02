@@ -62,11 +62,19 @@ export async function getPlatformStats(
 
   const { startDate, endDate } = resolveDateRange(dateFilter)
 
-  // Slips query
+  // Get cashier + agent IDs to filter slips
+  const { data: cashierAgentProfiles } = await supabase
+    .from('profiles')
+    .select('id')
+    .in('role', ['cashier', 'agent'])
+  const cashierAgentIds = (cashierAgentProfiles ?? []).map((p: any) => p.id)
+
+  // Slips query - only placed by cashiers/agents
   let slipsQuery = supabase
     .from('slips')
-    .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status')
+    .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, redeemed_at, is_insured')
 
+  if (cashierAgentIds.length > 0) slipsQuery = slipsQuery.in('placed_by', cashierAgentIds)
   if (startDate) {
     slipsQuery = slipsQuery.gte(
       'created_at', startDate
@@ -80,36 +88,35 @@ export async function getPlatformStats(
 
   const { data: slips } = await slipsQuery
 
-  // Jackpot slips (merged into combined totals)
+  // Jackpot slips - only placed by cashiers/agents
   let jpQuery = supabase
     .from('jackpot_slips')
-    .select('stake, reward_amount, reward_tax, status')
+    .select('stake, reward_amount, reward_tax, status, redeemed_at, is_insured')
 
+  if (cashierAgentIds.length > 0) jpQuery = jpQuery.in('placed_by', cashierAgentIds)
   if (startDate) jpQuery = jpQuery.gte('created_at', startDate)
   if (endDate) jpQuery = jpQuery.lte('created_at', endDate)
 
   const { data: jackpotSlips } = await jpQuery
 
   const jpWonTax = (jackpotSlips ?? [])
-    .filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
+    .filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
     .reduce((a, s) => a + (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15), 0)
 
   const jpPendingPayout = (jackpotSlips ?? [])
-    .filter((s) => s.status === 'pending')
-    .reduce((a, s) => a + (s.stake ?? 0), 0)
+    .filter((s) => s.status === 'pending' || s.status === 'won' || (s.status === 'near_win' && !(s as any).redeemed_at))
+    .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
 
   const totalRevenue =
     (slips ?? []).reduce((a, s) => a + (s.stake ?? 0), 0) +
     (jackpotSlips ?? []).reduce((a, s) => a + (s.stake ?? 0), 0)
 
   const pendingPayouts = (slips ?? [])
-    .filter((s) => s.status === 'pending')
-    .reduce(
-      (a, s) => a + (s.net_payout ?? 0), 0
-    ) + jpPendingPayout
+    .filter((s) => s.status === 'pending' || s.status === 'won' || (s.status === 'near_win' && !(s as any).redeemed_at))
+    .reduce((a, s) => a + (s.status === 'near_win' ? (s.insurance_payout ?? s.net_payout ?? 0) : (s.net_payout ?? 0)), 0) + jpPendingPayout
 
   const taxCollected = (slips ?? [])
-    .filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
+    .filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
     .reduce(
       (a, s) => a + ((s.status === 'near_win' || s.insurance_applied) ? (s.insurance_tax ?? 0) : (s.winning_tax ?? 0)), 0
     ) + jpWonTax
@@ -144,22 +151,24 @@ export async function getPlatformStats(
 
   // Calculate total paid out for gross profit
   const totalPaidOut =
-    (slips ?? []).filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
-      .reduce((a, s) => a + ((s.status === 'near_win' || s.insurance_applied)
-        ? (s.insurance_payout ?? s.net_payout ?? 0)
-        : (s.net_payout ?? 0)), 0) +
-    (jackpotSlips ?? []).filter((s) => s.status === 'won' || s.status === 'paid' || s.status === 'near_win')
-      .reduce((a, s) => a + ((s.reward_amount ?? 0) - (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15)), 0)
+    (slips ?? []).filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
+      .reduce((a, s) => a + (s.net_payout ?? 0), 0) +
+    (jackpotSlips ?? []).filter((s) => s.status === 'paid' || (s.status === 'near_win' && (s as any).redeemed_at))
+      .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
 
-  const grossProfit = totalRevenue - totalPaidOut - taxCollected
+  const grossProfit = totalRevenue - totalPaidOut
 
   // Slip status counts
   const allSlips = slips ?? []
   const allJp = jackpotSlips ?? []
-  const wonSlips = allSlips.filter(s => s.status === 'won' || s.status === 'paid').length + allJp.filter(s => s.status === 'won' || s.status === 'paid').length
+  const wonSlips = allSlips.filter(s => s.status === 'won' || s.status === 'paid').length + allJp.filter(s => s.status === 'won' || (s.status === 'paid' && !(s as any).is_insured)).length
+  const wonRedeemed = allSlips.filter(s => s.status === 'paid').length + allJp.filter(s => s.status === 'paid' && !(s as any).is_insured).length
+  const wonPending = allSlips.filter(s => s.status === 'won').length + allJp.filter(s => s.status === 'won').length
   const lostSlips = allSlips.filter(s => s.status === 'lost').length + allJp.filter(s => s.status === 'lost').length
   const pendingSlips = allSlips.filter(s => s.status === 'pending').length + allJp.filter(s => s.status === 'pending').length
-  const insuredSlips = allSlips.filter(s => s.status === 'near_win').length + allJp.filter(s => s.status === 'near_win').length
+  const insuredSlips = allSlips.filter(s => s.status === 'near_win').length + allJp.filter(s => s.status === 'near_win' || ((s as any).is_insured && s.status === 'paid')).length
+  const insuredRedeemed = allSlips.filter(s => s.status === 'near_win' && (s as any).redeemed_at).length + allJp.filter(s => (s.status === 'near_win' && (s as any).redeemed_at) || ((s as any).is_insured && s.status === 'paid')).length
+  const insuredPending = insuredSlips - insuredRedeemed
   const cancelledSlips = allSlips.filter(s => s.status === 'cancelled').length
 
   return {
@@ -169,9 +178,13 @@ export async function getPlatformStats(
     activeBettors: activeBettors ?? 0,
     totalSlipsToday: allSlips.length + allJp.length,
     wonSlips,
+    wonRedeemed,
+    wonPending,
     lostSlips,
     pendingSlips,
     insuredSlips,
+    insuredRedeemed,
+    insuredPending,
     cancelledSlips,
     pendingPayouts,
     totalCashiers: totalCashiers ?? 0,
