@@ -148,7 +148,7 @@ export async function getCashierDashboardStats(
   const jackpotInsuredPending = jackpotNearWinUnredeemed.length
   const jackpotInProgress = 0
   const jackpotCollected = allJackpot.reduce((a, s) => a + (s.stake ?? 0), 0)
-  const jackpotPaidOut = [...jackpotPaidWon, ...jackpotNearWinRedeemed, ...jackpotPaidInsuredLegacy].reduce((a: number, s: any) => a + ((s.reward_amount ?? 0) - (s.reward_tax ?? (s.reward_amount ?? 0) * 0.15)), 0)
+  const jackpotPaidOut = [...jackpotPaidWon, ...jackpotNearWinRedeemed, ...jackpotPaidInsuredLegacy].reduce((a: number, s: any) => a + (s.reward_amount ?? 0), 0)
   const jackpotPendingLiability = [...jackpotWonUnredeemed, ...jackpotNearWinUnredeemed, ...jackpotPending].reduce((a, s) => a + (s.reward_amount ?? 0), 0)
   const jackpotWonTotal = jackpotWon.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
   const jackpotInsuredTotal = jackpotNearWin.reduce((a, s) => a + (s.reward_amount ?? 0), 0)
@@ -184,7 +184,7 @@ export async function getCashierDashboardStats(
   const totalCollected = totalCollectedSlips + jackpotCollected
   const totalPaidOut = totalPaidOutSlips + jackpotPaidOut
   const actualPaidOut = totalPaidOut  // only redeemed slips (normal + insured paid)
-  const grossProfitLoss = totalCollected - totalPaidOut - taxCollected
+  const grossProfitLoss = totalCollected - totalPaidOut
   const pendingLiability = pendingLiabilitySlips + jackpotPendingLiability
 
   const walletBalance =
