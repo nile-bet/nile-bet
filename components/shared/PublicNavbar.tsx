@@ -103,30 +103,25 @@ export function PublicNavbar() {
           {!isAuthenticated ? (
             <>
               <Link href="/check-slip">
-                <Button variant="outline" size="sm" className="hidden md:flex border-gold/30 text-gold hover:bg-gold/10 text-xs">
-                  <Search className="w-3 h-3 mr-1" />
-                  Check Slip
-                </Button>
+                <button className="flex items-center gap-1.5 bg-[#1C2155] border border-gold/30 text-gold px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gold/10 transition-colors">
+                  <Search className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Check</span>
+                </button>
               </Link>
-
               <Link href="/login">
-                <Button size="sm" className="bg-gold text-charcoal hover:bg-gold-light font-semibold text-xs cursor-pointer">
-                  Login
-                </Button>
+                <button className="bg-gold text-charcoal px-4 py-2 rounded-lg text-xs font-bold hover:bg-gold-light transition-colors">
+                  LOGIN
+                </button>
               </Link>
             </>
           ) : (
             <>
               {/* Balance */}
               <div className="flex items-center bg-gold/10 border border-gold/30 rounded-md px-2 py-1">
-                <span className="text-gold font-mono text-xs md:text-sm font-medium">
+                <span className="text-gold font-mono text-xs font-semibold">
                   {formatETB(user?.credit_balance ?? 0)}
                 </span>
               </div>
-              {/* Bettor Badge — desktop only */}
-              <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/20 to-nile-blue/20 border border-gold/40 text-gold animate-pulse-gold">
-                ⚡ BETTOR
-              </span>
               <NotificationBell />
               {/* Avatar dropdown */}
               <DropdownMenu>
@@ -190,7 +185,7 @@ export function PublicNavbar() {
         </Link>
       </div>
 
-      {/* Desktop center nav — hidden on mobile */}
+      {/* Desktop center nav */}
       <div className="hidden md:flex border-t border-white/5 bg-[#0D1526] items-center px-6 gap-6 h-9">
         <button onClick={handleSportsClick} className="flex items-center gap-1.5 text-xs text-white/70 hover:text-gold transition-colors">
           <Globe className="w-3.5 h-3.5" />Sports
