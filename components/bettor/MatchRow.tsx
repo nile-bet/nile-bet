@@ -147,57 +147,31 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
           </button>
         </div>
 
-        {/* Mobile 8-col odds */}
+        {/* Mobile 8-col odds — uses OddButton for reactive selection state */}
         <div className="grid pb-2 px-1 gap-x-1"
           style={{ gridTemplateColumns: 'repeat(8, 1fr)' }}>
           {[
-            { label: '1', odd: getOdd(market1x2, 'Home'), mId: market1x2?.id ?? `${match.id}-1x2-1`, sel: 'Home', mkt: '1X2 (Full Time Result)' },
-            { label: 'X', odd: getOdd(market1x2, 'Draw'), mId: market1x2?.id ?? `${match.id}-1x2-x`, sel: 'Draw', mkt: '1X2 (Full Time Result)' },
-            { label: '2', odd: getOdd(market1x2, 'Away'), mId: market1x2?.id ?? `${match.id}-1x2-2`, sel: 'Away', mkt: '1X2 (Full Time Result)' },
-            { label: '1X', odd: getOdd(marketDC, '1X'), mId: marketDC?.id ?? `${match.id}-dc-1x`, sel: '1X', mkt: 'Double Chance' },
-            { label: '12', odd: getOdd(marketDC, '12'), mId: marketDC?.id ?? `${match.id}-dc-12`, sel: '12', mkt: 'Double Chance' },
-            { label: 'X2', odd: getOdd(marketDC, 'X2'), mId: marketDC?.id ?? `${match.id}-dc-x2`, sel: 'X2', mkt: 'Double Chance' },
-            { label: 'GG', odd: getOdd(marketBTTS, 'Yes'), mId: marketBTTS?.id ?? `${match.id}-btts-y`, sel: 'Yes', mkt: 'Both Teams to Score' },
-            { label: 'NG', odd: getOdd(marketBTTS, 'No'), mId: marketBTTS?.id ?? `${match.id}-btts-n`, sel: 'No', mkt: 'Both Teams to Score' },
-          ].map((btn) => {
-            const isSelected = useBetSlipStore.getState().isSelectionAdded(btn.mId, btn.sel)
-            return (
-              <button
-                key={btn.label}
-                onClick={() => {
-                  if (!btn.odd) return
-                  const store = useBetSlipStore.getState()
-                  if (store.isSelectionAdded(btn.mId, btn.sel)) {
-                    store.removeSelection(btn.mId, btn.sel)
-                  } else {
-                    store.addSelection({
-                      matchId: match.id,
-                      matchMarketId: btn.mId,
-                      homeTeam: match.home_team,
-                      awayTeam: match.away_team,
-                      leagueName: (match as any).league_name ?? '',
-                      countryFlag: (match as any).flag_emoji ?? '🏳️',
-                      marketName: btn.mkt,
-                      categoryName: 'MAIN',
-                      selection: btn.sel,
-                      odd: btn.odd,
-                      kickOffTime: match.kick_off_time,
-                      matchStatus: match.status,
-                    })
-                  }
-                }}
-                disabled={!btn.odd}
-                className={cn(
-                  'flex flex-col items-center justify-center py-1.5 rounded text-center transition-all',
-                  !btn.odd ? 'opacity-20 cursor-not-allowed' :
-                  isSelected ? 'bg-gold' : 'bg-[#172540] active:bg-gold/30'
-                )}
-              >
-                <span className={cn('text-[9px] font-semibold', isSelected ? 'text-charcoal' : 'text-white/50')}>{btn.label}</span>
-                <span className={cn('text-[12px] font-bold font-mono', isSelected ? 'text-charcoal' : 'text-gold')}>{btn.odd ? btn.odd.toFixed(2) : '—'}</span>
-              </button>
-            )
-          })}
+            { label: '1',  odd: getOdd(market1x2, 'Home'), mId: market1x2?.id ?? `${match.id}-1x2-1`,  sel: 'Home', mkt: '1X2 (Full Time Result)' },
+            { label: 'X',  odd: getOdd(market1x2, 'Draw'), mId: market1x2?.id ?? `${match.id}-1x2-x`,  sel: 'Draw', mkt: '1X2 (Full Time Result)' },
+            { label: '2',  odd: getOdd(market1x2, 'Away'), mId: market1x2?.id ?? `${match.id}-1x2-2`,  sel: 'Away', mkt: '1X2 (Full Time Result)' },
+            { label: '1X', odd: getOdd(marketDC, '1X'),    mId: marketDC?.id ?? `${match.id}-dc-1x`,   sel: '1X',   mkt: 'Double Chance' },
+            { label: '12', odd: getOdd(marketDC, '12'),    mId: marketDC?.id ?? `${match.id}-dc-12`,   sel: '12',   mkt: 'Double Chance' },
+            { label: 'X2', odd: getOdd(marketDC, 'X2'),   mId: marketDC?.id ?? `${match.id}-dc-x2`,   sel: 'X2',   mkt: 'Double Chance' },
+            { label: 'GG', odd: getOdd(marketBTTS, 'Yes'),mId: marketBTTS?.id ?? `${match.id}-btts-y`, sel: 'Yes',  mkt: 'Both Teams to Score' },
+            { label: 'NG', odd: getOdd(marketBTTS, 'No'), mId: marketBTTS?.id ?? `${match.id}-btts-n`, sel: 'No',   mkt: 'Both Teams to Score' },
+          ].map((btn) => (
+            <OddButton
+              key={btn.label}
+              {...commonProps}
+              label={btn.label}
+              odd={btn.odd}
+              matchMarketId={btn.mId}
+              selection={btn.sel}
+              marketName={btn.mkt}
+              categoryName="MAIN"
+              size="mobile"
+            />
+          ))}
         </div>
       </div>
 
