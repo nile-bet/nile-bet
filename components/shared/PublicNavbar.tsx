@@ -202,29 +202,6 @@ export function PublicNavbar() {
       </div>
     </nav>
 
-    {/* Mobile icon tab bar */}
-    <div className="md:hidden bg-[#0a0f1e] border-b border-white/5 flex items-center overflow-x-auto scrollbar-hide">
-      <Link href="/" className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-white/50 hover:text-gold">
-        <Home className="w-5 h-5" />
-        <span className="text-[9px] font-bold uppercase">Home</span>
-      </Link>
-      <button onClick={handleSportsClick} className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-white/50 hover:text-gold">
-        <Globe className="w-5 h-5" />
-        <span className="text-[9px] font-bold uppercase">Sport</span>
-      </button>
-      <Link href="/results" className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-white/50 hover:text-gold">
-        <BarChart2 className="w-5 h-5" />
-        <span className="text-[9px] font-bold uppercase">Results</span>
-      </Link>
-      <Link href="/weekend-jackpot" className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2">
-        <Trophy className={cn('w-5 h-5', jackpotOpen ? 'text-gold' : 'text-white/40')} />
-        <span className={cn('text-[9px] font-bold uppercase', jackpotOpen ? 'text-gold' : 'text-white/40')}>Jackpot</span>
-      </Link>
-      <Link href="/check-slip" className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-white/50 hover:text-gold">
-        <Search className="w-5 h-5" />
-        <span className="text-[9px] font-bold uppercase">Check</span>
-      </Link>
-    </div>
 
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
