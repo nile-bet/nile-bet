@@ -77,91 +77,58 @@ export function FilterBar({
   }
 
   return (
-    <div
-      className={cn(
-        'bg-slate-dark border-b border-gold/10',
-        className
-      )}
-    >
-      <div className="px-4 py-2.5 flex items-center gap-2 flex-wrap">
-        {/* Date label */}
-        <span className="text-[11px] text-gold font-extrabold tracking-widest uppercase mr-1">
-          Date
-        </span>
-
-        {/* Date filters */}
+    <div className={cn('bg-[#0D1526] border-b border-white/5', className)}>
+      {/* Row 1: Date filters */}
+      <div className="px-3 pt-2.5 pb-1 flex items-center gap-2 overflow-x-auto scrollbar-hide">
         {dateFilters.map((f) => (
           <button
             key={f.key}
-            onClick={() =>
-              handleSelect(f.key)
-            }
+            onClick={() => handleSelect(f.key)}
             className={cn(
-              'text-xs px-3 py-1.5 rounded-full border transition-all duration-150',
+              'text-sm px-5 py-2 rounded-full border font-semibold flex-shrink-0 transition-all duration-150',
               active === f.key
-                ? 'bg-gold border-gold text-charcoal font-semibold'
-                : 'border-gold/30 text-white font-semibold hover:border-gold hover:text-white'
+                ? 'bg-gold border-gold text-charcoal'
+                : 'border-white/10 bg-white/5 text-white/80 hover:border-gold/40 hover:text-white'
             )}
           >
             {f.label}
           </button>
         ))}
-
-        {/* Divider */}
-        <div className="h-5 w-px bg-gold/20 mx-1" />
-
-        {/* Time label */}
-        <span className="text-[11px] text-gold font-extrabold tracking-widest uppercase mr-1">
-          Kick-off
-        </span>
-
-        {/* Time filters */}
-        {timeFilters.map((f) => (
-          <button
-            key={f.key}
-            onClick={() =>
-              handleSelect(f.key)
-            }
-            className={cn(
-              'text-xs px-3 py-1.5 rounded-full border transition-all duration-150',
-              active === f.key
-                ? f.urgent
-                  ? 'bg-nile-orange border-nile-orange text-white font-semibold'
-                  : 'bg-gold border-gold text-charcoal font-semibold'
-                : f.urgent
-                ? 'border-nile-orange/30 text-nile-orange/70 hover:border-nile-orange/60 hover:text-nile-orange'
-                : 'border-gold/30 text-white font-semibold hover:border-gold hover:text-white'
-            )}
-          >
-            {f.label}
-          </button>
-        ))}
-
         {/* Match count */}
         {matchCount !== undefined && (
-          <span className="ml-auto bg-gold/10 border border-gold/30 text-gold text-xs rounded-full px-3 py-1">
-            {matchCount} matches
+          <span className="ml-auto flex-shrink-0 text-white/30 text-xs font-medium pr-1">
+            {matchCount}
           </span>
         )}
       </div>
 
-      {/* Active filter tag */}
-      {active && (
-        <div className="px-4 pb-2 flex items-center gap-2">
-          <span className="text-xs text-white/50">
-            Active filter:
-          </span>
-          <span className="flex items-center gap-1.5 bg-nile-blue border border-gold/30 text-gold text-xs rounded-full px-3 py-0.5">
-            {filterLabel[active]}
-            <button
-              onClick={clear}
-              className="text-gold/60 hover:text-gold ml-1"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </span>
-        </div>
-      )}
+      {/* Row 2: Time filters */}
+      <div className="px-3 pb-2.5 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+        {timeFilters.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => handleSelect(f.key)}
+            className={cn(
+              'text-xs px-4 py-1.5 rounded-full border font-semibold flex-shrink-0 transition-all duration-150',
+              active === f.key
+                ? f.urgent
+                  ? 'bg-nile-orange border-nile-orange text-white'
+                  : 'bg-gold border-gold text-charcoal'
+                : f.urgent
+                ? 'border-nile-orange/40 text-nile-orange/80 bg-nile-orange/10 hover:bg-nile-orange/20'
+                : 'border-white/10 bg-white/5 text-white/70 hover:border-gold/40 hover:text-white'
+            )}
+          >
+            {f.label}
+          </button>
+        ))}
+        {/* Clear active */}
+        {active && (
+          <button onClick={clear} className="flex-shrink-0 flex items-center gap-1 text-xs text-white/40 hover:text-white ml-1">
+            <X className="w-3 h-3" /> Clear
+          </button>
+        )}
+      </div>
     </div>
   )
 }

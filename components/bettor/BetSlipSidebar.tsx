@@ -644,24 +644,23 @@ export function BetSlipSidebar({
         }}
       />
     )}
-    {/* Mobile floating bottom bar */}
+    {/* Mobile floating Slip button — always visible when selections > 0 */}
     {selections.length > 0 && (
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1C2155] border-t border-gold/20 px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
-        <div className="flex flex-col">
-          <span className="text-[10px] text-white/50">{selections.length} selections · {calculation.totalOdds.toFixed(2)}x</span>
-          <span className="text-gold font-mono text-sm font-bold">{formatETB(calculation.netPayout)}</span>
-        </div>
+      <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
         <button
           onClick={isAuthenticated ? onPlaceBet : undefined}
-          disabled={isAuthenticated ? (!canPlace || hasStarted) : false}
-          className={cn(
-            'flex-1 py-2.5 rounded-xl text-sm font-bold transition-colors',
-            (!isAuthenticated || (canPlace && !hasStarted))
-              ? 'bg-gold text-charcoal hover:bg-gold-light'
-              : 'bg-white/10 text-white/30 cursor-not-allowed'
-          )}
+          className="flex items-center gap-2.5 bg-gold text-charcoal px-6 py-3 rounded-full shadow-2xl shadow-gold/30 font-bold text-sm hover:bg-gold-light transition-all active:scale-95"
         >
-          {hasStarted ? 'Remove started' : isAuthenticated ? 'Place Bet' : '🎟️ Place Bet'}
+          <Ticket className="w-4 h-4" />
+          Slip
+          <span className="bg-charcoal/20 text-charcoal text-xs font-bold px-2 py-0.5 rounded-full">
+            {selections.length}
+          </span>
+          {calculation.totalOdds > 0 && (
+            <span className="text-charcoal/70 text-xs font-semibold">
+              · {calculation.totalOdds.toFixed(2)}x
+            </span>
+          )}
         </button>
       </div>
     )}

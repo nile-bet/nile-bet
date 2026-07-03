@@ -90,223 +90,115 @@ export function PublicNavbar() {
 
   return (
     <>
-    <nav className="bg-slate-dark border-b border-gold/20 sticky top-0 z-50 h-14">
-      <div className="h-full px-4 md:px-6 flex items-center justify-between">
+    <nav className="bg-slate-dark border-b border-gold/20 sticky top-0 z-50">
+      {/* Top bar: Logo | Actions */}
+      <div className="h-14 px-3 md:px-6 flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/">
           <Logo size="md" showTagline />
         </Link>
 
-        {/* Center: Nav links (desktop) */}
-        <div className="hidden md:flex items-center gap-6">
-          <button
-            onClick={handleSportsClick}
-            className="flex items-center gap-1.5 text-sm text-white/70 hover:text-gold transition-colors cursor-pointer"
-          >
-            <Globe className="w-4 h-4" />
-            Sports
-          </button>
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="flex items-center gap-1.5 text-sm text-white/70 hover:text-gold transition-colors cursor-pointer"
-            >
-              <link.icon className="w-4 h-4" />
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
-          <JackpotButton />
-
           {!isAuthenticated ? (
             <>
               <Link href="/check-slip">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hidden md:flex border-gold/30 text-gold hover:bg-gold/10 text-xs"
-                >
-                  <Search className="w-3 h-3 mr-1" />
-                  Check Slip
-                </Button>
+                <button className="flex items-center gap-1.5 bg-[#1C2155] border border-gold/30 text-gold px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gold/10 transition-colors">
+                  <Search className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Check</span>
+                </button>
               </Link>
               <Link href="/login">
-                <Button
-                  size="sm"
-                  className="bg-gold text-charcoal hover:bg-gold-light font-semibold text-xs cursor-pointer"
-                >
-                  Login
-                </Button>
+                <button className="bg-gold text-charcoal px-4 py-2 rounded-lg text-xs font-bold hover:bg-gold-light transition-colors">
+                  LOGIN
+                </button>
               </Link>
             </>
           ) : (
             <>
               {/* Balance */}
               <div className="flex items-center bg-gold/10 border border-gold/30 rounded-md px-2 py-1">
-                <span className="text-gold font-mono text-xs md:text-sm font-medium">
-                  {formatETB(
-                    user?.credit_balance ?? 0
-                  )}
+                <span className="text-gold font-mono text-xs font-semibold">
+                  {formatETB(user?.credit_balance ?? 0)}
                 </span>
               </div>
-
-              {/* Bettor Badge */}
-              {isAuthenticated && (
-                <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/20 to-nile-blue/20 border border-gold/40 text-gold animate-pulse-gold">
-                  ⚡ BETTOR
-                </span>
-              )}
-              {/* Notification Bell */}
               <NotificationBell />
-
               {/* Avatar dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="w-8 h-8 rounded-full bg-nile-blue border border-gold/30 flex items-center justify-center text-gold font-bold text-sm hover:border-gold/60 transition-colors">
-                    {user?.username
-                      ?.charAt(0)
-                      .toUpperCase()}
+                    {user?.username?.charAt(0).toUpperCase()}
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="bg-slate-dark border-nile-blue/40 text-white w-48"
-                >
+                <DropdownMenuContent align="end" className="bg-slate-dark border-nile-blue/40 text-white w-48">
                   <div className="px-3 py-2 border-b border-nile-blue/20">
-                    <p className="font-semibold text-sm">
-                      @{user?.username}
-                    </p>
+                    <p className="font-semibold text-sm">@{user?.username}</p>
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/30 to-nile-blue/30 border border-gold/40 text-gold mt-1">⚡ BETTOR</span>
                   </div>
                   <DropdownMenuItem asChild>
-                    <Link
-                      href="/bettor-bets"
-                      className="cursor-pointer"
-                    >
+                    <Link href="/bettor-bets" className="cursor-pointer">
                       <span className="flex items-center gap-2 text-emerald-400 font-medium">🎟️ My Bets</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link
-                      href="/bettor-profile"
-                      className="cursor-pointer"
-                    >
+                    <Link href="/bettor-profile" className="cursor-pointer">
                       <span className="flex items-center gap-2 text-sky-400 font-medium">👤 My Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link
-                      href="/bettor-notifications"
-                      className="cursor-pointer"
-                    >
+                    <Link href="/bettor-notifications" className="cursor-pointer">
                       <span className="flex items-center gap-2 text-violet-400 font-medium">🔔 Notifications</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-nile-blue/20" />
-                  <DropdownMenuItem
-                    onClick={() => setShowLogoutConfirm(true)}
-                    className="text-nile-danger cursor-pointer focus:text-nile-danger"
-                  >
+                  <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} className="text-nile-danger cursor-pointer focus:text-nile-danger">
                     <span className="flex items-center gap-2 font-medium">🚪 Logout</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
           )}
-
-          {/* Mobile menu */}
-          <Sheet
-            open={mobileOpen}
-            onOpenChange={setMobileOpen}
-          >
-            <SheetTrigger asChild>
-              <button className="md:hidden p-2 text-white/60 hover:text-white">
-                <Menu className="w-5 h-5" />
-              </button>
-            </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="bg-slate-dark border-nile-blue/40 w-72"
-            >
-              <div className="flex flex-col gap-4 mt-6">
-                <Logo size="md" showTagline />
-                <div className="flex flex-col gap-2 mt-4">
-                  <button
-                    onClick={(e) => { handleSportsClick(e); setMobileOpen(false) }}
-                    className="flex items-center gap-2 text-base text-white/70 hover:text-gold py-2"
-                  >
-                    <Globe className="w-4 h-4" />
-                    Sports
-                  </button>
-                                    {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 text-white/70 hover:text-gold py-2 border-b border-nile-blue/20"
-                    >
-                      <link.icon className="w-4 h-4" />
-                      {link.label}
-                    </Link>
-                  ))}
-                  <Link
-                    href="/check-slip"
-                    onClick={() =>
-                      setMobileOpen(false)
-                    }
-                    className="text-white/70 hover:text-gold py-2 border-b border-nile-blue/20"
-                  >
-                    Check Slip
-                  </Link>
-                  {isAuthenticated && (
-                    <>
-                      <Link
-                        href="/bettor-bets"
-                        onClick={() =>
-                          setMobileOpen(false)
-                        }
-                        className="text-white/70 hover:text-gold py-2 border-b border-nile-blue/20"
-                      >
-                        My Bets
-                      </Link>
-                      <Link
-                        href="/bettor-profile"
-                        onClick={() =>
-                          setMobileOpen(false)
-                        }
-                        className="text-white/70 hover:text-gold py-2 border-b border-nile-blue/20"
-                      >
-                        Profile
-                      </Link>
-                      <button
-                        onClick={() => setShowLogoutConfirm(true)}
-                        className="text-nile-danger text-left py-2"
-                      >
-                        Logout
-                      </button>
-                    </>
-                  )}
-                  {!isAuthenticated && (
-                    <div className="flex gap-2 mt-2">
-                      <Link
-                        href="/login"
-                        className="flex-1"
-                      >
-                        <Button className="w-full bg-gold text-charcoal hover:bg-gold-light font-semibold cursor-pointer">
-                          Login
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
         </div>
+      </div>
+
+      {/* Bottom icon tab bar — mobile only */}
+      <div className="md:hidden border-t border-white/5 bg-[#0D1526] flex items-center overflow-x-auto scrollbar-hide">
+        <Link href="/" className="flex flex-col items-center justify-center gap-0.5 px-5 py-2 text-white/60 hover:text-gold transition-colors flex-shrink-0">
+          <Home className="w-5 h-5" />
+          <span className="text-[9px] font-bold uppercase tracking-wide">Home</span>
+        </Link>
+        <button onClick={handleSportsClick} className="flex flex-col items-center justify-center gap-0.5 px-5 py-2 text-white/60 hover:text-gold transition-colors flex-shrink-0">
+          <Globe className="w-5 h-5" />
+          <span className="text-[9px] font-bold uppercase tracking-wide">Sport</span>
+        </button>
+        <Link href="/results" className="flex flex-col items-center justify-center gap-0.5 px-5 py-2 text-white/60 hover:text-gold transition-colors flex-shrink-0">
+          <BarChart2 className="w-5 h-5" />
+          <span className="text-[9px] font-bold uppercase tracking-wide">Results</span>
+        </Link>
+        <Link href="/weekend-jackpot" className="flex flex-col items-center justify-center gap-0.5 px-5 py-2 flex-shrink-0">
+          <Trophy className={cn('w-5 h-5', jackpotOpen ? 'text-gold' : 'text-white/40')} />
+          <span className={cn('text-[9px] font-bold uppercase tracking-wide', jackpotOpen ? 'text-gold' : 'text-white/40')}>Jackpot</span>
+        </Link>
+        <Link href="/check-slip" className="flex flex-col items-center justify-center gap-0.5 px-5 py-2 text-white/60 hover:text-gold transition-colors flex-shrink-0">
+          <Search className="w-5 h-5" />
+          <span className="text-[9px] font-bold uppercase tracking-wide">Check</span>
+        </Link>
+      </div>
+
+      {/* Desktop center nav */}
+      <div className="hidden md:flex border-t border-white/5 bg-[#0D1526] items-center px-6 gap-6 h-9">
+        <button onClick={handleSportsClick} className="flex items-center gap-1.5 text-xs text-white/70 hover:text-gold transition-colors">
+          <Globe className="w-3.5 h-3.5" />Sports
+        </button>
+        {navLinks.map((link) => (
+          <Link key={link.href} href={link.href} className="flex items-center gap-1.5 text-xs text-white/70 hover:text-gold transition-colors">
+            <link.icon className="w-3.5 h-3.5" />{link.label}
+          </Link>
+        ))}
+        <Link href="/check-slip" className="flex items-center gap-1.5 text-xs text-white/70 hover:text-gold transition-colors">
+          <Search className="w-3.5 h-3.5" />Check Slip
+        </Link>
+        <JackpotButton />
       </div>
     </nav>
       {showLogoutConfirm && (

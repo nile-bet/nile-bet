@@ -106,18 +106,8 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
         </button>
       </div>
 
-      {/* Quick odds row — mobile: 1X2 only | desktop: 1X2 + DC + BTTS */}
-      {/* Mobile: 3-col 1X2 only */}
-      <div className="grid md:hidden border-t border-[rgba(255,255,255,0.04)] mt-1"
-        style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr' }}>
-        <OddButton {...commonProps} label="1" odd={getOdd(market1x2, 'Home')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-1`} selection="Home" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
-        <div className="bg-[rgba(255,255,255,0.06)]" />
-        <OddButton {...commonProps} label="X" odd={getOdd(market1x2, 'Draw')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-x`} selection="Draw" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
-        <div className="bg-[rgba(255,255,255,0.06)]" />
-        <OddButton {...commonProps} label="2" odd={getOdd(market1x2, 'Away')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-2`} selection="Away" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
-      </div>
-      {/* Desktop: all 8 cols */}
-      <div className="hidden md:grid border-t border-[rgba(255,255,255,0.04)] mt-1"
+      {/* Quick odds row — all 8 cols on all screens */}
+      <div className="grid border-t border-[rgba(255,255,255,0.04)] mt-1"
         style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}>
         <OddButton {...commonProps} label="1" odd={getOdd(market1x2, 'Home')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-1`} selection="Home" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
         <div className="bg-[rgba(255,255,255,0.06)]" />
