@@ -100,8 +100,6 @@ export function PublicNavbar() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
-          <JackpotButton />
-
           {!isAuthenticated ? (
             <>
               <Link href="/check-slip">
@@ -110,13 +108,7 @@ export function PublicNavbar() {
                   Check Slip
                 </Button>
               </Link>
-              {/* Mobile: icon-only check slip */}
-              <Link href="/check-slip" className="md:hidden">
-                <button className="flex items-center gap-1.5 bg-[#1C2155] border border-gold/30 text-gold px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gold/10 transition-colors">
-                  <Search className="w-3.5 h-3.5" />
-                  <span className="text-[11px]">Check</span>
-                </button>
-              </Link>
+
               <Link href="/login">
                 <Button size="sm" className="bg-gold text-charcoal hover:bg-gold-light font-semibold text-xs cursor-pointer">
                   Login
