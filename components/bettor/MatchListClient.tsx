@@ -1,5 +1,7 @@
 'use client'
 
+import { useBetSlipStore } from '@/lib/stores/betSlipStore'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { useState, useEffect,
   useCallback, useRef } from 'react'
 import { createClient }
@@ -41,6 +43,26 @@ interface MatchListClientProps {
   basePath?: string
   onPlaceBet?: () => void
   onSportsNavReady?: (openFn: () => void) => void
+}
+
+
+function MobileSlipButton({ onPlaceBet }: { onPlaceBet: () => void }) {
+  const { selections, calculation } = useBetSlipStore()
+  const { isAuthenticated } = useAuthStore()
+  if (selections.length === 0) return null
+  return (
+    <div className="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50">
+      <button
+        onClick={isAuthenticated ? onPlaceBet : undefined}
+        className="flex items-center gap-2 bg-gold text-charcoal px-7 py-3 rounded-full shadow-2xl shadow-gold/40 font-bold text-base hover:bg-gold-light transition-all active:scale-95"
+      >
+        🎟️ Slip
+        <span className="bg-charcoal/20 text-charcoal text-sm font-bold px-2 py-0.5 rounded-full">
+          {selections.length}
+        </span>
+      </button>
+    </div>
+  )
 }
 
 export function MatchListClient({
@@ -280,6 +302,9 @@ export function MatchListClient({
         isOpen={showPlaceBet}
         onClose={() => setShowPlaceBet(false)}
       />
+
+      {/* Mobile floating Slip button */}
+      <MobileSlipButton onPlaceBet={() => setShowPlaceBet(true)} />
     </div>
   )
 }

@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { OddButton } from './OddButton'
+import { useBetSlipStore } from '@/lib/stores/betSlipStore'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { MatchWithMarkets } from '@/types/database.types'
 
@@ -82,32 +83,29 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
         match.is_featured && 'border border-gold/30 bg-gold/5'
       )}
     >
-      {/* Match name row */}
-      <div className="flex items-center justify-between px-4 py-1.5">
+      {/* ── DESKTOP match name row ── */}
+      <div className="hidden md:flex items-center justify-between px-4 py-1.5">
         <div className="flex items-center gap-2">
           {match.is_featured && (
             <span className="text-[10px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded font-medium">
               ⭐ FEATURED
             </span>
           )}
-          <span className="text-[13px] font-semibold text-white tracking-wide truncate max-w-[180px] md:max-w-none">
+          <span className="text-[13px] font-semibold text-white tracking-wide">
             {match.home_team} <span className="text-white/30 mx-1">vs</span> {match.away_team}
           </span>
         </div>
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-[#A9B4D0] text-[11px] bg-[#172540] border border-white/10 px-2.5 py-1.5 md:py-0.5 rounded hover:bg-[#1A2945] transition-colors flex-shrink-0 ml-2 flex items-center gap-1"
+          className="text-[#A9B4D0] text-[11px] bg-[#172540] border border-white/10 px-2 py-0.5 rounded hover:bg-[#1A2945] transition-colors flex-shrink-0 ml-2 flex items-center gap-1"
         >
           +{totalMarkets} more
-          {expanded
-            ? <ChevronUp className="w-3 h-3" />
-            : <ChevronDown className="w-3 h-3" />
-          }
+          {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
         </button>
       </div>
 
-      {/* Quick odds row — all 8 cols on all screens */}
-      <div className="grid border-t border-[rgba(255,255,255,0.04)] mt-1"
+      {/* Desktop odds row */}
+      <div className="hidden md:grid border-t border-[rgba(255,255,255,0.04)] mt-1"
         style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}>
         <OddButton {...commonProps} label="1" odd={getOdd(market1x2, 'Home')} matchMarketId={market1x2?.id ?? `${match.id}-1x2-1`} selection="Home" marketName="1X2 (Full Time Result)" categoryName="MAIN" size="col" />
         <div className="bg-[rgba(255,255,255,0.06)]" />
@@ -124,6 +122,83 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
         <OddButton {...commonProps} label="Yes" odd={getOdd(marketBTTS, 'Yes')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-y`} selection="Yes" marketName="Both Teams to Score" categoryName="MAIN" size="col" />
         <div className="bg-[rgba(255,255,255,0.06)]" />
         <OddButton {...commonProps} label="No" odd={getOdd(marketBTTS, 'No')} matchMarketId={marketBTTS?.id ?? `${match.id}-btts-n`} selection="No" marketName="Both Teams to Score" categoryName="MAIN" size="col" />
+      </div>
+
+      {/* ── MOBILE layout ── */}
+      <div className="md:hidden">
+        {/* Match name + more button */}
+        <div className="flex items-center justify-between px-3 pt-2 pb-1">
+          <div className="flex-1 min-w-0">
+            {match.is_featured && (
+              <span className="text-[9px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded font-medium mr-1">
+                ⭐
+              </span>
+            )}
+            <span className="text-[15px] font-bold text-white leading-tight">
+              {match.home_team} <span className="text-white/30 text-sm">V</span> {match.away_team}
+            </span>
+          </div>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="flex-shrink-0 ml-2 bg-[#1a3a1a] border border-green-500/40 text-green-400 text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1"
+          >
+            +{totalMarkets} more
+            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
+        </div>
+
+        {/* Mobile 8-col odds */}
+        <div className="grid pb-2 px-1 gap-x-1"
+          style={{ gridTemplateColumns: 'repeat(8, 1fr)' }}>
+          {[
+            { label: '1', odd: getOdd(market1x2, 'Home'), mId: market1x2?.id ?? `${match.id}-1x2-1`, sel: 'Home', mkt: '1X2 (Full Time Result)' },
+            { label: 'X', odd: getOdd(market1x2, 'Draw'), mId: market1x2?.id ?? `${match.id}-1x2-x`, sel: 'Draw', mkt: '1X2 (Full Time Result)' },
+            { label: '2', odd: getOdd(market1x2, 'Away'), mId: market1x2?.id ?? `${match.id}-1x2-2`, sel: 'Away', mkt: '1X2 (Full Time Result)' },
+            { label: '1X', odd: getOdd(marketDC, '1X'), mId: marketDC?.id ?? `${match.id}-dc-1x`, sel: '1X', mkt: 'Double Chance' },
+            { label: '12', odd: getOdd(marketDC, '12'), mId: marketDC?.id ?? `${match.id}-dc-12`, sel: '12', mkt: 'Double Chance' },
+            { label: 'X2', odd: getOdd(marketDC, 'X2'), mId: marketDC?.id ?? `${match.id}-dc-x2`, sel: 'X2', mkt: 'Double Chance' },
+            { label: 'GG', odd: getOdd(marketBTTS, 'Yes'), mId: marketBTTS?.id ?? `${match.id}-btts-y`, sel: 'Yes', mkt: 'Both Teams to Score' },
+            { label: 'NG', odd: getOdd(marketBTTS, 'No'), mId: marketBTTS?.id ?? `${match.id}-btts-n`, sel: 'No', mkt: 'Both Teams to Score' },
+          ].map((btn) => {
+            const isSelected = useBetSlipStore.getState().isSelectionAdded(btn.mId, btn.sel)
+            return (
+              <button
+                key={btn.label}
+                onClick={() => {
+                  if (!btn.odd) return
+                  const store = useBetSlipStore.getState()
+                  if (store.isSelectionAdded(btn.mId, btn.sel)) {
+                    store.removeSelection(btn.mId, btn.sel)
+                  } else {
+                    store.addSelection({
+                      matchId: match.id,
+                      matchMarketId: btn.mId,
+                      homeTeam: match.home_team,
+                      awayTeam: match.away_team,
+                      leagueName: (match as any).league_name ?? '',
+                      countryFlag: (match as any).flag_emoji ?? '🏳️',
+                      marketName: btn.mkt,
+                      categoryName: 'MAIN',
+                      selection: btn.sel,
+                      odd: btn.odd,
+                      kickOffTime: match.kick_off_time,
+                      matchStatus: match.status,
+                    })
+                  }
+                }}
+                disabled={!btn.odd}
+                className={cn(
+                  'flex flex-col items-center justify-center py-1.5 rounded text-center transition-all',
+                  !btn.odd ? 'opacity-20 cursor-not-allowed' :
+                  isSelected ? 'bg-gold' : 'bg-[#172540] active:bg-gold/30'
+                )}
+              >
+                <span className={cn('text-[9px] font-semibold', isSelected ? 'text-charcoal' : 'text-white/50')}>{btn.label}</span>
+                <span className={cn('text-[12px] font-bold font-mono', isSelected ? 'text-charcoal' : 'text-gold')}>{btn.odd ? btn.odd.toFixed(2) : '—'}</span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Expanded markets panel */}
