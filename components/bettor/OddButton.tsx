@@ -83,30 +83,6 @@ export function OddButton({
     )
   }
 
-  if (size === 'mobile') {
-    return (
-      <button
-        onClick={handleClick}
-        disabled={isUnavailable}
-        className={cn(
-          'flex flex-col items-center justify-center py-1.5 rounded text-center transition-all',
-          isSelected
-            ? 'bg-gold cursor-pointer'
-            : isUnavailable
-            ? 'opacity-20 cursor-not-allowed bg-[#172540]'
-            : 'bg-[#172540] hover:bg-[#1e3060] cursor-pointer active:bg-gold/30'
-        )}
-      >
-        <span className={cn('text-[9px] font-semibold', isSelected ? 'text-charcoal' : 'text-white/50')}>
-          {label}
-        </span>
-        <span className={cn('text-[12px] font-bold font-mono', isSelected ? 'text-charcoal' : 'text-gold')}>
-          {odd ? odd.toFixed(2) : '—'}
-        </span>
-      </button>
-    )
-  }
-
   if (size === 'col') {
     return (
       <button
