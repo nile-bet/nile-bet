@@ -234,7 +234,7 @@ export default function AdminDashboard() {
           <StatsCard
             title="Gross Profit/Loss"
             value={formatETB(stats?.grossProfit ?? 0)}
-            subtitle="Collected - Paid - Tax"
+            subtitle="Collected - Paid Out"
             icon={TrendingUp}
             variant={(stats?.grossProfit ?? 0) >= 0 ? 'success' : 'danger'}
           />
@@ -340,7 +340,7 @@ export default function AdminDashboard() {
             <p className={cn('font-mono text-xl font-bold mt-1', (stats.grossProfit ?? 0) >= 0 ? 'text-nile-success' : 'text-nile-danger')}>
               {(stats.grossProfit ?? 0) >= 0 ? '+' : ''}{formatETB(stats.grossProfit ?? 0)}
             </p>
-            <p className="text-white/40 text-xs mt-1">Collected - Paid Out - Tax</p>
+            <p className="text-white/40 text-xs mt-1">Collected - Paid Out</p>
           </div>
           <div className="bg-nile-blue/10 border border-nile-blue/30 rounded-xl p-5">
             <p className="text-white/60 text-sm">Total Agent Share (60%)</p>

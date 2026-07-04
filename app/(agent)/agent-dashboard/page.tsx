@@ -156,7 +156,7 @@ export default function AgentDashboard() {
             <p className="text-white/40 text-xs mt-1">Available</p>
           </div>
           <StatsCard title="Total Collected" value={formatETB(stats?.totalCollected ?? 0)} subtitle="Staked by bettors" icon={DollarSign} variant="gold" />
-          <StatsCard title="Gross Profit/Loss" value={formatETB(stats?.grossProfit ?? 0)} subtitle="Collected - Paid - Tax" icon={TrendingUp} variant={(stats?.grossProfit ?? 0) >= 0 ? 'success' : 'danger'} />
+          <StatsCard title="Gross Profit/Loss" value={formatETB(stats?.grossProfit ?? 0)} subtitle="Collected - Paid Out" icon={TrendingUp} variant={(stats?.grossProfit ?? 0) >= 0 ? 'success' : 'danger'} />
           <StatsCard title="Pending Liability" value={formatETB(stats?.pendingLiability ?? 0)} subtitle="If all pending win" icon={Clock} variant={(stats?.pendingLiability ?? 0) > 0 ? 'danger' : 'default'} />
         </div>
       )}
