@@ -5,25 +5,25 @@ import { Phone } from 'lucide-react'
 export function Footer() {
   return (
     <footer className="bg-slate-dark border-t border-gold/10">
-      <div className="px-6 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="px-4 py-6 md:px-6 md:py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {/* Col 1: Brand */}
           <div>
             <Logo
               size="lg"
               showTagline
             />
-            <p className="text-sm text-white/60 mt-4 mb-3 leading-relaxed">
+            <p className="text-xs md:text-sm text-white/60 mt-3 mb-2 md:mt-4 md:mb-3 leading-relaxed">
               Premium international sports
               betting platform built for
               Ethiopians. Most competitive
               sports betting platform.
               100+ markets. 50+ leagues.
             </p>
-            <p className="text-sm text-white/70 mb-1">
+            <p className="text-xs md:text-sm text-white/70 mb-1">
               Instant payouts. Zero hassle.
             </p>
-            <p className="text-sm text-white/70 mb-4">
+            <p className="text-xs md:text-sm text-white/70 mb-3 md:mb-4">
               Your bet. Your rules. Your moment.
             </p>
             <Link href="/rules">
@@ -35,10 +35,10 @@ export function Footer() {
 
           {/* Col 2: Popular Leagues */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">
+            <h4 className="text-xs md:text-sm font-semibold text-white mb-2 md:mb-4">
               Popular Leagues
             </h4>
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-1.5 md:gap-2.5">
               {[
                 {
                   label:
@@ -73,7 +73,7 @@ export function Footer() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="text-sm text-white/60 hover:text-gold transition-colors"
+                  className="text-xs md:text-sm text-white/60 hover:text-gold transition-colors"
                 >
                   {l.label}
                 </Link>
@@ -83,10 +83,10 @@ export function Footer() {
 
           {/* Col 3: NILE Sports Betting */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">
+            <h4 className="text-xs md:text-sm font-semibold text-white mb-2 md:mb-4">
               NILE Sports Betting
             </h4>
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-1.5 md:gap-2.5">
               {[
                 { label: 'My Bets', href: '/bettor-bets' },
                 { label: 'Top-up', href: '/bettor-profile?tab=topup' },
@@ -101,7 +101,7 @@ export function Footer() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="text-sm text-white/60 hover:text-gold transition-colors"
+                  className="text-xs md:text-sm text-white/60 hover:text-gold transition-colors"
                 >
                   {l.label}
                 </Link>
@@ -111,10 +111,10 @@ export function Footer() {
 
           {/* Col 4: Company */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">
+            <h4 className="text-xs md:text-sm font-semibold text-white mb-2 md:mb-4">
               Company Information
             </h4>
-            <div className="text-sm text-white/60 leading-loose">
+            <div className="text-xs md:text-sm text-white/60 leading-relaxed md:leading-loose">
               <p>elitebet Ltd.</p>
               <p>Mail Box Office 66 95</p>
               <p>Wilton Rd London</p>
@@ -123,12 +123,12 @@ export function Footer() {
             </div>
             <div className="flex items-center gap-2 mt-3">
               <Phone className="w-3.5 h-3.5 text-gold" />
-              <span className="text-sm text-gold font-medium">
+              <span className="text-xs md:text-sm text-gold font-medium">
                 +44 7788 443322
               </span>
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-sm text-gold font-medium">
+              <span className="text-xs md:text-sm text-gold font-medium">
                 ✉ nilebetting@gmail.com
               </span>
             </div>
@@ -137,7 +137,7 @@ export function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-gold/10 py-4 px-6">
+      <div className="border-t border-gold/10 py-3 md:py-4 px-4 md:px-6">
         <p className="text-xs text-white/30 text-center">
           © 2026 NILE Bet. All rights
           reserved. Bet responsibly. 18+
