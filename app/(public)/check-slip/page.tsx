@@ -76,14 +76,14 @@ export default function CheckSlipPage() {
     <div className="min-h-screen flex flex-col">
       <PublicNavbar />
 
-      <main className="flex-1 flex flex-col items-center px-4 py-8">
+      <main className="flex-1 flex flex-col items-center px-3 md:px-4 py-4 md:py-8">
         <div className="w-full max-w-xl">
           {/* Header */}
-          <div className="text-center mb-4">
-            <div className="flex justify-center mb-2">
+          <div className="text-center mb-2 md:mb-4">
+            <div className="hidden md:flex justify-center mb-2">
               <Logo size="lg" showTagline />
             </div>
-            <h1 className="font-display text-xl font-bold text-white mb-1">
+            <h1 className="font-display text-base md:text-xl font-bold text-white mb-0.5">
               Check Your Slip
             </h1>
             <p className="text-white/40 text-xs">
@@ -93,8 +93,8 @@ export default function CheckSlipPage() {
           </div>
 
           {/* Input card */}
-          <div className="bg-slate-dark border border-gold/20 rounded-xl p-6 mb-6">
-            <label className="text-sm text-white/70 block mb-2">
+          <div className="bg-slate-dark border border-gold/20 rounded-xl p-3 md:p-6 mb-3 md:mb-6">
+            <label className="text-xs md:text-sm text-white/70 block mb-1.5 md:mb-2">
               Enter Slip ID
             </label>
             <div className="flex gap-3">
@@ -110,7 +110,7 @@ export default function CheckSlipPage() {
                 }
                 placeholder="e.g. 48392017 or JP85391421"
                 maxLength={10}
-                className="flex-1 bg-charcoal border border-gold/20 rounded-lg px-4 py-3 text-white font-mono text-center placeholder:text-white/25 placeholder:font-sans focus:outline-none focus:border-gold/50"
+                className="flex-1 bg-charcoal border border-gold/20 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-white font-mono text-center placeholder:text-white/25 placeholder:font-sans focus:outline-none focus:border-gold/50"
               />
               <button
                 onClick={handleCheck}
@@ -118,7 +118,7 @@ export default function CheckSlipPage() {
                   !slipId.trim() || loading
                 }
                 className={cn(
-                  'px-5 py-3 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2',
+                  'px-3 py-2 md:px-5 md:py-3 rounded-lg font-semibold text-xs md:text-sm transition-colors flex items-center gap-1.5 md:gap-2',
                   slipId.trim() && !loading
                     ? 'bg-gold text-charcoal hover:bg-gold-light'
                     : 'bg-white/10 text-white/30 cursor-not-allowed'
@@ -142,7 +142,7 @@ export default function CheckSlipPage() {
           )}
 
           {notFound && !loading && (
-            <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-6 text-center">
+            <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-3 md:p-6 text-center">
               <p className="text-nile-danger font-semibold">
                 ❌ Slip not found
               </p>
@@ -161,13 +161,13 @@ export default function CheckSlipPage() {
           )}
 
               {jackpotSlip && !loading && (
-                <div className="bg-slate-dark border border-gold/30 rounded-xl overflow-hidden">
+                <div className="bg-slate-dark border border-gold/30 rounded-xl overflow-hidden mt-2 md:mt-0">
                   {/* Header */}
-                  <div className="bg-gold/10 border-b border-gold/20 px-5 py-3 flex items-center justify-between">
+                  <div className="bg-gold/10 border-b border-gold/20 px-3 py-2 md:px-5 md:py-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🏆</span>
                       <div>
-                        <p className="text-gold font-bold font-mono">#{jackpotSlip.slip_id}</p>
+                        <p className="text-gold font-bold font-mono text-sm">#{jackpotSlip.slip_id}</p>
                         <p className="text-white/40 text-xs">{jackpotSlip.jackpots?.name}</p>
                       </div>
                     </div>
@@ -180,7 +180,7 @@ export default function CheckSlipPage() {
                     }`}>{jackpotSlip.status === 'paid' ? '✓ PAID' : jackpotSlip.status?.toUpperCase()}</span>
                   </div>
                   {/* Info */}
-                  <div className="px-5 py-3 grid grid-cols-2 gap-3 border-b border-nile-blue/20 text-sm">
+                  <div className="px-3 py-2 md:px-5 md:py-3 grid grid-cols-2 gap-2 md:gap-3 border-b border-nile-blue/20 text-xs md:text-sm">
                     <div>
                       <p className="text-white/40 text-xs">Bettor</p>
                       <p className="text-white font-medium">{jackpotSlip.is_anonymous ? '🔒 Anonymous' : `@${(jackpotSlip.bettor as any)?.username ?? '—'}`}</p>
@@ -213,8 +213,8 @@ export default function CheckSlipPage() {
                     </div>
                   </div>
                   {/* Picks */}
-                  <div className="px-5 py-3">
-                    <p className="text-white/50 text-xs uppercase tracking-widest mb-2 font-bold">Picks ({(jackpotSlip.jackpot_slip_selections ?? []).length}/12)</p>
+                  <div className="px-3 py-2 md:px-5 md:py-3">
+                    <p className="text-white/40 text-[10px] uppercase tracking-widest mb-1.5 font-bold">Picks ({(jackpotSlip.jackpot_slip_selections ?? []).length}/12)</p>
                     <div className="space-y-1 overflow-x-hidden">
                       {(jackpotSlip.jackpot_slip_selections ?? [])
                         .sort((a: any, b: any) => a.game_number - b.game_number)
@@ -244,11 +244,11 @@ export default function CheckSlipPage() {
 
           {/* Recent History */}
           {history.length > 0 && (
-            <div className="mt-8 bg-slate-dark border border-gold/10 rounded-xl p-4">
+            <div className="mt-4 md:mt-8 bg-slate-dark border border-gold/10 rounded-xl p-3 md:p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-gold/60" />
-                  <span className="text-sm font-semibold text-white/70">Recent Slips</span>
+                  <span className="text-xs md:text-sm font-semibold text-white/70">Recent Slips</span>
                 </div>
                 <button onClick={clearHistory} className="flex items-center gap-1 text-xs text-nile-danger/70 hover:text-nile-danger transition-colors">
                   <Trash2 className="w-3 h-3" /> Clear
@@ -257,7 +257,7 @@ export default function CheckSlipPage() {
               <div className="space-y-2">
                 {history.map(id => (
                   <button key={id} onClick={() => { setSlipId(id); handleCheck() }} className="w-full flex items-center justify-between px-3 py-2 bg-charcoal/50 hover:bg-charcoal rounded-lg border border-gold/10 hover:border-gold/30 transition-all">
-                    <span className="font-mono text-sm text-white">{id}</span>
+                    <span className="font-mono text-xs md:text-sm text-white">{id}</span>
                     <Receipt className="w-3 h-3 text-white/30" />
                   </button>
                 ))}
@@ -268,10 +268,10 @@ export default function CheckSlipPage() {
       </main>
 
           {/* Information Card */}
-          <div className="mt-6 bg-slate-dark border border-gold/15 rounded-xl p-4 md:p-6">
+          <div className="mt-4 bg-slate-dark border border-gold/15 rounded-xl p-3 md:p-6">
             <div className="flex items-center gap-2 mb-4">
               <Info className="w-5 h-5 text-gold flex-shrink-0" />
-              <h2 className="text-white font-bold text-base tracking-wide">Information</h2>
+              <h2 className="text-white font-bold text-sm md:text-base tracking-wide">Information</h2>
             </div>
             <ul className="space-y-2.5">
               {[
@@ -283,7 +283,7 @@ export default function CheckSlipPage() {
                 'For support, disputes, or payout inquiries, contact an authorized Nile Betting Shop.',
                 'Nile Betting is committed to providing secure, transparent, and reliable betting services.',
               ].map((item, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-[#A9B4D0] leading-relaxed">
+                <li key={i} className="flex items-start gap-2 text-xs md:text-sm text-[#A9B4D0] leading-relaxed">
                   <span className="text-gold mt-0.5 flex-shrink-0">•</span>
                   <span>{item}</span>
                 </li>
