@@ -356,12 +356,16 @@ export async function getAgentProfitReport(filters?: DateFilters) {
 
   // Step 3: Fetch slips placed by any of those cashiers
   const cashierIds = cashiers_.map((c) => c.id)
-  if (cashierIds.length === 0) return []
+  const allPlacerIds = [...agentIds, ...cashierIds]
+  if (allPlacerIds.length === 0) return []
+
+  const placerToAgent: Record<string, string> = { ...cashierToAgent }
+  for (const id of agentIds) placerToAgent[id] = id
 
   let query = supabase
     .from('slips')
     .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, placed_by, created_at')
-    .in('placed_by', cashierIds)
+    .in('placed_by', allPlacerIds)
     .order('created_at', { ascending: false })
     .limit(5000)
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
@@ -372,7 +376,7 @@ export async function getAgentProfitReport(filters?: DateFilters) {
   let jpQuery = supabase
     .from('jackpot_slips')
     .select('stake, reward_amount, reward_tax, status, placed_by, created_at')
-    .in('placed_by', cashierIds)
+    .in('placed_by', allPlacerIds)
     .order('created_at', { ascending: false })
     .limit(5000)
   if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
@@ -383,7 +387,7 @@ export async function getAgentProfitReport(filters?: DateFilters) {
   // Step 4: Group by agent
   const map: Record<string, any> = {}
   for (const slip of slips) {
-    const agentId = cashierToAgent[slip.placed_by ?? '']
+    const agentId = placerToAgent[slip.placed_by ?? '']
     if (!agentId) continue
     const username = agentMap[agentId] ?? 'unknown'
     if (!map[agentId]) {
@@ -401,7 +405,7 @@ export async function getAgentProfitReport(filters?: DateFilters) {
   }
 
   for (const slip of jackpotSlips) {
-    const agentId = cashierToAgent[slip.placed_by ?? '']
+    const agentId = placerToAgent[slip.placed_by ?? '']
     if (!agentId) continue
     const username = agentMap[agentId] ?? 'unknown'
     if (!map[agentId]) {
@@ -628,15 +632,16 @@ export async function getTaxReport(filters?: DateFilters) {
 
   let query = supabase
     .from('slips')
-    .select('winning_tax, net_payout, stake, status, created_at')
-    .eq('status', 'won')
+    .select('winning_tax, net_payout, stake, status, insurance_applied, insurance_payout, insurance_tax, redeemed_at, created_at')
+    .in('status', ['paid', 'near_win'])
     .order('created_at', { ascending: false })
     .limit(2000)
   if (networkIds.length > 0) query = query.in('placed_by', networkIds)
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
   if (filters?.endDate) query = query.lte('created_at', filters.endDate)
   const { data } = await query
-  const slips = data ?? []
+  // Only count slips that have actually been redeemed/paid (tax is only realized on payout)
+  const slips = (data ?? []).filter((s: any) => s.status === 'paid' || (s.status === 'near_win' && s.redeemed_at))
 
   let jpQuery = supabase
     .from('jackpot_slips')
@@ -657,10 +662,13 @@ export async function getTaxReport(filters?: DateFilters) {
     if (!map[date]) {
       map[date] = { date, winningSlips: 0, grossPayout: 0, taxAmount: 0, netPaidOut: 0 }
     }
+    const isInsured = slip.status === 'near_win' || slip.insurance_applied
+    const tax = isInsured ? (slip.insurance_tax ?? 0) : (slip.winning_tax ?? 0)
+    const net = isInsured ? (slip.insurance_payout ?? slip.net_payout ?? 0) : (slip.net_payout ?? 0)
     map[date].winningSlips += 1
-    map[date].grossPayout += (slip.net_payout ?? 0) + (slip.winning_tax ?? 0)
-    map[date].taxAmount += slip.winning_tax ?? 0
-    map[date].netPaidOut += slip.net_payout ?? 0
+    map[date].grossPayout += net + tax
+    map[date].taxAmount += tax
+    map[date].netPaidOut += net
   }
 
   for (const slip of jackpotSlips) {
@@ -713,7 +721,7 @@ export async function getJackpotProfitReport(filters?: DateFilters) {
 
   let query = supabase
     .from('jackpot_slips')
-    .select('slip_id, stake, reward_amount, status, jackpot_id, created_at, jackpots(name)')
+    .select('slip_id, stake, reward_amount, reward_tax, status, redeemed_at, jackpot_id, created_at, jackpots(name)')
     .order('created_at', { ascending: false })
     .limit(2000)
   if (networkIds.length > 0) query = query.in('placed_by', networkIds)
@@ -748,12 +756,12 @@ export async function getJackpotProfitReport(filters?: DateFilters) {
     else if (slip.status === 'lost') map[date].lost += 1
     else if (slip.status === 'pending') map[date].pending += 1
 
-    if (slip.status === 'won' || slip.status === 'near_win') {
-      const gross = slip.reward_amount ?? 0
-      const tax = gross * 0.15
-      map[date].grossPayout += gross
+    if (slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)) {
+      const net = slip.reward_amount ?? 0
+      const tax = (slip as any).reward_tax ?? net * 0.15
+      map[date].grossPayout += net + tax
       map[date].taxCollected += tax
-      map[date].netPaidOut += gross - tax
+      map[date].netPaidOut += net
     }
   }
 
