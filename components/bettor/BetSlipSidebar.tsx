@@ -648,8 +648,8 @@ export function BetSlipSidebar({
         }}
       />
     )}
-    {/* Mobile floating Slip button — always visible when selections > 0 */}
-    {selections.length > 0 && (
+    {/* Mobile floating Slip button — hidden when inside drawer (forceVisible) */}
+    {selections.length > 0 && !forceVisible && (
       <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
         <button
           onClick={isAuthenticated ? onPlaceBet : undefined}
