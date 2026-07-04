@@ -323,7 +323,7 @@ async function getCashierPlacerIds(supabase: any): Promise<string[]> {
 }
 
 export async function getAgentProfitReport(filters?: DateFilters) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // Step 1: Get all agents
   const { data: agents } = await supabase
@@ -424,7 +424,7 @@ export async function getAgentProfitReport(filters?: DateFilters) {
 }
 
 export async function getTopUsersReport(role?: string, filters?: DateFilters) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // For the cashier leaderboard, restrict the fetch to slips actually placed
   // by a cashier — otherwise agent- or bettor-placed slips could get grouped
@@ -547,7 +547,7 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
 }
 
 export async function getPlatformProfitReport(granularity?: string, filters?: DateFilters) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
   const networkIds = await getNetworkPlacerIds(supabase)
 
   let query = supabase
@@ -623,7 +623,7 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
 }
 
 export async function getTaxReport(filters?: DateFilters) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
   const networkIds = await getNetworkPlacerIds(supabase)
 
   let query = supabase
@@ -708,7 +708,7 @@ export async function getCouponHistoryByUser(
 
 // ─── JACKPOT PROFIT REPORT ────────────
 export async function getJackpotProfitReport(filters?: DateFilters) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
   const networkIds = await getNetworkPlacerIds(supabase)
 
   let query = supabase

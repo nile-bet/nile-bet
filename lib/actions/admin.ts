@@ -69,7 +69,7 @@ async function getNetworkPlacerIds(supabase: any): Promise<string[]> {
 export async function getPlatformStats(
   dateFilter: DateFilterInput = 'daily'
 ) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
 
   // Scope to the full agent + cashier network, excluding bettor self-placed bets
@@ -79,7 +79,7 @@ export async function getPlatformStats(
 
   let slipsQuery = supabase
     .from('slips')
-    .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, redeemed_at, is_insured')
+    .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, redeemed_at')
   if (networkIds.length > 0) slipsQuery = slipsQuery.in('placed_by', networkIds)
 
   if (startDate) {
@@ -209,7 +209,7 @@ export async function getPlatformStats(
 export async function getRevenueByDay(
   days: number = 30
 ) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   const start = new Date()
   start.setDate(start.getDate() - days)
@@ -281,7 +281,7 @@ export async function getRevenueByDay(
 }
 
 export async function getSlipStatusCounts() {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
   const networkIds = await getNetworkPlacerIds(supabase)
 
   let slipsQ = supabase.from('slips').select('status')
@@ -318,7 +318,7 @@ export async function getSlipStatusCounts() {
 export async function getAgentPerformance(
   dateFilter: DateFilterInput = 'daily'
 ) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   const { startDate, endDate } = resolveDateRange(dateFilter)
 
@@ -387,7 +387,7 @@ export async function getAgentPerformance(
 export async function getAdminPayoutsReport(
   dateFilter: DateFilterInput = 'daily'
 ) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
   const { startDate, endDate } = resolveDateRange(dateFilter)
   const networkIds = await getNetworkPlacerIds(supabase)
 
@@ -1220,7 +1220,7 @@ export async function changeUserPassword(
 export async function getJackpotDashboardStats(
   dateFilter: DateFilterInput = 'daily'
 ) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
   const { startDate, endDate } = resolveDateRange(dateFilter)
   const networkIds = await getNetworkPlacerIds(supabase)
 
