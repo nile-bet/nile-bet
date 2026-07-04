@@ -90,7 +90,7 @@ export function PublicNavbar() {
 
   return (
     <>
-    <nav className="bg-slate-dark border-b border-gold/20 sticky top-0 z-50 md:h-14">
+    <nav className="bg-slate-dark border-b border-gold/20 sticky top-0 z-50">
       {/* Top bar: Logo | Actions */}
       <div className="h-12 md:h-14 px-3 md:px-6 flex items-center justify-between">
         {/* Left: Logo */}
@@ -102,6 +102,9 @@ export function PublicNavbar() {
         <div className="flex items-center gap-2">
           {!isAuthenticated ? (
             <>
+              <div className="hidden md:block">
+                <JackpotButton />
+              </div>
               <Link href="/check-slip">
                 <button className="flex items-center gap-1.5 bg-[#1C2155] border border-gold/30 text-gold px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gold/10 transition-colors">
                   <Receipt className="w-3.5 h-3.5" />
@@ -116,6 +119,9 @@ export function PublicNavbar() {
             </>
           ) : (
             <>
+              <div className="hidden md:block">
+                <JackpotButton />
+              </div>
               {/* Balance */}
               <div className="hidden md:flex items-center bg-gold/10 border border-gold/30 rounded-md px-2 py-1">
                 <span className="text-gold font-mono text-xs font-semibold">
@@ -200,19 +206,18 @@ export function PublicNavbar() {
       </div>
 
       {/* Desktop center nav */}
-      <div className="hidden md:flex border-t border-white/5 bg-[#0D1526] items-center px-6 gap-6 h-9">
-        <button onClick={handleSportsClick} className="flex items-center gap-1.5 text-xs text-white/70 hover:text-gold transition-colors">
-          <Globe className="w-3.5 h-3.5" />Sports
-        </button>
-        {navLinks.map((link) => (
-          <Link key={link.href} href={link.href} className="flex items-center gap-1.5 text-xs text-white/70 hover:text-gold transition-colors">
-            <link.icon className="w-3.5 h-3.5" />{link.label}
+      <div className="hidden md:flex relative border-t border-white/5 bg-[#0D1526] items-center px-6 h-11">
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-10">
+          <Link href="/" className="flex items-center gap-2 text-sm font-medium text-white/80 hover:text-gold transition-colors">
+            <Home className="w-4 h-4" />Home
           </Link>
-        ))}
-        <Link href="/check-slip" className="flex items-center gap-1.5 text-xs text-white/70 hover:text-gold transition-colors">
-          <Receipt className="w-3.5 h-3.5" />Check Slip
-        </Link>
-        <JackpotButton />
+          <button onClick={handleSportsClick} className="flex items-center gap-2 text-sm font-medium text-white/80 hover:text-gold transition-colors">
+            <Globe className="w-4 h-4" />Sports
+          </button>
+          <Link href="/results" className="flex items-center gap-2 text-sm font-medium text-white/80 hover:text-gold transition-colors">
+            <BarChart2 className="w-4 h-4" />Results
+          </Link>
+        </div>
       </div>
     </nav>
 
