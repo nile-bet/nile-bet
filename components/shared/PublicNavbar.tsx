@@ -117,7 +117,7 @@ export function PublicNavbar() {
           ) : (
             <>
               {/* Balance */}
-              <div className="flex items-center bg-gold/10 border border-gold/30 rounded-md px-2 py-1">
+              <div className="hidden md:flex items-center bg-gold/10 border border-gold/30 rounded-md px-2 py-1">
                 <span className="text-gold font-mono text-xs font-semibold">
                   {formatETB(user?.credit_balance ?? 0)}
                 </span>
