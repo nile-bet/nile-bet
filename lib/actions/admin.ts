@@ -60,6 +60,14 @@ export async function getPlatformStats(
 ) {
   const supabase = await createClient()
 
+
+  // Get all cashier IDs platform-wide (same pattern as agent tracking its cashiers)
+  const { data: allCashiers } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('role', 'cashier')
+  const allCashierIds = (allCashiers ?? []).map((c: any) => c.id)
+
   const { startDate, endDate } = resolveDateRange(dateFilter)
 
   let slipsQuery = supabase
