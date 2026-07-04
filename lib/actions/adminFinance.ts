@@ -405,6 +405,12 @@ export async function getAgentProfitReport(filters?: DateFilters) {
 export async function getTopUsersReport(role?: string, filters?: DateFilters) {
   const supabase = await createClient()
 
+
+  // Get cashier/agent IDs for filtering
+  const { data: caProfiles } = await supabase
+    .from('profiles').select('id').in('role', ['cashier', 'agent'])
+  const caIds = (caProfiles ?? []).map((p: any) => p.id)
+
   let query = supabase
     .from('slips')
     .select('bettor_id, placed_by, stake, net_payout, insurance_applied, insurance_payout, insurance_tax, status, created_at, profiles!slips_bettor_id_fkey(username)')
