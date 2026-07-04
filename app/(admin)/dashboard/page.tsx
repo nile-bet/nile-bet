@@ -228,6 +228,7 @@ export default function AdminDashboard() {
           <StatsCard
             title="Total Collected"
             value={formatETB(stats?.totalRevenue ?? 0)}
+            subtitle="Staked by bettors"
             icon={DollarSign}
             variant="gold"
           />
@@ -245,11 +246,11 @@ export default function AdminDashboard() {
             icon={Ticket}
           />
           <StatsCard
-            title="Pending Payouts"
-            value={formatETB(stats?.pendingPayouts ?? 0)}
+            title="Pending Liability"
+            value={formatETB(stats?.pendingLiability ?? 0)}
             subtitle="If all pending win"
             icon={Clock}
-            variant={(stats?.pendingPayouts ?? 0) > 0 ? 'warning' : 'default'}
+            variant={(stats?.pendingLiability ?? 0) > 0 ? 'danger' : 'default'}
           />
         </div>
       )}

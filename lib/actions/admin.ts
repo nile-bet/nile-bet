@@ -154,6 +154,9 @@ export async function getPlatformStats(
       .reduce((a, s) => a + (s.reward_amount ?? 0), 0)
 
   const grossProfit = totalRevenue - totalPaidOut
+  const agentProfit = grossProfit * 0.6
+  const cashierProfit = grossProfit * 0.4
+  const pendingLiability = pendingPayouts
 
   // Slip status counts
   const allSlips = slips ?? []
@@ -172,6 +175,9 @@ export async function getPlatformStats(
     totalRevenue,
     totalPaidOut,
     grossProfit,
+    agentProfit,
+    cashierProfit,
+    pendingLiability,
     activeBettors: activeBettors ?? 0,
     totalSlipsToday: allSlips.length + allJp.length,
     wonSlips,
