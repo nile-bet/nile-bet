@@ -105,7 +105,7 @@ export function PublicNavbar() {
               <Link href="/check-slip">
                 <button className="flex items-center gap-1.5 bg-[#1C2155] border border-gold/30 text-gold px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gold/10 transition-colors">
                   <Receipt className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Check</span>
+                  <span>Check</span>
                 </button>
               </Link>
               <Link href="/login">
