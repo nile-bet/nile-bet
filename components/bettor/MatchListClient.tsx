@@ -385,6 +385,7 @@ export function MatchListClient({
           <BetSlipSidebar
             settings={settings}
             role="bettor"
+            forceVisible
             onPlaceBet={() => { setShowMobileSlip(false); setShowPlaceBet(true) }}
           />
         </SheetContent>
