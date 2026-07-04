@@ -62,15 +62,15 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-6 relative" style={{ background: '#0D1526' }}>
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-10 pointer-events-none"
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] rounded-full opacity-10 pointer-events-none"
         style={{ background: 'radial-gradient(circle, #FFD700 0%, transparent 70%)' }} />
 
-      <div className="w-full max-w-sm relative z-10">
+      <div className="w-full max-w-sm relative z-10 pb-6">
         <Link href="/" className="inline-flex items-center gap-2 font-bold text-sm mb-4 transition-colors" style={{ color: '#FFD700' }}>
           <ArrowLeft className="w-4 h-4" />
           Back to Betting
         </Link>
-        <div className="rounded-2xl p-7" style={{
+        <div className="rounded-2xl p-5 md:p-7" style={{
           background: '#1A1F4D',
           border: '1px solid rgba(255,255,255,0.10)',
           boxShadow: '0 25px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)'

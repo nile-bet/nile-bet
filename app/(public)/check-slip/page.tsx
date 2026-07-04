@@ -215,7 +215,7 @@ export default function CheckSlipPage() {
                   {/* Picks */}
                   <div className="px-5 py-3">
                     <p className="text-white/50 text-xs uppercase tracking-widest mb-2 font-bold">Picks ({(jackpotSlip.jackpot_slip_selections ?? []).length}/12)</p>
-                    <div className="space-y-1">
+                    <div className="space-y-1 overflow-x-hidden">
                       {(jackpotSlip.jackpot_slip_selections ?? [])
                         .sort((a: any, b: any) => a.game_number - b.game_number)
                         .map((sel: any) => {
@@ -227,9 +227,9 @@ export default function CheckSlipPage() {
                           return (
                             <div key={sel.id} className="flex items-center justify-between px-3 py-1.5 rounded-lg text-xs border"
                               style={{ background: correct ? 'rgba(74,222,128,0.06)' : wrong ? 'rgba(239,68,68,0.06)' : 'rgba(255,255,255,0.02)', borderColor: correct ? 'rgba(74,222,128,0.2)' : wrong ? 'rgba(239,68,68,0.2)' : 'rgba(37,46,109,0.4)' }}>
-                              <span className="text-white/40">
-                                <span className="font-mono text-gold/50 mr-2">G{sel.game_number}</span>
-                                {match?.home_team ?? '—'} v {match?.away_team ?? '—'}
+                              <span className="text-white/40 truncate flex-1 min-w-0">
+                                <span className="font-mono text-gold/50 mr-1.5">G{sel.game_number}</span>
+                                <span className="text-xs">{match?.home_team ?? '—'} v {match?.away_team ?? '—'}</span>
                               </span>
                               <span className={`font-black px-2 py-0.5 rounded text-sm ${correct ? 'text-green-400 bg-green-400/15' : wrong ? 'text-red-400 bg-red-400/15' : 'text-gold bg-gold/15'}`}>
                                 {pick}{correct ? ' ✓' : wrong ? ' ✗' : ''}
@@ -268,7 +268,7 @@ export default function CheckSlipPage() {
       </main>
 
           {/* Information Card */}
-          <div className="mt-8 bg-slate-dark border border-gold/15 rounded-xl p-6 w-full max-w-xl mx-auto">
+          <div className="mt-6 bg-slate-dark border border-gold/15 rounded-xl p-4 md:p-6">
             <div className="flex items-center gap-2 mb-4">
               <Info className="w-5 h-5 text-gold flex-shrink-0" />
               <h2 className="text-white font-bold text-base tracking-wide">Information</h2>

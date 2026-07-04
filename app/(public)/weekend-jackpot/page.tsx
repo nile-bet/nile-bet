@@ -34,7 +34,7 @@ export default async function JackpotPage() {
       <main className="flex-1">
         {/* Hero banner */}
         <div
-          className="relative py-8 px-4 text-center overflow-hidden"
+          className="relative py-6 px-4 text-center overflow-hidden"
           style={{
             background:
               'linear-gradient(135deg, #1A1A2E 0%, #1B3A6B 50%, #C9A84C20 100%)',
@@ -78,7 +78,7 @@ export default async function JackpotPage() {
                   <p className="text-white/50 text-xs uppercase tracking-widest mb-1">
                     Win All 12
                   </p>
-                  <p className="text-gold font-mono text-2xl font-bold">
+                  <p className="text-gold font-mono text-xl md:text-2xl font-bold">
                     {formatETB(
                       jackpot.win_all_reward
                     )}
@@ -91,7 +91,7 @@ export default async function JackpotPage() {
                   <p className="text-white/50 text-xs uppercase tracking-widest mb-1">
                     Miss 1
                   </p>
-                  <p className="text-gold/70 font-mono text-2xl font-bold">
+                  <p className="text-gold/70 font-mono text-xl md:text-2xl font-bold">
                     {formatETB(
                       jackpot.near_win_reward
                     )}
@@ -104,7 +104,7 @@ export default async function JackpotPage() {
                   <p className="text-white/50 text-xs uppercase tracking-widest mb-1">
                     Entry Fee
                   </p>
-                  <p className="text-white font-mono text-2xl font-bold">
+                  <p className="text-white font-mono text-xl md:text-2xl font-bold">
                     {formatETB(
                       jackpot.fixed_stake
                     )}
@@ -121,7 +121,7 @@ export default async function JackpotPage() {
         </div>
 
         {/* Main content */}
-        <div className="max-w-2xl mx-auto px-4 py-6">
+        <div className="max-w-2xl mx-auto px-3 md:px-4 py-4 md:py-6">
           <Suspense
             fallback={
               <div className="flex justify-center py-12">

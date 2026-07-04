@@ -184,7 +184,7 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
         </div>
       )}
 
-      <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         {/* LEFT: Match List */}
         <div className="flex-1 min-w-0 space-y-4">
           {/* Jackpot info bar */}
@@ -311,9 +311,9 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
                       <div className="px-3 py-2.5">
                         {/* Team names */}
                         <div className="flex items-center justify-between mb-2.5">
-                          <span className="text-white font-semibold text-sm flex-1">{match.home_team}</span>
+                          <span className="text-white font-semibold text-sm flex-1 truncate">{match.home_team}</span>
                           <span className="text-white/25 text-xs mx-2 flex-shrink-0">vs</span>
-                          <span className="text-white font-semibold text-sm flex-1 text-right">{match.away_team}</span>
+                          <span className="text-white font-semibold text-sm flex-1 text-right truncate">{match.away_team}</span>
                         </div>
                         {/* Odds buttons */}
                         <div className="grid grid-cols-3 gap-1.5">
