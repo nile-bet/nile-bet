@@ -62,14 +62,6 @@ export async function getPlatformStats(
 
   const { startDate, endDate } = resolveDateRange(dateFilter)
 
-  // Get cashier + agent IDs to filter slips
-  const { data: cashierAgentProfiles } = await supabase
-    .from('profiles')
-    .select('id')
-    .in('role', ['cashier', 'agent'])
-  const cashierAgentIds = (cashierAgentProfiles ?? []).map((p: any) => p.id)
-
-  // Slips query - only placed by cashiers/agents
   let slipsQuery = supabase
     .from('slips')
     .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, redeemed_at, is_insured')
@@ -88,12 +80,10 @@ export async function getPlatformStats(
 
   const { data: slips } = await slipsQuery
 
-  // Jackpot slips - only placed by cashiers/agents
   let jpQuery = supabase
     .from('jackpot_slips')
     .select('stake, reward_amount, reward_tax, status, redeemed_at, is_insured')
 
-  if (cashierAgentIds.length > 0) jpQuery = jpQuery.in('placed_by', cashierAgentIds)
   if (startDate) jpQuery = jpQuery.gte('created_at', startDate)
   if (endDate) jpQuery = jpQuery.lte('created_at', endDate)
 
