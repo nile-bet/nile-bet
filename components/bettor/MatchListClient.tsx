@@ -46,22 +46,90 @@ interface MatchListClientProps {
 }
 
 
-function MobileSlipButton({ onPlaceBet }: { onPlaceBet: () => void }) {
-  const { selections, calculation } = useBetSlipStore()
+function MobileSlipButton({ onPlaceBet, settings }: { onPlaceBet: () => void; settings: any }) {
+  const { selections, stake, setStake, clearSlip } = useBetSlipStore()
   const { isAuthenticated } = useAuthStore()
+  const [generating, setGenerating] = useState(false)
+  const [slipData, setSlipData] = useState<any>(null)
+  const [showModal, setShowModal] = useState(false)
+
   if (selections.length === 0) return null
+
+  const handleClick = async () => {
+    if (isAuthenticated) { onPlaceBet(); return }
+    // Anonymous: generate slip code
+    setGenerating(true)
+    try {
+      const res = await fetch('/api/anonymous-slip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selections, stake }),
+      })
+      const result = await res.json()
+      if (result.success && result.slipCode) {
+        const totalOdds = selections.reduce((a: number, s: any) => a * s.odd, 1)
+        const maxPayout = stake * totalOdds
+        const taxRate = (settings?.winningTaxPercent ?? 15) / 100
+        const winningTax = maxPayout * taxRate
+        setSlipData({
+          slipCode: result.slipCode,
+          stake,
+          totalOdds,
+          maxPayout,
+          winningTax,
+          netPayout: maxPayout - winningTax,
+          selections: selections.map((s: any) => ({
+            homeTeam: s.homeTeam,
+            awayTeam: s.awayTeam,
+            marketName: s.marketName,
+            selection: s.selection,
+            odd: s.odd,
+          }))
+        })
+        setShowModal(true)
+      } else {
+        alert(result.error ?? 'Failed to generate slip')
+      }
+    } catch (e) {
+      alert('Error: ' + String(e))
+    }
+    setGenerating(false)
+  }
+
   return (
-    <div className="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50">
-      <button
-        onClick={isAuthenticated ? onPlaceBet : undefined}
-        className="flex items-center gap-2 bg-gold text-charcoal px-7 py-3 rounded-full shadow-2xl shadow-gold/40 font-bold text-base hover:bg-gold-light transition-all active:scale-95"
-      >
-        🎟️ Slip
-        <span className="bg-charcoal/20 text-charcoal text-sm font-bold px-2 py-0.5 rounded-full">
-          {selections.length}
-        </span>
-      </button>
-    </div>
+    <>
+      <div className="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+        <button
+          onClick={handleClick}
+          disabled={generating}
+          className="pointer-events-auto flex items-center gap-2 bg-gold text-charcoal pl-4 pr-3 py-2.5 rounded-full shadow-2xl shadow-gold/40 font-bold text-sm hover:bg-gold-light transition-all active:scale-95 whitespace-nowrap"
+        >
+          {generating ? '⏳ Generating...' : '🎟️ Slip'}
+          <span className="bg-charcoal/25 text-charcoal text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full">
+            {selections.length}
+          </span>
+        </button>
+      </div>
+      {slipData && (
+        <AnonymousSlipModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          slipCode={slipData.slipCode}
+          stake={slipData.stake}
+          totalOdds={slipData.totalOdds}
+          maxPayout={slipData.maxPayout}
+          winningTax={slipData.winningTax}
+          netPayout={slipData.netPayout}
+          selections={slipData.selections}
+          onOk={() => {
+            clearSlip()
+            setStake(0)
+            setSlipData(null)
+            setShowModal(false)
+          }}
+        />
+      )}
+    </>
   )
 }
 
@@ -304,7 +372,7 @@ export function MatchListClient({
       />
 
       {/* Mobile floating Slip button */}
-      <MobileSlipButton onPlaceBet={() => setShowPlaceBet(true)} />
+      <MobileSlipButton onPlaceBet={() => setShowPlaceBet(true)} settings={settings} />
     </div>
   )
 }
