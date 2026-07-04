@@ -118,7 +118,7 @@ export default function AgentDashboard() {
   const isLowBalance = (stats?.myBalance ?? 0) < 1000
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 md:p-6 space-y-3 md:space-y-6">
       {/* Low balance alert */}
       {!loading && isLowBalance && (
         <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-4 flex items-center justify-between">
@@ -147,12 +147,12 @@ export default function AgentDashboard() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{[...Array(4)].map((_,i) => <SkeletonStatCard key={i} />)}</div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-slate-dark border border-gold/30 rounded-xl p-5">
+          <div className="bg-slate-dark border border-gold/30 rounded-xl p-3 md:p-5">
             <div className="flex justify-between items-start mb-2">
-              <p className="text-white/60 text-sm">My Balance</p>
+              <p className="text-white/60 text-xs md:text-sm">My Balance</p>
               <div className="p-2 bg-gold/10 rounded-lg"><Wallet className="w-5 h-5 text-gold" /></div>
             </div>
-            <p className="text-gold font-mono text-2xl font-bold">{formatETB(stats?.myBalance ?? 0)}</p>
+            <p className="text-gold font-mono text-lg md:text-2xl font-bold">{formatETB(stats?.myBalance ?? 0)}</p>
             <p className="text-white/40 text-xs mt-1">Available</p>
           </div>
           <StatsCard title="Total Collected" value={formatETB(stats?.totalCollected ?? 0)} subtitle="Staked by bettors" icon={DollarSign} variant="gold" />
@@ -163,40 +163,40 @@ export default function AgentDashboard() {
 
       {/* ── ROW 2: 6 Slip Status Mini Cards ── */}
       {!loading && stats && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div className="bg-slate-dark border border-nile-blue/40 rounded-xl p-3 text-center">
+        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-1.5 md:gap-3">
+          <div className="bg-slate-dark border border-nile-blue/40 rounded-xl p-2 md:p-3 text-center">
             <Ticket className="w-5 h-5 text-white/50 mx-auto mb-1" />
-            <p className="text-2xl font-bold text-white font-mono">{stats.totalSlips}</p>
+            <p className="text-xl md:text-2xl font-bold text-white font-mono">{stats.totalSlips}</p>
             <p className="text-white/50 text-xs">Total</p>
             <p className="text-white/25 text-[10px]">{stats.regularSlips ?? 0} reg · {stats.jackpotSlipsCount ?? 0} jp</p>
           </div>
-          <div className="bg-nile-success/10 border border-nile-success/30 rounded-xl p-3 text-center">
+          <div className="bg-nile-success/10 border border-nile-success/30 rounded-xl p-2 md:p-3 text-center">
             <CheckCircle className="w-5 h-5 text-nile-success mx-auto mb-1" />
-            <p className="text-2xl font-bold text-nile-success font-mono">{stats.wonSlips}</p>
+            <p className="text-xl md:text-2xl font-bold text-nile-success font-mono">{stats.wonSlips}</p>
             <p className="text-white/50 text-xs">Won</p>
             <div className="mt-1 space-y-0.5">
               <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.wonRedeemed ?? 0} redeemed</p>
               <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.wonPending ?? 0} pending</p>
             </div>
           </div>
-          <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center">
+          <div className="bg-gold/10 border border-gold/30 rounded-xl p-2 md:p-3 text-center">
             <span className="text-xl block mb-1">🛡️</span>
-            <p className="text-2xl font-bold text-gold font-mono">{stats.insuredSlips}</p>
+            <p className="text-xl md:text-2xl font-bold text-gold font-mono">{stats.insuredSlips}</p>
             <p className="text-white/50 text-xs">Insured</p>
             <div className="mt-1 space-y-0.5">
               <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.insuredRedeemed ?? 0} redeemed</p>
               <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.insuredPending ?? 0} pending</p>
             </div>
           </div>
-          <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-3 text-center">
+          <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-2 md:p-3 text-center">
             <XCircle className="w-5 h-5 text-nile-danger mx-auto mb-1" />
-            <p className="text-2xl font-bold text-nile-danger font-mono">{stats.lostSlips}</p>
+            <p className="text-xl md:text-2xl font-bold text-nile-danger font-mono">{stats.lostSlips}</p>
             <p className="text-white/50 text-xs">Lost</p>
             <p className="text-white/25 text-[10px]">{stats.lostRegular ?? 0} reg · {stats.lostJackpot ?? 0} jp</p>
           </div>
-          <div className="bg-nile-blue/20 border border-nile-blue/30 rounded-xl p-3 text-center">
+          <div className="bg-nile-blue/20 border border-nile-blue/30 rounded-xl p-2 md:p-3 text-center">
             <Clock className="w-5 h-5 text-gold mx-auto mb-1" />
-            <p className="text-2xl font-bold text-gold font-mono">{stats.pendingSlips}</p>
+            <p className="text-xl md:text-2xl font-bold text-gold font-mono">{stats.pendingSlips}</p>
             <p className="text-white/50 text-xs">Pending</p>
             <p className="text-white/25 text-[10px]">{stats.pendingRegular ?? 0} reg · {stats.pendingJackpot ?? 0} jp</p>
           </div>

@@ -192,7 +192,7 @@ export default function AgentCreditsPage() {
   ]
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 md:p-6 space-y-3 md:space-y-6">
       <h1 className="font-display text-xl md:text-2xl font-bold text-white">
         Credits
       </h1>
@@ -250,7 +250,7 @@ export default function AgentCreditsPage() {
       {activeTab === 'request' && (
         <div className="space-y-6">
           {/* Request form */}
-          <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5 space-y-4">
+          <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-3 md:p-5 space-y-3 md:space-y-4">
             <h2 className="font-semibold text-white">
               Request Credits from Admin
             </h2>
@@ -419,7 +419,7 @@ export default function AgentCreditsPage() {
         )}
 
       {activeTab === 'history' && (
-        <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5 space-y-4">
+        <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-3 md:p-5 space-y-3 md:space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <h3 className="text-white font-semibold">Credit History</h3>
             <span className="text-white/40 text-xs">{history.length} records</span>

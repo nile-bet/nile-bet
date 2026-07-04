@@ -100,7 +100,7 @@ export default function AgentReportsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 md:p-6 space-y-3 md:space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-xl md:text-2xl font-bold text-white">
           My Reports
@@ -171,7 +171,7 @@ export default function AgentReportsPage() {
           </div>
 
           {/* Chart */}
-          <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
+          <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-3 md:p-5">
             <h3 className="font-semibold text-white mb-4">
               Revenue Trend
             </h3>

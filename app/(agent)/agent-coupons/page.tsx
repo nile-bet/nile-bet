@@ -94,7 +94,7 @@ export default function AgentCouponsPage() {
       </div>
 
       {tab === 'redeem' && (
-        <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5 space-y-4">
+        <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-3 md:p-5 space-y-3 md:space-y-4">
           <h2 className="font-semibold text-white">Enter Coupon Code</h2>
           <div className="flex gap-3">
             <input type="text" value={code}

@@ -158,7 +158,7 @@ export function SidebarLayout({
             onOpenChange={setMobileOpen}
           >
             <SheetTrigger asChild>
-              <button className="p-3 rounded-full shadow-lg shadow-gold/30 text-charcoal font-bold" style={{background: "linear-gradient(135deg, #f0c040 0%, #d4af37 100%)"}}>
+              <button className="p-2.5 rounded-full shadow-lg shadow-gold/30 text-charcoal font-bold" style={{background: "linear-gradient(135deg, #f0c040 0%, #d4af37 100%)"}}>
                 <Menu className="w-5 h-5" />
               </button>
             </SheetTrigger>
