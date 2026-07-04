@@ -17,6 +17,7 @@ import { PlaceBetModal }
   from './PlaceBetModal'
 import { MatchRow } from './MatchRow'
 import { AnonymousSlipModal } from './AnonymousSlipModal'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { EmptyState }
   from '@/components/shared/EmptyState'
 import { SkeletonMatchRow }
@@ -47,7 +48,7 @@ interface MatchListClientProps {
 }
 
 
-function MobileSlipButton({ onPlaceBet, settings }: { onPlaceBet: () => void; settings: any }) {
+function MobileSlipButton({ onPlaceBet, settings, onOpen }: { onPlaceBet: () => void; settings: any; onOpen: () => void }) {
   const { selections, stake, setStake, clearSlip } = useBetSlipStore()
   const { isAuthenticated } = useAuthStore()
   const [generating, setGenerating] = useState(false)
@@ -57,7 +58,9 @@ function MobileSlipButton({ onPlaceBet, settings }: { onPlaceBet: () => void; se
   if (selections.length === 0) return null
 
   const handleClick = async () => {
-    if (isAuthenticated) { onPlaceBet(); return }
+    // Always open the slip drawer first
+    onOpen()
+    return
     // Anonymous: generate slip code
     setGenerating(true)
     try {
@@ -152,6 +155,7 @@ export function MatchListClient({
     useState<FilterType | null>(null)
   const [showPlaceBet, setShowPlaceBet] =
     useState(false)
+  const [showMobileSlip, setShowMobileSlip] = useState(false)
   const openCountriesPanelRef = useRef<(() => void) | null>(null)
   const supabase = createClient()
 
@@ -373,7 +377,18 @@ export function MatchListClient({
       />
 
       {/* Mobile floating Slip button */}
-      <MobileSlipButton onPlaceBet={() => setShowPlaceBet(true)} settings={settings} />
+      <MobileSlipButton onPlaceBet={() => setShowPlaceBet(true)} settings={settings} onOpen={() => setShowMobileSlip(true)} />
+
+      {/* Mobile slip sidebar drawer */}
+      <Sheet open={showMobileSlip} onOpenChange={setShowMobileSlip}>
+        <SheetContent side="right" className="w-full max-w-[320px] p-0 bg-[#1C2155] border-l border-gold/20">
+          <BetSlipSidebar
+            settings={settings}
+            role="bettor"
+            onPlaceBet={() => { setShowMobileSlip(false); setShowPlaceBet(true) }}
+          />
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
