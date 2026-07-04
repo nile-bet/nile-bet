@@ -104,7 +104,7 @@ export function PublicNavbar() {
             <>
               <Link href="/check-slip">
                 <button className="flex items-center gap-1.5 bg-[#1C2155] border border-gold/30 text-gold px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gold/10 transition-colors">
-                  <Search className="w-3.5 h-3.5" />
+                  <Receipt className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Check</span>
                 </button>
               </Link>
@@ -194,7 +194,7 @@ export function PublicNavbar() {
           <span className={cn('text-[9px] font-bold uppercase tracking-wide', jackpotOpen ? 'text-gold' : 'text-white/40')}>Jackpot</span>
         </Link>
         <Link href="/check-slip" className="flex flex-col items-center justify-center gap-0.5 px-5 py-2 text-white/60 hover:text-gold transition-colors flex-shrink-0">
-          <Search className="w-5 h-5" />
+          <Receipt className="w-5 h-5" />
           <span className="text-[9px] font-bold uppercase tracking-wide">Check</span>
         </Link>
       </div>
