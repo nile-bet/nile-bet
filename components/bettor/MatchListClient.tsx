@@ -14,6 +14,7 @@ import { LeagueSidebar }
 import { BetSlipSidebar }
   from './BetSlipSidebar'
 import { PlaceBetModal }
+import { AnonymousSlipModal } from './AnonymousSlipModal'
   from './PlaceBetModal'
 import { MatchRow } from './MatchRow'
 import { EmptyState }
