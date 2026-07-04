@@ -73,9 +73,9 @@ export default function AgentCouponsPage() {
     <div className="p-3 md:p-6 max-w-3xl space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-xl md:text-2xl font-bold text-white">Coupons</h1>
-        <div className="bg-slate-dark border border-gold/30 rounded-lg px-4 py-2 flex items-center gap-2">
-          <span className="text-white/60 text-xs">Balance:</span>
-          <span className="text-gold font-mono font-bold">{formatETB(user?.credit_balance ?? 0)}</span>
+        <div className="bg-slate-dark border border-gold/30 rounded-lg px-2.5 py-1.5 md:px-4 md:py-2 flex items-center gap-1.5">
+          <span className="text-white/60 text-[10px] md:text-xs">Bal:</span>
+          <span className="text-gold font-mono font-bold text-xs md:text-sm">{formatETB(user?.credit_balance ?? 0)}</span>
         </div>
       </div>
 
@@ -85,10 +85,10 @@ export default function AgentCouponsPage() {
           { key: 'history', label: 'History', icon: History },
         ] as { key: Tab; label: string; icon: any }[]).map(({ key, label, icon: Icon }) => (
           <button key={key} onClick={() => setTab(key)}
-            className={cn('flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors',
+            className={cn('flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium border transition-colors',
               tab === key ? 'bg-gold/20 border-gold/50 text-gold' : 'border-nile-blue/30 text-white/50 hover:text-white'
             )}>
-            <Icon className="w-4 h-4" />{label}
+            <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" /><span className="hidden sm:inline">{label}</span><span className="sm:hidden">{key === "redeem" ? "Redeem" : "History"}</span>
           </button>
         ))}
       </div>
@@ -101,10 +101,10 @@ export default function AgentCouponsPage() {
               onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
               onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
               placeholder="6-digit code" maxLength={6}
-              className="w-48 bg-charcoal border border-gold/30 rounded-lg px-4 py-3 text-gold font-mono text-xl text-center focus:outline-none tracking-widest"
+              className="w-32 md:w-48 bg-charcoal border border-gold/30 rounded-lg px-2 py-2 md:px-4 md:py-3 text-gold font-mono text-lg md:text-xl text-center focus:outline-none tracking-widest"
             />
             <button onClick={handleLookup} disabled={code.length !== 6 || loading}
-              className={cn('px-6 py-3 rounded-lg font-semibold text-sm flex-1',
+              className={cn('px-3 py-2 md:px-6 md:py-3 rounded-lg font-semibold text-xs md:text-sm flex-1',
                 code.length === 6 && !loading ? 'bg-gold text-charcoal hover:bg-gold-light' : 'bg-white/10 text-white/30 cursor-not-allowed'
               )}>
               {loading ? 'Searching...' : 'Look Up'}
@@ -112,10 +112,10 @@ export default function AgentCouponsPage() {
           </div>
           {error && <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-3"><p className="text-nile-danger text-sm">❌ {error}</p></div>}
           {lookedUp && (
-            <div className="bg-nile-blue/20 border border-gold/30 rounded-xl p-4 space-y-3">
+            <div className="bg-nile-blue/20 border border-gold/30 rounded-xl p-3 md:p-4 space-y-2 md:space-y-3">
               <div>
                 <p className="text-white font-semibold">@{lookedUp.bettor?.username}</p>
-                <p className="text-gold font-mono text-2xl font-bold mt-1">{formatETB(lookedUp.amount)}</p>
+                <p className="text-gold font-mono text-xl md:text-2xl font-bold mt-0.5">{formatETB(lookedUp.amount)}</p>
                 <div className="flex gap-3 mt-2 text-xs">
                   <span className="bg-nile-blue/40 text-nile-blue-light px-2 py-0.5 rounded capitalize">{lookedUp.type}</span>
                   <span className="text-nile-orange">Expires: {formatCountdown(lookedUp.expires_at)}</span>
@@ -171,7 +171,7 @@ export default function AgentCouponsPage() {
                 )}>{t === 'all' ? 'All Types' : t}</button>
             ))}
           </div>
-          <div className="bg-slate-dark border border-nile-blue/30 rounded-xl overflow-hidden">
+          <div className="bg-slate-dark border border-nile-blue/30 rounded-xl overflow-x-auto">
             {historyLoading ? (
               <div className="py-12 text-center text-white/40 text-sm">Loading...</div>
             ) : coupons.length === 0 ? (
@@ -179,26 +179,26 @@ export default function AgentCouponsPage() {
             ) : (
               <table className="w-full">
                 <thead><tr className="border-b border-nile-blue/20">
-                  <th className="text-left text-[11px] text-white/40 font-medium px-4 py-3 uppercase">Code</th>
-                  <th className="text-left text-[11px] text-white/40 font-medium px-4 py-3 uppercase">Bettor</th>
-                  <th className="text-left text-[11px] text-white/40 font-medium px-4 py-3 uppercase">Type</th>
-                  <th className="text-right text-[11px] text-white/40 font-medium px-4 py-3 uppercase">Amount</th>
-                  <th className="text-center text-[11px] text-white/40 font-medium px-4 py-3 uppercase">Status</th>
-                  <th className="text-left text-[11px] text-white/40 font-medium px-4 py-3 uppercase">Date</th>
+                  <th className="text-left text-[10px] text-white/40 font-medium px-2 md:px-4 py-2 md:py-3 uppercase">Code</th>
+                  <th className="text-left text-[10px] text-white/40 font-medium px-2 md:px-4 py-2 md:py-3 uppercase hidden sm:table-cell">Bettor</th>
+                  <th className="text-left text-[10px] text-white/40 font-medium px-2 md:px-4 py-2 md:py-3 uppercase">Type</th>
+                  <th className="text-right text-[10px] text-white/40 font-medium px-2 md:px-4 py-2 md:py-3 uppercase">Amount</th>
+                  <th className="text-center text-[10px] text-white/40 font-medium px-2 md:px-4 py-2 md:py-3 uppercase">Status</th>
+                  <th className="text-left text-[10px] text-white/40 font-medium px-2 md:px-4 py-2 md:py-3 uppercase hidden md:table-cell">Date</th>
                 </tr></thead>
                 <tbody className="divide-y divide-nile-blue/10">
                   {coupons.map(c => (
                     <tr key={c.id} className="hover:bg-nile-blue/5 transition-colors">
-                      <td className="px-4 py-3"><span className="text-gold font-mono font-bold">{c.code}</span></td>
-                      <td className="px-4 py-3"><span className="text-white/60 text-xs">@{c.bettor?.username ?? '—'}</span></td>
-                      <td className="px-4 py-3"><span className="text-nile-blue-light text-xs capitalize">{c.type}</span></td>
-                      <td className="px-4 py-3 text-right"><span className="text-white font-mono text-xs">{formatETB(c.amount)}</span></td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-2 md:px-4 py-2 md:py-3"><span className="text-gold font-mono font-bold text-xs md:text-sm">{c.code}</span></td>
+                      <td className="px-2 md:px-4 py-2 md:py-3 hidden sm:table-cell"><span className="text-white/60 text-xs">@{c.bettor?.username ?? '—'}</span></td>
+                      <td className="px-2 md:px-4 py-2 md:py-3"><span className="text-nile-blue-light text-[10px] md:text-xs capitalize">{c.type}</span></td>
+                      <td className="px-2 md:px-4 py-2 md:py-3 text-right"><span className="text-white font-mono text-[10px] md:text-xs">{formatETB(c.amount)}</span></td>
+                      <td className="px-2 md:px-4 py-2 md:py-3 text-center">
                         <span className={cn('text-[11px] font-medium px-2 py-0.5 rounded-full border', STATUS_COLORS[c.status] ?? 'text-white/40 bg-white/5 border-white/10')}>
                           {c.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3"><span className="text-white/40 text-xs">{formatDate(c.created_at)}</span></td>
+                      <td className="px-2 md:px-4 py-2 md:py-3 hidden md:table-cell"><span className="text-white/40 text-xs">{formatDate(c.created_at)}</span></td>
                     </tr>
                   ))}
                 </tbody>

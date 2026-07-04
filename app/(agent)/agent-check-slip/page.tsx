@@ -65,14 +65,14 @@ export default function AgentCheckSlipPage() {
 
   return (
     <div className="p-3 md:p-6 pb-20 md:pb-6 max-w-2xl">
-      <h1 className="font-display text-2xl font-bold text-white mb-2">
+      <h1 className="font-display text-lg md:text-2xl font-bold text-white mb-1 md:mb-2">
         Check Slip
       </h1>
-      <p className="text-white/50 text-sm mb-6">
+      <p className="text-white/40 text-xs md:text-sm mb-3 md:mb-6">
         Enter slip ID or scan QR / barcode
       </p>
 
-      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5 mb-6 space-y-4">
+      <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-3 md:p-5 mb-3 md:mb-6 space-y-2 md:space-y-4">
         <div className="flex gap-3">
           <input
             type="text"
@@ -82,19 +82,19 @@ export default function AgentCheckSlipPage() {
             placeholder="48392017 or JP85391421"
             maxLength={12}
             autoFocus
-            className="flex-1 bg-charcoal border border-gold/20 rounded-lg px-4 py-3 text-white font-mono text-xl text-center placeholder:text-white/20 placeholder:font-sans placeholder:text-base focus:outline-none focus:border-gold/50"
+            className="flex-1 bg-charcoal border border-gold/20 rounded-lg px-2 py-2 md:px-4 md:py-3 text-white font-mono text-base md:text-xl text-center placeholder:text-white/20 placeholder:font-sans placeholder:text-sm md:placeholder:text-base focus:outline-none focus:border-gold/50"
           />
           <button
             onClick={() => handleCheck()}
             disabled={!slipId.trim() || loading}
-            className="bg-gold text-charcoal px-5 py-3 rounded-lg font-semibold text-sm hover:bg-gold-light disabled:opacity-50 flex items-center gap-2"
+            className="bg-gold text-charcoal px-3 py-2 md:px-5 md:py-3 rounded-lg font-semibold text-xs md:text-sm hover:bg-gold-light disabled:opacity-50 flex items-center gap-1.5"
           >
             <Receipt className="w-4 h-4" />
             Check
           </button>
           <button
             onClick={() => setShowScanner(!showScanner)}
-            className="border border-nile-blue/30 text-white/60 px-3 py-3 rounded-lg hover:text-white hover:border-gold/30"
+            className="border border-nile-blue/30 text-white/60 px-2.5 py-2 md:px-3 md:py-3 rounded-lg hover:text-white hover:border-gold/30"
             title="Scan QR Code"
           >
             <Camera className="w-5 h-5" />
@@ -109,7 +109,7 @@ export default function AgentCheckSlipPage() {
           />
         )}
 
-        <p className="text-white/25 text-xs text-center">
+        <p className="text-white/25 text-[10px] md:text-xs text-center">
           ↵ Barcode scanner auto-submits on Enter • 📷 Tap camera to scan QR
         </p>
       </div>
@@ -121,7 +121,7 @@ export default function AgentCheckSlipPage() {
       )}
 
       {notFound && !loading && (
-        <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-6 text-center">
+        <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-3 md:p-6 text-center">
           <p className="text-nile-danger font-semibold">❌ Slip not found</p>
           <p className="text-white/50 text-sm mt-1">Check the ID and try again</p>
         </div>
@@ -134,7 +134,7 @@ export default function AgentCheckSlipPage() {
       {jackpotSlip && !loading && (
         <div className="bg-slate-dark border border-gold/30 rounded-xl overflow-hidden">
           {/* Header */}
-          <div className="bg-gold/10 border-b border-gold/20 px-5 py-3 flex items-center justify-between">
+          <div className="bg-gold/10 border-b border-gold/20 px-3 py-2 md:px-5 md:py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-lg">🏆</span>
               <div>
@@ -151,7 +151,7 @@ export default function AgentCheckSlipPage() {
             }`}>{jackpotSlip.status === 'paid' ? '✓ PAID' : jackpotSlip.status?.toUpperCase()}</span>
           </div>
           {/* Info */}
-          <div className="px-5 py-3 grid grid-cols-2 gap-3 border-b border-nile-blue/20 text-sm">
+          <div className="px-3 py-2 md:px-5 md:py-3 grid grid-cols-2 gap-2 md:gap-3 border-b border-nile-blue/20 text-xs md:text-sm">
             <div>
               <p className="text-white/40 text-xs">Bettor</p>
               <p className="text-white font-medium">{jackpotSlip.is_anonymous ? '🔒 Anonymous' : `@${(jackpotSlip.bettor as any)?.username ?? '—'}`}</p>
@@ -184,8 +184,8 @@ export default function AgentCheckSlipPage() {
             </div>
           </div>
           {/* Picks */}
-          <div className="px-5 py-3">
-            <p className="text-white/50 text-xs uppercase tracking-widest mb-2 font-bold">Picks ({(jackpotSlip.jackpot_slip_selections ?? []).length}/12)</p>
+          <div className="px-3 py-2 md:px-5 md:py-3">
+            <p className="text-white/40 text-[10px] md:text-xs uppercase tracking-widest mb-1.5 font-bold">Picks ({(jackpotSlip.jackpot_slip_selections ?? []).length}/12)</p>
             <div className="space-y-1">
               {(jackpotSlip.jackpot_slip_selections ?? [])
         .sort((a: any, b: any) => a.game_number - b.game_number)
@@ -214,11 +214,11 @@ export default function AgentCheckSlipPage() {
       )}
 
       {history.length > 0 && (
-        <div className="mt-6 bg-slate-dark border border-gold/10 rounded-xl p-4">
+        <div className="mt-3 md:mt-6 bg-slate-dark border border-gold/10 rounded-xl p-3 md:p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-gold/60" />
-              <span className="text-sm font-semibold text-white/70">Recent Slips</span>
+              <span className="text-xs md:text-sm font-semibold text-white/70">Recent Slips</span>
             </div>
             <button onClick={clearHistory} className="flex items-center gap-1 text-xs text-nile-danger/70 hover:text-nile-danger transition-colors">
               <Trash2 className="w-3 h-3" /> Clear
@@ -227,7 +227,7 @@ export default function AgentCheckSlipPage() {
           <div className="space-y-2">
             {history.map(id => (
               <button key={id} onClick={() => { setSlipId(id); handleCheck(id) }} className="w-full flex items-center justify-between px-3 py-2 bg-charcoal/50 hover:bg-charcoal rounded-lg border border-gold/10 hover:border-gold/30 transition-all">
-                <span className="font-mono text-sm text-white">{id}</span>
+                <span className="font-mono text-xs md:text-sm text-white">{id}</span>
                 <Receipt className="w-3 h-3 text-white/30" />
               </button>
             ))}
