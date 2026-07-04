@@ -121,9 +121,9 @@ export function DashboardNavbar({
             }`}
             style={!jackpotOpen ? { background: 'rgba(255,255,255,0.12)' } : {}}
           >
-            🏆 <span className="hidden md:inline">JACKPOT</span>
+            🏆 JACKPOT
             {!jackpotOpen && (
-              <span className="hidden md:inline text-[9px] px-1 rounded" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <span className="text-[9px] px-1 rounded" style={{ background: 'rgba(255,255,255,0.1)' }}>
                 CLOSED
               </span>
             )}
