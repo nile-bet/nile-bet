@@ -4,7 +4,7 @@ import { Phone } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="bg-slate-dark border-t border-gold/10">
+    <footer className="bg-slate-dark border-t-4 border-gold/20 mt-8 md:mt-16">
       <div className="px-4 py-6 md:px-6 md:py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {/* Col 1: Brand */}
