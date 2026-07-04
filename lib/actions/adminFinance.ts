@@ -301,6 +301,27 @@ interface DateFilters {
   endDate?: string
 }
 
+// ─── NETWORK SCOPE HELPER ────────────────────────────────────────────────────
+// Returns all agent + cashier profile IDs. Used to scope admin-wide aggregate
+// reports to the agent/cashier network only, excluding bettor self-placed bets.
+async function getNetworkPlacerIds(supabase: any): Promise<string[]> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .in('role', ['agent', 'cashier'])
+  return (data ?? []).map((p: any) => p.id)
+}
+
+// Returns only cashier profile IDs (used for the "top cashiers" leaderboard,
+// so agent- or bettor-placed slips don't get mislabeled as a cashier's).
+async function getCashierPlacerIds(supabase: any): Promise<string[]> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('role', 'cashier')
+  return (data ?? []).map((p: any) => p.id)
+}
+
 export async function getAgentProfitReport(filters?: DateFilters) {
   const supabase = await createClient()
 
@@ -405,11 +426,10 @@ export async function getAgentProfitReport(filters?: DateFilters) {
 export async function getTopUsersReport(role?: string, filters?: DateFilters) {
   const supabase = await createClient()
 
-
-  // Get cashier/agent IDs for filtering
-  const { data: caProfiles } = await supabase
-    .from('profiles').select('id').in('role', ['cashier', 'agent'])
-  const caIds = (caProfiles ?? []).map((p: any) => p.id)
+  // For the cashier leaderboard, restrict the fetch to slips actually placed
+  // by a cashier — otherwise agent- or bettor-placed slips could get grouped
+  // in under a random placed_by id and misrepresented as a "cashier".
+  const cashierIds = role === 'cashiers' ? await getCashierPlacerIds(supabase) : null
 
   let query = supabase
     .from('slips')
@@ -417,6 +437,7 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
     .order('created_at', { ascending: false })
     .limit(1000)
 
+  if (cashierIds) query = query.in('placed_by', cashierIds)
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
   if (filters?.endDate) query = query.lte('created_at', filters.endDate)
 
@@ -428,6 +449,7 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
     .select('bettor_id, placed_by, stake, reward_amount, reward_tax, status, created_at, profiles!jackpot_slips_bettor_id_fkey(username)')
     .order('created_at', { ascending: false })
     .limit(1000)
+  if (cashierIds) jpQuery = jpQuery.in('placed_by', cashierIds)
   if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
   if (filters?.endDate) jpQuery = jpQuery.lte('created_at', filters.endDate)
   const { data: jpData } = await jpQuery
@@ -526,11 +548,14 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
 
 export async function getPlatformProfitReport(granularity?: string, filters?: DateFilters) {
   const supabase = await createClient()
+  const networkIds = await getNetworkPlacerIds(supabase)
+
   let query = supabase
     .from('slips')
     .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, created_at')
     .order('created_at', { ascending: false })
     .limit(2000)
+  if (networkIds.length > 0) query = query.in('placed_by', networkIds)
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
   if (filters?.endDate) query = query.lte('created_at', filters.endDate)
   const { data } = await query
@@ -541,6 +566,7 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
     .select('stake, reward_amount, reward_tax, status, created_at')
     .order('created_at', { ascending: false })
     .limit(2000)
+  if (networkIds.length > 0) jpQuery = jpQuery.in('placed_by', networkIds)
   if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
   if (filters?.endDate) jpQuery = jpQuery.lte('created_at', filters.endDate)
   const { data: jpData } = await jpQuery
@@ -598,12 +624,15 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
 
 export async function getTaxReport(filters?: DateFilters) {
   const supabase = await createClient()
+  const networkIds = await getNetworkPlacerIds(supabase)
+
   let query = supabase
     .from('slips')
     .select('winning_tax, net_payout, stake, status, created_at')
     .eq('status', 'won')
     .order('created_at', { ascending: false })
     .limit(2000)
+  if (networkIds.length > 0) query = query.in('placed_by', networkIds)
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
   if (filters?.endDate) query = query.lte('created_at', filters.endDate)
   const { data } = await query
@@ -615,6 +644,7 @@ export async function getTaxReport(filters?: DateFilters) {
     .in('status', ['won', 'near_win'])
     .order('created_at', { ascending: false })
     .limit(2000)
+  if (networkIds.length > 0) jpQuery = jpQuery.in('placed_by', networkIds)
   if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
   if (filters?.endDate) jpQuery = jpQuery.lte('created_at', filters.endDate)
   const { data: jpData } = await jpQuery
@@ -679,12 +709,14 @@ export async function getCouponHistoryByUser(
 // ─── JACKPOT PROFIT REPORT ────────────
 export async function getJackpotProfitReport(filters?: DateFilters) {
   const supabase = await createClient()
+  const networkIds = await getNetworkPlacerIds(supabase)
 
   let query = supabase
     .from('jackpot_slips')
     .select('slip_id, stake, reward_amount, status, jackpot_id, created_at, jackpots(name)')
     .order('created_at', { ascending: false })
     .limit(2000)
+  if (networkIds.length > 0) query = query.in('placed_by', networkIds)
   if (filters?.startDate) query = query.gte('created_at', filters.startDate)
   if (filters?.endDate) query = query.lte('created_at', filters.endDate)
   const { data } = await query

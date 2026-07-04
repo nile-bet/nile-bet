@@ -55,25 +55,32 @@ function resolveDateRange(dateFilter: DateFilterInput): {
   return { startDate: null, endDate: null }
 }
 
+// ─── NETWORK SCOPE HELPER ────────────────────────────────────────────────────
+// Returns all agent + cashier profile IDs. Used to scope admin-wide aggregate
+// reports to the agent/cashier network only, excluding bettor self-placed bets.
+async function getNetworkPlacerIds(supabase: any): Promise<string[]> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .in('role', ['agent', 'cashier'])
+  return (data ?? []).map((p: any) => p.id)
+}
+
 export async function getPlatformStats(
   dateFilter: DateFilterInput = 'daily'
 ) {
   const supabase = await createClient()
 
 
-  // Get all cashier IDs platform-wide (same pattern as agent tracking its cashiers)
-  const { data: allCashiers } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('role', 'cashier')
-  const allCashierIds = (allCashiers ?? []).map((c: any) => c.id)
+  // Scope to the full agent + cashier network, excluding bettor self-placed bets
+  const networkIds = await getNetworkPlacerIds(supabase)
 
   const { startDate, endDate } = resolveDateRange(dateFilter)
 
   let slipsQuery = supabase
     .from('slips')
     .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, redeemed_at, is_insured')
-  if (allCashierIds.length > 0) slipsQuery = slipsQuery.in('placed_by', allCashierIds)
+  if (networkIds.length > 0) slipsQuery = slipsQuery.in('placed_by', networkIds)
 
   if (startDate) {
     slipsQuery = slipsQuery.gte(
@@ -91,7 +98,7 @@ export async function getPlatformStats(
   let jpQuery = supabase
     .from('jackpot_slips')
     .select('stake, reward_amount, reward_tax, status, redeemed_at, is_insured')
-  if (allCashierIds.length > 0) jpQuery = jpQuery.in('placed_by', allCashierIds)
+  if (networkIds.length > 0) jpQuery = jpQuery.in('placed_by', networkIds)
 
   if (startDate) jpQuery = jpQuery.gte('created_at', startDate)
   if (endDate) jpQuery = jpQuery.lte('created_at', endDate)
@@ -207,16 +214,22 @@ export async function getRevenueByDay(
   const start = new Date()
   start.setDate(start.getDate() - days)
 
-  const { data: slips } = await supabase
+  const networkIds = await getNetworkPlacerIds(supabase)
+
+  let slipsQ = supabase
     .from('slips')
     .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, created_at')
     .gte('created_at', start.toISOString())
     .in('status', ['won', 'lost', 'pending', 'near_win'])
+  if (networkIds.length > 0) slipsQ = slipsQ.in('placed_by', networkIds)
+  const { data: slips } = await slipsQ
 
-  const { data: jackpotSlips } = await supabase
+  let jpQ = supabase
     .from('jackpot_slips')
     .select('stake, reward_amount, reward_tax, status, created_at')
     .gte('created_at', start.toISOString())
+  if (networkIds.length > 0) jpQ = jpQ.in('placed_by', networkIds)
+  const { data: jackpotSlips } = await jpQ
 
   const grouped: Record<string, {
     date: string
@@ -269,14 +282,15 @@ export async function getRevenueByDay(
 
 export async function getSlipStatusCounts() {
   const supabase = await createClient()
+  const networkIds = await getNetworkPlacerIds(supabase)
 
-  const { data } = await supabase
-    .from('slips')
-    .select('status')
+  let slipsQ = supabase.from('slips').select('status')
+  if (networkIds.length > 0) slipsQ = slipsQ.in('placed_by', networkIds)
+  const { data } = await slipsQ
 
-  const { data: jackpotData } = await supabase
-    .from('jackpot_slips')
-    .select('status')
+  let jpQ = supabase.from('jackpot_slips').select('status')
+  if (networkIds.length > 0) jpQ = jpQ.in('placed_by', networkIds)
+  const { data: jackpotData } = await jpQ
 
   const counts = {
     pending: 0,
@@ -375,8 +389,9 @@ export async function getAdminPayoutsReport(
 ) {
   const supabase = await createClient()
   const { startDate, endDate } = resolveDateRange(dateFilter)
+  const networkIds = await getNetworkPlacerIds(supabase)
 
-  // Regular slips — all won/near_win/paid platform-wide
+  // Regular slips — agent/cashier network only (excludes bettor self-placed)
   let q = supabase
     .from('slips')
     .select(`
@@ -388,11 +403,12 @@ export async function getAdminPayoutsReport(
     .in('status', ['won', 'near_win', 'paid'])
     .order('created_at', { ascending: false })
     .limit(500)
+  if (networkIds.length > 0) q = q.in('placed_by', networkIds)
   if (startDate) q = q.gte('created_at', startDate)
   if (endDate) q = q.lte('created_at', endDate)
   const { data: slips } = await q
 
-  // Jackpot slips — all won/near_win/paid platform-wide
+  // Jackpot slips — agent/cashier network only (excludes bettor self-placed)
   let jq = supabase
     .from('jackpot_slips')
     .select(`
@@ -404,6 +420,7 @@ export async function getAdminPayoutsReport(
     .in('status', ['won', 'near_win', 'paid'])
     .order('created_at', { ascending: false })
     .limit(500)
+  if (networkIds.length > 0) jq = jq.in('placed_by', networkIds)
   if (startDate) jq = jq.gte('created_at', startDate)
   if (endDate) jq = jq.lte('created_at', endDate)
   const { data: jackpotSlips } = await jq
@@ -1205,10 +1222,12 @@ export async function getJackpotDashboardStats(
 ) {
   const supabase = await createClient()
   const { startDate, endDate } = resolveDateRange(dateFilter)
+  const networkIds = await getNetworkPlacerIds(supabase)
 
   let slipsQuery = supabase
     .from('jackpot_slips')
     .select('status, created_at')
+  if (networkIds.length > 0) slipsQuery = slipsQuery.in('placed_by', networkIds)
 
   if (startDate) slipsQuery = slipsQuery.gte('created_at', startDate)
   if (endDate) slipsQuery = slipsQuery.lte('created_at', endDate)
