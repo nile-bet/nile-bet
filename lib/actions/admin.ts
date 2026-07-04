@@ -90,6 +90,7 @@ export async function getPlatformStats(
   let jpQuery = supabase
     .from('jackpot_slips')
     .select('stake, reward_amount, reward_tax, status, redeemed_at, is_insured')
+  if (allCashierIds.length > 0) jpQuery = jpQuery.in('placed_by', allCashierIds)
 
   if (startDate) jpQuery = jpQuery.gte('created_at', startDate)
   if (endDate) jpQuery = jpQuery.lte('created_at', endDate)
