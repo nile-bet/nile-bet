@@ -405,23 +405,34 @@ export async function getAgentPerformance(
         .select('stake, net_payout, status, created_at')
         .in('placed_by', placerIds)
 
+      let jpQuery = supabase
+        .from('jackpot_slips')
+        .select('stake, reward_amount, status, created_at')
+        .in('placed_by', placerIds)
+
+      if (startDate) jpQuery = jpQuery.gte('created_at', startDate)
+      if (endDate) jpQuery = jpQuery.lte('created_at', endDate)
+
+      const { data: agentJpSlips } = await jpQuery
+
       if (startDate) slipsQuery = slipsQuery.gte('created_at', startDate)
       if (endDate) slipsQuery = slipsQuery.lte('created_at', endDate)
 
       const { data: agentSlips } = await slipsQuery
 
       const revenue = (agentSlips ?? [])
-        .reduce(
-          (a, s) => a + (s.stake ?? 0), 0
-        )
+        .reduce((a, s) => a + (s.stake ?? 0), 0) +
+        (agentJpSlips ?? [])
+          .reduce((a, s) => a + (s.stake ?? 0), 0)
 
       return {
         ...agent,
         cashiers_count: cashiersCount ?? 0,
         revenue,
         active_slips: (agentSlips ?? [])
-          .filter((s) => s.status === 'pending')
-          .length,
+          .filter((s) => s.status === 'pending').length +
+          (agentJpSlips ?? [])
+            .filter((s) => s.status === 'pending').length,
       }
     })
   )
