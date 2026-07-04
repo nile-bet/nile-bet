@@ -73,6 +73,7 @@ export async function getPlatformStats(
   let slipsQuery = supabase
     .from('slips')
     .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, redeemed_at, is_insured')
+  if (allCashierIds.length > 0) slipsQuery = slipsQuery.in('placed_by', allCashierIds)
 
   if (startDate) {
     slipsQuery = slipsQuery.gte(
