@@ -66,7 +66,6 @@ export async function getPlatformStats(
     .from('slips')
     .select('stake, net_payout, winning_tax, insurance_applied, insurance_payout, insurance_tax, status, redeemed_at, is_insured')
 
-  if (cashierAgentIds.length > 0) slipsQuery = slipsQuery.in('placed_by', cashierAgentIds)
   if (startDate) {
     slipsQuery = slipsQuery.gte(
       'created_at', startDate
