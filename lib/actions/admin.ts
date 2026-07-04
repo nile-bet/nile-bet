@@ -374,7 +374,6 @@ export async function getAgentPerformance(
     .from('profiles')
     .select('id, username, credit_balance, status, created_at')
     .eq('role', 'agent')
-    .eq('status', 'active')
 
   if (!agents) return []
 
