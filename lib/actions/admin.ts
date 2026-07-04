@@ -180,6 +180,45 @@ export async function getPlatformStats(
   const insuredPending = insuredSlips - insuredRedeemed
   const cancelledSlips = allSlips.filter(s => s.status === 'cancelled').length
 
+  // Regular vs jackpot splits (mirrors getAgentNetworkStats)
+  const regularSlips = allSlips.length
+  const jackpotSlipsCount = allJp.length
+  const lostRegular = allSlips.filter(s => s.status === 'lost').length
+  const lostJackpot = allJp.filter(s => s.status === 'lost').length
+  const pendingRegular = allSlips.filter(s => s.status === 'pending').length
+  const pendingJackpot = allJp.filter(s => s.status === 'pending').length
+
+  // Active cashiers/agents (for "active / total" ratio cards)
+  const { count: activeCashiers } =
+    await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'cashier')
+      .eq('status', 'active')
+
+  const { count: activeAgents } =
+    await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'agent')
+      .eq('status', 'active')
+
+  // Pending credit requests platform-wide (requests sent to admin)
+  const { data: adminProfile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('role', 'admin')
+    .limit(1)
+    .single()
+
+  const { count: pendingRequests } = adminProfile
+    ? await supabase
+        .from('credit_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('to_user_id', adminProfile.id)
+        .eq('status', 'pending')
+    : { count: 0 }
+
   return {
     totalRevenue,
     totalPaidOut,
@@ -189,18 +228,27 @@ export async function getPlatformStats(
     pendingLiability,
     activeBettors: activeBettors ?? 0,
     totalSlipsToday: allSlips.length + allJp.length,
+    regularSlips,
+    jackpotSlipsCount,
     wonSlips,
     wonRedeemed,
     wonPending,
     lostSlips,
+    lostRegular,
+    lostJackpot,
     pendingSlips,
+    pendingRegular,
+    pendingJackpot,
     insuredSlips,
     insuredRedeemed,
     insuredPending,
     cancelledSlips,
     pendingPayouts,
     totalCashiers: totalCashiers ?? 0,
+    activeCashiers: activeCashiers ?? 0,
     totalAgents: totalAgents ?? 0,
+    activeAgents: activeAgents ?? 0,
+    pendingRequests: pendingRequests ?? 0,
     taxCollected,
     platformBalance: admin?.credit_balance ?? 0,
   }

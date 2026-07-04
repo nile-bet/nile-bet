@@ -268,12 +268,14 @@ export default function AdminDashboard() {
           />
           <StatsCard
             title="Total Agents"
-            value={stats?.totalAgents ?? 0}
+            value={`${stats?.activeAgents ?? 0} / ${stats?.totalAgents ?? 0}`}
+            subtitle="Active / Total"
             icon={Users}
           />
           <StatsCard
             title="Total Cashiers"
-            value={stats?.totalCashiers ?? 0}
+            value={`${stats?.activeCashiers ?? 0} / ${stats?.totalCashiers ?? 0}`}
+            subtitle="Active / Total"
             icon={Users}
           />
           <StatsCard
@@ -288,6 +290,19 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* Stats Row 2b: Pending Credits */}
+      {!loading && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatsCard
+            title="Pending Credits"
+            value={stats?.pendingRequests ?? 0}
+            subtitle="Awaiting approval"
+            icon={Clock}
+            variant={(stats?.pendingRequests ?? 0) > 0 ? 'warning' : 'default'}
+          />
+        </div>
+      )}
+
 
       {/* ── Slip Status Mini Cards ── */}
       {!loading && stats && (
@@ -296,6 +311,7 @@ export default function AdminDashboard() {
             <Ticket className="w-5 h-5 text-white/50 mx-auto mb-1" />
             <p className="text-2xl font-bold text-white font-mono">{stats.totalSlipsToday}</p>
             <p className="text-white/50 text-xs">Total</p>
+            <p className="text-white/25 text-[10px]">{stats.regularSlips ?? 0} reg · {stats.jackpotSlipsCount ?? 0} jp</p>
           </div>
           <div className="bg-nile-success/10 border border-nile-success/30 rounded-xl p-3 text-center">
             <CheckCircle className="w-5 h-5 text-nile-success mx-auto mb-1" />
@@ -319,11 +335,13 @@ export default function AdminDashboard() {
             <XCircle className="w-5 h-5 text-nile-danger mx-auto mb-1" />
             <p className="text-2xl font-bold text-nile-danger font-mono">{stats.lostSlips ?? 0}</p>
             <p className="text-white/50 text-xs">Lost</p>
+            <p className="text-white/25 text-[10px]">{stats.lostRegular ?? 0} reg · {stats.lostJackpot ?? 0} jp</p>
           </div>
           <div className="bg-nile-blue/20 border border-nile-blue/30 rounded-xl p-3 text-center">
             <Clock className="w-5 h-5 text-gold mx-auto mb-1" />
             <p className="text-2xl font-bold text-gold font-mono">{stats.pendingSlips ?? 0}</p>
             <p className="text-white/50 text-xs">Pending</p>
+            <p className="text-white/25 text-[10px]">{stats.pendingRegular ?? 0} reg · {stats.pendingJackpot ?? 0} jp</p>
           </div>
           <div className="bg-nile-blue/10 border border-nile-blue/20 rounded-xl p-3 text-center">
             <RefreshCw className="w-5 h-5 text-nile-blue-light mx-auto mb-1" />
