@@ -77,7 +77,7 @@ export function DashboardNavbar({
 
   return (
     <>
-    <nav className="bg-slate-dark border-b border-gold/20 h-14 px-4 md:px-6 flex items-center justify-between sticky top-0 z-40">
+    <nav className="bg-slate-dark border-b border-gold/20 h-12 md:h-14 px-3 md:px-6 flex items-center justify-between sticky top-0 z-40">
       {/* Left: Logo + Toggle */}
       <div className="flex items-center gap-2">
         {onToggleSidebar && (
@@ -114,16 +114,16 @@ export function DashboardNavbar({
         {/* Jackpot */}
         <Link href={role === "agent" ? "/agent-jackpot" : role === "cashier" ? "/cashier-jackpot" : "/jackpot"}>
           <button
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-2 md:px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
               jackpotOpen
                 ? 'bg-gold text-charcoal animate-pulse-gold hover:animate-none hover:bg-gold-light'
                 : 'text-white/60'
             }`}
             style={!jackpotOpen ? { background: 'rgba(255,255,255,0.12)' } : {}}
           >
-            🏆 JACKPOT
+            🏆 <span className="hidden md:inline">JACKPOT</span>
             {!jackpotOpen && (
-              <span className="text-[9px] px-1 rounded" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <span className="hidden md:inline text-[9px] px-1 rounded" style={{ background: 'rgba(255,255,255,0.1)' }}>
                 CLOSED
               </span>
             )}
@@ -134,7 +134,7 @@ export function DashboardNavbar({
         {role !== 'admin' &&
           user?.credit_balance !==
             undefined && (
-            <div className="flex items-center bg-gold/10 border border-gold/30 rounded-md px-2 py-1">
+            <div className="hidden md:flex items-center bg-gold/10 border border-gold/30 rounded-md px-2 py-1">
               <span className="text-gold font-mono text-sm">
                 {formatETB(
                   user.credit_balance
@@ -144,7 +144,7 @@ export function DashboardNavbar({
           )}
 
         {role && (
-          <div className="flex">
+          <div className="hidden md:flex">
             <RoleBadge role={role as UserRole} />
           </div>
         )}
