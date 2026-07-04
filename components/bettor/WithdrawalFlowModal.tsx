@@ -117,7 +117,7 @@ export function WithdrawalFlowModal({
       open={isOpen}
       onOpenChange={handleClose}
     >
-      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-md">
+      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-md w-[95vw] md:w-full">
         <DialogHeader>
           <DialogTitle className="text-white">
             {step === 1
@@ -242,7 +242,7 @@ export function WithdrawalFlowModal({
                   (digit, i) => (
                     <div
                       key={i}
-                      className="w-10 h-12 bg-charcoal border border-gold/50 rounded-lg flex items-center justify-center text-gold font-mono text-2xl font-bold"
+                      className="w-9 h-10 md:w-10 md:h-12 bg-charcoal border border-gold/50 rounded-lg flex items-center justify-center text-gold font-mono text-xl md:text-2xl font-bold"
                     >
                       {digit}
                     </div>

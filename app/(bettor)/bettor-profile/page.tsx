@@ -103,8 +103,8 @@ export default function ProfilePage() {
     <div className="min-h-screen flex flex-col">
       <PublicNavbar />
 
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8">
-        <h1 className="font-display text-2xl font-bold text-white mb-6">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-3 md:px-4 py-4 md:py-8 pb-20 md:pb-8">
+        <h1 className="font-display text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">
           My Profile
         </h1>
 
@@ -116,7 +116,7 @@ export default function ProfilePage() {
               <p className="text-white/60 text-sm mb-1">
                 Available Balance
               </p>
-              <p className="text-gold font-mono text-3xl font-bold mb-1">
+              <p className="text-gold font-mono text-2xl md:text-3xl font-bold mb-1">
                 {formatETB(
                   user.credit_balance
                 )}
@@ -210,7 +210,7 @@ export default function ProfilePage() {
                     .map((digit: string, i: number) => (
                       <div
                         key={i}
-                        className="w-9 h-11 bg-charcoal border border-gold/50 rounded-lg flex items-center justify-center text-gold font-mono text-xl font-bold"
+                        className="w-8 h-10 md:w-9 md:h-11 bg-charcoal border border-gold/50 rounded-lg flex items-center justify-center text-gold font-mono text-lg md:text-xl font-bold"
                       >
                         {digit}
                       </div>
@@ -391,7 +391,7 @@ export default function ProfilePage() {
                   <span className="text-white/50 text-sm">
                     Member since:
                   </span>
-                  <span className="text-white/70 text-sm">
+                  <span className="text-white/70 text-xs md:text-sm text-right">
                     {formatDate(
                       user.created_at
                     )}
@@ -402,7 +402,7 @@ export default function ProfilePage() {
                     <span className="text-white/50 text-sm">
                       Last login:
                     </span>
-                    <span className="text-white/70 text-sm">
+                    <span className="text-white/70 text-xs md:text-sm text-right">
                       {formatDate(
                         user.last_login
                       )}

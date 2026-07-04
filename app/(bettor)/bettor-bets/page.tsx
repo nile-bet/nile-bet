@@ -81,8 +81,8 @@ export default function MyBetsPage() {
     <div className="min-h-screen flex flex-col">
       <PublicNavbar />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
-        <h1 className="font-display text-2xl font-bold text-white mb-6">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-3 md:px-4 py-4 md:py-8 pb-20 md:pb-8">
+        <h1 className="font-display text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">
           My Bets
         </h1>
 
@@ -96,7 +96,7 @@ export default function MyBetsPage() {
                 setPage(1)
               }}
               className={cn(
-                'px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
+                'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium whitespace-nowrap transition-colors',
                 activeTab === tab.key
                   ? 'bg-gold text-charcoal'
                   : 'bg-slate-dark text-white/60 hover:text-white border border-nile-blue/30'
@@ -257,7 +257,7 @@ function JackpotSlipCard({ slip }: { slip: any }) {
                 }>
                   <span className="text-white/50 truncate flex-1">
                     <span className="font-mono font-bold mr-2 text-[10px]" style={{ color: 'rgba(212,175,55,0.6)' }}>G{sel.game_number}</span>
-                    {match?.home_team ?? '—'} <span className="text-white/25">vs</span> {match?.away_team ?? '—'}
+                    <span className="truncate">{match?.home_team ?? '—'}</span> <span className="text-white/25">vs</span> <span className="truncate">{match?.away_team ?? '—'}</span>
                   </span>
                   <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
                     <span className="font-black px-2 py-0.5 rounded-lg text-[11px]" style={

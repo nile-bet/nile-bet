@@ -75,9 +75,9 @@ export default function NotificationsPage() {
     <div className="min-h-screen flex flex-col">
       <PublicNavbar />
 
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
+      <main className="flex-1 max-w-2xl mx-auto w-full px-3 md:px-4 py-4 md:py-8 pb-20 md:pb-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="font-display text-2xl font-bold text-white">
+          <h1 className="font-display text-xl md:text-2xl font-bold text-white">
             Notifications
           </h1>
           {notifications.some(
@@ -111,7 +111,7 @@ export default function NotificationsPage() {
                     markAsRead(notif.id)
                   }
                   className={cn(
-                    'bg-slate-dark rounded-xl p-4 flex gap-3 cursor-pointer transition-colors hover:bg-nile-blue/10 border',
+                    'bg-slate-dark rounded-xl p-3 md:p-4 flex gap-3 cursor-pointer transition-colors hover:bg-nile-blue/10 border',
                     !notif.is_read
                       ? 'border-l-4 border-l-gold border-gold/20 bg-gold/5'
                       : 'border-nile-blue/20'
