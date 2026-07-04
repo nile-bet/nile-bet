@@ -122,6 +122,19 @@ export function PublicNavbar() {
                   {formatETB(user?.credit_balance ?? 0)}
                 </span>
               </div>
+              {/* Jackpot button — mobile only */}
+              <Link href="/weekend-jackpot" className="md:hidden">
+                <button className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all ${
+                  jackpotOpen
+                    ? 'bg-gold text-charcoal animate-pulse-gold'
+                    : 'text-white/60 bg-white/10'
+                }`}>
+                  🏆 JACKPOT
+                  {!jackpotOpen && (
+                    <span className="text-[9px] px-1 rounded bg-white/10">CLOSED</span>
+                  )}
+                </button>
+              </Link>
               <NotificationBell />
               {/* Avatar dropdown */}
               <DropdownMenu>
@@ -134,6 +147,7 @@ export function PublicNavbar() {
                   <div className="px-3 py-2 border-b border-nile-blue/20">
                     <p className="font-semibold text-sm">@{user?.username}</p>
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/30 to-nile-blue/30 border border-gold/40 text-gold mt-1">⚡ BETTOR</span>
+                    <p className="md:hidden text-gold font-mono text-sm font-bold mt-1.5">{formatETB(user?.credit_balance ?? 0)}</p>
                   </div>
                   <DropdownMenuItem asChild>
                     <Link href="/bettor-bets" className="cursor-pointer">
