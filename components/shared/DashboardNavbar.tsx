@@ -134,7 +134,7 @@ export function DashboardNavbar({
         {role !== 'admin' &&
           user?.credit_balance !==
             undefined && (
-            <div className="hidden md:flex items-center bg-gold/10 border border-gold/30 rounded-md px-2.5 py-1">
+            <div className="flex items-center bg-gold/10 border border-gold/30 rounded-md px-2 py-1">
               <span className="text-gold font-mono text-sm">
                 {formatETB(
                   user.credit_balance
@@ -144,7 +144,7 @@ export function DashboardNavbar({
           )}
 
         {role && (
-          <div className="hidden md:flex">
+          <div className="flex">
             <RoleBadge role={role as UserRole} />
           </div>
         )}

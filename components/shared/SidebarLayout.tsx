@@ -152,7 +152,7 @@ export function SidebarLayout({
         />
 
         {/* Mobile sidebar trigger */}
-        <div className="md:hidden fixed bottom-4 left-4 z-50">
+        <div className="md:hidden fixed bottom-4 right-4 z-50">
           <Sheet
             open={mobileOpen}
             onOpenChange={setMobileOpen}
@@ -178,7 +178,7 @@ export function SidebarLayout({
         </div>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
           {children}
         </main>
       </div>

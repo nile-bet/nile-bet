@@ -49,9 +49,9 @@ export default function AgentJackpotPage() {
   )
 
   return (
-    <div className="p-4 max-w-2xl">
+    <div className="p-3 md:p-4 max-w-2xl">
       {/* Header */}
-      <div className="bg-slate-dark border border-gold/20 rounded-xl p-4 mb-4 flex items-center justify-between">
+      <div className="bg-slate-dark border border-gold/20 rounded-xl p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Trophy className="w-6 h-6 text-gold" />
           <div>

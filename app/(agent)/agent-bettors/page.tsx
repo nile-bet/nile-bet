@@ -183,7 +183,7 @@ export default function AgentBettorsPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-white">
+        <h1 className="font-display text-xl md:text-2xl font-bold text-white">
           My Bettors
         </h1>
         <span className="text-white/50 text-sm">

@@ -64,7 +64,7 @@ export default function AgentCheckSlipPage() {
   }
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="p-3 md:p-6 pb-20 md:pb-6 max-w-2xl">
       <h1 className="font-display text-2xl font-bold text-white mb-2">
         Check Slip
       </h1>

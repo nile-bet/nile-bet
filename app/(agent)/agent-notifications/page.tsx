@@ -51,10 +51,10 @@ export default function AgentNotificationsPage() {
   const unread = notifications.filter(n => !n.is_read)
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="p-3 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Notifications</h1>
+          <h1 className="font-display text-xl md:text-2xl font-bold text-white">Notifications</h1>
           <p className="text-white/40 text-sm mt-0.5">{notifications.length} total · {unread.length} unread</p>
         </div>
         {unread.length > 0 && (
