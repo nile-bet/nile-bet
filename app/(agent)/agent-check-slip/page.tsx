@@ -6,7 +6,7 @@ import { getJackpotSlipById } from '@/lib/actions/jackpot'
 import { SlipDetailCard } from '@/components/shared/SlipDetailCard'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { QRScanner } from '@/components/cashier/QRScanner'
-import { Search, Camera, Clock, Trash2 } from 'lucide-react'
+import { Search, Receipt, Camera, Clock, Trash2 } from 'lucide-react'
 import type { SlipWithSelections } from '@/types/database.types'
 
 export default function AgentCheckSlipPage() {
@@ -89,7 +89,7 @@ export default function AgentCheckSlipPage() {
             disabled={!slipId.trim() || loading}
             className="bg-gold text-charcoal px-5 py-3 rounded-lg font-semibold text-sm hover:bg-gold-light disabled:opacity-50 flex items-center gap-2"
           >
-            <Search className="w-4 h-4" />
+            <Receipt className="w-4 h-4" />
             Check
           </button>
           <button
@@ -228,7 +228,7 @@ export default function AgentCheckSlipPage() {
             {history.map(id => (
               <button key={id} onClick={() => { setSlipId(id); handleCheck(id) }} className="w-full flex items-center justify-between px-3 py-2 bg-charcoal/50 hover:bg-charcoal rounded-lg border border-gold/10 hover:border-gold/30 transition-all">
                 <span className="font-mono text-sm text-white">{id}</span>
-                <Search className="w-3 h-3 text-white/30" />
+                <Receipt className="w-3 h-3 text-white/30" />
               </button>
             ))}
           </div>

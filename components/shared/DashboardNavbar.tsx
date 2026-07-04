@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { PanelLeftClose, PanelLeftOpen, LogOut, LayoutDashboard,
-  Search } from 'lucide-react'
+  Search, Receipt } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -205,7 +205,7 @@ export function DashboardNavbar({
                 }
                 className="cursor-pointer flex items-center gap-2 text-emerald-400 font-medium hover:text-emerald-300"
               >
-                <Search className="w-4 h-4 text-emerald-400" />
+                <Receipt className="w-4 h-4 text-emerald-400" />
                 Check Slip
               </Link>
             </DropdownMenuItem>

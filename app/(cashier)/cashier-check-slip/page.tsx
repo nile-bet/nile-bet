@@ -6,7 +6,7 @@ import { getJackpotSlipById } from '@/lib/actions/jackpot'
 import { SlipDetailCard } from '@/components/shared/SlipDetailCard'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { QRScanner } from '@/components/cashier/QRScanner'
-import { Search, Camera, Clock, Trash2, ScanSearch } from 'lucide-react'
+import { Search, Receipt, Camera, Clock, Trash2, ScanSearch } from 'lucide-react'
 import type { SlipWithSelections } from '@/types/database.types'
 import { cn } from '@/lib/utils'
 
@@ -98,7 +98,7 @@ export default function CashierCheckSlipPage() {
                   disabled={!slipId.trim() || loading}
                   className="bg-gold text-charcoal px-4 py-2.5 rounded-lg font-bold text-sm hover:bg-gold/90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 active:scale-[0.97] transition-all"
                 >
-                  <Search className="w-3.5 h-3.5" />
+                  <Receipt className="w-3.5 h-3.5" />
                   Check
                 </button>
                 <button
@@ -140,7 +140,7 @@ export default function CashierCheckSlipPage() {
                     <button key={id} onClick={() => { setSlipId(id); handleCheck(id) }}
                       className="w-full flex items-center justify-between px-3 py-2 bg-charcoal/60 hover:bg-charcoal rounded-lg border border-white/6 hover:border-gold/25 transition-all group">
                       <span className="font-mono text-xs text-white">{id}</span>
-                      <Search className="w-3 h-3 text-white/25 group-hover:text-gold/60 transition-colors" />
+                      <Receipt className="w-3 h-3 text-white/25 group-hover:text-gold/60 transition-colors" />
                     </button>
                   ))}
                 </div>

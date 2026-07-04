@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Receipt } from 'lucide-react'
 import { PublicNavbar }
   from '@/components/shared/PublicNavbar'
 import { Footer }
@@ -124,7 +124,7 @@ export default function CheckSlipPage() {
                     : 'bg-white/10 text-white/30 cursor-not-allowed'
                 )}
               >
-                <Search className="w-4 h-4" />
+                <Receipt className="w-4 h-4" />
                 Check
               </button>
             </div>
@@ -258,7 +258,7 @@ export default function CheckSlipPage() {
                 {history.map(id => (
                   <button key={id} onClick={() => { setSlipId(id); handleCheck() }} className="w-full flex items-center justify-between px-3 py-2 bg-charcoal/50 hover:bg-charcoal rounded-lg border border-gold/10 hover:border-gold/30 transition-all">
                     <span className="font-mono text-sm text-white">{id}</span>
-                    <Search className="w-3 h-3 text-white/30" />
+                    <Receipt className="w-3 h-3 text-white/30" />
                   </button>
                 ))}
               </div>

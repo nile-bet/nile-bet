@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Menu, X, Search, Home, Trophy, BarChart2, Globe } from 'lucide-react'
+import { Menu, X, Search, Receipt, Home, Trophy, BarChart2, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import {
@@ -210,7 +210,7 @@ export function PublicNavbar() {
           </Link>
         ))}
         <Link href="/check-slip" className="flex items-center gap-1.5 text-xs text-white/70 hover:text-gold transition-colors">
-          <Search className="w-3.5 h-3.5" />Check Slip
+          <Receipt className="w-3.5 h-3.5" />Check Slip
         </Link>
         <JackpotButton />
       </div>
