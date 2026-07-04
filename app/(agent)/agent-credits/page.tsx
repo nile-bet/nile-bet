@@ -200,18 +200,18 @@ export default function AgentCreditsPage() {
       {/* Balance card */}
       <div
         className={cn(
-          'rounded-xl p-5 border',
+          'rounded-xl p-3 md:p-5 border',
           isLowBalance
             ? 'bg-nile-danger/10 border-nile-danger/30'
             : 'bg-slate-dark border-gold/30'
         )}
       >
-        <p className="text-white/60 text-sm mb-1">
+        <p className="text-white/60 text-xs md:text-sm mb-0.5 md:mb-1">
           {isLowBalance
             ? '⚠️ Low Balance'
             : 'My Balance'}
         </p>
-        <p className="text-gold font-mono text-3xl font-bold">
+        <p className="text-gold font-mono text-2xl md:text-3xl font-bold">
           {formatETB(
             user?.credit_balance ?? 0
           )}
@@ -236,7 +236,7 @@ export default function AgentCreditsPage() {
               setActiveTab(t.key)
             }
             className={cn(
-              'px-4 py-2 rounded-lg text-sm font-medium',
+              'px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium',
               activeTab === t.key
                 ? 'bg-gold text-charcoal'
                 : 'bg-slate-dark border border-nile-blue/30 text-white/60 hover:text-white'
@@ -248,7 +248,7 @@ export default function AgentCreditsPage() {
       </div>
 
       {activeTab === 'request' && (
-        <div className="space-y-6">
+        <div className="space-y-3 md:space-y-6">
           {/* Request form */}
           <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-3 md:p-5 space-y-3 md:space-y-4">
             <h2 className="font-semibold text-white">
@@ -312,7 +312,7 @@ export default function AgentCreditsPage() {
                   <div
                     key={req.id}
                     className={cn(
-                      'bg-slate-dark border rounded-xl p-4 flex items-center gap-4',
+                      'bg-slate-dark border rounded-xl p-3 md:p-4 flex items-center gap-2 md:gap-4',
                       req.status === 'pending'
                         ? 'border-gold/30'
                         : req.status ===
@@ -333,7 +333,7 @@ export default function AgentCreditsPage() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <p className="text-white font-mono font-bold">
+                      <p className="text-white font-mono font-bold text-sm md:text-base">
                         {formatETB(req.amount)}
                       </p>
                       {req.note && (
@@ -378,18 +378,18 @@ export default function AgentCreditsPage() {
               <div className="space-y-3">
                 {cashierRequests.map((req) => (
                   <div key={req.id} className={cn(
-                    'bg-slate-dark border rounded-xl p-4',
+                    'bg-slate-dark border rounded-xl p-3 md:p-4',
                     req.status === 'pending' ? 'border-gold/30' :
                     req.status === 'approved' ? 'border-nile-success/30' : 'border-nile-danger/20'
                   )}>
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-2">
                       <div>
-                        <p className="text-white font-semibold text-sm">@{req.requester?.username ?? '—'}</p>
+                        <p className="text-white font-semibold text-xs md:text-sm">@{req.requester?.username ?? '—'}</p>
                         <p className="text-white/40 text-xs">{formatDate(req.created_at)}</p>
                         {req.note && <p className="text-white/50 text-xs mt-0.5">{req.note}</p>}
                       </div>
                       <div className="text-right">
-                        <p className="text-gold font-mono font-bold text-lg">{formatETB(req.amount)}</p>
+                        <p className="text-gold font-mono font-bold text-base md:text-lg">{formatETB(req.amount)}</p>
                         <StatusBadge status={req.status} type="request" />
                       </div>
                     </div>
@@ -398,14 +398,14 @@ export default function AgentCreditsPage() {
                         <button
                           onClick={() => handleApproveCashierRequest(req.id, req.amount, req.requester_id)}
                           disabled={approvingId === req.id}
-                          className="flex-1 bg-nile-success text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-nile-success/80 disabled:opacity-50 transition-colors"
+                          className="flex-1 bg-nile-success text-white py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-semibold hover:bg-nile-success/80 disabled:opacity-50 transition-colors"
                         >
                           {approvingId === req.id ? 'Processing...' : '✓ Approve'}
                         </button>
                         <button
                           onClick={() => handleDeclineCashierRequest(req.id, req.requester_id)}
                           disabled={approvingId === req.id}
-                          className="flex-1 border border-nile-danger/40 text-nile-danger py-2.5 rounded-lg text-sm hover:bg-nile-danger/10 disabled:opacity-50 transition-colors"
+                          className="flex-1 border border-nile-danger/40 text-nile-danger py-2 md:py-2.5 rounded-lg text-xs md:text-sm hover:bg-nile-danger/10 disabled:opacity-50 transition-colors"
                         >
                           ✗ Decline
                         </button>
@@ -469,14 +469,14 @@ export default function AgentCreditsPage() {
                   const isIncoming = h.to_profile?.username === user?.username
                   return (
                     <div key={h.id} className={cn(
-                      'flex items-center gap-4 p-3 rounded-xl border transition-all',
+                      'flex items-center gap-2 md:gap-4 p-2.5 md:p-3 rounded-xl border transition-all',
                       isIncoming
                         ? 'bg-nile-success/5 border-nile-success/20'
                         : 'bg-gold/5 border-gold/20'
                     )}>
                       {/* Direction badge */}
                       <div className={cn(
-                        'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold',
+                        'flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold',
                         isIncoming ? 'bg-nile-success/20 text-nile-success' : 'bg-gold/20 text-gold'
                       )}>
                         {isIncoming ? '↓' : '↑'}
@@ -484,14 +484,14 @@ export default function AgentCreditsPage() {
 
                       {/* From → To */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 text-xs">
+                        <div className="flex items-center gap-1 text-[10px] md:text-xs">
                           <span className="text-white/50">@{h.from_profile?.username ?? '—'}</span>
                           <span className="text-white/20">→</span>
                           <span className={isIncoming ? 'text-nile-success font-medium' : 'text-gold font-medium'}>
                             @{h.to_profile?.username ?? '—'}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 mt-0.5">
+                        <div className="flex items-center gap-2 mt-0.5">
                           {h.note && <span className="text-white/30 text-xs truncate">{h.note}</span>}
                           <span className="text-white/20 text-xs">{formatDate(h.created_at)}</span>
                         </div>
@@ -499,7 +499,7 @@ export default function AgentCreditsPage() {
 
                       {/* Amount */}
                       <div className={cn(
-                        'font-mono font-bold text-sm flex-shrink-0',
+                        'font-mono font-bold text-xs md:text-sm flex-shrink-0',
                         isIncoming ? 'text-nile-success' : 'text-gold'
                       )}>
                         {isIncoming ? '+' : '-'}{formatETB(h.amount)}
