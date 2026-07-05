@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuthStore } from '@/lib/stores/authStore'
 import {
   calculateSlip,
@@ -61,7 +62,9 @@ const emptyCalc: SlipCalculation = {
 }
 
 export const useBetSlipStore =
-  create<BetSlipState>((set, get) => ({
+  create<BetSlipState>()(
+  persist(
+    (set, get) => ({
     selections: [],
     stake: 0,
     calculation: emptyCalc,
@@ -188,4 +191,15 @@ export const useBetSlipStore =
         get().selections,
         settings
       ),
-  }))
+    }),
+    {
+      name: 'nilebet-betslip',
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({
+        selections: state.selections,
+        stake: state.stake,
+        calculation: state.calculation,
+      }),
+    }
+  )
+)
