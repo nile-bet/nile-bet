@@ -206,18 +206,18 @@ export function PublicNavbar() {
       </div>
 
       {/* Desktop center nav */}
-      <div className="hidden md:flex relative border-t border-white/10 items-center px-6 h-12" style={{ background: 'linear-gradient(90deg, #1a0e3a 0%, #1e1248 50%, #1a0e3a 100%)' }}>
+      <div className="hidden md:flex relative border-t border-gold/10 items-center px-6 h-12 bg-slate-dark">
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-12">
-          <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-white transition-colors group">
-            <Home className="w-4 h-4 group-hover:text-gold transition-colors" />
+          <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-gold transition-colors group">
+            <Home className="w-5 h-5 group-hover:text-gold transition-colors" />
             <span>Home</span>
           </Link>
-          <button onClick={handleSportsClick} className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-white transition-colors group">
-            <Globe className="w-4 h-4 group-hover:text-gold transition-colors" />
+          <button onClick={handleSportsClick} className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-gold transition-colors group">
+            <Globe className="w-5 h-5 group-hover:text-gold transition-colors" />
             <span>Sports</span>
           </button>
-          <Link href="/results" className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-white transition-colors group">
-            <BarChart2 className="w-4 h-4 group-hover:text-gold transition-colors" />
+          <Link href="/results" className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-gold transition-colors group">
+            <BarChart2 className="w-5 h-5 group-hover:text-gold transition-colors" />
             <span>Results</span>
           </Link>
         </div>
