@@ -229,9 +229,10 @@ export function BetSlipSidebar({
                 setLoadingSlip(false)
                 return
               }
-              // Load selections into bet slip
+              // Load selections into bet slip, skipping any match that already started
               clearSlip()
               const sels = (slip as any).slip_selections ?? []
+              let skippedCount = 0
               sels.forEach((s: any) => {
                 const match = s.matches as any
                 const market = s.match_markets as any
@@ -239,6 +240,14 @@ export function BetSlipSidebar({
                 const category = template?.market_categories as any
                 const leagues = match?.leagues as any
                 const countries = leagues?.countries as any
+                const matchStatus = match?.status ?? 'upcoming'
+                const kickOffPassed =
+                  match?.kick_off_time &&
+                  new Date(match.kick_off_time).getTime() <= Date.now()
+                if (matchStatus !== 'upcoming' || kickOffPassed) {
+                  skippedCount++
+                  return
+                }
                 useBetSlipStore.getState().addSelection({
                   matchId: s.match_id,
                   matchMarketId: s.match_market_id,
@@ -251,9 +260,16 @@ export function BetSlipSidebar({
                   selection: s.selection,
                   odd: s.odd_at_placement,
                   kickOffTime: match?.kick_off_time ?? '',
-                  matchStatus: match?.status ?? 'upcoming',
+                  matchStatus,
                 })
               })
+              if (skippedCount > 0) {
+                setLoadError(
+                  skippedCount === sels.length
+                    ? 'All matches in this slip have already started'
+                    : `${skippedCount} selection(s) skipped — match already started`
+                )
+              }
               if ((slip as any).stake) setStake((slip as any).stake)
               setCopySlipId('')
               setLoadingSlip(false)

@@ -113,11 +113,13 @@ export async function placeBet(input: {
   ]
   const { data: matchCheck } = await supabase
     .from('matches')
-    .select('id, status, home_team, away_team')
+    .select('id, status, home_team, away_team, kick_off_time')
     .in('id', matchIds)
-
+  const placeBetNow = Date.now()
   const closedMatch = matchCheck?.find(
-    (m: any) => m.status !== 'upcoming'
+    (m: any) =>
+      m.status !== 'upcoming' ||
+      (m.kick_off_time && new Date(m.kick_off_time).getTime() <= placeBetNow)
   )
   if (closedMatch) {
     return {
@@ -125,7 +127,6 @@ export async function placeBet(input: {
       error: `${closedMatch.home_team} vs ${closedMatch.away_team} has already started`,
     }
   }
-
   // Check placer balance <
   const { data: placer } = await supabase
     .from('profiles')
@@ -735,6 +736,25 @@ export async function rebetSlip(
   // 3. Build selections with current odds
   const selections = (slip.slip_selections as any[]) ?? []
   if (selections.length === 0) return { success: false, error: 'No selections found' }
+
+  // 3b. Reject if any match has already started
+  const matchIds = [...new Set(selections.map((s: any) => s.match_id))]
+  const { data: matchCheck } = await adminClient
+    .from('matches')
+    .select('id, status, home_team, away_team, kick_off_time')
+    .in('id', matchIds)
+  const rebetNow = Date.now()
+  const closedMatch = matchCheck?.find(
+    (m: any) =>
+      m.status !== 'upcoming' ||
+      (m.kick_off_time && new Date(m.kick_off_time).getTime() <= rebetNow)
+  )
+  if (closedMatch) {
+    return {
+      success: false,
+      error: `${closedMatch.home_team} vs ${closedMatch.away_team} has already started`,
+    }
+  }
 
   const newSelections = selections.map((s: any) => {
     const currentOdd = s.match_markets?.match_market_odds?.find((o: any) => o.selection === s.selection)?.odd_value ?? s.odd_at_placement
