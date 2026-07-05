@@ -207,6 +207,56 @@ export default function RootLayout({
                 }
                 sessionStorage.setItem(key, '1');
               })();
+
+              // Scroll position restore on reload
+              (function() {
+                var scrollKey = 'nilebet_scroll_' + window.location.pathname;
+                // Restore scroll position
+                var saved = sessionStorage.getItem(scrollKey);
+                if (saved) {
+                  window.addEventListener('load', function() {
+                    setTimeout(function() {
+                      var pos = parseInt(saved, 10);
+                      // Try main scrollable containers first, then window
+                      var containers = [
+                        document.querySelector('main.flex-1.overflow-y-auto'),
+                        document.querySelector('.flex-1.overflow-y-auto'),
+                        window
+                      ];
+                      for (var i = 0; i < containers.length; i++) {
+                        if (containers[i]) {
+                          if (containers[i] === window) {
+                            window.scrollTo(0, pos);
+                          } else {
+                            containers[i].scrollTop = pos;
+                          }
+                          break;
+                        }
+                      }
+                    }, 300);
+                  });
+                }
+                // Save scroll position before unload
+                window.addEventListener('beforeunload', function() {
+                  var containers = [
+                    document.querySelector('main.flex-1.overflow-y-auto'),
+                    document.querySelector('.flex-1.overflow-y-auto'),
+                  ];
+                  var pos = 0;
+                  for (var i = 0; i < containers.length; i++) {
+                    if (containers[i] && containers[i].scrollTop > 0) {
+                      pos = containers[i].scrollTop;
+                      break;
+                    }
+                  }
+                  if (pos === 0) pos = window.scrollY;
+                  if (pos > 0) {
+                    sessionStorage.setItem(scrollKey, pos.toString());
+                  } else {
+                    sessionStorage.removeItem(scrollKey);
+                  }
+                });
+              })();
             `,
           }}
         />
