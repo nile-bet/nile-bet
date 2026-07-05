@@ -420,7 +420,7 @@ export async function getAgentProfitReport(filters?: DateFilters) {
   }
 
   return Object.values(map).map((r: any) => {
-    r.grossProfit = r.totalCollected - r.totalPaidOut - r.taxCollected
+    r.grossProfit = r.totalCollected - r.totalPaidOut
     r.agentShare = r.grossProfit * 0.6
     r.cashierShare = r.grossProfit * 0.4
     return r
@@ -596,7 +596,7 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
     }
     map[period].slipCount += 1
     map[period].totalStaked += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') {
+    if (slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)) {
       map[period].totalPaidOut += (slip.status === 'near_win' || slip.insurance_applied)
         ? (slip.insurance_payout ?? slip.net_payout ?? 0)
         : (slip.net_payout ?? 0)
@@ -613,15 +613,15 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
     }
     map[period].slipCount += 1
     map[period].totalStaked += slip.stake ?? 0
-    if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') {
+    if (slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)) {
       const tax = slip.reward_tax ?? (slip.reward_amount ?? 0) * 0.15
-      map[period].totalPaidOut += (slip.reward_amount ?? 0) - tax
+      map[period].totalPaidOut += (slip.reward_amount ?? 0)
       map[period].taxCollected += tax
     }
   }
 
   return Object.values(map).map((r) => {
-    r.grossProfit = r.totalStaked - r.totalPaidOut - r.taxCollected
+    r.grossProfit = r.totalStaked - r.totalPaidOut
     return r
   }).sort((a: any, b: any) => a.period.localeCompare(b.period))
 }
@@ -766,7 +766,7 @@ export async function getJackpotProfitReport(filters?: DateFilters) {
   }
 
   return Object.values(map).map((r: any) => {
-    r.grossProfit = r.totalCollected - r.netPaidOut - r.taxCollected
+    r.grossProfit = r.totalCollected - r.netPaidOut
     return r
   }).sort((a: any, b: any) => a.date.localeCompare(b.date))
 }
