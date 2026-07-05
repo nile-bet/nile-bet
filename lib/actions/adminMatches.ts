@@ -33,6 +33,15 @@ export async function getMatchesForAdmin(
   } = filters
   const offset = (page - 1) * limit
 
+  // Auto-close any 'upcoming' match whose kick_off_time has passed.
+  // This makes the close happen the moment kickoff is reached, without a cron job —
+  // it self-heals on every admin page load, mirroring the jackpot auto-close pattern.
+  await supabase
+    .from('matches')
+    .update({ status: 'closed' })
+    .eq('status', 'upcoming')
+    .lt('kick_off_time', new Date().toISOString())
+
   let query = supabase
     .from('matches')
     .select(
