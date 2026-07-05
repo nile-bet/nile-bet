@@ -11,6 +11,8 @@ import { InstallPrompt }
   from '@/components/shared/InstallPrompt'
 import { SessionTimeoutWarning }
   from '@/components/shared/SessionTimeoutWarning'
+import { ScrollRestorer }
+  from '@/components/shared/ScrollRestorer'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -277,6 +279,7 @@ export default function RootLayout({
             },
           }}
         />
+        <ScrollRestorer />
         <InstallPrompt />
         <SessionTimeoutWarning />
       </body>
