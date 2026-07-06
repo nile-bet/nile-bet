@@ -93,10 +93,9 @@ export function BetSlipSidebar({
   // Realtime: auto-flag and auto-remove selections when match goes closed
   useEffect(() => {
     const supabase = createClient()
-    const matchIds = useBetSlipStore.getState().selections.map(s => s.matchId)
-    if (!matchIds.length) return
+    const channelName = `betslip-match-status-${forceVisible ? 'mobile' : 'desktop'}-${Math.random().toString(36).slice(2)}`
     const channel = supabase
-      .channel('betslip-match-status')
+      .channel(channelName)
       .on('postgres_changes', {
         event: 'UPDATE',
         schema: 'public',
@@ -188,7 +187,10 @@ export function BetSlipSidebar({
 
   return (
     <>
-    <div className={forceVisible ? "flex w-full flex-col bg-[#1C2155] h-full" : "hidden md:flex w-[240px] flex-shrink-0 bg-[#1C2155] border-l border-[rgba(212,175,55,0.15)] rounded-none flex-col"} style={{ fontSize: "78%", position: "sticky", top: "60px", height: "calc(100vh - 60px)" }}>
+    <div
+      className={forceVisible ? "flex w-full flex-col bg-[#1C2155] h-full" : "hidden md:flex w-[240px] flex-shrink-0 bg-[#1C2155] border-l border-[rgba(212,175,55,0.15)] rounded-none flex-col"}
+      style={forceVisible ? { fontSize: "78%" } : { fontSize: "78%", position: "sticky", top: "60px", height: "calc(100vh - 60px)" }}
+    >
       {/* Header */}
       <div className="px-4 py-3 border-b border-gold/10 flex items-center justify-between">
         <h3 className="font-semibold text-white text-sm flex items-center gap-2">

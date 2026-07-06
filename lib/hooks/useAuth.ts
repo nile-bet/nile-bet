@@ -165,7 +165,7 @@ export function useAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session?.user) return
       profileChannel = supabase
-        .channel(`profile-status-${session.user.id}`)
+        .channel(`profile-status-${session.user.id}-${Math.random().toString(36).slice(2)}`)
         .on('postgres_changes', {
           event: 'UPDATE',
           schema: 'public',
