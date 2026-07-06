@@ -596,9 +596,10 @@ export async function suspendUserByAgent(
 
   if (updateErr) return { success: false, error: 'Failed to update status: ' + updateErr.message }
 
-  if (suspend) {
-    await adminClient.auth.admin.signOut(targetId, 'global').catch(() => {})
-  }
+  // Note: Supabase's admin.signOut() expects a JWT access token, not a user ID,
+  // so calling it with targetId always fails (403). The realtime profile-status
+  // listener in useAuth already force-logs-out suspended users client-side,
+  // so we rely on that instead of a broken server-side call here.
 
   await adminClient.from('notifications').insert({
     to_user_id: targetId,
