@@ -568,7 +568,7 @@ export async function getPlatformProfitReport(granularity?: string, filters?: Da
 
   let jpQuery = supabase
     .from('jackpot_slips')
-    .select('stake, reward_amount, reward_tax, status, created_at')
+    .select('stake, reward_amount, reward_tax, status, redeemed_at, created_at')
     .order('created_at', { ascending: false })
     .limit(2000)
   if (networkIds.length > 0) jpQuery = jpQuery.in('placed_by', networkIds)
