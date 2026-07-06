@@ -118,9 +118,10 @@ export default function CashierActivityPage() {
       ),
     },
     {
-      key: 'details',
+      key: 'reprint',
       label: '',
-      render: (v: any, row: any) => {
+      render: (_v: any, row: any) => {
+        const v = row.details
         const isNormal = row.action === 'bet_placed'
         const isJackpot = row.action === 'jackpot_bet_placed'
         if ((!isNormal && !isJackpot) || !v?.slip_id) return null
