@@ -437,7 +437,7 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
 
   let query = supabase
     .from('slips')
-    .select('bettor_id, placed_by, stake, net_payout, insurance_applied, insurance_payout, insurance_tax, status, created_at, profiles!slips_bettor_id_fkey(username)')
+    .select('bettor_id, placed_by, stake, net_payout, insurance_applied, insurance_payout, insurance_tax, status, is_anonymous, redeemed_at, created_at, profiles!slips_bettor_id_fkey(username)')
     .order('created_at', { ascending: false })
     .limit(1000)
 
@@ -450,7 +450,7 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
 
   let jpQuery = supabase
     .from('jackpot_slips')
-    .select('bettor_id, placed_by, stake, reward_amount, reward_tax, status, created_at, profiles!jackpot_slips_bettor_id_fkey(username)')
+    .select('bettor_id, placed_by, stake, reward_amount, reward_tax, status, is_anonymous, redeemed_at, created_at, profiles!jackpot_slips_bettor_id_fkey(username)')
     .order('created_at', { ascending: false })
     .limit(1000)
   if (cashierIds) jpQuery = jpQuery.in('placed_by', cashierIds)
@@ -487,7 +487,8 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       }
       map[key].slipCount += 1
       map[key].totalStaked += slip.stake ?? 0
-      if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') {
+      const isRedeemed = slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)
+      if (isRedeemed) {
         map[key].totalPaid += (slip.status === 'near_win' || slip.insurance_applied)
           ? (slip.insurance_payout ?? slip.net_payout ?? 0)
           : (slip.net_payout ?? 0)
@@ -502,9 +503,9 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       map[key].slipCount += 1
       map[key].jackpotSlipCount += 1
       map[key].totalStaked += slip.stake ?? 0
-      if (slip.status === 'won' || slip.status === 'paid' || slip.status === 'near_win') {
-        const tax = slip.reward_tax ?? (slip.reward_amount ?? 0) * 0.15
-        map[key].totalPaid += (slip.reward_amount ?? 0) - tax
+      const jpIsRedeemed = slip.status === 'paid' || (slip.status === 'near_win' && (slip as any).redeemed_at)
+      if (jpIsRedeemed) {
+        map[key].totalPaid += (slip.reward_amount ?? 0)
       }
     }
     return Object.values(map)
@@ -512,10 +513,10 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       .sort((a, b) => b.netProfit - a.netProfit)
       .slice(0, 20)
   } else {
-    // Group by bettor username
+    // Group by bettor username (anonymous slips bucketed separately, never attributed to a random id)
     const map: Record<string, any> = {}
     for (const slip of slips) {
-      const username = (slip.profiles as any)?.username ?? slip.bettor_id ?? 'unknown'
+      const username = (slip as any).is_anonymous ? 'Anonymous' : ((slip.profiles as any)?.username ?? 'unknown')
       if (!map[username]) {
         map[username] = { username, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, jackpotWon: 0, jackpotLost: 0, winRate: 0 }
       }
@@ -525,7 +526,7 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       if (slip.status === 'lost') map[username].lostBets += 1
     }
     for (const slip of jackpotSlips) {
-      const username = (slip.profiles as any)?.username ?? slip.bettor_id ?? 'unknown'
+      const username = (slip as any).is_anonymous ? 'Anonymous' : ((slip.profiles as any)?.username ?? 'unknown')
       if (!map[username]) {
         map[username] = { username, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, jackpotWon: 0, jackpotLost: 0, winRate: 0 }
       }
