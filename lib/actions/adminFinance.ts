@@ -723,7 +723,7 @@ export async function getJackpotProfitReport(filters?: DateFilters) {
 
   let query = supabase
     .from('jackpot_slips')
-    .select('slip_id, stake, reward_amount, reward_tax, status, redeemed_at, jackpot_id, created_at, jackpots(name)')
+    .select('slip_id, stake, reward_amount, reward_tax, status, redeemed_at, is_insured, jackpot_id, created_at, jackpots(name)')
     .order('created_at', { ascending: false })
     .limit(2000)
   if (networkIds.length > 0) query = query.in('placed_by', networkIds)
@@ -753,8 +753,9 @@ export async function getJackpotProfitReport(filters?: DateFilters) {
     map[date].totalSlips += 1
     map[date].totalCollected += slip.stake ?? 0
 
-    if (slip.status === 'won') map[date].won += 1
-    else if (slip.status === 'near_win') map[date].nearWin += 1
+    const isLegacyInsuredPaid = slip.status === 'paid' && (slip as any).is_insured === true
+    if (slip.status === 'won' || (slip.status === 'paid' && !isLegacyInsuredPaid)) map[date].won += 1
+    else if (slip.status === 'near_win' || isLegacyInsuredPaid) map[date].nearWin += 1
     else if (slip.status === 'lost') map[date].lost += 1
     else if (slip.status === 'pending') map[date].pending += 1
 
