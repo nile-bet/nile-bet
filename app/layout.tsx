@@ -38,27 +38,27 @@ export const metadata: Metadata = {
       'https://nile-bet.vercel.app'
   ),
   title: {
-    default: 'NILE Bet — Flow into Wins',
-    template: '%s | NILE Bet',
+    default: 'NILE Betting — Flow into Wins',
+    template: '%s | NILE Betting',
   },
   description:
-    "Ethiopia's premier sports betting platform. Bet on football, win big with NILE Bet.",
+    "Ethiopia's premier sports betting platform. Bet on football, win big with NILE Betting.",
   keywords: [
     'sports betting',
     'Ethiopia',
     'football betting',
     'jackpot',
-    'NILE Bet',
+    'NILE Betting',
   ],
-  authors: [{ name: 'NILE Bet' }],
-  creator: 'NILE Bet',
-  publisher: 'NILE Bet',
-  applicationName: 'NILE Bet',
+  authors: [{ name: 'NILE Betting' }],
+  creator: 'NILE Betting',
+  publisher: 'NILE Betting',
+  applicationName: 'NILE Betting',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'NILE Bet',
+    title: 'NILE Betting',
     startupImage: [
       {
         url: '/icons/icon-512x512.png',
@@ -71,8 +71,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_ET',
     url: 'https://nile-bet.vercel.app',
-    siteName: 'NILE Bet',
-    title: 'NILE Bet — Flow into Wins',
+    siteName: 'NILE Betting',
+    title: 'NILE Betting — Flow into Wins',
     description:
       "Ethiopia's premier sports betting platform",
     images: [
@@ -80,13 +80,13 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'NILE Bet',
+        alt: 'NILE Betting',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NILE Bet — Flow into Wins',
+    title: 'NILE Betting — Flow into Wins',
     description:
       "Ethiopia's premier sports betting platform",
     images: ['/og-image.png'],
@@ -148,7 +148,7 @@ export default function RootLayout({
         />
         <meta
           name="apple-mobile-web-app-title"
-          content="NILE Bet"
+          content="NILE Betting"
         />
         {/* Apple icons */}
         <link

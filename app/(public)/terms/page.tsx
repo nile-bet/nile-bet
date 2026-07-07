@@ -13,12 +13,12 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-white font-semibold text-lg mb-3">1. Acceptance of Terms</h2>
-            <p>By accessing or using the NILE Bet platform, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services. NILE Bet reserves the right to modify these terms at any time, and continued use of the platform constitutes acceptance of any changes.</p>
+            <p>By accessing or using the NILE Betting platform, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services. NILE Betting reserves the right to modify these terms at any time, and continued use of the platform constitutes acceptance of any changes.</p>
           </section>
 
           <section>
             <h2 className="text-white font-semibold text-lg mb-3">2. Eligibility</h2>
-            <p className="mb-2">To use NILE Bet services, you must:</p>
+            <p className="mb-2">To use NILE Betting services, you must:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>Be at least 18 years of age</li>
               <li>Be legally permitted to participate in online sports betting in your jurisdiction</li>
@@ -29,7 +29,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-white font-semibold text-lg mb-3">3. Account Registration</h2>
-            <p className="mb-2">Each user may only maintain one account. You are responsible for maintaining the confidentiality of your account credentials. You must notify us immediately of any unauthorized use of your account. NILE Bet reserves the right to suspend or terminate accounts that violate these terms.</p>
+            <p className="mb-2">Each user may only maintain one account. You are responsible for maintaining the confidentiality of your account credentials. You must notify us immediately of any unauthorized use of your account. NILE Betting reserves the right to suspend or terminate accounts that violate these terms.</p>
           </section>
 
           <section>
@@ -37,7 +37,7 @@ export default function TermsPage() {
             <ul className="list-disc pl-5 space-y-1">
               <li>All bets are subject to the minimum and maximum stake limits set by the platform</li>
               <li>Bets placed on closed or suspended markets will be voided</li>
-              <li>NILE Bet reserves the right to void bets placed in error or due to technical issues</li>
+              <li>NILE Betting reserves the right to void bets placed in error or due to technical issues</li>
               <li>Winnings are subject to a 15% withholding tax as required by law</li>
               <li>Bets cannot be cancelled after the cancellation window has passed</li>
               <li>Maximum payout per slip is subject to platform limits</li>
@@ -46,12 +46,12 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-white font-semibold text-lg mb-3">5. Deposits & Withdrawals</h2>
-            <p className="mb-2">All deposits and withdrawals are processed through authorized cashiers and agents. NILE Bet is not responsible for delays caused by third-party payment processors. Withdrawal requests are subject to verification and may require identity confirmation.</p>
+            <p className="mb-2">All deposits and withdrawals are processed through authorized cashiers and agents. NILE Betting is not responsible for delays caused by third-party payment processors. Withdrawal requests are subject to verification and may require identity confirmation.</p>
           </section>
 
           <section>
             <h2 className="text-white font-semibold text-lg mb-3">6. Responsible Gambling</h2>
-            <p className="mb-2">NILE Bet is committed to promoting responsible gambling. We offer self-exclusion tools and encourage users to gamble responsibly. If you feel you have a gambling problem, please seek help from a professional organization. Users showing signs of problem gambling may have their accounts restricted.</p>
+            <p className="mb-2">NILE Betting is committed to promoting responsible gambling. We offer self-exclusion tools and encourage users to gamble responsibly. If you feel you have a gambling problem, please seek help from a professional organization. Users showing signs of problem gambling may have their accounts restricted.</p>
           </section>
 
           <section>
@@ -67,17 +67,17 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-white font-semibold text-lg mb-3">8. Bonuses & Promotions</h2>
-            <p>All bonuses and promotions are subject to specific terms and wagering requirements. NILE Bet reserves the right to modify, suspend, or cancel any promotion at any time. Abuse of bonus systems will result in account suspension and forfeiture of winnings.</p>
+            <p>All bonuses and promotions are subject to specific terms and wagering requirements. NILE Betting reserves the right to modify, suspend, or cancel any promotion at any time. Abuse of bonus systems will result in account suspension and forfeiture of winnings.</p>
           </section>
 
           <section>
             <h2 className="text-white font-semibold text-lg mb-3">9. Limitation of Liability</h2>
-            <p>NILE Bet shall not be liable for any losses arising from technical failures, system downtime, or events beyond our reasonable control. The platform is provided "as is" without warranties of any kind. Users bet at their own risk.</p>
+            <p>NILE Betting shall not be liable for any losses arising from technical failures, system downtime, or events beyond our reasonable control. The platform is provided "as is" without warranties of any kind. Users bet at their own risk.</p>
           </section>
 
           <section>
             <h2 className="text-white font-semibold text-lg mb-3">10. Privacy</h2>
-            <p>Your use of NILE Bet is also governed by our <a href="/privacy" className="text-gold hover:text-gold-light underline">Privacy Policy</a>, which is incorporated into these terms by reference.</p>
+            <p>Your use of NILE Betting is also governed by our <a href="/privacy" className="text-gold hover:text-gold-light underline">Privacy Policy</a>, which is incorporated into these terms by reference.</p>
           </section>
 
           <section>
@@ -91,7 +91,7 @@ export default function TermsPage() {
           </section>
 
           <div className="border-t border-nile-blue/20 pt-6">
-            <p className="text-white/30 text-xs">By using NILE Bet, you confirm that you have read, understood, and agree to these Terms & Conditions. Must be 18+ to bet. Please gamble responsibly.</p>
+            <p className="text-white/30 text-xs">By using NILE Betting, you confirm that you have read, understood, and agree to these Terms & Conditions. Must be 18+ to bet. Please gamble responsibly.</p>
           </div>
         </div>
       </main>

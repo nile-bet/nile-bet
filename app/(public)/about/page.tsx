@@ -8,7 +8,7 @@ export default function AboutPage() {
       <PublicNavbar />
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-10 text-center">
         <div className="flex justify-center mb-6"><Logo size="lg" showTagline /></div>
-        <h1 className="font-display text-3xl font-bold text-white mb-4">About NILE Bet</h1>
+        <h1 className="font-display text-3xl font-bold text-white mb-4">About NILE Betting</h1>
         <p className="text-white/60 leading-relaxed mb-8">Premium international sports betting platform built for Ethiopians. The most competitive sports betting platform with 100+ markets and 50+ leagues.</p>
         <div className="grid grid-cols-3 gap-6 mb-8">
           {[{ v: '50+', l: 'Leagues' }, { v: '100+', l: 'Markets' }, { v: 'ETB 250K', l: 'Jackpot Prize' }].map(item => (

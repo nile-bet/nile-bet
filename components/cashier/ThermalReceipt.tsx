@@ -59,7 +59,7 @@ export const ThermalReceipt = forwardRef<
     cashierUsername,
     agentUsername,
     placedAt,
-    platformName = 'NILE Bet',
+    platformName = 'NILE Betting',
     platformSlogan = 'Flow into Wins',
     isAnonymous = false,
     insuranceApplied = false,

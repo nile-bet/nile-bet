@@ -261,7 +261,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
                   >
                     {/* Header */}
                     <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: '4px', marginBottom: '6px' }}>
-                      <div style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '3px' }}>NILE BET</div>
+                      <div style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '3px' }}>NILE BETTING</div>
                       <div style={{ fontSize: '10px' }}>Flow into Wins</div>
                       <div style={{ fontSize: '13px', fontWeight: 'bold', marginTop: '2px' }}>🏆 WEEKEND JACKPOT</div>
                       <div style={{ fontSize: '9px', marginTop: '3px', color: '#555' }}>
@@ -339,7 +339,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
                     {/* Footer */}
                     <div style={{ borderTop: '1px dashed #000', marginTop: '6px', paddingTop: '4px', textAlign: 'center', fontSize: '9px', color: '#555' }}>
                       <div>Good luck! 🏆</div>
-                      <div style={{ fontWeight: 'bold' }}>NILE BET</div>
+                      <div style={{ fontWeight: 'bold' }}>NILE BETTING</div>
                       <div>Must be 18+ to bet</div>
                       <div style={{ marginTop: '4px' }}>═══════════════════════</div>
                     </div>

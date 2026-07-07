@@ -258,7 +258,7 @@ export function TopupFlowModal({
             </div>
 
             <p className="text-white/50 text-sm text-center">
-              Show this code to any NILE Bet
+              Show this code to any NILE Betting
               cashier or agent to top up your
               balance
             </p>

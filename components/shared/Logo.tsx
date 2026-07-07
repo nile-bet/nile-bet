@@ -38,7 +38,7 @@ export function Logo({
     >
       <Image
         src={LOGO_URL}
-        alt="NILE Bet Logo"
+        alt="NILE Betting Logo"
         width={imgSize}
         height={imgSize}
         className="object-contain flex-shrink-0"
@@ -51,7 +51,7 @@ export function Logo({
             nameSize
           )}
         >
-          NILE Bet
+          NILE Betting
         </span>
         {showTagline && (
           <span className="text-[9px] text-nile-blue-light tracking-[2px] uppercase font-body mt-0.5">

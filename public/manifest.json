@@ -1,6 +1,6 @@
 {
-  "name": "NILE Bet",
-  "short_name": "NILEBet",
+  "name": "NILE Betting",
+  "short_name": "Nile Betting",
   "description": "Flow into Wins — Ethiopia's premium sports betting platform",
   "start_url": "/",
   "display": "standalone",
@@ -102,7 +102,7 @@
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "NILE Bet Home"
+      "label": "NILE Betting Home"
     }
   ],
   "prefer_related_applications": false,

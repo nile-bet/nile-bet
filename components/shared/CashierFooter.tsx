@@ -88,7 +88,7 @@ export function CashierFooter() {
       {/* Bottom bar */}
       <div className="border-t border-gold/10 py-4 px-6">
         <p className="text-xs text-white/30 text-center">
-          © 2026 NILE Bet. All rights reserved. Bet responsibly. 18+ only.
+          © 2026 NILE Betting. All rights reserved. Bet responsibly. 18+ only.
         </p>
       </div>
     </footer>

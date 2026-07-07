@@ -273,7 +273,7 @@ export function WithdrawalFlowModal({
             </div>
 
             <p className="text-white/50 text-sm text-center">
-              Take this code to any NILE Bet
+              Take this code to any NILE Betting
               cashier to collect your cash
             </p>
 

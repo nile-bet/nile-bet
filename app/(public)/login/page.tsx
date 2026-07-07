@@ -131,7 +131,7 @@ export default function LoginPage() {
 
           <div className="flex items-center gap-3 my-4">
             <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
-            <span className="text-xs" style={{ color: '#A9B4D0' }}>New to NILE Bet?</span>
+            <span className="text-xs" style={{ color: '#A9B4D0' }}>New to NILE Betting?</span>
             <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
           </div>
 

@@ -50,7 +50,7 @@ export default function RegisterPage() {
     setError('')
     const result = await registerBettor(username.trim(), password)
     if (result.success) {
-      toast.success('🌊 Welcome to NILE Bet!')
+      toast.success('🌊 Welcome to NILE Betting!')
       window.location.href = '/'
     } else {
       setError(result.error ?? 'Registration failed')

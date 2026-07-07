@@ -4,7 +4,7 @@ export default function CashierRulesPage() {
   return (
     <div className="px-35 py-4 max-w-3xl">
       <h1 className="font-display text-3xl font-bold text-white mb-2">Rules & Regulations</h1>
-      <p className="text-white/40 text-sm mb-8">NILE Bet Official Betting Rules</p>
+      <p className="text-white/40 text-sm mb-8">NILE Betting Official Betting Rules</p>
       <div className="space-y-8 text-white/70 text-sm leading-relaxed">
         <section>
           <h2 className="text-white font-semibold text-lg mb-3">General Rules</h2>
@@ -12,7 +12,7 @@ export default function CashierRulesPage() {
             <li>All bets must be placed before the match kicks off</li>
             <li>Minimum 4 selections required per bet slip</li>
             <li>Maximum odds per selection apply</li>
-            <li>NILE Bet reserves the right to void any bet placed in error</li>
+            <li>NILE Betting reserves the right to void any bet placed in error</li>
           </ul>
         </section>
         <section>

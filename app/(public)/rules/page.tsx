@@ -14,9 +14,9 @@ const sections = [
     id: '1',
     title: '1. General Betting Rules',
     content: `
-      Acceptance of Bets: All bets are subject to availability and acceptance by NILE Bet. Bets are only valid once confirmed and a unique 8-digit Slip ID is generated. NILE Bet reserves the right to void or limit any bet at its discretion.
+      Acceptance of Bets: All bets are subject to availability and acceptance by NILE Betting. Bets are only valid once confirmed and a unique 8-digit Slip ID is generated. NILE Betting reserves the right to void or limit any bet at its discretion.
 
-      Settlement: All bets settled based on official results. Settlement occurs within 24 hours of event completion. In disputes, NILE Bet's decision is final.
+      Settlement: All bets settled based on official results. Settlement occurs within 24 hours of event completion. In disputes, NILE Betting's decision is final.
 
       Winning Tax: A 15% winning tax is deducted from all winning payouts. Net Payout = Max Payout × 0.85. Tax is automatically deducted at redemption.
     `,
@@ -25,7 +25,7 @@ const sections = [
     id: '2',
     title: '2. Odds & Market Rules',
     content: `
-      Market Label Corrections: Due to data variations, certain market labels may differ. NILE Bet reserves the right to correct these labels. The recorded odd at time of placement remains unchanged.
+      Market Label Corrections: Due to data variations, certain market labels may differ. NILE Betting reserves the right to correct these labels. The recorded odd at time of placement remains unchanged.
 
       All odds are sourced from our admin team. Odds are set until match kick-off. Odds at time of placement are final for that bet.
     `,
@@ -88,9 +88,9 @@ const sections = [
     content: `
       All disputes must be raised within 7 days of bet settlement via your cashier or admin.
 
-      Provide your Slip ID and a description of the issue. NILE Bet's decision is final.
+      Provide your Slip ID and a description of the issue. NILE Betting's decision is final.
 
-      Obvious pricing errors may result in bet cancellation at NILE Bet's discretion.
+      Obvious pricing errors may result in bet cancellation at NILE Betting's discretion.
 
       Maximum liability is limited to the stake amount of the bet in question.
     `,
@@ -140,10 +140,10 @@ export default function RulesPage() {
             IMPORTANT NOTICE
           </p>
           <p className="text-white/70 text-sm leading-relaxed">
-            By placing a bet with NILE Bet,
+            By placing a bet with NILE Betting,
             you confirm that you have read,
             understood, and agree to these
-            rules. NILE Bet reserves the
+            rules. NILE Betting reserves the
             right to amend these rules at
             any time without prior notice.
           </p>

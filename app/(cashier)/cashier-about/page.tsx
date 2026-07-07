@@ -7,9 +7,9 @@ export default function CashierAboutPage() {
       <div className="flex justify-center mb-8">
         <Logo size="lg" showTagline />
       </div>
-      <h1 className="font-display text-3xl font-bold text-white mb-4 text-center">About NILE Bet</h1>
+      <h1 className="font-display text-3xl font-bold text-white mb-4 text-center">About NILE Betting</h1>
       <div className="space-y-6 text-white/70 text-sm leading-relaxed">
-        <p>NILE Bet is Ethiopia's premier sports betting platform, offering the most competitive odds across 100+ markets and 50+ leagues worldwide.</p>
+        <p>NILE Betting is Ethiopia's premier sports betting platform, offering the most competitive odds across 100+ markets and 50+ leagues worldwide.</p>
         <p>We are committed to providing a safe, fair, and entertaining betting experience for all our users. Our platform is built with cutting-edge technology to ensure fast, reliable, and secure transactions.</p>
         <section>
           <h2 className="text-white font-semibold text-lg mb-3">Our Mission</h2>

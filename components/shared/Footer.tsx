@@ -139,7 +139,7 @@ export function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-gold/10 py-3 md:py-4 px-4 md:px-6">
         <p className="text-xs text-white/30 text-center">
-          © 2026 NILE Bet. All rights
+          © 2026 NILE Betting. All rights
           reserved. Bet responsibly. 18+
           only.
         </p>

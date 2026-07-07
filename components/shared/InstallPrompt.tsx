@@ -119,7 +119,7 @@ export function InstallPrompt() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-white font-semibold text-sm">
-            Install NILE Bet
+            Install NILE Betting
           </p>
           {isIOS ? (
             <p className="text-white/50 text-xs mt-0.5 leading-relaxed">

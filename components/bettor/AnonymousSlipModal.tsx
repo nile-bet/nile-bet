@@ -101,7 +101,7 @@ export function AnonymousSlipModal({
           <div ref={receiptRef} className="thermal-receipt bg-white text-black font-mono text-[11px] p-4" style={{ lineHeight: '1.5' }}>
             {/* Header */}
             <div className="text-center border-b border-dashed border-black pb-2 mb-3">
-              <div className="text-lg font-bold tracking-widest">NILE BET</div>
+              <div className="text-lg font-bold tracking-widest">NILE BETTING</div>
               <div className="text-[10px]">Flow into Wins</div>
               <div className="text-[9px] text-gray-500 mt-1">{new Date().toLocaleString('en-ET')}</div>
             </div>
@@ -157,7 +157,7 @@ export function AnonymousSlipModal({
 
             {/* Footer */}
             <div className="border-t border-dashed border-black mt-3 pt-2 text-center text-[9px] text-gray-500">
-              <div>Thank you for betting with NILE Bet</div>
+              <div>Thank you for betting with NILE Betting</div>
               <div>Must be 18+ · Bet responsibly</div>
               <div className="mt-1">═══════════════════</div>
             </div>

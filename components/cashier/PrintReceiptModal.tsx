@@ -92,7 +92,7 @@ export function PrintReceiptModal({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `NILE Bet Slip #${slipData.slipId}`,
+          title: `NILE Betting Slip #${slipData.slipId}`,
           text: `Check my bet slip! Potential win: ${formatETB(slipData.netPayout ?? 0)}`,
           url: slipUrl,
         })

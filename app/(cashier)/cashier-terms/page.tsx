@@ -8,7 +8,7 @@ export default function CashierTermsPage() {
       <div className="space-y-8 text-white/70 text-sm leading-relaxed">
         <section>
           <h2 className="text-white font-semibold text-lg mb-3">1. Acceptance of Terms</h2>
-          <p>By accessing or using the NILE Bet platform, you agree to be bound by these Terms and Conditions. NILE Bet reserves the right to modify these terms at any time.</p>
+          <p>By accessing or using the NILE Betting platform, you agree to be bound by these Terms and Conditions. NILE Betting reserves the right to modify these terms at any time.</p>
         </section>
         <section>
           <h2 className="text-white font-semibold text-lg mb-3">2. Eligibility</h2>
@@ -29,7 +29,7 @@ export default function CashierTermsPage() {
         </section>
         <section>
           <h2 className="text-white font-semibold text-lg mb-3">4. Responsible Gambling</h2>
-          <p>NILE Bet is committed to promoting responsible gambling. If you feel you have a gambling problem, please seek professional help.</p>
+          <p>NILE Betting is committed to promoting responsible gambling. If you feel you have a gambling problem, please seek professional help.</p>
         </section>
         <section>
           <h2 className="text-white font-semibold text-lg mb-3">5. Contact Us</h2>
