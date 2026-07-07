@@ -327,7 +327,7 @@ export function BetSlipSidebar({
               </button>
             )}
 
-            <div className="max-h-[200px] overflow-y-auto space-y-1.5 pr-0.5 scrollbar-thin">
+            <div className="max-h-[168px] overflow-y-auto space-y-1.5 pr-0.5 scrollbar-thin snap-y snap-mandatory">
             {selections.map((s) => {
               const started =
                 s.matchStatus === 'closed' ||
@@ -337,7 +337,7 @@ export function BetSlipSidebar({
                 <div
                   key={`${s.matchMarketId}-${s.selection}`}
                   className={cn(
-                    'rounded-lg p-2 border transition-colors',
+                    'rounded-lg p-2 border transition-colors snap-start',
                     started
                       ? 'border-nile-danger/60 bg-nile-danger/15'
                       : countdown
