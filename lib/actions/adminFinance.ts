@@ -646,15 +646,16 @@ export async function getTaxReport(filters?: DateFilters) {
 
   let jpQuery = supabase
     .from('jackpot_slips')
-    .select('reward_amount, status, created_at')
-    .in('status', ['won', 'near_win'])
+    .select('reward_amount, reward_tax, status, redeemed_at, created_at')
+    .in('status', ['paid', 'near_win'])
     .order('created_at', { ascending: false })
     .limit(2000)
   if (networkIds.length > 0) jpQuery = jpQuery.in('placed_by', networkIds)
   if (filters?.startDate) jpQuery = jpQuery.gte('created_at', filters.startDate)
   if (filters?.endDate) jpQuery = jpQuery.lte('created_at', filters.endDate)
   const { data: jpData } = await jpQuery
-  const jackpotSlips = jpData ?? []
+  // Only count slips that have actually been redeemed/paid (tax is only realized on payout)
+  const jackpotSlips = (jpData ?? []).filter((s: any) => s.status === 'paid' || (s.status === 'near_win' && s.redeemed_at))
 
   // Group by date
   const map: Record<string, any> = {}
@@ -677,12 +678,12 @@ export async function getTaxReport(filters?: DateFilters) {
     if (!map[date]) {
       map[date] = { date, winningSlips: 0, grossPayout: 0, taxAmount: 0, netPaidOut: 0 }
     }
-    const gross = slip.reward_amount ?? 0
-    const tax = gross * 0.15
+    const net = slip.reward_amount ?? 0
+    const tax = (slip as any).reward_tax ?? net * 0.15
     map[date].winningSlips += 1
-    map[date].grossPayout += gross
+    map[date].grossPayout += net + tax
     map[date].taxAmount += tax
-    map[date].netPaidOut += gross - tax
+    map[date].netPaidOut += net
   }
 
   return Object.values(map).sort((a: any, b: any) => a.date.localeCompare(b.date))
