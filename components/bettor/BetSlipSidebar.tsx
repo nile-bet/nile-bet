@@ -189,7 +189,7 @@ export function BetSlipSidebar({
     <>
     <div
       className={forceVisible ? "flex w-full flex-col bg-[#1C2155] h-full" : "hidden md:flex w-[240px] flex-shrink-0 bg-[#1C2155] border-l border-[rgba(212,175,55,0.15)] rounded-none flex-col"}
-      style={forceVisible ? { fontSize: "78%" } : { fontSize: "78%", position: "sticky", top: "60px", height: "calc(100vh - 60px)" }}
+      style={forceVisible ? { fontSize: "78%" } : { fontSize: "78%", position: "sticky", top: "60px", maxHeight: "calc(100vh - 60px)", overflowY: "auto" }}
     >
       {/* Header */}
       <div className="px-4 py-3 border-b border-gold/10 flex items-center justify-between">
@@ -299,7 +299,7 @@ export function BetSlipSidebar({
       )}
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide">
+      <div className="flex-1">
         {selections.length === 0 ? (
           /* Empty state */
           <div className="flex flex-col items-center justify-center h-full py-12 px-4 text-center">
@@ -327,7 +327,7 @@ export function BetSlipSidebar({
               </button>
             )}
 
-            <div className="max-h-[168px] overflow-y-auto space-y-1.5 pr-0.5 scrollbar-thin snap-y snap-mandatory">
+            <div className="space-y-1.5 pr-0.5">
             {selections.map((s) => {
               const started =
                 s.matchStatus === 'closed' ||
@@ -337,12 +337,12 @@ export function BetSlipSidebar({
                 <div
                   key={`${s.matchMarketId}-${s.selection}`}
                   className={cn(
-                    'rounded-lg p-2 border transition-colors snap-start',
+                    'rounded-lg p-2 border transition-colors h-[74px] overflow-hidden',
                     started
                       ? 'border-nile-danger/60 bg-nile-danger/15'
                       : countdown
                       ? 'border-nile-orange/40 bg-nile-orange/10'
-                      : 'border-gold/40 bg-gold/10'
+                      : 'border-gold/25 bg-gold/5'
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
