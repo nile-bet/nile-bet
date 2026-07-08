@@ -188,8 +188,8 @@ export function BetSlipSidebar({
   return (
     <>
     <div
-      className={forceVisible ? "flex w-full flex-col bg-[#1C2155] h-full" : "hidden md:flex w-[240px] flex-shrink-0 bg-[#1C2155] border-l border-[rgba(212,175,55,0.15)] rounded-none flex-col"}
-      style={forceVisible ? { fontSize: "78%" } : { fontSize: "78%", position: "sticky", top: "60px", maxHeight: "calc(100vh - 60px)", overflowY: "auto" }}
+        className={forceVisible ? "flex w-full flex-col bg-[#1C2155] h-full overflow-hidden" : "hidden md:flex w-[240px] flex-shrink-0 bg-[#1C2155] border-l border-[rgba(212,175,55,0.15)] rounded-none flex-col overflow-hidden"}
+        style={forceVisible ? { fontSize: "78%" } : { fontSize: "78%", position: "sticky", top: "60px", height: "calc(100vh - 60px)" }}
     >
       {/* Header */}
       <div className="px-4 py-3 border-b border-gold/10 flex items-center justify-between">
@@ -285,7 +285,7 @@ export function BetSlipSidebar({
       </div>
 
       {/* Wallet (logged in) */}
-      {isAuthenticated && user && (
+      {isAuthenticated && user && selections.length === 0 && (
         <div className="px-4 py-2 border-b border-gold/10">
           <div className="flex items-center justify-between">
             <span className="text-xs text-white/50">
@@ -299,7 +299,7 @@ export function BetSlipSidebar({
       )}
 
       {/* Scrollable content */}
-      <div className="flex-1">
+        <div className="flex-1 overflow-y-auto min-h-0" style={{ minHeight: "148px" }}>
         {selections.length === 0 ? (
           /* Empty state */
           <div className="flex flex-col items-center justify-center h-full py-12 px-4 text-center">
@@ -312,7 +312,7 @@ export function BetSlipSidebar({
             </p>
           </div>
         ) : (
-          <div className="p-3 space-y-1.5">
+          <div className="p-2 space-y-1">
             {/* Remove all started button */}
             {hasStarted && (
               <button
@@ -327,7 +327,7 @@ export function BetSlipSidebar({
               </button>
             )}
 
-            <div className="space-y-1.5 pr-0.5">
+            <div className="space-y-1 pr-0.5">
             {selections.map((s) => {
               const started =
                 s.matchStatus === 'closed' ||
@@ -337,7 +337,7 @@ export function BetSlipSidebar({
                 <div
                   key={`${s.matchMarketId}-${s.selection}`}
                   className={cn(
-                    'rounded-lg p-2 border transition-colors h-[74px] overflow-hidden',
+                    'rounded-lg p-1.5 border transition-colors h-[64px] overflow-hidden',
                     started
                       ? 'border-nile-danger/60 bg-nile-danger/15'
                       : countdown
@@ -350,14 +350,14 @@ export function BetSlipSidebar({
                       <p className="text-[12px] text-white font-semibold truncate leading-tight">
                         {s.homeTeam} vs {s.awayTeam}
                       </p>
-                      <p className="text-[9px] text-gold/50 truncate leading-tight mt-0.5">
+                      <p className="text-[9px] text-gold/50 truncate leading-tight mt-0">
                         {s.leagueName}
                       </p>
-                      <p className="text-[9px] text-white/30 flex items-center gap-0.5 leading-tight mt-0.5">
+                      <p className="text-[9px] text-white/30 flex items-center gap-0.5 leading-tight mt-0">
                         <Clock className="w-2.5 h-2.5" />
                         {formatKickOff(s.kickOffTime)}
                       </p>
-                      <p className="text-[10px] text-white/40 truncate leading-tight mt-0.5">
+                      <p className="text-[10px] text-white/40 truncate leading-tight mt-0">
                         {s.marketName}: <span className="text-white font-medium">{s.selection}</span>
                       </p>
                       {started ? (
@@ -405,22 +405,6 @@ export function BetSlipSidebar({
       {/* Footer: stake + calculation */}
       {selections.length > 0 && (
         <div className="border-t border-gold/10 p-4 space-y-3">
-          {/* Selection progress bar */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-[10px] text-white/40">Progress</span>
-              <span className={cn('text-[10px] font-medium', selections.length >= settings.minSelections ? 'text-nile-success' : 'text-nile-orange')}>
-                {selections.length}/{settings.minSelections} min
-              </span>
-            </div>
-            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className={cn('h-full rounded-full transition-all duration-300', selections.length >= settings.minSelections ? 'bg-nile-success shadow-[0_0_6px_rgba(34,197,94,0.6)]' : 'bg-nile-orange')}
-                style={{ width: `${Math.min((selections.length / settings.minSelections) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-
           {/* Total odds warning */}
           {calculation.totalOdds > 0 && (() => {
             const pct = calculation.totalOdds / settings.maxTotalOdds
