@@ -92,27 +92,27 @@ export function PublicNavbar() {
     <>
     <nav className="bg-slate-dark border-b border-gold/20 sticky top-0 z-50">
       {/* Top bar: Logo | Actions */}
-      <div className="h-11 md:h-14 px-2.5 md:px-6 flex items-center justify-between">
+      <div className="h-12 md:h-14 px-3 md:px-6 flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/">
           <Logo size="md" showTagline />
         </Link>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-1.5 md:gap-2">
+        <div className="flex items-center gap-2 md:gap-2">
           {!isAuthenticated ? (
             <>
               <div className="hidden md:block">
                 <JackpotButton />
               </div>
               <Link href="/check-slip">
-                <button className="flex items-center gap-1 bg-[#1C2155] border border-gold/30 text-gold px-2 py-1.5 md:px-3 md:py-2 rounded-lg text-[11px] md:text-xs font-semibold hover:bg-gold/10 transition-colors">
-                  <Receipt className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                <button className="flex items-center gap-1.5 bg-[#1C2155] border border-gold/30 text-gold px-2.5 py-2 md:px-3 md:py-2 rounded-lg text-xs font-semibold hover:bg-gold/10 transition-colors">
+                  <Receipt className="w-3.5 h-3.5" />
                   <span>Check</span>
                 </button>
               </Link>
               <Link href="/login">
-                <button className="bg-gold text-charcoal px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[11px] md:text-xs font-bold hover:bg-gold-light transition-colors">
+                <button className="bg-gold text-charcoal px-3.5 py-2 md:px-4 md:py-2 rounded-lg text-xs font-bold hover:bg-gold-light transition-colors">
                   LOGIN
                 </button>
               </Link>
@@ -130,14 +130,14 @@ export function PublicNavbar() {
               </div>
               {/* Jackpot button — mobile only */}
               <Link href="/weekend-jackpot" className="md:hidden">
-                <button className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
+                <button className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-bold transition-all ${
                   jackpotOpen
                     ? 'bg-gold text-charcoal animate-pulse-gold'
-                    : 'text-white/50 bg-white/10'
+                    : 'text-white/60 bg-white/10'
                 }`}>
-                  🏆
+                  🏆 JP
                   {!jackpotOpen && (
-                    <span className="text-[8px] px-1 rounded bg-white/10">CLOSED</span>
+                    <span className="text-[9px] px-1 rounded bg-white/10">CLOSED</span>
                   )}
                 </button>
               </Link>
@@ -145,7 +145,7 @@ export function PublicNavbar() {
               {/* Avatar dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-nile-blue border border-gold/30 flex items-center justify-center text-gold font-bold text-xs md:text-sm hover:border-gold/60 transition-colors">
+                  <button className="w-8 h-8 rounded-full bg-nile-blue border border-gold/30 flex items-center justify-center text-gold font-bold text-sm hover:border-gold/60 transition-colors">
                     {user?.username?.charAt(0).toUpperCase()}
                   </button>
                 </DropdownMenuTrigger>
@@ -183,25 +183,25 @@ export function PublicNavbar() {
 
       {/* Bottom icon tab bar — mobile only */}
       <div className="md:hidden border-t border-white/5 bg-[#0D1526] grid grid-cols-5">
-        <Link href="/" className="flex flex-col items-center justify-center gap-0.5 py-1.5 text-white/60 active:text-gold transition-colors">
-          <Home className="w-4 h-4" />
-          <span className="text-[8px] font-bold uppercase tracking-wide">Home</span>
+        <Link href="/" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white/60 active:text-gold transition-colors">
+          <Home className="w-[18px] h-[18px]" />
+          <span className="text-[9px] font-bold uppercase tracking-wide">Home</span>
         </Link>
-        <button onClick={handleSportsClick} className="flex flex-col items-center justify-center gap-0.5 py-1.5 text-white/60 active:text-gold transition-colors">
-          <Globe className="w-4 h-4" />
-          <span className="text-[8px] font-bold uppercase tracking-wide">Sport</span>
+        <button onClick={handleSportsClick} className="flex flex-col items-center justify-center gap-1 py-2.5 text-white/60 active:text-gold transition-colors">
+          <Globe className="w-[18px] h-[18px]" />
+          <span className="text-[9px] font-bold uppercase tracking-wide">Sport</span>
         </button>
-        <Link href="/results" className="flex flex-col items-center justify-center gap-0.5 py-1.5 text-white/60 active:text-gold transition-colors">
-          <BarChart2 className="w-4 h-4" />
-          <span className="text-[8px] font-bold uppercase tracking-wide">Results</span>
+        <Link href="/results" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white/60 active:text-gold transition-colors">
+          <BarChart2 className="w-[18px] h-[18px]" />
+          <span className="text-[9px] font-bold uppercase tracking-wide">Results</span>
         </Link>
-        <Link href="/weekend-jackpot" className="flex flex-col items-center justify-center gap-0.5 py-1.5">
-          <Trophy className={cn('w-4 h-4', jackpotOpen ? 'text-gold' : 'text-white/40')} />
-          <span className={cn('text-[8px] font-bold uppercase tracking-wide', jackpotOpen ? 'text-gold' : 'text-white/40')}>Jackpot</span>
+        <Link href="/weekend-jackpot" className="flex flex-col items-center justify-center gap-1 py-2.5">
+          <Trophy className={cn('w-[18px] h-[18px]', jackpotOpen ? 'text-gold' : 'text-white/40')} />
+          <span className={cn('text-[9px] font-bold uppercase tracking-wide', jackpotOpen ? 'text-gold' : 'text-white/40')}>Jackpot</span>
         </Link>
-        <Link href="/check-slip" className="flex flex-col items-center justify-center gap-0.5 py-1.5 text-white/60 active:text-gold transition-colors">
-          <Receipt className="w-4 h-4" />
-          <span className="text-[8px] font-bold uppercase tracking-wide">Check</span>
+        <Link href="/check-slip" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white/60 active:text-gold transition-colors">
+          <Receipt className="w-[18px] h-[18px]" />
+          <span className="text-[9px] font-bold uppercase tracking-wide">Check</span>
         </Link>
       </div>
 

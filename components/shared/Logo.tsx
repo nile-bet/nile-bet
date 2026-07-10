@@ -17,14 +17,14 @@ export function Logo({
   className,
 }: LogoProps) {
   const imgSizeClasses = {
-    sm: 'w-6 h-6 md:w-8 md:h-8',
-    md: 'w-7 h-7 md:w-9 md:h-9',
+    sm: 'w-7 h-7 md:w-8 md:h-8',
+    md: 'w-8 h-8 md:w-9 md:h-9',
     lg: 'w-9 h-9 md:w-12 md:h-12',
   }[size]
 
   const nameSize = {
     sm: 'text-sm md:text-base',
-    md: 'text-sm md:text-xl',
+    md: 'text-base md:text-xl',
     lg: 'text-lg md:text-2xl',
   }[size]
 
