@@ -17,8 +17,8 @@ export function Logo({
   className,
 }: LogoProps) {
   const imgSizeClasses = {
-    sm: 'w-7 h-7 md:w-8 md:h-8',
-    md: 'w-8 h-8 md:w-9 md:h-9',
+    sm: 'w-8 h-8 md:w-9 md:h-9',
+    md: 'w-9 h-9 md:w-10 md:h-10',
     lg: 'w-9 h-9 md:w-12 md:h-12',
   }[size]
 
@@ -50,7 +50,7 @@ export function Logo({
           NILE Betting
         </span>
         {showTagline && (
-          <span className="hidden md:block text-[9px] text-nile-blue-light tracking-[2px] uppercase font-body mt-0.5">
+          <span className="block text-[7px] md:text-[9px] text-nile-blue-light tracking-[1.5px] md:tracking-[2px] uppercase font-body mt-0.5">
             Flow into Wins
           </span>
         )}

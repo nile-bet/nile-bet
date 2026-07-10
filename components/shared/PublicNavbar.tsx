@@ -92,7 +92,7 @@ export function PublicNavbar() {
     <>
     <nav className="bg-slate-dark border-b border-gold/20 sticky top-0 z-50">
       {/* Top bar: Logo | Actions */}
-      <div className="h-12 md:h-14 px-3 md:px-6 flex items-center justify-between">
+      <div className="h-14 md:h-16 px-3 md:px-6 flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/">
           <Logo size="md" showTagline />
