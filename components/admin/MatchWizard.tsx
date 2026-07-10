@@ -39,9 +39,9 @@ const STEP_LABELS = [
 const CATEGORY_ORDER = [
   'MAIN', 'GOALS', 'HANDICAP', 'HALVES',
   'CORNERS', 'CARDS', 'TEAM GOALS',
-  'CLEAN SHEET', 'ODD/EVEN',
+  'CLEAN SHEET', 'GOALS ODD/EVEN',
   'SCORERS', 'SCORE', 'COMBO',
-  'MINUTES', 'SPECIALS',
+  'MIN 1X2', 'MIN GOALS', 'SPECIALS',
 ]
 
 export function MatchWizard({
