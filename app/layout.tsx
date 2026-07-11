@@ -35,10 +35,13 @@ const robotoMono = Roboto_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ??
-      'https://nile-bet.vercel.app'
+      'https://nilebetting.vercel.app'
   ),
+  alternates: {
+    canonical: '/',
+  },
   title: {
-    default: 'NILE Betting — Flow into Wins',
+    default: 'NILE Betting - Sports Betting in Ethiopia',
     template: '%s | NILE Betting',
   },
   description:
@@ -70,9 +73,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_ET',
-    url: 'https://nile-bet.vercel.app',
+    url: 'https://nilebetting.vercel.app',
     siteName: 'NILE Betting',
-    title: 'NILE Betting — Flow into Wins',
+    title: 'NILE Betting - Sports Betting in Ethiopia',
     description:
       "Ethiopia's premier sports betting platform",
     images: [
@@ -86,7 +89,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NILE Betting — Flow into Wins',
+    title: 'NILE Betting - Sports Betting in Ethiopia',
     description:
       "Ethiopia's premier sports betting platform",
     images: ['/og-image.png'],
