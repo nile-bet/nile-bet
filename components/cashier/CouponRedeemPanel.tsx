@@ -142,7 +142,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
   const maxLen = mode === 'slip' ? 10 : 6
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
 
       {/* Mode tabs */}
       <div className="grid grid-cols-2 gap-2 bg-charcoal rounded-xl p-1">

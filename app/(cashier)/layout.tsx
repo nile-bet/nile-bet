@@ -122,7 +122,7 @@ export default function CashierLayout({ children }: { children: React.ReactNode 
 
       {/* Redeem Modal */}
       <Dialog open={redeemOpen} onOpenChange={setRedeemOpen}>
-        <DialogContent className="bg-slate-dark border-nile-blue/40 w-full redeem-dialog">
+        <DialogContent className="bg-slate-dark border-nile-blue/40 w-full max-w-md sm:max-w-lg md:max-w-xl redeem-dialog !py-4">
           <DialogHeader>
             <DialogTitle className="text-white">
               🎟️ Redeem Coupon
