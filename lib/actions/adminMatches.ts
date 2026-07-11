@@ -2310,6 +2310,15 @@ export async function settleJackpot(
               bettor.credit_balance + reward,
           })
           .eq('id', slip.bettor_id)
+        // Mark slip as already settled so cashier/agent side can't redeem it again
+        await supabase
+          .from('jackpot_slips')
+          .update(
+            isWin
+              ? { status: 'paid' }
+              : { redeemed_at: new Date().toISOString() }
+          )
+          .eq('id', slip.id)
       }
 
       // Credit insured-tier tax to the platform admin
