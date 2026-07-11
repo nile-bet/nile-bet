@@ -125,7 +125,7 @@ export function LeagueSidebar({
             position: 'fixed', top: 0, left: 0,
             height: '100%',
             width: 'min(380px, 100vw)',
-            backgroundColor: '#0d1526',
+            backgroundColor: '#1C2155',
             zIndex: 99999,
             display: 'flex',
             flexDirection: 'column',
