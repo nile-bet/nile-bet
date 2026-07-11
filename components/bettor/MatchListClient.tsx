@@ -27,7 +27,7 @@ import {
 } from '@/lib/actions/matches'
 import { formatKickOff }
   from '@/lib/utils/formatCurrency'
-import { Swords } from 'lucide-react'
+import { Swords, Receipt } from 'lucide-react'
 import { FlagImage } from '@/components/shared/FlagImage'
 import type {
   MatchWithLeague,
@@ -106,7 +106,7 @@ function MobileSlipButton({ onPlaceBet, settings, onOpen }: { onPlaceBet: () => 
           disabled={generating}
           className="pointer-events-auto flex items-center gap-2.5 bg-gold text-charcoal pl-5 pr-4 py-3.5 rounded-full shadow-2xl shadow-gold/40 font-bold text-base hover:bg-gold-light transition-all active:scale-95 whitespace-nowrap"
         >
-          🎟️ Slip
+          <Receipt className="w-5 h-5" /> Slip
           {selections.length > 0 && (
             <span className="bg-charcoal/25 text-charcoal text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full">
               {selections.length}
