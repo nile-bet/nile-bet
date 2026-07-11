@@ -190,8 +190,11 @@ export function CouponRedeemPanel({ onClose }: Props) {
                 setCode(val)
                 setError('')
                 // Auto-trigger if barcode scanner fills exact length
-                if (mode === 'slip' && (val.length === 8 || val.length === 10)) {
-                  setTimeout(() => inputRef.current?.blur(), 50)
+                if (mode === 'slip') {
+                  const isJackpot = val.startsWith('JP')
+                  if ((isJackpot && val.length === 10) || (!isJackpot && val.length === 8)) {
+                    setTimeout(() => inputRef.current?.blur(), 50)
+                  }
                 }
                 if (mode === 'coupon' && val.length === 6) {
                   setTimeout(() => inputRef.current?.blur(), 50)
@@ -276,13 +279,13 @@ export function CouponRedeemPanel({ onClose }: Props) {
             {/* Bettor + payout */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/40 text-xs">Bettor</p>
+                <p className="text-white/70 text-xs">Bettor</p>
                 <p className="text-white font-semibold">
                   {slipData.is_anonymous ? '🎭 Anonymous' : `@${slipData.bettor?.username ?? '—'}`}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-white/40 text-xs">Net Payout</p>
+                <p className="text-white/70 text-xs">Net Payout</p>
                 <p className={cn('font-mono font-bold text-2xl', ['won','near_win'].includes(slipData.status) ? 'text-nile-success' : 'text-white/40')}>
                   {formatETB(payoutAmount ?? slipData.net_payout)}
                 </p>
@@ -292,15 +295,15 @@ export function CouponRedeemPanel({ onClose }: Props) {
             {/* Stake + odds */}
             <div className="grid grid-cols-3 gap-2 bg-charcoal/50 rounded-xl p-3 text-center">
               <div>
-                <p className="text-white/40 text-[10px] uppercase">Stake</p>
+                <p className="text-white/70 text-[10px] uppercase">Stake</p>
                 <p className="text-white font-mono text-sm font-bold">{formatETB(slipData.stake)}</p>
               </div>
               <div>
-                <p className="text-white/40 text-[10px] uppercase">Odds</p>
+                <p className="text-white/70 text-[10px] uppercase">Odds</p>
                 <p className="text-gold font-mono text-sm font-bold">{slipData.total_odds?.toFixed(2)}</p>
               </div>
               <div>
-                <p className="text-white/40 text-[10px] uppercase">Selections</p>
+                <p className="text-white/70 text-[10px] uppercase">Selections</p>
                 <p className="text-white font-mono text-sm font-bold">{slipData.slip_selections?.length ?? slipData.jackpot_slip_selections?.length ?? '—'}</p>
               </div>
             </div>
@@ -314,7 +317,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
                   </div>
                   <div>
                     <p className="text-nile-success font-bold text-sm">Winning Slip!</p>
-                    <p className="text-white/60 text-xs">Redeem to collect {formatETB(payoutAmount ?? slipData.net_payout)} into your balance</p>
+                    <p className="text-white/80 text-xs">Redeem to collect {formatETB(payoutAmount ?? slipData.net_payout)} into your balance</p>
                   </div>
                 </div>
 
@@ -334,7 +337,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
                   </button>
                   <button
                     onClick={resetState}
-                    className="px-4 py-3 rounded-xl border border-white/10 text-white/40 hover:text-white hover:border-white/30 transition-all"
+                    className="px-4 py-3 rounded-xl border border-nile-danger/40 text-nile-danger hover:bg-nile-danger/10 hover:border-nile-danger/60 transition-all"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -387,11 +390,11 @@ export function CouponRedeemPanel({ onClose }: Props) {
           <div className="p-4 space-y-3 bg-slate-dark/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/40 text-xs">Bettor</p>
+                <p className="text-white/70 text-xs">Bettor</p>
                 <p className="text-white font-semibold text-lg">@{lookedUp.bettor?.username}</p>
               </div>
               <div className="text-right">
-                <p className="text-white/40 text-xs">Amount</p>
+                <p className="text-white/70 text-xs">Amount</p>
                 <p className="text-gold font-mono text-2xl font-bold">{formatETB(lookedUp.amount)}</p>
               </div>
             </div>
