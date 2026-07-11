@@ -194,7 +194,7 @@ export function PublicNavbar() {
       </div>
 
       {/* Bottom icon tab bar — mobile only */}
-      <div className="md:hidden border-t border-white/5 bg-[#0D1526] grid grid-cols-5">
+      <div className="md:hidden border-t border-white/5 bg-slate-dark grid grid-cols-5">
         <Link href="/" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white active:text-gold transition-colors">
           <Home className="w-[18px] h-[18px]" />
           <span className="text-[9px] font-bold uppercase tracking-wide text-white">Home</span>
