@@ -94,3 +94,10 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+
+@media (min-width: 768px) {
+  .redeem-dialog {
+    max-width: 380px !important;
+  }
+}
