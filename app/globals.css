@@ -98,6 +98,12 @@
 
 @media (min-width: 768px) {
   .redeem-dialog {
-    max-width: 380px !important;
+    max-width: 520px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .redeem-dialog {
+    max-width: 580px !important;
   }
 }

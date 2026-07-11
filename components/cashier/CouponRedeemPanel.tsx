@@ -170,7 +170,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
 
       {/* Balance bar */}
       <div className="flex justify-between items-center bg-nile-blue/20 border border-nile-blue/30 rounded-xl px-4 py-3">
-        <span className="text-white/60 text-xs uppercase tracking-wider">Your Balance</span>
+        <span className="text-white/85 text-xs uppercase tracking-wider">Your Balance</span>
         <span className="text-gold font-mono font-bold text-lg">{formatETB(user?.credit_balance ?? 0)}</span>
       </div>
 
@@ -243,7 +243,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
           />
         )}
 
-        <p className="text-white/30 text-xs mt-1.5 text-center">
+        <p className="text-white/60 text-xs mt-1.5 text-center">
           {mode === 'slip' ? '🔍 Enter 8-digit slip ID or scan barcode • 📷 Camera QR' : '🔢 Enter 6-digit coupon code • 📷 Camera QR'}
         </p>
       </div>
