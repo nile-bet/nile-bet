@@ -189,16 +189,6 @@ export function CouponRedeemPanel({ onClose }: Props) {
                   : e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen)
                 setCode(val)
                 setError('')
-                // Auto-trigger if barcode scanner fills exact length
-                if (mode === 'slip') {
-                  const isJackpot = val.startsWith('JP')
-                  if ((isJackpot && val.length === 10) || (!isJackpot && val.length === 8)) {
-                    setTimeout(() => inputRef.current?.blur(), 50)
-                  }
-                }
-                if (mode === 'coupon' && val.length === 6) {
-                  setTimeout(() => inputRef.current?.blur(), 50)
-                }
               }}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
