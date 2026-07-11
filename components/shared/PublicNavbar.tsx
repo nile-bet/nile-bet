@@ -195,25 +195,25 @@ export function PublicNavbar() {
 
       {/* Bottom icon tab bar — mobile only */}
       <div className="md:hidden border-t border-white/5 bg-[#0D1526] grid grid-cols-5">
-        <Link href="/" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white/60 active:text-gold transition-colors">
+        <Link href="/" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white active:text-gold transition-colors">
           <Home className="w-[18px] h-[18px]" />
-          <span className="text-[9px] font-bold uppercase tracking-wide">Home</span>
+          <span className="text-[9px] font-bold uppercase tracking-wide text-white">Home</span>
         </Link>
-        <button onClick={handleSportsClick} className="flex flex-col items-center justify-center gap-1 py-2.5 text-white/60 active:text-gold transition-colors">
+        <button onClick={handleSportsClick} className="flex flex-col items-center justify-center gap-1 py-2.5 text-white active:text-gold transition-colors">
           <Globe className="w-[18px] h-[18px]" />
-          <span className="text-[9px] font-bold uppercase tracking-wide">Sport</span>
+          <span className="text-[9px] font-bold uppercase tracking-wide text-white">Sport</span>
         </button>
-        <Link href="/results" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white/60 active:text-gold transition-colors">
+        <Link href="/results" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white active:text-gold transition-colors">
           <BarChart2 className="w-[18px] h-[18px]" />
-          <span className="text-[9px] font-bold uppercase tracking-wide">Results</span>
+          <span className="text-[9px] font-bold uppercase tracking-wide text-white">Results</span>
         </Link>
         <Link href="/weekend-jackpot" className="flex flex-col items-center justify-center gap-1 py-2.5">
           <Trophy className={cn('w-[18px] h-[18px]', jackpotOpen ? 'text-gold' : 'text-white/40')} />
           <span className={cn('text-[9px] font-bold uppercase tracking-wide', jackpotOpen ? 'text-gold' : 'text-white/40')}>Jackpot</span>
         </Link>
-        <Link href="/check-slip" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white/60 active:text-gold transition-colors">
+        <Link href="/check-slip" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white active:text-gold transition-colors">
           <Receipt className="w-[18px] h-[18px]" />
-          <span className="text-[9px] font-bold uppercase tracking-wide">Check</span>
+          <span className="text-[9px] font-bold uppercase tracking-wide text-white">Check</span>
         </Link>
       </div>
 
