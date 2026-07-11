@@ -192,7 +192,10 @@ export function BetSlipSidebar({
         style={forceVisible ? { fontSize: "78%" } : { fontSize: "78%", position: "sticky", top: "60px", height: "calc(100vh - 60px)" }}
     >
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gold/10 flex items-center justify-between">
+      <div className={cn(
+        "px-4 py-3 border-b border-gold/10 flex items-center justify-between",
+        forceVisible && "pr-10"
+      )}>
         <h3 className="font-semibold text-white text-sm flex items-center gap-2">
           <Ticket className="w-4 h-4 text-gold" />
           Bet Slip
@@ -200,7 +203,7 @@ export function BetSlipSidebar({
         {selections.length > 0 && (
           <button
             onClick={clearSlip}
-            className="text-xs text-white/40 hover:text-white"
+            className="text-xs text-white/40 hover:text-white flex-shrink-0"
           >
             Clear all
           </button>
