@@ -106,14 +106,14 @@ export function PublicNavbar() {
                 <JackpotButton />
               </div>
               <Link href="/weekend-jackpot" className="md:hidden">
-                <button className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-bold transition-all ${
+                <button className={`flex items-center gap-0.5 px-1.5 py-1 rounded text-[9px] font-bold transition-all ${
                   jackpotOpen
                     ? 'bg-gold text-charcoal animate-pulse-gold'
                     : 'text-white/60 bg-white/10'
                 }`}>
-                  🏆 JP
+                  🏆
                   {!jackpotOpen && (
-                    <span className="text-[9px] px-1 rounded bg-white/10">CLOSED</span>
+                    <span className="text-[7px] px-0.5 rounded bg-white/10">CLOSED</span>
                   )}
                 </button>
               </Link>
@@ -142,14 +142,14 @@ export function PublicNavbar() {
               </div>
               {/* Jackpot button — mobile only */}
               <Link href="/weekend-jackpot" className="md:hidden">
-                <button className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-bold transition-all ${
+                <button className={`flex items-center gap-0.5 px-1.5 py-1 rounded text-[9px] font-bold transition-all ${
                   jackpotOpen
                     ? 'bg-gold text-charcoal animate-pulse-gold'
                     : 'text-white/60 bg-white/10'
                 }`}>
-                  🏆 JP
+                  🏆
                   {!jackpotOpen && (
-                    <span className="text-[9px] px-1 rounded bg-white/10">CLOSED</span>
+                    <span className="text-[7px] px-0.5 rounded bg-white/10">CLOSED</span>
                   )}
                 </button>
               </Link>
