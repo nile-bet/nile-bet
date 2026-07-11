@@ -104,11 +104,11 @@ function MobileSlipButton({ onPlaceBet, settings, onOpen }: { onPlaceBet: () => 
         <button
           onClick={handleClick}
           disabled={generating}
-          className="pointer-events-auto flex items-center gap-2 bg-gold text-charcoal pl-4 pr-3 py-2.5 rounded-full shadow-2xl shadow-gold/40 font-bold text-sm hover:bg-gold-light transition-all active:scale-95 whitespace-nowrap"
+          className="pointer-events-auto flex items-center gap-2.5 bg-gold text-charcoal pl-5 pr-4 py-3.5 rounded-full shadow-2xl shadow-gold/40 font-bold text-base hover:bg-gold-light transition-all active:scale-95 whitespace-nowrap"
         >
           🎟️ Slip
           {selections.length > 0 && (
-            <span className="bg-charcoal/25 text-charcoal text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full">
+            <span className="bg-charcoal/25 text-charcoal text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full">
               {selections.length}
             </span>
           )}
