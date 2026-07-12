@@ -2277,15 +2277,36 @@ export async function settleJackpot(
     if (isWin) winners++
     if (isNearWin) nearWins++
 
+    // Determine (in advance) whether this payout will be auto-credited to a
+    // real bettor below, using the exact same walk-in rule as the credit
+    // block further down, so the two never diverge.
+    let willAutoCredit = false
+    if (reward > 0 && slip.bettor_id) {
+      const { data: settlementBettor } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', slip.bettor_id)
+        .single()
+      const isWalkInForSettlement =
+        slip.bettor_id === slip.placed_by && settlementBettor?.role !== 'bettor'
+      willAutoCredit = !isWalkInForSettlement
+    }
+
+    const jackpotUpdateFields: any = {
+      status,
+      correct_count: correctCount,
+      reward_amount: reward,
+      reward_tax: rewardTax,
+      is_insured: isNearWin,
+    }
+    if (willAutoCredit) {
+      jackpotUpdateFields.redeemed_at = new Date().toISOString()
+      if (isWin) jackpotUpdateFields.status = 'paid'
+    }
+
     await supabase
       .from('jackpot_slips')
-      .update({
-        status,
-        correct_count: correctCount,
-        reward_amount: reward,
-        reward_tax: rewardTax,
-        is_insured: isNearWin,
-      })
+      .update(jackpotUpdateFields)
       .eq('id', slip.id)
 
     // Credit reward — ONLY auto-credit when the bettor is a real registered
