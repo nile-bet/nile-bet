@@ -77,7 +77,7 @@ export function FilterBar({
   }
 
   return (
-    <div className={cn('sticky top-[110px] md:static z-40 bg-slate-dark md:bg-[#0D1526] border-b border-white/5', className)}>
+    <div className={cn('sticky top-[110px] z-40 md:static md:z-auto bg-slate-dark md:bg-slate-dark border-b border-white/5', className)}>
       <div className="flex flex-col md:flex-row md:items-center px-3 md:px-6 py-2 md:py-3 md:gap-6">
         {/* Date filters */}
         <div className="flex items-center gap-2 md:gap-3 pt-2.5 pb-1 md:py-0 overflow-x-auto scrollbar-hide">
