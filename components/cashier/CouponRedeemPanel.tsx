@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Check, X, Search, Scan, Trophy, Ticket, ArrowRight, AlertTriangle, Camera } from 'lucide-react'
 import { QRScanner } from '@/components/cashier/QRScanner'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type Mode = 'slip' | 'coupon'
 
@@ -260,9 +261,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
             slipData.status === 'paid' ? 'bg-white/5' : 'bg-nile-orange/10'
           )}>
             <span className="text-xs text-white/50 font-mono">{slipData.slip_id}</span>
-            <span className={cn('font-bold text-sm', slipStatusColor[slipData.status] ?? 'text-white')}>
-              {slipStatusLabel[slipData.status] ?? slipData.status}
-            </span>
+            <StatusBadge status={slipData.status} type="slip" />
           </div>
 
           <div className="p-4 space-y-3 bg-slate-dark/50">
@@ -299,7 +298,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
             </div>
 
             {/* Won — show payout action */}
-            {['won','near_win'].includes(slipData.status) && (
+            {['won','near_win'].includes(slipData.status) && !slipData.redeemed_at && (
               <>
                 <div className="bg-nile-success/10 border border-nile-success/20 rounded-xl p-3 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-nile-success/20 flex items-center justify-center flex-shrink-0">
@@ -338,6 +337,15 @@ export function CouponRedeemPanel({ onClose }: Props) {
             {slipData.status === 'paid' && (
               <div className="bg-white/5 rounded-xl p-3 text-center">
                 <p className="text-white/40 text-sm">✅ This slip has already been paid out</p>
+              </div>
+            )}
+
+            {slipData.status === 'near_win' && slipData.redeemed_at && (
+              <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center space-y-1">
+                <p className="text-gold text-sm font-semibold">
+                  🛡️ Insured payout already credited — {formatETB(payoutAmount ?? slipData.net_payout)}
+                </p>
+                <p className="text-white/40 text-xs">This slip cannot be redeemed again</p>
               </div>
             )}
 
