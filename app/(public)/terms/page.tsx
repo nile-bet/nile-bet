@@ -20,7 +20,7 @@ export default function TermsPage() {
             <h2 className="text-white font-semibold text-lg mb-3">2. Eligibility</h2>
             <p className="mb-2">To use NILE Betting services, you must:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Be at least 18 years of age</li>
+              <li>Be at least 21 years of age</li>
               <li>Be legally permitted to participate in online sports betting in your jurisdiction</li>
               <li>Not be a resident of a jurisdiction where online betting is prohibited</li>
               <li>Register with accurate and truthful personal information</li>
@@ -91,7 +91,7 @@ export default function TermsPage() {
           </section>
 
           <div className="border-t border-nile-blue/20 pt-6">
-            <p className="text-white/30 text-xs">By using NILE Betting, you confirm that you have read, understood, and agree to these Terms & Conditions. Must be 18+ to bet. Please gamble responsibly.</p>
+            <p className="text-white/30 text-xs">By using NILE Betting, you confirm that you have read, understood, and agree to these Terms & Conditions. Must be 21+ to bet. Please gamble responsibly.</p>
           </div>
         </div>
       </main>

@@ -34,7 +34,7 @@ export default function CashierRulesPage() {
         </section>
         <section>
           <h2 className="text-white font-semibold text-lg mb-3">Responsible Gambling</h2>
-          <p>Must be 18+ to bet. Gambling should be entertaining. Never bet more than you can afford to lose.</p>
+          <p>Must be 21+ to bet. Gambling should be entertaining. Never bet more than you can afford to lose.</p>
         </section>
       </div>
       <CashierFooter />

@@ -13,7 +13,7 @@ export default function CashierTermsPage() {
         <section>
           <h2 className="text-white font-semibold text-lg mb-3">2. Eligibility</h2>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Must be at least 18 years of age</li>
+            <li>Must be at least 21 years of age</li>
             <li>Must be legally permitted to participate in sports betting</li>
             <li>Must register with accurate personal information</li>
           </ul>

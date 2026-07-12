@@ -505,7 +505,7 @@ export const ThermalReceipt = forwardRef<
           {platformName}
         </div>
         <div style={{ marginTop: '2px' }}>
-          Must be 18+ to bet
+          Must be 21+ to bet
         </div>
         <div>Bet responsibly</div>
         <div style={{ marginTop: '4px' }}>

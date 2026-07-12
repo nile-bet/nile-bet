@@ -17,7 +17,7 @@ export function CashierFooter() {
             <p className="text-sm text-white/70 mb-4">Your bet. Your rules. Your moment.</p>
             <Link href="/cashier-rules">
               <button className="border border-nile-danger text-nile-danger text-xs px-4 py-2 rounded-md hover:bg-nile-danger/10 transition-colors">
-                18+ | Play Responsibly
+                21+ | Play Responsibly
               </button>
             </Link>
           </div>
@@ -88,7 +88,7 @@ export function CashierFooter() {
       {/* Bottom bar */}
       <div className="border-t border-gold/10 py-4 px-6">
         <p className="text-xs text-white/30 text-center">
-          © 2026 NILE Betting. All rights reserved. Bet responsibly. 18+ only.
+          © 2026 NILE Betting. All rights reserved. Bet responsibly. 21+ only.
         </p>
       </div>
     </footer>

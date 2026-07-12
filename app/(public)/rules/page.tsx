@@ -99,7 +99,7 @@ const sections = [
     id: '8',
     title: '8. Responsible Betting',
     content: `
-      Age Restriction: You must be 18 years or older to place bets. Underage betting is strictly prohibited.
+      Age Restriction: You must be 21 years or older to place bets. Underage betting is strictly prohibited.
 
       Self-exclusion: Contact admin to temporarily or permanently deactivate your account. Pending bets will be settled normally.
 

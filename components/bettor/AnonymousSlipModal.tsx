@@ -158,7 +158,7 @@ export function AnonymousSlipModal({
             {/* Footer */}
             <div className="border-t border-dashed border-black mt-3 pt-2 text-center text-[9px] text-gray-500">
               <div>Thank you for betting with NILE Betting</div>
-              <div>Must be 18+ · Bet responsibly</div>
+              <div>Must be 21+ · Bet responsibly</div>
               <div className="mt-1">═══════════════════</div>
             </div>
           </div>

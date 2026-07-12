@@ -340,7 +340,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
                     <div style={{ borderTop: '1px dashed #000', marginTop: '6px', paddingTop: '4px', textAlign: 'center', fontSize: '9px', color: '#555' }}>
                       <div>Good luck! 🏆</div>
                       <div style={{ fontWeight: 'bold' }}>NILE BETTING</div>
-                      <div>Must be 18+ to bet</div>
+                      <div>Must be 21+ to bet</div>
                       <div style={{ marginTop: '4px' }}>═══════════════════════</div>
                     </div>
 
