@@ -188,7 +188,7 @@ export function BetSlipSidebar({
   return (
     <>
     <div
-        className={forceVisible ? "flex w-full flex-col bg-[#1C2155] h-full overflow-hidden" : "hidden md:flex w-[240px] flex-shrink-0 bg-[#1C2155] border-l border-[rgba(212,175,55,0.15)] rounded-none flex-col overflow-hidden"}
+        className={forceVisible ? "flex w-full flex-col bg-[rgb(21,29,41)] h-full overflow-hidden" : "hidden md:flex w-[240px] flex-shrink-0 bg-[rgb(21,29,41)] border-l border-[rgba(212,175,55,0.15)] rounded-none flex-col overflow-hidden"}
         style={forceVisible ? { fontSize: "78%" } : { fontSize: "78%", position: "sticky", top: "60px", height: "calc(100vh - 60px)" }}
     >
       {/* Header */}
