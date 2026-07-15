@@ -1255,7 +1255,7 @@ function calculateSelectionResult(
     if (selection === 'Away') return sh_away > sh_home ? won : lost
   }
 
-  const htAhMatch = marketName.match(/1st Half AH ([+-]\d+(?:\.\d+)?)/)
+  const htAhMatch = marketName.match(/1st Half AH ([+-]\d+(?:\.\d+)?)(?:\/[+-]\d+(?:\.\d+)?)?/)
   if (htAhMatch) {
     const hc = parseFloat(htAhMatch[1])
     const adjHome = ht_home + hc
@@ -1337,7 +1337,13 @@ function calculateSelectionResult(
   }
 
   if (marketName === 'Exact Corners') {
-    if (selection === '12+') return totalCorners >= 12 ? won : lost
+    if (selection === '13+') return totalCorners >= 13 ? won : lost
+    const rangeMatch = selection.match(/^(\d+)-(\d+)$/)
+    if (rangeMatch) {
+      const lo = parseInt(rangeMatch[1])
+      const hi = parseInt(rangeMatch[2])
+      return totalCorners >= lo && totalCorners <= hi ? won : lost
+    }
     const n = parseInt(selection)
     if (!isNaN(n)) return totalCorners === n ? won : lost
   }
