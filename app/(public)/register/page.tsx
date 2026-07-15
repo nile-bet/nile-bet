@@ -18,6 +18,26 @@ export default function RegisterPage() {
   const [checking, setChecking] = useState(false)
   const [available, setAvailable] = useState<boolean | null>(null)
 
+  // Restore non-sensitive form fields after a refresh (never persist password fields)
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('nilebet-register-draft')
+      if (saved) {
+        const draft = JSON.parse(saved)
+        if (draft.username) setUsername(draft.username)
+        if (draft.agreed) setAgreed(draft.agreed)
+      }
+    } catch {}
+  }, [])
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        'nilebet-register-draft',
+        JSON.stringify({ username, agreed })
+      )
+    } catch {}
+  }, [username, agreed])
+
   useEffect(() => {
     if (username.length < 3) { setAvailable(null); return }
     const timer = setTimeout(async () => {

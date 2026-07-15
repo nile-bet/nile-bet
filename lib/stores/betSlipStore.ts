@@ -51,6 +51,8 @@ interface BetSlipState {
   ) => boolean
   getValidationErrors: (settings: PlatformSettings) => string[]
   removeStartedSelections: () => void
+  hasHydrated: boolean
+  setHasHydrated: (v: boolean) => void
 }
 
 const emptyCalc: SlipCalculation = {
@@ -73,6 +75,8 @@ export const useBetSlipStore =
     selectedBettorName: null,
     isAnonymous: false,
     isJackpot: false,
+    hasHydrated: false,
+    setHasHydrated: (v) => set({ hasHydrated: v }),
 
     addSelection: (s) => {
       const existing = get().selections
@@ -200,6 +204,9 @@ export const useBetSlipStore =
         stake: state.stake,
         calculation: state.calculation,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     }
   )
 )

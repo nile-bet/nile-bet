@@ -41,8 +41,8 @@ export function OddButton({
   disabled = false,
   darker = false,
 }: OddButtonProps) {
-  const { addSelection, removeSelection, isSelectionAdded } = useBetSlipStore()
-  const isSelected = isSelectionAdded(matchMarketId, selection)
+  const { addSelection, removeSelection, isSelectionAdded, hasHydrated } = useBetSlipStore()
+  const isSelected = hasHydrated && isSelectionAdded(matchMarketId, selection)
   const isUnavailable = !odd || disabled
 
   const handleClick = () => {
