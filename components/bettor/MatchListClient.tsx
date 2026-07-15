@@ -259,11 +259,6 @@ export function MatchListClient({
 
   return (
     <div className="flex flex-col w-full" style={{ margin: 0, padding: 0 }}>
-      <FilterBar
-        onFilterChange={handleFilterChange}
-        matchCount={matches.length}
-      />
-
       <div className="flex items-start w-full">
         {/* League Sidebar */}
         <div className="hidden md:flex flex-col flex-shrink-0 border-r border-nile-blue/20" style={{ position: "sticky", top: "60px", alignSelf: "flex-start" }}>
@@ -279,8 +274,13 @@ export function MatchListClient({
 
         {/* Match List */}
         <div className="flex-1 overflow-y-auto overscroll-auto border-r border-nile-blue/20" style={{ height: "calc(100vh - 120px)", minHeight: "60vh", backgroundColor: "#0D1526" }}>
+          <div className="sticky top-0 z-20">
+            <FilterBar
+              onFilterChange={handleFilterChange}
+            />
+          </div>
           {/* Column headers */}
-          <div className="sticky top-0 z-10 bg-[#141F36] border-b border-gold/20 hidden md:flex items-stretch">
+          <div className="sticky top-[104px] z-10 bg-[#141F36] border-b border-gold/20 hidden md:flex items-stretch">
             <div className="flex-1">
               <div className="grid text-[13px] font-extrabold uppercase tracking-widest" style={{ gridTemplateColumns: '1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr' }}>
                 <div className="flex items-center justify-center py-3 bg-[#141F36] text-white font-extrabold col-span-5 border-b-2 border-indigo-500/40">Match Result</div>

@@ -17,7 +17,6 @@ interface FilterBarProps {
   onFilterChange: (
     filter: FilterType | null
   ) => void
-  matchCount?: number
   className?: string
 }
 
@@ -43,7 +42,6 @@ const timeFilters: {
 
 export function FilterBar({
   onFilterChange,
-  matchCount,
   className,
 }: FilterBarProps) {
   const [active, setActive] =
@@ -77,19 +75,19 @@ export function FilterBar({
   }
 
   return (
-    <div className={cn('sticky top-[110px] z-40 md:static md:z-auto bg-slate-dark md:bg-slate-dark border-b border-white/5', className)}>
-      <div className="flex flex-col md:flex-row md:items-center px-3 md:px-6 py-2 md:py-3 md:gap-6">
+    <div className={cn('bg-[#141F36] border-b border-white/5', className)}>
+      <div className="flex flex-col px-3 md:px-4 py-2.5 gap-2">
         {/* Date filters */}
-        <div className="flex items-center gap-2 md:gap-3 pt-2.5 pb-1 md:py-0 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           {dateFilters.map((f) => (
             <button
               key={f.key}
               onClick={() => handleSelect(f.key)}
               className={cn(
-                'text-sm px-5 py-2 md:px-4 md:py-1.5 rounded-full border font-semibold flex-shrink-0 transition-all duration-150',
+                'text-base px-10 py-3 rounded-full border font-bold flex-shrink-0 flex-1 transition-all duration-150',
                 active === f.key
                   ? 'bg-gold border-gold text-charcoal'
-                  : 'border-white/20 bg-white/10 text-white shadow-sm hover:border-gold/50 hover:bg-white/15'
+                  : 'border-transparent bg-[#1E2A47] text-white/70 hover:bg-[#26335A]'
               )}
             >
               {f.label}
@@ -97,23 +95,21 @@ export function FilterBar({
           ))}
         </div>
 
-        <div className="hidden md:block w-px h-6 bg-white/10" />
-
         {/* Time filters */}
-        <div className="flex items-center gap-2 md:gap-3 pb-2.5 md:pb-0 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           {timeFilters.map((f) => (
             <button
               key={f.key}
               onClick={() => handleSelect(f.key)}
               className={cn(
-                'text-xs px-4 py-1.5 md:px-3.5 md:py-1 rounded-full border font-semibold flex-shrink-0 transition-all duration-150',
+                'text-xs px-3.5 py-1.5 rounded-full border font-medium flex-shrink-0 transition-all duration-150',
                 active === f.key
                   ? f.urgent
                     ? 'bg-nile-orange border-nile-orange text-white'
                     : 'bg-gold border-gold text-charcoal'
                   : f.urgent
-                  ? 'border-nile-orange/40 text-nile-orange/80 bg-nile-orange/10 hover:bg-nile-orange/20'
-                  : 'border-white/10 bg-white/5 text-white/70 hover:border-gold/40 hover:text-white'
+                  ? 'border-nile-orange/60 text-nile-orange bg-[#2A1508] hover:bg-[#3A1C0B]'
+                  : 'border-transparent text-white/70 bg-[#1E2A47] hover:bg-[#26335A]'
               )}
             >
               {f.label}
@@ -127,12 +123,6 @@ export function FilterBar({
           )}
         </div>
 
-        {/* Match count */}
-        {matchCount !== undefined && (
-          <span className="hidden md:inline-flex ml-auto flex-shrink-0 text-white/30 text-xs font-medium">
-            {matchCount}
-          </span>
-        )}
       </div>
     </div>
   )
