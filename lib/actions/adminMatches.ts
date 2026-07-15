@@ -1539,16 +1539,26 @@ function calculateSelectionResult(
     return resMatch && ouPart === ou ? won : lost
   }
 
-  if (marketName === 'Win & Over 2.5') {
-    const winAndOver = (homeWin || awayWin) && totalGoals > 2.5
-    if (selection === 'Yes') return winAndOver ? won : lost
-    if (selection === 'No') return !winAndOver ? won : lost
+  const winOverMatch = marketName.match(/^Win & Over (\d+(?:\.\d+)?)$/)
+  if (winOverMatch) {
+    const line = parseFloat(winOverMatch[1])
+    const covers = totalGoals > line
+    if (selection === 'Home & Over') return homeWin && covers ? won : lost
+    if (selection === 'Away & Over') return awayWin && covers ? won : lost
+    // Legacy Yes/No format (Win & Over 2.5 originally used Yes/No selections)
+    if (selection === 'Yes') return ((homeWin || awayWin) && covers) ? won : lost
+    if (selection === 'No') return !((homeWin || awayWin) && covers) ? won : lost
   }
 
-  if (marketName === 'Win & Under 2.5') {
-    const winAndUnder = (homeWin || awayWin) && totalGoals < 2.5
-    if (selection === 'Yes') return winAndUnder ? won : lost
-    if (selection === 'No') return !winAndUnder ? won : lost
+  const winUnderMatch = marketName.match(/^Win & Under (\d+(?:\.\d+)?)$/)
+  if (winUnderMatch) {
+    const line = parseFloat(winUnderMatch[1])
+    const covers = totalGoals < line
+    if (selection === 'Home & Under') return homeWin && covers ? won : lost
+    if (selection === 'Away & Under') return awayWin && covers ? won : lost
+    // Legacy Yes/No format
+    if (selection === 'Yes') return ((homeWin || awayWin) && covers) ? won : lost
+    if (selection === 'No') return !((homeWin || awayWin) && covers) ? won : lost
   }
 
   // ── 1ST HALF CORNERS O/U ──

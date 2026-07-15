@@ -222,10 +222,16 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
             <div className="divide-y divide-nile-blue/10 overflow-y-auto max-h-64" ref={marketsListRef}>
               {(() => {
                 // Group Over/Under markets together under one header
-                const overUnderMarkets = currentMarkets.filter(m =>
-                  /over.?under/i.test(m.market_templates?.name ?? '') &&
-                  !/corner/i.test(m.market_templates?.name ?? '')
-                )
+                const overUnderMarkets = currentMarkets.filter(m => {
+                  const n = m.market_templates?.name ?? ''
+                  // Only match simple goal-total markets like "Over/Under 2.5"
+                  // or "1st Half Over/Under 1.5" — exclude combo markets that
+                  // happen to contain "Over/Under" as part of a longer name
+                  // (e.g. "BTTS + Over/Under 2.5"), which have their own
+                  // multi-selection rendering and must not be grouped here.
+                  return /^(1st Half |2nd Half )?Over\/Under \d+(?:\.\d+)?$/i.test(n.trim()) &&
+                    !/corner/i.test(n)
+                })
                 const isCornerOU = (name: string) =>
                   /Corners?\s*O\/U|Corners?\s*Over.?Under/i.test(name)
                 const isCardOU = (name: string) =>
