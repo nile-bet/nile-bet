@@ -220,7 +220,7 @@ export function BetSlipSidebar({
             onChange={(e) =>
               setCopySlipId(e.target.value)
             }
-            className="flex-1 bg-charcoal border border-gold/20 rounded-md px-2 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-gold/40 font-mono"
+            className="flex-1 bg-[rgb(21,29,41)] border border-gold/20 rounded-md px-2 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-gold/40 font-mono"
             maxLength={10}
           />
           <button
@@ -282,7 +282,7 @@ export function BetSlipSidebar({
             disabled={loadingSlip || !copySlipId.trim()}
             className="relative group text-xs bg-gradient-to-r from-gold/80 to-gold text-charcoal px-2 py-1.5 rounded-md hover:from-gold hover:to-gold-light transition-all disabled:opacity-50 shadow-sm hover:shadow-gold/30 hover:shadow-md"
           >
-            {loadingSlip ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Search className="w-3 h-3" /><span className="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-charcoal border border-gold/30 text-gold text-[10px] px-2 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Search</span></>}
+            {loadingSlip ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Search className="w-3 h-3" /><span className="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-[rgb(21,29,41)] border border-gold/30 text-gold text-[10px] px-2 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Search</span></>}
           </button>
         </div>
       </div>
@@ -437,7 +437,7 @@ export function BetSlipSidebar({
                 )
               }
               placeholder="0.00"
-              className="w-full bg-charcoal border border-gold/30 rounded-md px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-gold"
+              className="w-full bg-[rgb(21,29,41)] border border-gold/30 rounded-md px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-gold"
             />
             <p className="text-[10px] text-white/30 mt-1">
               Min: ETB {settings.minStake} | Max: ETB {settings.maxStakePerSlip.toLocaleString()}
