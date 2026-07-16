@@ -75,7 +75,7 @@ export function FilterBar({
   }
 
   return (
-    <div className={cn('bg-[#141F36] border-b border-white/5', className)}>
+    <div className={cn('bg-slate-dark border-b border-white/5', className)}>
       <div className="flex flex-col px-3 md:px-4 py-2.5 gap-2">
         {/* Date filters */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">

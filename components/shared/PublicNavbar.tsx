@@ -194,7 +194,7 @@ export function PublicNavbar() {
       </div>
 
       {/* Bottom icon tab bar — mobile only */}
-      <div className="md:hidden border-t border-white/5 bg-slate-dark grid grid-cols-5">
+      <div className="md:hidden border-t border-white/5 bg-[rgb(21,29,41)] grid grid-cols-5">
         <Link href="/" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white active:text-gold transition-colors">
           <Home className="w-[18px] h-[18px]" />
           <span className="text-[9px] font-bold uppercase tracking-wide text-white">Home</span>
@@ -218,7 +218,7 @@ export function PublicNavbar() {
       </div>
 
       {/* Desktop center nav */}
-      <div className="hidden md:flex relative border-t border-gold/10 items-center px-6 h-12 bg-slate-dark">
+      <div className="hidden md:flex relative border-t border-gold/10 items-center px-6 h-12 bg-[rgb(21,29,41)]">
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-12">
           <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-gold transition-colors group">
             <Home className="w-5 h-5 group-hover:text-gold transition-colors" />
