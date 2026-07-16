@@ -84,7 +84,7 @@ export function FilterBar({
               key={f.key}
               onClick={() => handleSelect(f.key)}
               className={cn(
-                'text-base px-10 py-3 rounded-full border font-bold flex-shrink-0 flex-1 transition-all duration-150',
+                'text-base px-6 md:px-10 py-3 rounded-full border font-bold flex-shrink-0 flex-1 md:flex-1 min-w-fit transition-all duration-150',
                 active === f.key
                   ? 'bg-gold border-gold text-charcoal'
                   : 'border-transparent bg-[#1E2A47] text-white/70 hover:bg-[#26335A]'
