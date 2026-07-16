@@ -363,11 +363,13 @@ export function MatchListClient({
         </div>
 
         {/* Bet Slip Sidebar */}
-        <BetSlipSidebar
-          settings={settings}
-          role="bettor"
-          onPlaceBet={() => setShowPlaceBet(true)}
-        />
+        <div className="flex-shrink-0" style={{ position: "sticky", top: "60px", alignSelf: "flex-start" }}>
+          <BetSlipSidebar
+            settings={settings}
+            role="bettor"
+            onPlaceBet={() => setShowPlaceBet(true)}
+          />
+        </div>
       </div>
 
       {/* Place Bet Modal */}
