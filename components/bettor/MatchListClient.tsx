@@ -261,7 +261,7 @@ export function MatchListClient({
     <div className="flex flex-col w-full" style={{ margin: 0, padding: 0 }}>
       <div className="flex items-start w-full">
         {/* League Sidebar */}
-        <div className="hidden md:flex flex-col flex-shrink-0 border-r border-nile-blue/20" style={{ position: "sticky", top: "60px", alignSelf: "flex-start" }}>
+        <div className="hidden md:flex flex-col flex-shrink-0 border-r border-nile-blue/20" style={{ position: "sticky", top: "0px", alignSelf: "flex-start" }}>
           <LeagueSidebar
             countries={countries}
             topLeagues={topLeagues}
@@ -363,11 +363,12 @@ export function MatchListClient({
         </div>
 
         {/* Bet Slip Sidebar */}
-        <div className="flex-shrink-0" style={{ position: "sticky", top: "60px", alignSelf: "flex-start" }}>
+        <div className="flex-shrink-0" style={{ position: "sticky", top: "0px", alignSelf: "flex-start" }}>
           <BetSlipSidebar
             settings={settings}
             role="bettor"
             onPlaceBet={() => setShowPlaceBet(true)}
+            stickyTop={0}
           />
         </div>
       </div>

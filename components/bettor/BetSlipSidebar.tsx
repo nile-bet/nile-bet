@@ -23,6 +23,7 @@ interface BetSlipSidebarProps {
   onPlaceBet?: () => void
   onTopup?: () => void
   forceVisible?: boolean
+  stickyTop?: number
 }
 
 export function BetSlipSidebar({
@@ -31,6 +32,7 @@ export function BetSlipSidebar({
   onPlaceBet,
   onTopup,
   forceVisible = false,
+  stickyTop = 60,
 }: BetSlipSidebarProps) {
   const { settings: liveSettings, setSettings } = useAuthStore()
   const [freshSettings, setFreshSettings] = useState<any>(null)
@@ -189,7 +191,7 @@ export function BetSlipSidebar({
     <>
     <div
         className={forceVisible ? "flex w-full flex-col bg-[rgb(21,29,41)] h-full overflow-hidden" : "hidden md:flex w-[240px] flex-shrink-0 bg-[rgb(21,29,41)] border-l border-[rgba(212,175,55,0.15)] rounded-none flex-col overflow-hidden"}
-        style={forceVisible ? { fontSize: "78%" } : { fontSize: "78%", position: "sticky", top: "60px", height: "calc(100vh - 60px)" }}
+        style={forceVisible ? { fontSize: "78%" } : { fontSize: "78%", position: "sticky", top: `${stickyTop}px`, height: `calc(100vh - ${stickyTop}px)` }}
     >
       {/* Header */}
       <div className={cn(

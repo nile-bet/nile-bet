@@ -206,7 +206,7 @@ export function CashierTopLayout({
       </nav>
 
       {/* Secondary nav: Home / Sports / Results */}
-      <div className="flex items-center justify-center gap-10 px-4 py-3 border-b border-gold/10 flex-shrink-0" style={{ background: '#1A1F4D' }}>
+      <div className="flex items-center justify-center gap-10 px-4 py-3 border-b border-gold/10 flex-shrink-0" style={{ background: 'rgb(21,29,41)' }}>
         <Link
           href="/cashier-place-bet"
           className="flex items-center gap-2 text-base font-bold text-white hover:text-gold transition-colors"
