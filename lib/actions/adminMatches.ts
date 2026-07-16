@@ -1499,15 +1499,11 @@ function calculateSelectionResult(
     return `${ftResult} & ${ou}` === selection ? won : lost
   }
 
-  if (marketName === 'BTTS + Over/Under 2.5') {
+  const bttsOuMatch = marketName.match(/^BTTS \+ Over\/Under (\d+(?:\.\d+)?)$/)
+  if (bttsOuMatch) {
+    const line = parseFloat(bttsOuMatch[1])
     const btts = ft_home > 0 && ft_away > 0 ? 'Yes' : 'No'
-    const ou = totalGoals > 2.5 ? 'Over' : 'Under'
-    return `${btts} & ${ou}` === selection ? won : lost
-  }
-
-  if (marketName === 'BTTS + Over/Under 3.5') {
-    const btts = ft_home > 0 && ft_away > 0 ? 'Yes' : 'No'
-    const ou = totalGoals > 3.5 ? 'Over' : 'Under'
+    const ou = totalGoals > line ? 'Over' : 'Under'
     return `${btts} & ${ou}` === selection ? won : lost
   }
 
