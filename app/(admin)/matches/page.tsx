@@ -283,7 +283,7 @@ export default function MatchesPage() {
       ),
     },
     {
-      key: 'id',
+      key: 'actions',
       label: 'Actions',
       render: (_: any, row: any) => (
         <div className="flex gap-1">

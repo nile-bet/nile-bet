@@ -86,18 +86,6 @@ export async function getMatchesForAdmin(
   if (isFeatured !== undefined) {
     query = query.eq('is_featured', isFeatured)
   }
-  if (countryId) {
-    query = query.eq('leagues.countries.id', countryId)
-  }
-  if (dateFrom) {
-    query = query.gte('kick_off_time', dateFrom)
-  }
-  if (dateTo) {
-    query = query.lte('kick_off_time', dateTo)
-  }
-  if (isFeatured !== undefined) {
-    query = query.eq('is_featured', isFeatured)
-  }
 
   const { data, count } = await query
 
