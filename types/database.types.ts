@@ -103,6 +103,7 @@ export interface Match {
   status: MatchStatus
   is_featured: boolean
   featured_order: number
+  manual_market_count: number | null
   created_by: string | null
   created_at: string
   updated_at: string

@@ -140,6 +140,7 @@ export async function createMatch(data: {
     name: string
     team: 'home' | 'away'
   }[]
+  manualMarketCount?: number | null
   createdBy: string
 }): Promise<{
   success: boolean
@@ -172,6 +173,7 @@ export async function createMatch(data: {
         status: data.publishImmediately
           ? 'upcoming'
           : 'pending',
+        manual_market_count: data.manualMarketCount ?? null,
         created_by: data.createdBy,
       })
       .select('id')

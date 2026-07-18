@@ -59,6 +59,7 @@ export function MatchWizard({
   const [kickOff, setKickOff] = useState('')
   const [isFeatured, setIsFeatured] =
     useState(false)
+  const [manualMarketCount, setManualMarketCount] = useState<string>('')
   const [countries, setCountries] =
     useState<any[]>([])
   const [selectedCountry, setSelectedCountry] =
@@ -209,6 +210,7 @@ export function MatchWizard({
       selectedMarkets,
       odds: oddsArray,
       players,
+      manualMarketCount: manualMarketCount === '' ? null : Number(manualMarketCount),
       createdBy: user.id,
     })
 
@@ -424,6 +426,19 @@ export function MatchWizard({
                     ? 'Featured'
                     : 'Not featured'}
                 </button>
+              </div>
+              <div>
+                <label className="text-xs text-white/60 block mb-1">
+                  "+N more" Count (leave blank to auto-count enabled markets)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={manualMarketCount}
+                  onChange={(e) => setManualMarketCount(e.target.value)}
+                  placeholder="Auto"
+                  className="w-full px-3 py-2.5 rounded-lg border border-nile-blue/30 bg-transparent text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-gold"
+                />
               </div>
             </div>
 

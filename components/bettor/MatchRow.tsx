@@ -50,7 +50,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
     return market.match_market_odds?.find((o) => o.selection === sel)?.odd_value ?? null
   }
 
-  const totalMarkets = match.match_markets?.filter((m) => m.is_enabled).length ?? 0
+  const totalMarkets = match.manual_market_count ?? (match.match_markets?.filter((m) => m.is_enabled).length ?? 0)
 
   // Group enabled markets by category
   const marketsByCategory = (match.match_markets ?? [])
