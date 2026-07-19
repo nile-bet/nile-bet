@@ -46,7 +46,6 @@ export default function BettorReportPage() {
       'JP Lost': b.jackpotLost,
       'Total Staked': b.totalStaked,
       'Win Rate': `${b.winRate?.toFixed(1)}%`,
-      'Total Won (ETB)': b.totalWonAmount,
       'Balance': b.currentBalance ?? '',
     }))), 'Bettor Report')
     XLSX.writeFile(wb, `bettor-report-${dateFilter.type}.xlsx`)
@@ -132,9 +131,6 @@ export default function BettorReportPage() {
               <span className={cn('text-xs font-mono', v >= 50 ? 'text-nile-success' : v < 30 ? 'text-nile-danger' : 'text-white/60')}>
                 {v?.toFixed(1)}%
               </span>
-            )},
-            { key: 'totalWonAmount', label: 'Total Won (ETB)', sortable: true, render: (v: any) => (
-              <span className="text-nile-success font-mono text-xs">{formatETB(v ?? 0)}</span>
             )},
             { key: 'currentBalance', label: 'Balance', sortable: true, render: (v: any) => (
               v === null ? <span className="text-white/30 text-xs">—</span> : <span className="text-gold font-mono text-xs">{formatETB(v)}</span>
