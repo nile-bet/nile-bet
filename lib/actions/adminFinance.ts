@@ -516,35 +516,56 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
     // Group by bettor username (anonymous slips bucketed separately, never attributed to a random id)
     const map: Record<string, any> = {}
     for (const slip of slips) {
-      const username = (slip as any).is_anonymous ? 'Anonymous' : ((slip.profiles as any)?.username ?? 'unknown')
+      const isAnon = (slip as any).is_anonymous
+      const username = isAnon ? 'Anonymous' : ((slip.profiles as any)?.username ?? 'unknown')
       if (!map[username]) {
-        map[username] = { username, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, jackpotWon: 0, jackpotLost: 0, winRate: 0 }
+        map[username] = { username, bettorId: isAnon ? null : slip.bettor_id, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, jackpotWon: 0, jackpotLost: 0, totalWonAmount: 0, winRate: 0 }
       }
       map[username].slipCount += 1
       map[username].totalStaked += slip.stake ?? 0
-      if (slip.status === 'won') map[username].wonBets += 1
+      if (slip.status === 'won') {
+        map[username].wonBets += 1
+        map[username].totalWonAmount += slip.net_payout ?? 0
+      }
       if (slip.status === 'lost') map[username].lostBets += 1
     }
     for (const slip of jackpotSlips) {
-      const username = (slip as any).is_anonymous ? 'Anonymous' : ((slip.profiles as any)?.username ?? 'unknown')
+      const isAnon = (slip as any).is_anonymous
+      const username = isAnon ? 'Anonymous' : ((slip.profiles as any)?.username ?? 'unknown')
       if (!map[username]) {
-        map[username] = { username, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, jackpotWon: 0, jackpotLost: 0, winRate: 0 }
+        map[username] = { username, bettorId: isAnon ? null : slip.bettor_id, slipCount: 0, totalStaked: 0, wonBets: 0, lostBets: 0, jackpotWon: 0, jackpotLost: 0, totalWonAmount: 0, winRate: 0 }
       }
       map[username].slipCount += 1
       map[username].totalStaked += slip.stake ?? 0
       if (slip.status === 'won' || slip.status === 'near_win') {
         map[username].wonBets += 1
         map[username].jackpotWon += 1
+        map[username].totalWonAmount += slip.reward_amount ?? 0
       }
       if (slip.status === 'lost') {
         map[username].lostBets += 1
         map[username].jackpotLost += 1
       }
     }
+
+    // Attach current balances
+    const bettorIds = Array.from(new Set(Object.values(map).map((r: any) => r.bettorId).filter(Boolean))) as string[]
+    const balanceMap: Record<string, number> = {}
+    if (bettorIds.length > 0) {
+      const { data: balProfiles } = await supabase
+        .from('profiles')
+        .select('id, credit_balance')
+        .in('id', bettorIds)
+      ;(balProfiles ?? []).forEach((p: any) => {
+        balanceMap[p.id] = p.credit_balance ?? 0
+      })
+    }
+
     return Object.values(map)
-      .map((r) => ({
+      .map((r: any) => ({
         ...r,
         winRate: r.slipCount > 0 ? (r.wonBets / r.slipCount) * 100 : 0,
+        currentBalance: r.bettorId ? (balanceMap[r.bettorId] ?? 0) : null,
       }))
       .sort((a, b) => b.totalStaked - a.totalStaked)
       .slice(0, 20)
