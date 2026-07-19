@@ -653,7 +653,30 @@ export async function getAllUsers(
   const { data, count, error } = await query
 
   if (error) return { users: [], total: 0 }
-  return { users: data ?? [], total: count ?? 0 }
+
+  let users = data ?? []
+
+  // Attach total winnings for bettors
+  if (role === 'bettor' && users.length > 0) {
+    const bettorIds = users.map((u: any) => u.id)
+    const { data: wonSlips } = await supabase
+      .from('slips')
+      .select('bettor_id, net_payout')
+      .eq('status', 'won')
+      .in('bettor_id', bettorIds)
+
+    const totals: Record<string, number> = {}
+    ;(wonSlips ?? []).forEach((s: any) => {
+      totals[s.bettor_id] = (totals[s.bettor_id] ?? 0) + (s.net_payout ?? 0)
+    })
+
+    users = users.map((u: any) => ({
+      ...u,
+      total_won: totals[u.id] ?? 0,
+    }))
+  }
+
+  return { users, total: count ?? 0 }
 }
 
 export async function createUser(data: {

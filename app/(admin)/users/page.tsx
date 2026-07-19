@@ -409,6 +409,16 @@ export default function UsersPage() {
         </span>
       ),
     },
+    ...(activeTab === 'bettor' ? [{
+      key: 'total_won',
+      label: 'Total Won',
+      sortable: true,
+      render: (v: any) => (
+        <span className="font-mono text-nile-success">
+          {formatETB(v ?? 0)}
+        </span>
+      ),
+    }] : []),
     {
       key: 'status',
       label: 'Status',
