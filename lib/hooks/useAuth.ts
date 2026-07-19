@@ -1,6 +1,6 @@
 'use client'
 
-import { refreshPlatformSettings, parseSettingsMap } from '@/lib/utils/refreshSettings'
+import { refreshPlatformSettings } from '@/lib/utils/refreshSettings'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient }

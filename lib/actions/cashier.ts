@@ -95,7 +95,6 @@ export async function getCashierDashboardStats(
   const insuredRedeemed = nearWinSlips.filter((s: any) => s.redeemed_at).length
   const insuredPending = insuredSlips.length - insuredRedeemed
 
-  const inProgressSlips = pendingSlips.length
 
   const totalCollectedSlips = all.reduce((a, s) => a + (s.stake ?? 0), 0)
 

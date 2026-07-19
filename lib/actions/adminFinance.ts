@@ -523,9 +523,10 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       }
       map[username].slipCount += 1
       map[username].totalStaked += slip.stake ?? 0
-      if (slip.status === 'won') {
-        map[username].wonBets += 1
-        map[username].totalWonAmount += slip.net_payout ?? 0
+      const isWonOrInsured = slip.status === 'won' || (slip.status === 'near_win' && (slip as any).redeemed_at) || slip.insurance_applied
+      if (slip.status === 'won') map[username].wonBets += 1
+      if (isWonOrInsured) {
+        map[username].totalWonAmount += (slip.insurance_applied ? (slip.insurance_payout ?? slip.net_payout ?? 0) : (slip.net_payout ?? 0))
       }
       if (slip.status === 'lost') map[username].lostBets += 1
     }
@@ -537,9 +538,12 @@ export async function getTopUsersReport(role?: string, filters?: DateFilters) {
       }
       map[username].slipCount += 1
       map[username].totalStaked += slip.stake ?? 0
+      const jpIsWonOrInsured = slip.status === 'won' || (slip.status === 'near_win' && (slip as any).redeemed_at)
       if (slip.status === 'won' || slip.status === 'near_win') {
         map[username].wonBets += 1
         map[username].jackpotWon += 1
+      }
+      if (jpIsWonOrInsured) {
         map[username].totalWonAmount += slip.reward_amount ?? 0
       }
       if (slip.status === 'lost') {

@@ -19,45 +19,6 @@ export type FilterType =
   | '6hr'
   | '12hr'
 
-function buildTimeFilter(
-  filter: FilterType
-): string {
-  switch (filter) {
-    case 'today':
-      return `kick_off_time.gte.${new Date().toISOString().split('T')[0]}T00:00:00,kick_off_time.lte.${new Date().toISOString().split('T')[0]}T23:59:59`
-    case 'tomorrow': {
-      const d = new Date()
-      d.setDate(d.getDate() + 1)
-      const ds = d.toISOString().split('T')[0]
-      return `kick_off_time.gte.${ds}T00:00:00,kick_off_time.lte.${ds}T23:59:59`
-    }
-    case 'weekly': {
-      const end = new Date()
-      end.setDate(end.getDate() + 7)
-      return `kick_off_time.lte.${end.toISOString()}`
-    }
-    case '1hr': {
-      const end = new Date()
-      end.setHours(end.getHours() + 1)
-      return `kick_off_time.lte.${end.toISOString()}`
-    }
-    case '3hr': {
-      const end = new Date()
-      end.setHours(end.getHours() + 3)
-      return `kick_off_time.lte.${end.toISOString()}`
-    }
-    case '6hr': {
-      const end = new Date()
-      end.setHours(end.getHours() + 6)
-      return `kick_off_time.lte.${end.toISOString()}`
-    }
-    case '12hr': {
-      const end = new Date()
-      end.setHours(end.getHours() + 12)
-      return `kick_off_time.lte.${end.toISOString()}`
-    }
-  }
-}
 
 export async function getUpcomingMatches(options: {
   leagueIds?: string[]

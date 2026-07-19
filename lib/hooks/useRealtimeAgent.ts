@@ -8,8 +8,6 @@ import { useAuthStore }
 import { useNotificationStore }
   from '@/lib/stores/notificationStore'
 import { toast } from 'sonner'
-import { formatETB }
-  from '@/lib/utils/formatCurrency'
 
 export function useRealtimeAgent() {
   const {

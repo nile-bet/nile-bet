@@ -201,7 +201,6 @@ export default function AdminJackpotPage() {
       matches: matchesData,
       createdBy: user.id,
     })
-    console.log('result:', result)
 
     if (result.success) {
       toast.success('Jackpot created!')
