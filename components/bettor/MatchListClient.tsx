@@ -236,22 +236,10 @@ export function MatchListClient({
         }
       )
       .subscribe()
-
     return () => {
       supabase.removeChannel(channel)
     }
   }, [])
-
-  // Group by league
-  const grouped = matches.reduce(
-    (acc, m) => {
-      const key = `${(m as any).league_name}-${(m as any).flag_emoji}`
-      if (!acc[key]) acc[key] = []
-      acc[key].push(m)
-      return acc
-    },
-    {} as Record<string, MatchWithLeague[]>
-  )
 
   const featured = matches.filter(
     (m) => m.is_featured
@@ -327,33 +315,29 @@ export function MatchListClient({
                 </div>
               )}
 
-              {/* Grouped by league */}
-              {Object.entries(grouped).map(
-                ([key, groupMatches]) => {
-                  const first = groupMatches[0] as any
+              {/* One header per match (not grouped) */}
+              {matches.map(
+                (match, i) => {
+                  const m = match as any
                   return (
-                    <div key={key}>
+                    <div key={match.id}>
                       <div className="flex items-center justify-between px-4 py-2 bg-[#111C31] border-b border-[rgba(255,255,255,0.06)]">
                         <span className="text-[11px] text-[#A9B4D0] font-medium flex items-center gap-1.5">
-                          <FlagImage emoji={first.flag_emoji ?? '🏳️'} />
-                          <span className="text-[#7D89A8]">{first.country_name}</span>
+                          <span aria-hidden="true">⚽</span>
+                          <FlagImage emoji={m.flag_emoji ?? '🏳️'} />
+                          <span className="text-[#7D89A8]">{m.country_name}</span>
                           <span className="text-[#7D89A8]/50">·</span>
-                          <span>{first.league_name}</span>
+                          <span>{m.league_name}</span>
                         </span>
                         <span className="text-[11px] text-[#7D89A8]">
-                          {formatKickOff(groupMatches[0].kick_off_time)}
+                          {formatKickOff(match.kick_off_time)}
                         </span>
                       </div>
-                      {groupMatches.map(
-                        (match, i) => (
-                          <MatchRow
-                            key={match.id}
-                            match={match as unknown as MatchWithMarkets}
-                            isEven={i % 2 === 0}
-                            basePath={basePath}
-                          />
-                        )
-                      )}
+                      <MatchRow
+                        match={match as unknown as MatchWithMarkets}
+                        isEven={i % 2 === 0}
+                        basePath={basePath}
+                      />
                     </div>
                   )
                 }
