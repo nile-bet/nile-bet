@@ -162,6 +162,17 @@ export const ThermalReceipt = forwardRef<
           marginBottom: '6px',
         }}
       >
+        <img
+          src="https://i.postimg.cc/15mmFn80/nile-logo-cropped-removebg-preview-(1).png"
+          alt="NILE Betting Logo"
+          style={{
+            width: '40px',
+            height: '40px',
+            objectFit: 'contain',
+            margin: '0 auto 4px',
+            display: 'block',
+          }}
+        />
         <div
           style={{
             fontSize: '18px',
