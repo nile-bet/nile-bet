@@ -43,11 +43,12 @@ export function Logo({
       <div className="flex flex-col leading-none">
         <span
           className={cn(
-            'font-display font-bold text-gold tracking-wide',
+            'font-display font-bold tracking-wide',
             nameSize
           )}
         >
-          NILE Betting
+          <span className="text-white md:text-gold">NILE</span>{' '}
+          <span className="text-gold">Betting</span>
         </span>
         {showTagline && (
           <span className="block text-[7px] md:text-[9px] text-nile-blue-light tracking-[1.5px] md:tracking-[2px] uppercase font-body mt-0.5">
