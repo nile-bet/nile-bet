@@ -58,7 +58,7 @@ export function CashierTopLayout({
     Object.keys(localStorage).forEach(k => {
       if (k.startsWith('sb-') || k.includes('supabase')) localStorage.removeItem(k)
     })
-    window.location.href = '/login'
+    window.location.href = '/'
   }
 
   return (
