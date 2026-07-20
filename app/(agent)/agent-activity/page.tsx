@@ -20,6 +20,7 @@ const ACTION_COLORS: Record<
   cashier_created: 'text-nile-success',
   credits_assigned: 'text-gold',
   coupon_topup_approved: 'text-nile-success',
+  coupon_declined: 'text-nile-danger',
   coupon_withdrawal_approved:
     'text-nile-orange',
   credit_request_created:

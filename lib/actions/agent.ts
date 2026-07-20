@@ -1042,6 +1042,12 @@ export async function declineCouponByAgent(
     type: 'balance_updated',
   })
 
+  await adminClient.from('activity_logs').insert({
+    user_id: agentId,
+    action: 'coupon_declined',
+    details: { code, coupon_type: coupon.type, amount: coupon.amount, bettor_id: coupon.bettor_id },
+  })
+
   return { success: true }
 }
 export async function agentApproveCreditRequest(
