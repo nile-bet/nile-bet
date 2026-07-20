@@ -47,7 +47,7 @@ export function Logo({
             nameSize
           )}
         >
-          <span className="text-white md:text-gold">NILE</span>{' '}
+          <span className="text-gold">NILE</span>{' '}
           <span className="text-gold">Betting</span>
         </span>
         {showTagline && (
