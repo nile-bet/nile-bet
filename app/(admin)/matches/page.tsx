@@ -18,6 +18,7 @@ import { StatusBadge }
   from '@/components/shared/StatusBadge'
 import { ConfirmModal }
   from '@/components/shared/ConfirmModal'
+import { QuickMatchModal } from '@/components/admin/QuickMatchModal'
 import { MatchWizard }
   from '@/components/admin/MatchWizard'
 import { formatDate, formatKickOff }
@@ -38,6 +39,7 @@ import {
   Filter,
   X,
   Calendar,
+  Sparkles,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -66,6 +68,8 @@ export default function MatchesPage() {
 
   const [showCreate, setShowCreate] =
     useState(false)
+
+  const [showQuickCreate, setShowQuickCreate] = useState(false)
   const [showConfirm, setShowConfirm] =
     useState(false)
   const [confirmData, setConfirmData] =
@@ -343,13 +347,22 @@ export default function MatchesPage() {
         <h1 className="font-display text-2xl font-bold text-white">
           Match Management
         </h1>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="bg-gold text-charcoal px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gold-light"
-        >
-          <Plus className="w-4 h-4" />
-          Add Match
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowQuickCreate(true)}
+            className="bg-gold/20 border border-gold text-gold px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gold/30"
+          >
+            <Sparkles className="w-4 h-4" />
+            Quick Match
+          </button>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="bg-gold text-charcoal px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gold-light"
+          >
+            <Plus className="w-4 h-4" />
+            Full Wizard
+          </button>
+        </div>
       </div>
 
       {/* Status tabs */}
@@ -574,6 +587,16 @@ export default function MatchesPage() {
       )}
 
       {/* Match Wizard */}
+      {showQuickCreate && (
+        <QuickMatchModal
+          onClose={() => setShowQuickCreate(false)}
+          onSuccess={() => {
+            setShowQuickCreate(false)
+            loadMatches()
+          }}
+        />
+      )}
+
       {showCreate && (
         <MatchWizard
           onClose={() => setShowCreate(false)}
