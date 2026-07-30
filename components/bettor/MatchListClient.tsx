@@ -241,10 +241,6 @@ export function MatchListClient({
     }
   }, [])
 
-  const featured = matches.filter(
-    (m) => m.is_featured
-  )
-
   return (
     <div className="flex flex-col w-full" style={{ margin: 0, padding: 0 }}>
       <div className="flex items-start w-full">
@@ -294,28 +290,7 @@ export function MatchListClient({
             />
           ) : (
             <>
-              {/* Featured */}
-              {featured.length > 0 && (
-                <div>
-                  <div className="px-4 py-1.5 bg-gold/5 border-b border-gold/20">
-                    <span className="text-[10px] text-gold/60 tracking-widest uppercase font-medium">
-                      ⭐ Featured Matches
-                    </span>
-                  </div>
-                  {featured.map(
-                    (match, i) => (
-                      <MatchRow
-                        key={match.id}
-                        match={match as unknown as MatchWithMarkets}
-                        isEven={i % 2 === 0}
-                        basePath={basePath}
-                      />
-                    )
-                  )}
-                </div>
-              )}
-
-              {/* One header per match (not grouped) */}
+              {/* One header per match (not grouped); featured matches show inline via MatchRow's badge */}
               {matches.map(
                 (match, i) => {
                   const m = match as any
