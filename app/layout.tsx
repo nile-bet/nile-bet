@@ -58,6 +58,14 @@ export const metadata: Metadata = {
   publisher: 'NILE Betting',
   applicationName: 'NILE Betting',
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icons/icon-96x96.png', type: 'image/png', sizes: '96x96' },
+      { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' },
+    ],
+    apple: '/icons/icon-192x192.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
