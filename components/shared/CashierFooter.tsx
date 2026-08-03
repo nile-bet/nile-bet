@@ -79,8 +79,43 @@ export function CashierFooter() {
               <span className="text-sm text-gold font-medium">+44 7788 443322</span>
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-sm text-gold font-medium">✉ nilebetting@gmail.com</span>
+              <a href="mailto:nilebetting@gmail.com" className="text-sm text-gold font-medium hover:underline">✉ nilebetting@gmail.com</a>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Follow Us */}
+      <div className="border-t border-gold/10 px-6 py-6">
+        <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between md:gap-0">
+          <h4 className="text-sm font-semibold tracking-wide text-white/80 uppercase">
+            Follow Us
+          </h4>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://instagram.com/nilebetting"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="group w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-[#feda75] via-[#d62976] to-[#4f5bd5] text-white shadow-md shadow-black/30 transition-transform duration-200 hover:scale-110 hover:shadow-lg"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+            </a>
+            <a
+              href="https://t.me/nilebetting"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Telegram"
+              className="group w-10 h-10 flex items-center justify-center rounded-full bg-[#29A9EA] text-white shadow-md shadow-black/30 transition-transform duration-200 hover:scale-110 hover:shadow-lg"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                <path d="M21.05 3.16 2.83 10.4c-1.24.5-1.23 1.2-.23 1.5l4.66 1.46 1.8 5.5c.22.6.37.85.75.85.3 0 .43-.14.6-.3l1.75-1.7 4.65 3.4c.86.47 1.47.23 1.68-.8l3.05-14.3c.31-1.26-.48-1.83-1.5-1.4Z"/>
+              </svg>
+            </a>
           </div>
         </div>
       </div>
