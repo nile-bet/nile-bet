@@ -18,9 +18,7 @@ export default async function CashierPlaceBetPage() {
     settings,
     jackpot,
   ] = await Promise.all([
-    getUpcomingMatches({
-      isTopLeagues: true,
-    }),
+    getUpcomingMatches({}),
     getCountriesWithLeagues(),
     getTopLeagues(),
     getPlatformSettings(),
