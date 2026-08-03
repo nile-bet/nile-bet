@@ -15,7 +15,21 @@ export function usePrint(contentRef: RefObject<HTMLDivElement | null>, options?:
 
     const pageStyle = options?.pageStyle ?? `
       @page { size: 80mm auto; margin: 0; }
-      @media print { body { margin: 0; } .thermal-receipt { width: 80mm !important; } }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 80mm;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+      }
+      .thermal-receipt {
+        width: 80mm !important;
+        max-width: 80mm !important;
+        transform: none !important;
+      }
     `
 
     printWindow.document.write(`<!DOCTYPE html>
@@ -24,7 +38,7 @@ export function usePrint(contentRef: RefObject<HTMLDivElement | null>, options?:
   <title>${options?.documentTitle ?? 'Print'}</title>
   <style>${pageStyle}</style>
 </head>
-<body>${content.innerHTML}</body>
+<body>${content.outerHTML}</body>
 </html>`)
     printWindow.document.close()
     printWindow.focus()
