@@ -46,6 +46,7 @@ export function QuickMatchModal({ onClose, onSuccess }: QuickMatchModalProps) {
   const [kickOff, setKickOff] = useState('')
   const [isFeatured, setIsFeatured] = useState(false)
   const [presetKey, setPresetKey] = useState('standard')
+  const [manualMarketCount, setManualMarketCount] = useState('')
   const [activeTab, setActiveTab] = useState<'paste' | 'manual'>('paste')
 
   const [aiOddsMap, setAiOddsMap] = useState<Record<string, Record<string, string>>>({})
@@ -179,7 +180,7 @@ export function QuickMatchModal({ onClose, onSuccess }: QuickMatchModalProps) {
       selectedMarkets: templateIds,
       odds: oddsArray,
       players: [],
-      manualMarketCount: null,
+      manualMarketCount: manualMarketCount === '' ? null : Number(manualMarketCount),
       createdBy: user.id,
     })
 
@@ -384,6 +385,20 @@ export function QuickMatchModal({ onClose, onSuccess }: QuickMatchModalProps) {
                 {selectedPreset.description} · {resolvedCount} market
                 {resolvedCount === 1 ? '' : 's'} will be added
               </p>
+            </div>
+
+            <div>
+              <label className="text-xs text-white/60 block mb-1">
+                "+N more" Count (leave blank to auto-count enabled markets)
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={manualMarketCount}
+                onChange={(e) => setManualMarketCount(e.target.value)}
+                placeholder="Auto"
+                className="w-full px-3 py-2.5 rounded-lg border border-nile-blue/30 bg-transparent text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-gold"
+              />
             </div>
 
             <div className="bg-charcoal/50 border border-nile-blue/30 rounded-lg p-3 space-y-2">
