@@ -206,26 +206,26 @@ export function CashierTopLayout({
       </nav>
 
       {/* Secondary nav: Home / Sports / Results */}
-      <div className="flex items-center justify-center gap-10 px-4 py-3 border-b border-gold/10 flex-shrink-0" style={{ background: 'rgb(21,29,41)' }}>
+      <div className="flex items-center justify-center gap-3 px-4 py-2.5 border-b border-gold/10 flex-shrink-0 bg-slate-dark">
         <Link
           href="/cashier-place-bet"
-          className="flex items-center gap-2 text-base font-bold text-white hover:text-gold transition-colors"
+          className="flex items-center gap-2 text-sm font-bold text-white/80 px-4 py-2 rounded-full border border-transparent hover:bg-gold/10 hover:border-gold/25 hover:text-gold transition-all"
         >
-          <Home className="w-5 h-5" />
+          <Home className="w-4 h-4" />
           Home
         </Link>
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('open-countries-panel'))}
-          className="flex items-center gap-2 text-base font-bold text-white hover:text-gold transition-colors"
+          className="flex items-center gap-2 text-sm font-bold text-white/80 px-4 py-2 rounded-full border border-transparent hover:bg-gold/10 hover:border-gold/25 hover:text-gold transition-all"
         >
-          <Globe className="w-5 h-5" />
+          <Globe className="w-4 h-4" />
           Sports
         </button>
         <Link
           href="/cashier-results"
-          className="flex items-center gap-2 text-base font-bold text-white hover:text-gold transition-colors"
+          className="flex items-center gap-2 text-sm font-bold text-white/80 px-4 py-2 rounded-full border border-transparent hover:bg-gold/10 hover:border-gold/25 hover:text-gold transition-all"
         >
-          <BarChart2 className="w-5 h-5" />
+          <BarChart2 className="w-4 h-4" />
           Results
         </Link>
       </div>

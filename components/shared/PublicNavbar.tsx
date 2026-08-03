@@ -194,42 +194,45 @@ export function PublicNavbar() {
       </div>
 
       {/* Bottom icon tab bar — mobile only */}
-      <div className="md:hidden border-t border-white/5 bg-[rgb(21,29,41)] grid grid-cols-5">
-        <Link href="/" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white active:text-gold transition-colors">
+      <div className="md:hidden border-t border-gold/10 bg-slate-dark grid grid-cols-5 px-1.5 py-1.5 gap-1">
+        <Link href="/" className="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-white/70 hover:bg-white/5 active:bg-gold/15 active:text-gold transition-all">
           <Home className="w-[18px] h-[18px]" />
-          <span className="text-[9px] font-bold uppercase tracking-wide text-white">Home</span>
+          <span className="text-[9px] font-bold uppercase tracking-wide">Home</span>
         </Link>
-        <button onClick={handleSportsClick} className="flex flex-col items-center justify-center gap-1 py-2.5 text-white active:text-gold transition-colors">
+        <button onClick={handleSportsClick} className="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-white/70 hover:bg-white/5 active:bg-gold/15 active:text-gold transition-all">
           <Globe className="w-[18px] h-[18px]" />
-          <span className="text-[9px] font-bold uppercase tracking-wide text-white">Sport</span>
+          <span className="text-[9px] font-bold uppercase tracking-wide">Sport</span>
         </button>
-        <Link href="/results" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white active:text-gold transition-colors">
+        <Link href="/results" className="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-white/70 hover:bg-white/5 active:bg-gold/15 active:text-gold transition-all">
           <BarChart2 className="w-[18px] h-[18px]" />
-          <span className="text-[9px] font-bold uppercase tracking-wide text-white">Results</span>
+          <span className="text-[9px] font-bold uppercase tracking-wide">Results</span>
         </Link>
-        <Link href="/weekend-jackpot" className="flex flex-col items-center justify-center gap-1 py-2.5">
-          <Trophy className={cn('w-[18px] h-[18px]', jackpotOpen ? 'text-gold' : 'text-white/40')} />
-          <span className={cn('text-[9px] font-bold uppercase tracking-wide', jackpotOpen ? 'text-gold' : 'text-white/40')}>Jackpot</span>
+        <Link href="/weekend-jackpot" className={cn(
+          'flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all',
+          jackpotOpen ? 'bg-gold/15 text-gold hover:bg-gold/25' : 'text-white/40 hover:bg-white/5'
+        )}>
+          <Trophy className="w-[18px] h-[18px]" />
+          <span className="text-[9px] font-bold uppercase tracking-wide">Jackpot</span>
         </Link>
-        <Link href="/check-slip" className="flex flex-col items-center justify-center gap-1 py-2.5 text-white active:text-gold transition-colors">
+        <Link href="/check-slip" className="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-white/70 hover:bg-white/5 active:bg-gold/15 active:text-gold transition-all">
           <Receipt className="w-[18px] h-[18px]" />
-          <span className="text-[9px] font-bold uppercase tracking-wide text-white">Check</span>
+          <span className="text-[9px] font-bold uppercase tracking-wide">Check</span>
         </Link>
       </div>
 
       {/* Desktop center nav */}
-      <div className="hidden md:flex relative border-t border-gold/10 items-center px-6 h-12 bg-[rgb(21,29,41)]">
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-12">
-          <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-gold transition-colors group">
-            <Home className="w-5 h-5 group-hover:text-gold transition-colors" />
+      <div className="hidden md:flex relative border-t border-gold/10 items-center justify-center px-6 py-2 bg-slate-dark">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-white/80 px-4 py-2 rounded-full border border-transparent hover:bg-gold/10 hover:border-gold/25 hover:text-gold transition-all group">
+            <Home className="w-4 h-4" />
             <span>Home</span>
           </Link>
-          <button onClick={handleSportsClick} className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-gold transition-colors group">
-            <Globe className="w-5 h-5 group-hover:text-gold transition-colors" />
+          <button onClick={handleSportsClick} className="flex items-center gap-2 text-sm font-semibold text-white/80 px-4 py-2 rounded-full border border-transparent hover:bg-gold/10 hover:border-gold/25 hover:text-gold transition-all group">
+            <Globe className="w-4 h-4" />
             <span>Sports</span>
           </button>
-          <Link href="/results" className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-gold transition-colors group">
-            <BarChart2 className="w-5 h-5 group-hover:text-gold transition-colors" />
+          <Link href="/results" className="flex items-center gap-2 text-sm font-semibold text-white/80 px-4 py-2 rounded-full border border-transparent hover:bg-gold/10 hover:border-gold/25 hover:text-gold transition-all group">
+            <BarChart2 className="w-4 h-4" />
             <span>Results</span>
           </Link>
         </div>
