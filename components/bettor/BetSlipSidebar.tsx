@@ -261,7 +261,7 @@ export function BetSlipSidebar({
                   homeTeam: match?.home_team ?? '',
                   awayTeam: match?.away_team ?? '',
                   leagueName: leagues?.name ?? '',
-                  countryFlag: countries?.flag_emoji ?? '🏳️',
+                  countryFlag: countries?.flag_emoji ?? '',
                   marketName: template?.name ?? '',
                   categoryName: category?.name ?? '',
                   selection: s.selection,

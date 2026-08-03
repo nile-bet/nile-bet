@@ -11,10 +11,9 @@ interface FlagImageProps {
 
 export function FlagImage({ emoji, size = 'sm', className = '' }: FlagImageProps) {
   const [imgError, setImgError] = useState(false)
-  const url = flagImageUrl(emoji)
-
-  if (!url || imgError) {
-    return <span className={className}>{emoji}</span>
+  const url = flagImageUrl(emoji) || '/icons/flag-placeholder.svg'
+  if (imgError) {
+    return <span className={className} aria-hidden="true" />
   }
 
   const dimensions = size === 'sm'

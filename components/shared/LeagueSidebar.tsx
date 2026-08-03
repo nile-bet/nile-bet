@@ -91,7 +91,7 @@ export function LeagueSidebar({
               className={cn('w-full text-left px-3 py-1.5 text-[12px] flex items-center gap-2 transition-colors',
                 selectedLeagueId === league.id ? 'bg-gold/10 text-gold border-l-2 border-gold' : 'text-white/60 hover:bg-gold/5 hover:text-white border-l-2 border-transparent'
               )}>
-              <span className="flex-shrink-0"><FlagImage emoji={(league as any).flag_emoji ?? '🏳️'} /></span>
+              <span className="flex-shrink-0"><FlagImage emoji={(league as any).flag_emoji ?? ''} /></span>
               <span className="truncate">{league.name}</span>
             </button>
           ))}
@@ -170,7 +170,7 @@ export function LeagueSidebar({
                   {topLeagues.map((league) => (
                     <button key={league.id} onClick={() => handleLeagueSelect(league.id)}
                       style={{ width: '100%', textAlign: 'left', padding: '9px 16px', display: 'flex', alignItems: 'center', gap: 8, background: selectedLeagueId === league.id ? 'rgba(218,165,32,0.1)' : 'none', border: 'none', borderLeft: selectedLeagueId === league.id ? '3px solid #d4a017' : '3px solid transparent', cursor: 'pointer', color: selectedLeagueId === league.id ? '#d4a017' : 'rgba(255,255,255,0.7)', fontSize: 12 }}>
-                      <FlagImage emoji={(league as any).flag_emoji ?? '🏳️'} />
+                      <FlagImage emoji={(league as any).flag_emoji ?? ''} />
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{league.name}</span>
                     </button>
                   ))}

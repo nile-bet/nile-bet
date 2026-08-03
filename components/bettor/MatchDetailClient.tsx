@@ -180,7 +180,7 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
   const router = useRouter()
   const leagues = match.leagues as any
   const leagueName = leagues?.name ?? ''
-  const countryFlag = leagues?.countries?.flag_emoji ?? '🏳️'
+  const countryFlag = leagues?.countries?.flag_emoji ?? ''
   const countryName = leagues?.countries?.name ?? ''
 
   const byCategory = new Map<string, typeof match.match_markets>()

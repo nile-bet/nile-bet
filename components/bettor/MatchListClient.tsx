@@ -299,7 +299,7 @@ export function MatchListClient({
                       <div className="flex items-center justify-between px-4 py-2 bg-[#111C31] border-b border-[rgba(255,255,255,0.06)]">
                         <span className="text-[11px] text-[#A9B4D0] font-medium flex items-center gap-1.5">
                           <span aria-hidden="true">⚽</span>
-                          <FlagImage emoji={m.flag_emoji ?? '🏳️'} />
+                          <FlagImage emoji={m.flag_emoji ?? ''} />
                           <span className="text-[#7D89A8]">{m.country_name}</span>
                           <span className="text-[#7D89A8]/50">·</span>
                           <span>{m.league_name}</span>

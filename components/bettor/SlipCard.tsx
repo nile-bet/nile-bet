@@ -110,7 +110,7 @@ export function SlipCard({
         homeTeam: match?.home_team ?? '',
         awayTeam: match?.away_team ?? '',
         leagueName: '',
-        countryFlag: '🏳️',
+        countryFlag: '',
         marketName: template?.name ?? '',
         categoryName:
           template?.market_categories

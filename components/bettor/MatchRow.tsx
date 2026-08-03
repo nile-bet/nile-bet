@@ -70,7 +70,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
     homeTeam: match.home_team,
     awayTeam: match.away_team,
     leagueName: (match as any).league_name ?? '',
-    countryFlag: (match as any).flag_emoji ?? '🏳️',
+    countryFlag: (match as any).flag_emoji ?? '',
     kickOffTime: match.kick_off_time,
     matchStatus: match.status,
   }
