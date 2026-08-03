@@ -61,21 +61,6 @@ export function PrintReceiptModal({
         'Print failed. Check printer connection.'
       )
     },
-    pageStyle: `
-      @page {
-        size: 80mm auto;
-        margin: 0;
-      }
-      @media print {
-        body {
-          margin: 0;
-          padding: 0;
-        }
-        .thermal-receipt {
-          width: 80mm !important;
-        }
-      }
-    `,
   })
 
   const handleCopyId = () => {

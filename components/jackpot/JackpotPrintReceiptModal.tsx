@@ -82,13 +82,6 @@ export function JackpotPrintReceiptModal({
   const handlePrint = usePrint(receiptRef, {
     documentTitle: `NILE-Jackpot-${slipId}`,
     onAfterPrint: () => toast.success('Receipt printed!'),
-    pageStyle: `
-      @page { size: 80mm auto; margin: 0; }
-      @media print {
-        body { margin: 0; }
-        .thermal-receipt { width: 80mm !important; }
-      }
-    `,
   })
 
   const handleCopyId = () => {

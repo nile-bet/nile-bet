@@ -86,13 +86,6 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
       console.error("Print failed")
       toast.error('Print failed. Check printer connection.')
     },
-    pageStyle: `
-      @page { size: 80mm auto; margin: 0; }
-      @media print {
-        body { margin: 0; padding: 0; }
-        .thermal-receipt { width: 80mm !important; }
-      }
-    `,
   })
 
   // ── Normal slip receipt data ──────────────────────────────────────────────
@@ -226,7 +219,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
 
                 {/* ── NORMAL SLIP ── */}
                 {!isJackpot && normalSlipData && (
-                  <div ref={receiptRef}>
+                  <div ref={receiptRef} className="thermal-receipt" style={{ width: '80mm', backgroundColor: '#FFFFFF' }}>
                     <ThermalReceipt {...normalSlipData} slipId={newSlipId ?? normalSlipData.slipId} />
                     {/* Re-print stamp */}
                     <div style={{
