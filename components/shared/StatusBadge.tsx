@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { Check, Shield } from 'lucide-react'
 
 type BadgeType =
   | 'slip'
@@ -29,7 +30,7 @@ function getConfig(
           'bg-nile-orange/20 text-nile-orange border-nile-orange/40',
       },
       won: {
-        label: 'WON ✓',
+        label: 'WON',
         className:
           'bg-nile-success/20 text-nile-success border-nile-success/40',
       },
@@ -44,7 +45,7 @@ function getConfig(
           'bg-white/10 text-white/50 border-white/20',
       },
       near_win: {
-        label: 'NEAR WIN 🛡️',
+        label: 'NEAR WIN',
         className:
           'bg-gold/20 text-gold border-gold/40',
       },
@@ -246,15 +247,19 @@ export function StatusBadge({
   className,
 }: StatusBadgeProps) {
   const config = getConfig(status, type)
+  const Icon = type === 'slip' && status === 'won' ? Check
+    : type === 'slip' && status === 'near_win' ? Shield
+    : null
 
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border text-[10px] font-semibold px-2 py-0.5 tracking-wide',
+        'inline-flex items-center gap-1 rounded-full border text-[10px] font-semibold px-2 py-0.5 tracking-wide',
         config.className,
         className
       )}
     >
+      {Icon && <Icon className="w-2.5 h-2.5" />}
       {config.label}
     </span>
   )

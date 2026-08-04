@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { X } from 'lucide-react'
+import { X, Flame } from 'lucide-react'
 
 export type FilterType =
   | 'today'
@@ -34,8 +34,8 @@ const timeFilters: {
   label: string
   urgent?: boolean
 }[] = [
-  { key: '1hr', label: '🔥 1 Hr', urgent: true },
-  { key: '3hr', label: '🔥 3 Hr', urgent: true },
+  { key: '1hr', label: '1 Hr', urgent: true },
+  { key: '3hr', label: '3 Hr', urgent: true },
   { key: '6hr', label: '6 Hr' },
   { key: '12hr', label: '12 Hr' },
 ]
@@ -68,8 +68,8 @@ export function FilterBar({
     today: 'Today',
     tomorrow: 'Tomorrow',
     weekly: 'Weekly',
-    '1hr': '🔥 Within 1 hour',
-    '3hr': '🔥 Within 3 hours',
+    '1hr': 'Within 1 hour',
+    '3hr': 'Within 3 hours',
     '6hr': 'Within 6 hours',
     '12hr': 'Within 12 hours',
   }
@@ -102,7 +102,7 @@ export function FilterBar({
               key={f.key}
               onClick={() => handleSelect(f.key)}
               className={cn(
-                'text-xs px-3.5 py-1.5 rounded-full border font-medium flex-shrink-0 transition-all duration-150',
+                'flex items-center gap-1 text-xs px-3.5 py-1.5 rounded-full border font-medium flex-shrink-0 transition-all duration-150',
                 active === f.key
                   ? f.urgent
                     ? 'bg-nile-orange border-nile-orange text-white'
@@ -112,6 +112,7 @@ export function FilterBar({
                   : 'border-transparent text-white/70 bg-[#1E2A47] hover:bg-[#26335A]'
               )}
             >
+              {f.urgent && <Flame className="w-3 h-3" />}
               {f.label}
             </button>
           ))}

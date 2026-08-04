@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Download, X } from 'lucide-react'
+import { Download, X, Share, SquarePlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface BeforeInstallPromptEvent
@@ -159,10 +159,10 @@ export function InstallPrompt() {
 
       {isIOS && (
         <div className="mt-3 flex items-center justify-center gap-2 text-white/40 text-xs">
-          <span>📤</span>
+          <Share className="w-3.5 h-3.5" />
           <span>Share</span>
           <span>→</span>
-          <span>➕</span>
+          <SquarePlus className="w-3.5 h-3.5" />
           <span>Add to Home Screen</span>
         </div>
       )}

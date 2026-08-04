@@ -27,7 +27,7 @@ export function OfflineBanner() {
       setOffline(false)
       if (wasOffline) {
         toast.success(
-          '✅ Back online!'
+          'Back online!'
         )
         setWasOffline(false)
       }
@@ -36,7 +36,7 @@ export function OfflineBanner() {
       setOffline(true)
       setWasOffline(true)
       toast.error(
-        '📡 No connection — working offline'
+        'No connection — working offline'
       )
     }
 
