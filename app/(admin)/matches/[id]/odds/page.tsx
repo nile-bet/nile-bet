@@ -1,6 +1,5 @@
 'use client'
-
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient }
   from '@/lib/supabase/client'
@@ -20,7 +19,7 @@ import { useAuthStore }
   from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Search, Save, X, TrendingUp, TrendingDown, RotateCcw } from 'lucide-react'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -33,6 +32,10 @@ const CATEGORIES = [
   'SCORERS', 'SCORE', 'COMBO',
   'MIN 1X2', 'MIN GOALS', 'SPECIALS',
 ]
+
+// key helper for pending-change map: one entry per (market, selection)
+const pendingKey = (matchMarketId: string, selection: string) =>
+  `${matchMarketId}::${selection}`
 
 export default function OddsPage({
   params,
@@ -50,6 +53,10 @@ export default function OddsPage({
   const [players, setPlayers] = useState<any[]>([])
   const [newPlayer, setNewPlayer] = useState({ name: '', team: 'home' as 'home' | 'away', odd: '2.00' })
   const [addingPlayer, setAddingPlayer] = useState(false)
+
+  // NEW: search + batch-edit state
+  const [marketSearch, setMarketSearch] = useState('')
+  const [pendingChanges, setPendingChanges] = useState<Record<string, number>>({})
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -82,7 +89,6 @@ export default function OddsPage({
       )
       .eq('id', id)
       .single()
-
     if (data) {
       setMatch(data)
       // Load players for scorers markets
@@ -110,7 +116,6 @@ export default function OddsPage({
       setNewPlayer({ name: '', team: 'home', odd: '2.00' })
       toast.success('Player added!')
       loadMatch(matchId)
-      // Reload players
       const supabase = createClient()
       const { data: pl } = await supabase.from('match_players').select('*').eq('match_id', matchId).order('team')
       if (pl) setPlayers(pl)
@@ -134,32 +139,75 @@ export default function OddsPage({
           ?.name === cat && mm.is_enabled
     )
 
-  const handleOddUpdate = async (
+  // Markets for the active category, filtered by search text
+  const visibleMarkets = useMemo(() => {
+    const list = getCategoryMarkets(activeCategory)
+    if (!marketSearch.trim()) return list
+    const q = marketSearch.trim().toLowerCase()
+    return list.filter((mm: any) =>
+      mm.market_templates?.name?.toLowerCase().includes(q)
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match, activeCategory, marketSearch])
+
+  const pendingCount = Object.keys(pendingChanges).length
+
+  // Stage a single odd change locally (no network call yet)
+  const stageOddChange = (
     matchMarketId: string,
     selection: string,
-    newOdd: string
+    newOdd: number
   ) => {
-    if (!user || !matchId) return
-    const val = parseFloat(newOdd)
-    if (isNaN(val) || val <= 1.0) return
+    setPendingChanges((prev) => ({
+      ...prev,
+      [pendingKey(matchMarketId, selection)]: newOdd,
+    }))
+  }
 
+  // Remove a single staged change (revert that one field)
+  const discardOne = (matchMarketId: string, selection: string) => {
+    setPendingChanges((prev) => {
+      const next = { ...prev }
+      delete next[pendingKey(matchMarketId, selection)]
+      return next
+    })
+  }
+
+  const discardAll = () => setPendingChanges({})
+
+  // Quick ± percentage adjust for every odd within one market card.
+  // Applies to the *current* value (staged if present, else server value).
+  const quickAdjustMarket = (mm: any, pct: number) => {
+    const odds = mm.match_market_odds ?? []
+    setPendingChanges((prev) => {
+      const next = { ...prev }
+      odds.forEach((odd: any) => {
+        const key = pendingKey(mm.id, odd.selection)
+        const base = next[key] ?? odd.odd_value
+        const updated = Math.max(1.01, base * (1 + pct / 100))
+        next[key] = Math.round(updated * 100) / 100
+      })
+      return next
+    })
+  }
+
+  const handleSaveAll = async () => {
+    if (!user || !matchId || pendingCount === 0) return
     setSaving(true)
+    const oddsUpdates = Object.entries(pendingChanges).map(([key, newOdd]) => {
+      const [matchMarketId, selection] = key.split('::')
+      return { matchMarketId, selection, newOdd }
+    })
     const result = await updateMatch(matchId, {
       updatedBy: user.id,
-      oddsUpdates: [
-        {
-          matchMarketId,
-          selection,
-          newOdd: val,
-        },
-      ],
+      oddsUpdates,
     })
-
     if (result.success) {
-      toast.success('Odd updated')
+      toast.success(`${oddsUpdates.length} odd${oddsUpdates.length === 1 ? '' : 's'} updated`)
+      setPendingChanges({})
       loadMatch(matchId)
     } else {
-      toast.error('Failed to update odd')
+      toast.error(result.error ?? 'Failed to update odds')
     }
     setSaving(false)
   }
@@ -168,14 +216,12 @@ export default function OddsPage({
     if (!user || !matchId) return
     const pct = parseFloat(margin)
     if (isNaN(pct)) return
-
     setSaving(true)
     const result = await applyGlobalMargin(
       matchId,
       pct,
       user.id
     )
-
     if (result.success) {
       toast.success(`Margin of ${pct}% applied`)
       setMargin('')
@@ -196,7 +242,7 @@ export default function OddsPage({
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 pb-24">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button
@@ -271,7 +317,7 @@ export default function OddsPage({
       </div>
 
       {/* Category tabs */}
-      <div className="overflow-x-auto scrollbar-hide mb-6">
+      <div className="overflow-x-auto scrollbar-hide mb-4">
         <div className="flex gap-0 border-b border-gold/10">
           {CATEGORIES.map((cat) => {
             const hasMarkets =
@@ -296,6 +342,26 @@ export default function OddsPage({
             )
           })}
         </div>
+      </div>
+
+      {/* Search bar */}
+      <div className="relative mb-6">
+        <Search className="w-4 h-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          type="text"
+          value={marketSearch}
+          onChange={(e) => setMarketSearch(e.target.value)}
+          placeholder={`Search markets in ${activeCategory}...`}
+          className="w-full bg-slate-dark border border-nile-blue/30 rounded-lg pl-9 pr-9 py-2.5 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-gold"
+        />
+        {marketSearch && (
+          <button
+            onClick={() => setMarketSearch('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Odds table */}
@@ -337,7 +403,6 @@ export default function OddsPage({
                 {addingPlayer ? 'Adding...' : '+ Add Player'}
               </button>
             </div>
-            {/* Player list */}
             {players.length > 0 && (
               <div className="mt-4">
                 <p className="text-white/50 text-xs mb-2 uppercase tracking-widest">Players ({players.length})</p>
@@ -362,27 +427,61 @@ export default function OddsPage({
           </div>
         )}
 
-        {getCategoryMarkets(activeCategory)
-          .length === 0 ? (
+        {visibleMarkets.length === 0 ? (
           <p className="text-white/30 text-sm">
-            {activeCategory === 'SCORERS' ? 'Add players above to enable scorer markets' : 'No markets in this category'}
+            {activeCategory === 'SCORERS'
+              ? 'Add players above to enable scorer markets'
+              : marketSearch
+              ? `No markets match "${marketSearch}"`
+              : 'No markets in this category'}
           </p>
         ) : (
-          getCategoryMarkets(activeCategory).map(
+          visibleMarkets.map(
             (mm: any) => {
-              const template =
-                mm.market_templates
-              const odds =
-                mm.match_market_odds ?? []
+              const template = mm.market_templates
+              const odds = mm.match_market_odds ?? []
+              const marketHasPendingChange = odds.some((odd: any) =>
+                pendingChanges[pendingKey(mm.id, odd.selection)] !== undefined
+              )
 
               return (
                 <div
                   key={mm.id}
-                  className="bg-slate-dark border border-nile-blue/30 rounded-xl p-4"
+                  className={cn(
+                    'bg-slate-dark border rounded-xl p-4 transition-colors',
+                    marketHasPendingChange
+                      ? 'border-gold/60'
+                      : 'border-nile-blue/30'
+                  )}
                 >
-                  <p className="text-white/70 text-sm font-medium mb-3">
-                    {template?.name}
-                  </p>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-white/70 text-sm font-medium">
+                        {template?.name}
+                      </p>
+                      {marketHasPendingChange && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => quickAdjustMarket(mm, -5)}
+                        title="Decrease all odds in this market by 5%"
+                        className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-md border border-nile-blue/30 text-white/50 hover:text-nile-danger hover:border-nile-danger/40 transition-colors"
+                      >
+                        <TrendingDown className="w-3 h-3" />
+                        5%
+                      </button>
+                      <button
+                        onClick={() => quickAdjustMarket(mm, 5)}
+                        title="Increase all odds in this market by 5%"
+                        className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-md border border-nile-blue/30 text-white/50 hover:text-nile-green hover:border-nile-green/40 transition-colors"
+                      >
+                        <TrendingUp className="w-3 h-3" />
+                        5%
+                      </button>
+                    </div>
+                  </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
@@ -397,59 +496,74 @@ export default function OddsPage({
                             Original Odd
                           </th>
                           <th className="text-right text-xs text-white/40 pb-2">
-                            Update
+                            New Value
                           </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {odds.map((odd: any) => (
-                          <tr
-                            key={odd.id}
-                            className="border-b border-nile-blue/10"
-                          >
-                            <td className="py-2 text-white/70">
-                              {odd.selection}
-                            </td>
-                            <td className="py-2 text-right text-gold font-mono">
-                              {odd.odd_value?.toFixed(
-                                2
+                        {odds.map((odd: any) => {
+                          const key = pendingKey(mm.id, odd.selection)
+                          const staged = pendingChanges[key]
+                          const isEdited = staged !== undefined
+
+                          return (
+                            <tr
+                              key={odd.id}
+                              className={cn(
+                                'border-b border-nile-blue/10',
+                                isEdited && 'bg-gold/5'
                               )}
-                            </td>
-                            <td className="py-2 text-right text-white/30 font-mono text-xs">
-                              {odd.original_odd?.toFixed(
-                                2
-                              )}
-                            </td>
-                            <td className="py-2 text-right">
-                              <input
-                                type="number"
-                                step="0.01"
-                                min="1.01"
-                                defaultValue={odd.odd_value?.toFixed(
-                                  2
-                                )}
-                                onBlur={(e) => {
-                                  const val =
-                                    e.target.value
-                                  if (
-                                    val &&
-                                    parseFloat(
-                                      val
-                                    ) !==
-                                      odd.odd_value
-                                  ) {
-                                    handleOddUpdate(
-                                      mm.id,
-                                      odd.selection,
-                                      val
-                                    )
-                                  }
-                                }}
-                                className="w-20 bg-charcoal border border-nile-blue/40 rounded px-2 py-1 text-center text-gold font-mono text-sm focus:outline-none focus:border-gold"
-                              />
-                            </td>
-                          </tr>
-                        ))}
+                            >
+                              <td className="py-2 text-white/70">
+                                {odd.selection}
+                              </td>
+                              <td className="py-2 text-right font-mono">
+                                <span className={isEdited ? 'text-white/30 line-through' : 'text-gold'}>
+                                  {odd.odd_value?.toFixed(2)}
+                                </span>
+                              </td>
+                              <td className="py-2 text-right text-white/30 font-mono text-xs">
+                                {odd.original_odd?.toFixed(2)}
+                              </td>
+                              <td className="py-2 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    min="1.01"
+                                    value={
+                                      staged !== undefined
+                                        ? staged
+                                        : odd.odd_value?.toFixed(2)
+                                    }
+                                    onChange={(e) => {
+                                      const val = e.target.value
+                                      const num = parseFloat(val)
+                                      if (!isNaN(num) && num > 1.0) {
+                                       stageOddChange(mm.id, odd.selection, num)
+                                      }
+                                    }}
+                                    className={cn(
+                                      'w-20 bg-charcoal border rounded px-2 py-1 text-center font-mono text-sm focus:outline-none',
+                                      isEdited
+                                        ? 'border-gold text-gold'
+                                        : 'border-nile-blue/40 text-white/70 focus:border-gold'
+                                    )}
+                                  />
+                                  {isEdited && (
+                                    <button
+                                      onClick={() => discardOne(mm.id, odd.selection)}
+                                      title="Discard this change"
+                                      className="text-white/30 hover:text-nile-danger"
+                                    >
+                                      <RotateCcw className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -459,6 +573,33 @@ export default function OddsPage({
           )
         )}
       </div>
+
+      {/* Sticky save bar */}
+      {pendingCount > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-slate-dark border-t border-gold/30 px-6 py-3 flex items-center justify-between z-40 shadow-lg shadow-black/40">
+          <span className="text-white text-sm">
+            <span className="text-gold font-semibold">{pendingCount}</span>{' '}
+            unsaved change{pendingCount === 1 ? '' : 's'}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={discardAll}
+              disabled={saving}
+              className="px-4 py-2 rounded-lg text-sm text-white/60 hover:text-white disabled:opacity-50"
+            >
+              Discard All
+            </button>
+            <button
+              onClick={handleSaveAll}
+              disabled={saving}
+              className="flex items-center gap-2 bg-gold text-charcoal px-5 py-2 rounded-lg text-sm font-semibold hover:bg-gold-light disabled:opacity-50"
+            >
+              <Save className="w-4 h-4" />
+              {saving ? 'Saving...' : `Save ${pendingCount} Change${pendingCount === 1 ? '' : 's'}`}
+            </button>
+          </div>
+        </div>
+      )}
 
       <ConfirmModal
         isOpen={showMarginConfirm}
