@@ -425,6 +425,8 @@ export async function getAgentProfitReport(filters?: DateFilters) {
     r.grossProfit = r.totalCollected - r.totalPaidOut
     r.agentShare = r.grossProfit * financeAgentPct
     r.cashierShare = r.grossProfit * financeCashierPct
+    r.agentPct = financeAgentPct
+    r.cashierPct = financeCashierPct
     return r
   }).sort((a: any, b: any) => b.grossProfit - a.grossProfit)
 }

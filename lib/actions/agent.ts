@@ -932,7 +932,7 @@ export async function getAgentReport(
   }
 
   return {
-    summary: { totalCollected, totalPaid, taxCollected: taxCollectedAll, grossProfit, agentShare, slipCount: allSlips.length + allJackpotSlips.length },
+    summary: { totalCollected, totalPaid, taxCollected: taxCollectedAll, grossProfit, agentShare, agentPct: agentPct2, cashierPct: 1 - agentPct2, slipCount: allSlips.length + allJackpotSlips.length },
     trendData: Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date)),
     cashierBreakdown: Object.values(cashierMap).sort((a: any, b: any) => b.grossProfit - a.grossProfit),
   }
@@ -1353,6 +1353,8 @@ export async function getAgentNetworkStats(
     grossProfit,
     agentProfit,
     cashierProfit,
+    agentPct: agentPct3,
+    cashierPct: cashierPct3,
     // Jackpot status
     jackpot: {
       total: jackpotTotal,

@@ -444,7 +444,7 @@ export default function ReportsPage() {
                   },
                   {
                     key: 'agentShare',
-                    label: 'Agent (60%)',
+                    label: 'Agent Share',
                     render: (v: any) => (
                       <span className="text-nile-blue-light font-mono text-xs">
                         {formatETB(v)}
@@ -453,7 +453,7 @@ export default function ReportsPage() {
                   },
                   {
                     key: 'cashierShare',
-                    label: 'Cashier (40%)',
+                    label: 'Cashier Share',
                     render: (v: any) => (
                       <span className="text-white/60 font-mono text-xs">
                         {formatETB(v)}

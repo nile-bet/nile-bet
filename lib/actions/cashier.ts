@@ -251,6 +251,8 @@ export async function getCashierDashboardStats(
     accountTotal,
     netBalance,
     cashierProfit,
+    cashierPct,
+    agentPct,
     taxCollected,
     agentPayable,
     totalWon,

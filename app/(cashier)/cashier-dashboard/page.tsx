@@ -124,11 +124,11 @@ export default function CashierDashboard() {
           reportData.stats.grossProfitLoss,
       },
       {
-        Metric: 'Cashier Share (40%)',
+        Metric: `Cashier Share (${Math.round((reportData.stats.cashierPct ?? 0.4) * 100)}%)`,
         Value: reportData.stats.cashierProfit,
       },
       {
-        Metric: 'Agent Payable (60%)',
+        Metric: `Agent Payable (${Math.round((reportData.stats.agentPct ?? 0.6) * 100)}%)`,
         Value: reportData.stats.agentPayable,
       },
       {
@@ -603,7 +603,7 @@ export default function CashierDashboard() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-white/60 text-sm">
-                  Cashier Profit (40%)
+                  Cashier Profit ({Math.round((stats.cashierPct ?? 0.4) * 100)}%)
                 </p>
                 <p
                   className={cn(
@@ -633,7 +633,7 @@ export default function CashierDashboard() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-white/60 text-sm">
-                  Agent Payable (60%)
+                  Agent Payable ({Math.round((stats.agentPct ?? 0.6) * 100)}%)
                 </p>
                 <p
                   className={cn(

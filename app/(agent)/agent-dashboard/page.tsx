@@ -86,8 +86,8 @@ export default function AgentDashboard() {
       { Metric: 'Total Paid Out', Value: stats.totalPaidOut },
       { Metric: 'Tax Collected', Value: stats.taxCollected },
       { Metric: 'Gross Profit', Value: stats.grossProfit },
-      { Metric: 'Agent Profit (60%)', Value: stats.agentProfit },
-      { Metric: 'Cashier Profit (40%)', Value: stats.cashierProfit },
+      { Metric: `Agent Profit (${Math.round((stats.agentPct ?? 0.6) * 100)}%)`, Value: stats.agentProfit },
+      { Metric: `Cashier Profit (${Math.round((stats.cashierPct ?? 0.4) * 100)}%)`, Value: stats.cashierProfit },
       { Metric: 'Pending Liability', Value: stats.pendingLiability },
       { Metric: 'Total Slips', Value: stats.totalSlips },
       { Metric: 'Won Slips', Value: stats.wonSlips },
@@ -106,7 +106,7 @@ export default function AgentDashboard() {
         Collected: c.totalCollected,
         'Paid Out': c.totalPaid,
         'Gross Profit': c.grossProfit,
-        'Agent Share (60%)': c.agentShare,
+        [`Agent Share (${Math.round((stats.agentPct ?? 0.6) * 100)}%)`]: c.agentShare,
       }))), 'Cashier Breakdown')
     }
     if (report.trendData?.length) {
@@ -215,7 +215,7 @@ export default function AgentDashboard() {
           <div className="bg-nile-success/10 border border-nile-success/20 rounded-xl p-5">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-white/60 text-sm">Total Cashier Profit (40%)</p>
+                <p className="text-white/60 text-sm">Total Cashier Profit ({Math.round((stats.cashierPct ?? 0.4) * 100)}%)</p>
                 <p className={cn('font-mono text-xl font-bold mt-1', (stats.cashierProfit ?? 0) >= 0 ? 'text-nile-success' : 'text-nile-danger')}>
                   {(stats.cashierProfit ?? 0) >= 0 ? '+' : ''}{formatETB(stats.cashierProfit)}
                 </p>
@@ -227,7 +227,7 @@ export default function AgentDashboard() {
           <div className="bg-nile-blue/10 border border-nile-blue/30 rounded-xl p-5">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-white/60 text-sm">Total Agent Profit (60%)</p>
+                <p className="text-white/60 text-sm">Total Agent Profit ({Math.round((stats.agentPct ?? 0.6) * 100)}%)</p>
                 <p className={cn('font-mono text-xl font-bold mt-1', (stats.agentProfit ?? 0) >= 0 ? 'text-gold' : 'text-nile-danger')}>
                   {(stats.agentProfit ?? 0) >= 0 ? '+' : ''}{formatETB(stats.agentProfit)}
                 </p>

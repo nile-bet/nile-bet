@@ -150,7 +150,7 @@ export default function AgentReportsPage() {
               }
             />
             <StatsCard
-              title="My Share (60%)"
+              title={`My Share (${Math.round((report.summary.agentPct ?? 0.6) * 100)}%)`}
               value={formatETB(
                 report.summary.agentShare
               )}
@@ -297,7 +297,7 @@ export default function AgentReportsPage() {
                   },
                   {
                     key: 'agentShare',
-                    label: 'My Share (60%)',
+                    label: 'My Share',
                     render: (v: any) => <span className="text-nile-blue-light font-mono text-xs">{formatETB(v)}</span>,
                   },
                 ]}

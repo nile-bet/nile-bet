@@ -362,16 +362,16 @@ export default function AdminDashboard() {
             <p className="text-white/40 text-xs mt-1">Collected - Paid Out</p>
           </div>
           <div className="bg-nile-blue/10 border border-nile-blue/30 rounded-xl p-5">
-            <p className="text-white/60 text-sm">Total Agent Share (60%)</p>
+            <p className="text-white/60 text-sm">Total Agent Share ({Math.round((stats.agentPct ?? 0.6) * 100)}%)</p>
             <p className="text-gold font-mono text-xl font-bold mt-1">
-              {formatETB((stats.grossProfit ?? 0) * 0.6)}
+              {formatETB((stats.grossProfit ?? 0) * (stats.agentPct ?? 0.6))}
             </p>
             <p className="text-white/40 text-xs mt-1">Sum across all agents</p>
           </div>
           <div className="bg-nile-blue/10 border border-nile-blue/30 rounded-xl p-5">
-            <p className="text-white/60 text-sm">Total Cashier Share (40%)</p>
+            <p className="text-white/60 text-sm">Total Cashier Share ({Math.round((stats.cashierPct ?? 0.4) * 100)}%)</p>
             <p className="text-nile-blue-light font-mono text-xl font-bold mt-1">
-              {formatETB((stats.grossProfit ?? 0) * 0.4)}
+              {formatETB((stats.grossProfit ?? 0) * (stats.cashierPct ?? 0.4))}
             </p>
             <p className="text-white/40 text-xs mt-1">Sum across all cashiers</p>
           </div>
