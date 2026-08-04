@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { PanelLeftClose, PanelLeftOpen, LogOut, LayoutDashboard, Search, Receipt, Ticket } from 'lucide-react'
+import { PanelLeftClose, PanelLeftOpen, LogOut, LayoutDashboard, Search, Receipt, Ticket,
+  Trophy} from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -120,7 +121,7 @@ export function DashboardNavbar({
             }`}
             style={!jackpotOpen ? { background: 'rgba(255,255,255,0.12)' } : {}}
           >
-            🏆 JACKPOT
+            <Trophy className="w-3.5 h-3.5" /> JACKPOT
             {!jackpotOpen && (
               <span className="text-[9px] px-1 rounded" style={{ background: 'rgba(255,255,255,0.1)' }}>
                 CLOSED

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LucideIcon, Menu, X, LogOut, LayoutDashboard, Search, ChevronDown, Home, Globe, BarChart2, Ticket } from 'lucide-react'
+import { LucideIcon, Menu, X, LogOut, LayoutDashboard, Search, ChevronDown, Home, Globe, BarChart2, Ticket, Trophy } from 'lucide-react'
 import { Logo } from './Logo'
 import { NotificationBell } from './NotificationBell'
 import { RoleBadge } from './RoleBadge'
@@ -101,7 +101,7 @@ export function CashierTopLayout({
               }`}
               style={!jackpotOpen ? { background: 'rgba(255,255,255,0.12)' } : {}}
             >
-              🏆 JACKPOT
+              <Trophy className="w-3.5 h-3.5" /> JACKPOT
               {!jackpotOpen && (
                 <span className="text-[9px] px-1 rounded" style={{ background: 'rgba(255,255,255,0.1)' }}>
                   CLOSED

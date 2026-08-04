@@ -7,6 +7,12 @@ import {
   ChevronUp,
   Copy,
   RefreshCw,
+  Trophy,
+  Shield,
+  CheckCircle2,
+  XCircle,
+  Undo2,
+  Clock,
 } from 'lucide-react'
 import { StatusBadge }
   from '@/components/shared/StatusBadge'
@@ -158,7 +164,7 @@ export function SlipCard({
         {slip.status === 'won' && (
           <div className="bg-nile-success/20 border-b border-nile-success/30 px-4 py-2 text-center">
             <span className="text-nile-success font-semibold text-sm">
-              🎉 You Won!
+              You Won!
             </span>
           </div>
         )}
@@ -167,7 +173,7 @@ export function SlipCard({
         {slip.status === 'near_win' && (
           <div className="bg-gold/10 border-b border-gold/30 px-4 py-2 text-center">
             <span className="text-gold font-semibold text-sm">
-              🛡️ Insurance Applied —{' '}
+              <Shield className="w-3.5 h-3.5 inline-block -mt-0.5 mr-0.5" /> Insurance Applied —{' '}
               {formatETB(
                 slip.insurance_payout
               )}{' '}
@@ -187,8 +193,8 @@ export function SlipCard({
             <div>
               <div className="flex items-center gap-2">
                 {isJackpot && (
-                  <span className="text-[10px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded">
-                    🏆 JACKPOT
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded">
+                    <Trophy className="w-2.5 h-2.5" /> JACKPOT
                   </span>
                 )}
                 <span className="text-gold font-mono font-bold text-sm">
@@ -252,14 +258,22 @@ export function SlipCard({
                   sel.match_markets
                 const template =
                   market?.market_templates
-                const resultIcon =
+                const ResultIcon =
                   sel.result === 'won'
-                    ? '✅'
+                    ? CheckCircle2
                     : sel.result === 'lost'
-                    ? '❌'
+                    ? XCircle
                     : sel.result === 'void'
-                    ? '↩️'
-                    : '⏳'
+                    ? Undo2
+                    : Clock
+                const resultColor =
+                  sel.result === 'won'
+                    ? 'text-nile-success'
+                    : sel.result === 'lost'
+                    ? 'text-nile-danger'
+                    : sel.result === 'void'
+                    ? 'text-white/40'
+                    : 'text-gold/60'
 
                 return (
                   <div
@@ -284,9 +298,7 @@ export function SlipCard({
                           2
                         )}
                       </span>
-                      <span className="text-lg">
-                        {resultIcon}
-                      </span>
+                      <ResultIcon className={cn('w-4 h-4', resultColor)} />
                     </div>
                   </div>
                 )

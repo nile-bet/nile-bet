@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Menu, X, Search, Receipt, Home, Trophy, BarChart2, Globe } from 'lucide-react'
+import { Menu, X, Search, Receipt, Home, Trophy, BarChart2, Globe, Ticket, User, Bell, LogOut, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import {
@@ -78,7 +78,7 @@ export function PublicNavbar() {
             : 'bg-white/20 text-white/60'
         )}
       >
-        🏆 JACKPOT
+        <Trophy className="w-3.5 h-3.5" /> JACKPOT
         {!jackpotOpen && (
           <span className="text-[9px] bg-white/10 px-1 rounded">
             CLOSED
@@ -111,7 +111,7 @@ export function PublicNavbar() {
                     ? 'bg-gold text-charcoal animate-pulse-gold'
                     : 'text-white/60 bg-white/10'
                 }`}>
-                  🏆
+                  <Trophy className="w-3 h-3" />
                   {!jackpotOpen && (
                     <span className="text-[7px] px-0.5 rounded bg-white/10">CLOSED</span>
                   )}
@@ -147,7 +147,7 @@ export function PublicNavbar() {
                     ? 'bg-gold text-charcoal animate-pulse-gold'
                     : 'text-white/60 bg-white/10'
                 }`}>
-                  🏆
+                  <Trophy className="w-3 h-3" />
                   {!jackpotOpen && (
                     <span className="text-[7px] px-0.5 rounded bg-white/10">CLOSED</span>
                   )}
@@ -164,27 +164,27 @@ export function PublicNavbar() {
                 <DropdownMenuContent align="end" className="bg-slate-dark border-nile-blue/40 text-white w-48">
                   <div className="px-3 py-2 border-b border-nile-blue/20">
                     <p className="font-semibold text-sm">@{user?.username}</p>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/30 to-nile-blue/30 border border-gold/40 text-gold mt-1">⚡ BETTOR</span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/30 to-nile-blue/30 border border-gold/40 text-gold mt-1"><Zap className="w-2.5 h-2.5" /> BETTOR</span>
                     <p className="md:hidden text-gold font-mono text-sm font-bold mt-1.5">{formatETB(user?.credit_balance ?? 0)}</p>
                   </div>
                   <DropdownMenuItem asChild>
                     <Link href="/bettor-bets" className="cursor-pointer">
-                      <span className="flex items-center gap-2 text-emerald-400 font-medium">🎟️ My Bets</span>
+                      <span className="flex items-center gap-2 text-emerald-400 font-medium"><Ticket className="w-4 h-4" /> My Bets</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/bettor-profile" className="cursor-pointer">
-                      <span className="flex items-center gap-2 text-sky-400 font-medium">👤 My Profile</span>
+                      <span className="flex items-center gap-2 text-sky-400 font-medium"><User className="w-4 h-4" /> My Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/bettor-notifications" className="cursor-pointer">
-                      <span className="flex items-center gap-2 text-violet-400 font-medium">🔔 Notifications</span>
+                      <span className="flex items-center gap-2 text-violet-400 font-medium"><Bell className="w-4 h-4" /> Notifications</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-nile-blue/20" />
                   <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} className="text-nile-danger cursor-pointer focus:text-nile-danger">
-                    <span className="flex items-center gap-2 font-medium">🚪 Logout</span>
+                    <span className="flex items-center gap-2 font-medium"><LogOut className="w-4 h-4" /> Logout</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
