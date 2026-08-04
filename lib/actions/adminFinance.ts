@@ -420,7 +420,7 @@ export async function getAgentProfitReport(filters?: DateFilters) {
     }
   }
 
-  const { cashierPct: financeCashierPct, agentPct: financeAgentPct } = await getProfitSplit(supabase)
+  const { cashierPct: financeCashierPct, agentPct: financeAgentPct } = await getProfitSplit()
   return Object.values(map).map((r: any) => {
     r.grossProfit = r.totalCollected - r.totalPaidOut
     r.agentShare = r.grossProfit * financeAgentPct

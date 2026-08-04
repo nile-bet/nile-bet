@@ -196,7 +196,7 @@ export async function getCashierDashboardStats(
   const netBalance = totalPaidOut - totalCollected
 
   // Profit split
-  const { cashierPct, agentPct } = await getProfitSplit(supabase)
+  const { cashierPct, agentPct } = await getProfitSplit()
   const cashierProfit = grossProfitLoss * cashierPct
   const agentPayable = grossProfitLoss * agentPct
   // Won amounts: 'paid' slips = redeemed, 'won' slips = pending payout (regular only here)

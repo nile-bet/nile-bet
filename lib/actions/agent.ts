@@ -102,7 +102,7 @@ export async function getAgentStats(
   }
 
   const grossProfit = totalRevenue - paidOut
-  const { agentPct } = await getProfitSplit(supabase)
+  const { agentPct } = await getProfitSplit()
   const agentShare = grossProfit * agentPct
 
   // Pending credit requests
@@ -885,7 +885,7 @@ export async function getAgentReport(
   const totalPaid = totalPaidSlips + jackpotPaidR
   const taxCollectedAll = taxCollected + jackpotTaxCollectedR
   const grossProfit = totalCollected - totalPaid
-  const { agentPct: agentPct2 } = await getProfitSplit(supabase)
+  const { agentPct: agentPct2 } = await getProfitSplit()
   const agentShare = grossProfit * agentPct2
   const grouped: Record<string, any> = {}
   allSlips.forEach((slip) => {
@@ -1302,7 +1302,7 @@ export async function getAgentNetworkStats(
   const pendingLiability = pendingLiabilitySlips + jackpotPendingLiability
 
   const grossProfit = totalCollected - totalPaidOut
-  const { cashierPct: cashierPct3, agentPct: agentPct3 } = await getProfitSplit(supabase)
+  const { cashierPct: cashierPct3, agentPct: agentPct3 } = await getProfitSplit()
   const agentProfit = grossProfit * agentPct3
   const cashierProfit = grossProfit * cashierPct3
 
