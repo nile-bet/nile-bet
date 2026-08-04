@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { OddButton } from './OddButton'
 import { useBetSlipStore } from '@/lib/stores/betSlipStore'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, ClipboardList } from 'lucide-react'
 import type { MatchWithMarkets } from '@/types/database.types'
 
 const CATEGORY_ORDER = [
@@ -210,7 +210,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
           {/* ── Markets list or empty state ── */}
           {!hasMarkets ? (
             <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-              <span className="text-3xl mb-2">📋</span>
+              <ClipboardList className="w-8 h-8 mb-2 text-white/30" />
               <p className="text-white/30 text-xs font-semibold">
                 No market list here
               </p>

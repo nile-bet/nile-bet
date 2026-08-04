@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, AlertTriangle, ChevronUp, ChevronDown } from 'lucide-react'
+import { ArrowLeft, AlertTriangle, ChevronUp, ChevronDown, ClipboardList} from 'lucide-react'
 import { OddButton } from './OddButton'
 import { formatKickOff } from '@/lib/utils/formatCurrency'
 import { FlagImage } from '@/components/shared/FlagImage'
@@ -262,7 +262,7 @@ export function MatchDetailClient({ match }: { match: MatchWithMarkets }) {
       <div className="flex-1 overflow-y-auto">
         {activeMarkets.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <span className="text-3xl mb-3">📋</span>
+            <ClipboardList className="w-8 h-8 mb-3 text-white/30" />
             <p className="text-white/30 text-sm">No market list here</p>
             <p className="text-white/20 text-xs mt-1">{activeCategory} markets not available for this match</p>
           </div>

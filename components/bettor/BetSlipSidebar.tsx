@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { X, Ticket, AlertTriangle, Search, Loader2, Clock, Copy, Check } from 'lucide-react'
+import { X, Ticket, AlertTriangle, Search, Loader2, Clock, Copy, Check, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { useBetSlipStore } from '@/lib/stores/betSlipStore'
 import { useAuthStore }
@@ -114,7 +114,7 @@ export function BetSlipSidebar({
               s.matchId === updated.id ? { ...s, matchStatus: updated.status } : s
             )
             useBetSlipStore.setState({ selections: newSelections })
-            toast.warning(`⚠️ ${matchName} has started — remove it to place your bet`)
+            toast.warning(`${matchName} has started — remove it to place your bet`)
           }
         }
       })
@@ -395,7 +395,7 @@ export function BetSlipSidebar({
                             : 'text-nile-danger hover:text-nile-danger/80'
                         )}
                       >
-                        ✕
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -592,7 +592,7 @@ export function BetSlipSidebar({
                   : 'bg-white/10 text-white/30 cursor-not-allowed'
               )}
             >
-              {generatingCode ? 'Generating...' : slipCode ? '🔄 Regenerate Code' : '🎟️ Place Bet'}
+              {generatingCode ? 'Generating...' : slipCode ? (<span className="inline-flex items-center gap-1.5"><RefreshCw className="w-3.5 h-3.5" /> Regenerate Code</span>) : (<span className="inline-flex items-center gap-1.5"><Ticket className="w-3.5 h-3.5" /> Place Bet</span>)}
             </button>
           ) : (
             <button
