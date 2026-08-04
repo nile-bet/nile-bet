@@ -5,6 +5,7 @@ import QRCode from 'qrcode'
 import { StatusBadge } from './StatusBadge'
 import { formatDate, formatETB } from '@/lib/utils/formatCurrency'
 import { cn } from '@/lib/utils'
+import { Trophy, CheckCircle2, XCircle, Undo2, Clock, Check, PartyPopper, Shield, Copy } from 'lucide-react'
 import type { SlipWithSelections } from '@/types/database.types'
 
 interface SlipDetailCardProps {
@@ -42,10 +43,10 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
 
   const resultIcon = (result: string) => {
     switch (result) {
-      case 'won': return '✅'
-      case 'lost': return '❌'
-      case 'void': return '↩️'
-      default: return '⏳'
+      case 'won': return <CheckCircle2 className="w-4 h-4 text-nile-success" />
+      case 'lost': return <XCircle className="w-4 h-4 text-nile-danger" />
+      case 'void': return <Undo2 className="w-4 h-4 text-white/40" />
+      default: return <Clock className="w-4 h-4 text-gold/60" />
     }
   }
 
@@ -69,8 +70,8 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {isJackpot && (
-              <span className="text-[10px] bg-gold/20 text-gold border border-gold/30 px-2 py-0.5 rounded font-medium">
-                🏆 JACKPOT
+              <span className="inline-flex items-center gap-1 text-[10px] bg-gold/20 text-gold border border-gold/30 px-2 py-0.5 rounded font-medium">
+                <Trophy className="w-2.5 h-2.5" /> JACKPOT
               </span>
             )}
             <span className="text-gold font-mono font-bold text-lg">#{slip.slip_id}</span>
@@ -81,14 +82,14 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
 
         {/* Summary bar */}
         <div className="flex gap-3 mt-3">
-          <span className="text-[11px] bg-nile-success/20 text-nile-success px-2 py-0.5 rounded-full">
-            ✅ {wonCount} Won
+          <span className="inline-flex items-center gap-1 text-[11px] bg-nile-success/20 text-nile-success px-2 py-0.5 rounded-full">
+            <CheckCircle2 className="w-3 h-3" /> {wonCount} Won
           </span>
-          <span className="text-[11px] bg-nile-danger/20 text-nile-danger px-2 py-0.5 rounded-full">
-            ❌ {lostCount} Lost
+          <span className="inline-flex items-center gap-1 text-[11px] bg-nile-danger/20 text-nile-danger px-2 py-0.5 rounded-full">
+            <XCircle className="w-3 h-3" /> {lostCount} Lost
           </span>
-          <span className="text-[11px] bg-gold/10 text-gold px-2 py-0.5 rounded-full">
-            ⏳ {pendingCount} Pending
+          <span className="inline-flex items-center gap-1 text-[11px] bg-gold/10 text-gold px-2 py-0.5 rounded-full">
+            <Clock className="w-3 h-3" /> {pendingCount} Pending
           </span>
         </div>
       </div>
@@ -119,7 +120,7 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
                   </p>
                   {match?.kick_off_time && (
                     <p className="text-white/30 text-[10px] mt-0.5">
-                      🕐 {new Date(match.kick_off_time).toLocaleString('en-ET', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      {new Date(match.kick_off_time).toLocaleString('en-ET', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   )}
                 </div>
@@ -127,7 +128,7 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
                   <span className="text-gold font-mono text-sm font-bold">
                     {sel.odd_at_placement?.toFixed(2)}
                   </span>
-                  <span className="text-lg">{resultIcon(sel.result)}</span>
+                  <span>{resultIcon(sel.result)}</span>
                 </div>
               </div>
             </div>
@@ -168,12 +169,12 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
         {/* Status message */}
         {slip.status === 'paid' && (
           <div className="mt-2 bg-nile-blue-light/10 border border-nile-blue-light/30 rounded-lg p-3 text-center">
-            <p className="text-nile-blue-light font-semibold text-sm">✓ Paid — Redeemed by cashier</p>
+            <p className="text-nile-blue-light font-semibold text-sm flex items-center justify-center gap-1"><Check className="w-4 h-4" /> Paid — Redeemed by cashier</p>
           </div>
         )}
         {slip.status === 'won' && (
           <div className="mt-2 bg-nile-success/10 border border-nile-success/30 rounded-lg p-3 text-center">
-            <p className="text-nile-success font-semibold text-sm">🎉 You Won! Visit a cashier to claim your prize.</p>
+            <p className="text-nile-success font-semibold text-sm flex items-center justify-center gap-1"><PartyPopper className="w-4 h-4" /> You Won! Visit a cashier to claim your prize.</p>
           </div>
         )}
         {slip.status === 'lost' && (
@@ -184,7 +185,7 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
 
         {slip.insurance_applied && (
           <div className="mt-2 bg-gold/10 border border-gold/30 rounded-lg p-2 text-center space-y-1">
-            <p className="text-gold text-xs font-semibold">🛡️ Insurance Applied — {formatETB(slip.insurance_payout)} credited</p>
+            <p className="text-gold text-xs font-semibold flex items-center justify-center gap-1"><Shield className="w-3.5 h-3.5" /> Insurance Applied — {formatETB(slip.insurance_payout)} credited</p>
             {(slip.insurance_tax ?? 0) > 0 && (
               <p className="text-white/40 text-[10px]">Tax of {formatETB(slip.insurance_tax)} already deducted</p>
             )}
@@ -201,7 +202,7 @@ export function SlipDetailCard({ slip, showShareOptions = false, className }: Sl
             onClick={() => navigator.clipboard.writeText(`${appUrl}/slip/${slip.slip_id}`)}
             className="w-full text-xs border border-gold/30 text-gold py-2 rounded-lg hover:bg-gold/10 transition-colors"
           >
-            📋 Copy Slip Link
+            <span className="inline-flex items-center gap-1.5"><Copy className="w-3.5 h-3.5" /> Copy Slip Link</span>
           </button>
         </div>
       )}
