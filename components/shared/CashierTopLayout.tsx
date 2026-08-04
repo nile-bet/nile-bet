@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LucideIcon, Menu, X, LogOut, LayoutDashboard, Search, ChevronDown, Home, Globe, BarChart2 } from 'lucide-react'
+import { LucideIcon, Menu, X, LogOut, LayoutDashboard, Search, ChevronDown, Home, Globe, BarChart2, Ticket } from 'lucide-react'
 import { Logo } from './Logo'
 import { NotificationBell } from './NotificationBell'
 import { RoleBadge } from './RoleBadge'
@@ -78,7 +78,7 @@ export function CashierTopLayout({
             className="bg-gold text-charcoal font-bold text-xs px-4 py-2 rounded-md hover:bg-gold-light transition-colors flex items-center gap-1.5"
             title="Ctrl+R"
           >
-            🎟️ REDEEM SLIP
+            <Ticket className="w-3.5 h-3.5" /> REDEEM SLIP
           </button>
         )}
 

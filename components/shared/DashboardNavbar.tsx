@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { PanelLeftClose, PanelLeftOpen, LogOut, LayoutDashboard,
-  Search, Receipt } from 'lucide-react'
+import { PanelLeftClose, PanelLeftOpen, LogOut, LayoutDashboard, Search, Receipt, Ticket } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -98,7 +97,7 @@ export function DashboardNavbar({
             className="bg-gold text-charcoal font-bold text-xs px-4 py-2 rounded-md hover:bg-gold-light transition-colors flex items-center gap-1.5"
             title="Ctrl+R"
           >
-            🎟️ REDEEM SLIP
+            <Ticket className="w-3.5 h-3.5" /> REDEEM SLIP
           </button>
         ) : (
           title && (
