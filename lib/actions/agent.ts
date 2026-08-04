@@ -1,4 +1,5 @@
 'use server'
+import { getProfitSplit } from '@/lib/utils/getProfitSplit'
 
 import { createClient }
   from '@/lib/supabase/server'
@@ -101,7 +102,8 @@ export async function getAgentStats(
   }
 
   const grossProfit = totalRevenue - paidOut
-  const agentShare = grossProfit * 0.6
+  const { agentPct } = await getProfitSplit(supabase)
+  const agentShare = grossProfit * agentPct
 
   // Pending credit requests
   const { count: pendingRequests } =
@@ -883,7 +885,8 @@ export async function getAgentReport(
   const totalPaid = totalPaidSlips + jackpotPaidR
   const taxCollectedAll = taxCollected + jackpotTaxCollectedR
   const grossProfit = totalCollected - totalPaid
-  const agentShare = grossProfit * 0.6
+  const { agentPct: agentPct2 } = await getProfitSplit(supabase)
+  const agentShare = grossProfit * agentPct2
   const grouped: Record<string, any> = {}
   allSlips.forEach((slip) => {
     const date = slip.created_at.split('T')[0]
@@ -925,7 +928,7 @@ export async function getAgentReport(
   }
   for (const c of Object.values(cashierMap) as any[]) {
     c.grossProfit = c.totalCollected - c.totalPaid
-    c.agentShare = c.grossProfit * 0.6
+    c.agentShare = c.grossProfit * agentPct2
   }
 
   return {
@@ -1299,8 +1302,9 @@ export async function getAgentNetworkStats(
   const pendingLiability = pendingLiabilitySlips + jackpotPendingLiability
 
   const grossProfit = totalCollected - totalPaidOut
-  const agentProfit = grossProfit * 0.6
-  const cashierProfit = grossProfit * 0.4
+  const { cashierPct: cashierPct3, agentPct: agentPct3 } = await getProfitSplit(supabase)
+  const agentProfit = grossProfit * agentPct3
+  const cashierProfit = grossProfit * cashierPct3
 
   // Jackpot status breakdown
   const jackpotTotal = allJackpot.length

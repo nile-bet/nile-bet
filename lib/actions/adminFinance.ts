@@ -1,4 +1,5 @@
 'use server'
+import { getProfitSplit } from '@/lib/utils/getProfitSplit'
 
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 
@@ -419,10 +420,11 @@ export async function getAgentProfitReport(filters?: DateFilters) {
     }
   }
 
+  const { cashierPct: financeCashierPct, agentPct: financeAgentPct } = await getProfitSplit(supabase)
   return Object.values(map).map((r: any) => {
     r.grossProfit = r.totalCollected - r.totalPaidOut
-    r.agentShare = r.grossProfit * 0.6
-    r.cashierShare = r.grossProfit * 0.4
+    r.agentShare = r.grossProfit * financeAgentPct
+    r.cashierShare = r.grossProfit * financeCashierPct
     return r
   }).sort((a: any, b: any) => b.grossProfit - a.grossProfit)
 }

@@ -1,4 +1,5 @@
 'use server'
+import { getProfitSplit } from '@/lib/utils/getProfitSplit'
 
 import { createClient }
   from '@/lib/supabase/server'
@@ -195,8 +196,9 @@ export async function getCashierDashboardStats(
   const netBalance = totalPaidOut - totalCollected
 
   // Profit split
-  const cashierProfit = grossProfitLoss * 0.4
-  const agentPayable = grossProfitLoss * 0.6
+  const { cashierPct, agentPct } = await getProfitSplit(supabase)
+  const cashierProfit = grossProfitLoss * cashierPct
+  const agentPayable = grossProfitLoss * agentPct
   // Won amounts: 'paid' slips = redeemed, 'won' slips = pending payout (regular only here)
   const wonRedeemedAmount = paidSlips.reduce((a, s) => a + (s.net_payout ?? 0), 0)
   const wonPendingAmount = wonSlips.reduce((a, s) => a + (s.net_payout ?? 0), 0)
