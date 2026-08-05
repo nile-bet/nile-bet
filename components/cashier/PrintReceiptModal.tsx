@@ -51,16 +51,21 @@ export function PrintReceiptModal({
   const [copied, setCopied] = useState(false)
 
   const handlePrint = usePrint(receiptRef, {
-    
-    documentTitle: `NILE-Bet-${slipData.slipId}`,
+    documentTitle: `NILE-${slipData.slipId}`,
     onAfterPrint: () => {
       toast.success('Receipt printed!')
+      setTimeout(() => onClose(), 300)
     },
     onPrintError: () => {
-      toast.error(
-        'Print failed. Check printer connection.'
-      )
+      toast.error('Print failed. Check printer connection.')
     },
+    pageStyle: `
+      @page { size: 80mm auto; margin: 0; }
+      @media print {
+        body { margin: 0; padding: 0; }
+        .thermal-receipt { width: 80mm !important; }
+      }
+    `,
   })
 
   const handleCopyId = () => {
@@ -95,7 +100,7 @@ export function PrintReceiptModal({
       open={isOpen}
       onOpenChange={onClose}
     >
-      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-lg w-full" style={{ maxHeight: "90vh", overflowY: "auto" }}>
+      <DialogContent className="bg-slate-dark border-nile-blue/40 max-w-sm w-full" style={{ maxHeight: "92vh", overflowY: "auto" }}>
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Printer className="w-5 h-5 text-gold" />
@@ -153,16 +158,10 @@ export function PrintReceiptModal({
 
         {/* Receipt preview */}
         <div
-          className="border border-dashed border-nile-blue/30 rounded-lg overflow-hidden"
-          style={{ maxHeight: '55vh', overflowY: 'auto' }}
+          className="border border-dashed border-nile-blue/30 rounded-lg overflow-y-auto"
+          style={{ maxHeight: '50vh' }}
         >
-          <div
-            style={{
-              transform: 'scale(0.85)',
-              transformOrigin: 'top center',
-              backgroundColor: 'white',
-            }}
-          >
+          <div style={{ transform: 'scale(0.82)', transformOrigin: 'top left', width: '122%', backgroundColor: 'white' }}>
             <ThermalReceipt
               ref={receiptRef}
               {...slipData}

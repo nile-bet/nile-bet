@@ -32,20 +32,33 @@ export function usePrint(contentRef: RefObject<HTMLDivElement | null>, options?:
       }
     `
 
+    // Copy Google Fonts link if present
+    const fontLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .map(l => l.outerHTML).join('\n')
+
     printWindow.document.write(`<!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8"/>
   <title>${options?.documentTitle ?? 'Print'}</title>
+  ${fontLinks}
   <style>${pageStyle}</style>
 </head>
 <body>${content.outerHTML}</body>
 </html>`)
     printWindow.document.close()
     printWindow.focus()
+    // Wait for fonts/images to load before printing
     setTimeout(() => {
-      printWindow.print()
-      printWindow.close()
-      options?.onAfterPrint?.()
-    }, 400)
+      try {
+        printWindow.print()
+      } catch (e) {
+        options?.onPrintError?.()
+      }
+      setTimeout(() => {
+        printWindow.close()
+        options?.onAfterPrint?.()
+      }, 500)
+    }, 600)
   }
 }
