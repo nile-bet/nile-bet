@@ -1,5 +1,7 @@
 'use client'
 
+import { Ticket } from 'lucide-react'
+
 import { useState } from 'react'
 import { PublicNavbar } from '@/components/shared/PublicNavbar'
 import { BetSlipSidebar } from './BetSlipSidebar'
@@ -17,7 +19,7 @@ function MobileSlipButton({ onOpen }: { onOpen: () => void }) {
         onClick={onOpen}
         className="pointer-events-auto flex items-center gap-2 bg-gold text-charcoal pl-4 pr-3 py-2.5 rounded-full shadow-2xl shadow-gold/40 font-bold text-sm hover:bg-gold-light transition-all active:scale-95 whitespace-nowrap"
       >
-        🎟️ Slip
+        <span className="inline-flex items-center gap-1.5"><Ticket className="w-4 h-4" /> Slip</span>
         {selections.length > 0 && (
           <span className="bg-charcoal/25 text-charcoal text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full">
             {selections.length}
