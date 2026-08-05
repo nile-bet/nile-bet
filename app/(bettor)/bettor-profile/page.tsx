@@ -28,13 +28,7 @@ import {
   formatCountdown,
 } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
-import {
-  Wallet,
-  TrendingUp,
-  TrendingDown,
-  User,
-  Gift,
-} from 'lucide-react'
+import { Wallet, TrendingUp, TrendingDown, User, Gift, CreditCard, Banknote, Shield, Trophy, CheckCircle2 } from 'lucide-react'
 
 export default function ProfilePage() {
   const { user, settings } = useAuthStore()
@@ -137,7 +131,7 @@ export default function ProfilePage() {
                   }
                   className="flex-1 bg-gold text-charcoal py-2.5 rounded-lg text-sm font-semibold hover:bg-gold-light"
                 >
-                  💳 Request Top-up
+                  <span className="inline-flex items-center gap-1.5"><CreditCard className="w-4 h-4" /> Request Top-up</span>
                 </button>
                 <button
                   onClick={() =>
@@ -145,7 +139,7 @@ export default function ProfilePage() {
                   }
                   className="flex-1 border border-nile-blue text-nile-blue-light py-2.5 rounded-lg text-sm font-medium hover:bg-nile-blue/20"
                 >
-                  💸 Withdraw
+                  <span className="inline-flex items-center gap-1.5"><Banknote className="w-4 h-4" /> Withdraw</span>
                 </button>
               </div>
             </div>
@@ -157,7 +151,7 @@ export default function ProfilePage() {
                   <Gift className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-gold font-semibold text-sm">
-                      🎁 Welcome Bonus Available!
+                      <span className="inline-flex items-center gap-1.5"><Gift className="w-4 h-4" /> Welcome Bonus Available!</span>
                     </p>
                     <p className="text-white/60 text-xs mt-1">
                       Top up ETB{' '}
@@ -188,8 +182,8 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-white font-semibold text-sm">
                     {coupon.type === 'topup'
-                      ? '🎫 Active Top-up Coupon'
-                      : '💸 Active Withdrawal Coupon'}
+                      ? 'Active Top-up Coupon'
+                      : 'Active Withdrawal Coupon'}
                   </p>
                   <button
                     onClick={() =>
@@ -294,14 +288,14 @@ export default function ProfilePage() {
                 </div>
                 <div className="bg-gold/10 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold text-gold font-mono">{stats?.nearWinBets ?? 0}</p>
-                  <p className="text-white/50 text-xs">Near Win 🛡️</p>
+                  <p className="text-white/50 text-xs flex items-center gap-1">Near Win <Shield className="w-3 h-3" /></p>
                 </div>
               </div>
 
               {/* Jackpot stats */}
               {(stats?.jackpotEntries ?? 0) > 0 && (
                 <>
-                  <p className="text-white/40 text-[10px] uppercase tracking-widest mt-3 mb-2">🏆 Jackpot Entries</p>
+                  <p className="text-white/40 text-[10px] uppercase tracking-widest mt-3 mb-2 flex items-center gap-1"><Trophy className="w-3 h-3" /> Jackpot Entries</p>
                   <div className="grid grid-cols-3 gap-2">
                     <div className="bg-charcoal/50 rounded-lg p-2.5 text-center">
                       <p className="text-xl font-bold text-gold font-mono">{stats?.jackpotEntries ?? 0}</p>
@@ -421,8 +415,8 @@ export default function ProfilePage() {
                     }
                   >
                     {user.welcome_bonus_claimed
-                      ? '✅ Claimed'
-                      : '🎁 Available'}
+                      ? (<span className="inline-flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Claimed</span>)
+                      : (<span className="inline-flex items-center gap-1"><Gift className="w-3.5 h-3.5" /> Available</span>)}
                   </span>
                 </div>
               </div>

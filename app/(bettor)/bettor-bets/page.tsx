@@ -18,7 +18,7 @@ import {
 } from '@/lib/actions/coupons'
 import { useAuthStore }
   from '@/lib/stores/authStore'
-import { Ticket, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { Ticket, CheckCircle, XCircle, ChevronDown, ChevronUp, Trophy, Medal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const TABS = [
@@ -27,8 +27,8 @@ const TABS = [
   { key: 'won', label: 'Won' },
   { key: 'lost', label: 'Lost' },
   { key: 'cancelled', label: 'Cancelled' },
-  { key: 'near_win', label: 'Near Win 🛡️' },
-  { key: 'jackpot', label: '🏆 Jackpot' },
+  { key: 'near_win', label: 'Near Win' },
+  { key: 'jackpot', label: 'Jackpot' },
 ]
 
 export default function MyBetsPage() {
@@ -203,12 +203,12 @@ function JackpotSlipCard({ slip }: { slip: any }) {
     }>
       {slip.status === 'won' && (
         <div className="px-4 py-2 text-center border-b border-[#D4AF37]/20" style={{ background: 'rgba(212,175,55,0.1)' }}>
-          <p className="font-bold text-sm" style={{ color: '#FFD700' }}>🏆 JACKPOT WINNER!</p>
+          <p className="font-bold text-sm flex items-center justify-center gap-1.5" style={{ color: '#FFD700' }}><Trophy className="w-4 h-4" /> JACKPOT WINNER!</p>
         </div>
       )}
       {slip.status === 'near_win' && (
         <div className="px-4 py-2 text-center border-b border-green-500/20" style={{ background: 'rgba(74,222,128,0.06)' }}>
-          <p className="font-semibold text-sm text-green-400">🥈 Near Win — 11/12!</p>
+          <p className="font-semibold text-sm text-green-400 flex items-center justify-center gap-1.5"><Medal className="w-4 h-4" /> Near Win — 11/12!</p>
         </div>
       )}
       <div className="p-4">
