@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff, Check, X, Loader2, User, Lock, Shield, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, Check, X, Loader2, User, Lock, Shield, ArrowLeft, AlertTriangle } from 'lucide-react'
 import { Logo } from '@/components/shared/Logo'
 import { registerBettor, checkUsernameAvailable } from '@/lib/actions/auth'
 import { toast } from 'sonner'
@@ -70,7 +70,7 @@ export default function RegisterPage() {
     setError('')
     const result = await registerBettor(username.trim(), password)
     if (result.success) {
-      toast.success('🌊 Welcome to NILE Betting!')
+      toast.success('Welcome to NILE Betting!')
       window.location.href = '/'
     } else {
       setError(result.error ?? 'Registration failed')
@@ -130,8 +130,8 @@ export default function RegisterPage() {
                    available === false ? <X className="w-4 h-4" style={{ color: '#ef4444' }} /> : null}
                 </div>
               </div>
-              {available === true && <p className="text-xs mt-1" style={{ color: '#22c55e' }}>✓ Username available</p>}
-              {available === false && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>✗ Username already taken</p>}
+              {available === true && <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#22c55e' }}><Check className="w-3.5 h-3.5" /> Username available</p>}
+              {available === false && <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#ef4444' }}><X className="w-3.5 h-3.5" /> Username already taken</p>}
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>Letters, numbers and underscores (3-20 chars)</p>
             </div>
 
@@ -212,7 +212,7 @@ export default function RegisterPage() {
 
             {error && (
               <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}>
-                <p className="text-red-400 text-sm">⚠️ {error}</p>
+                <p className="text-red-400 text-sm flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> {error}</p>
               </div>
             )}
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff, User, Lock, Shield, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, User, Lock, Shield, ArrowLeft, AlertTriangle, Ban, Mail } from 'lucide-react'
 import { Logo } from '@/components/shared/Logo'
 import { loginUser } from '@/lib/actions/auth'
 import { toast } from 'sonner'
@@ -110,7 +110,7 @@ export default function LoginPage() {
 
             {error && (
               <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}>
-                <p className="text-red-400 text-sm">⚠️ {error}</p>
+                <p className="text-red-400 text-sm flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> {error}</p>
               </div>
             )}
 
@@ -157,7 +157,7 @@ export default function LoginPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
           <div className="w-full max-w-sm rounded-2xl p-8 text-center" style={{ background: '#1A1F4D', border: '1px solid rgba(239,68,68,0.3)', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
             <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(239,68,68,0.15)' }}>
-              <span className="text-3xl">🚫</span>
+              <Ban className="w-8 h-8" />
             </div>
             <h2 className="text-white font-bold text-xl mb-2">Account Suspended</h2>
             <p className="text-sm mb-6" style={{ color: '#A9B4D0' }}>
@@ -165,7 +165,7 @@ export default function LoginPage() {
             </p>
             <div className="rounded-xl px-4 py-3 mb-6 text-left" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
               <p className="text-xs" style={{ color: '#A9B4D0' }}>For support, contact:</p>
-              <p className="text-sm text-white font-medium mt-1">📧 nilebetting@gmail.com</p>
+              <p className="text-sm text-white font-medium mt-1 flex items-center justify-center gap-1.5"><Mail className="w-4 h-4" /> nilebetting@gmail.com</p>
               <p className="text-xs mt-1" style={{ color: '#A9B4D0' }}>or visit your nearest Nile Betting Shop</p>
             </div>
             <button

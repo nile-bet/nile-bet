@@ -68,8 +68,8 @@ export default async function JackpotPage() {
             <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-2">
               Weekend Jackpot
             </h1>
-            <p className="text-gold text-xl font-semibold mb-4">
-              🏆 Pick 12. Win Big.
+            <p className="text-gold text-xl font-semibold mb-4 flex items-center justify-center gap-2">
+              <Trophy className="w-5 h-5" /> Pick 12. Win Big.
             </p>
 
             {jackpot ? (
