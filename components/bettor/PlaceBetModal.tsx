@@ -19,12 +19,7 @@ import { formatETB }
   from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import {
-  X,
-  Lock,
-  Unlock,
-  AlertTriangle,
-} from 'lucide-react'
+import { X, Lock, Unlock, AlertTriangle, Shield } from 'lucide-react'
 
 interface PlaceBetModalProps {
   isOpen: boolean
@@ -240,7 +235,7 @@ export function PlaceBetModal({
               {/* Insurance badge */}
               {insuranceApplied && (
                 <div className="bg-gold/10 border border-gold/30 rounded-lg px-3 py-2 text-xs text-gold flex items-center gap-2">
-                  🛡️ Insurance active — miss
+                  <Shield className="w-3.5 h-3.5 inline-block -mt-0.5 mr-0.5" /> Insurance active — miss
                   1-2 and still get payout
                 </div>
               )}

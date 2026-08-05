@@ -123,8 +123,8 @@ export function TopupFlowModal({
         <DialogHeader>
           <DialogTitle className="text-white">
             {step === 1
-              ? 'Request Top-up 💳'
-              : 'Your Top-up Coupon 🎫'}
+              ? 'Request Top-up'
+              : 'Your Top-up Coupon'}
           </DialogTitle>
         </DialogHeader>
 
@@ -246,7 +246,7 @@ export function TopupFlowModal({
               {[
                 '⏰ Expires in 6 hours',
                 '1️⃣ One-time use only',
-                '🏪 Valid at any cashier',
+                'Valid at any cashier',
               ].map((pill) => (
                 <span
                   key={pill}

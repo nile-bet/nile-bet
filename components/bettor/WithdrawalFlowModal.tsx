@@ -121,8 +121,8 @@ export function WithdrawalFlowModal({
         <DialogHeader>
           <DialogTitle className="text-white">
             {step === 1
-              ? 'Withdraw Winnings 💸'
-              : 'Your Withdrawal Coupon 💸'}
+              ? 'Withdraw Winnings'
+              : 'Your Withdrawal Coupon'}
           </DialogTitle>
         </DialogHeader>
 
