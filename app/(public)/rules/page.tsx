@@ -34,7 +34,7 @@ const sections = [
     id: '3',
     title: '3. Match & Event Rules',
     content: `
-      ⚠️ ALL bets placed after kick-off are VOID. No exceptions — even if placed seconds after kick-off.
+      ALL bets placed after kick-off are VOID. No exceptions — even if placed seconds after kick-off.
 
       Postponed matches: Bets remain valid if match replays within 48 hours. Otherwise bets are voided and full stake refunded.
 

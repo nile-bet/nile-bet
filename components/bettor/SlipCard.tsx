@@ -13,6 +13,8 @@ import {
   XCircle,
   Undo2,
   Clock,
+  Ticket,
+  Timer,
 } from 'lucide-react'
 import { StatusBadge }
   from '@/components/shared/StatusBadge'
@@ -56,6 +58,11 @@ export function SlipCard({
 
   const isJackpot =
     slip.slip_id?.startsWith('JP')
+  const isWon = slip.status === 'won' || slip.status === 'paid'
+  const isNearWin = slip.status === 'near_win'
+  const isLost = slip.status === 'lost'
+  const isCancelled = slip.status === 'cancelled'
+  const isPending = slip.status === 'pending'
 
   const canCancel =
     slip.status === 'pending' &&
@@ -133,54 +140,70 @@ export function SlipCard({
     router.push('/')
   }
 
-  const borderColor =
-    slip.status === 'won' || slip.status === 'paid'
-      ? 'border-nile-success/30'
-      : slip.status === 'lost'
-      ? 'border-nile-danger/20'
-      : slip.status === 'near_win'
-      ? 'border-gold/40'
-      : slip.status === 'cancelled'
-      ? 'border-white/10'
-      : 'border-nile-blue/30'
-
-  const bgTint =
-    slip.status === 'won' || slip.status === 'paid'
-      ? 'bg-nile-success/5'
-      : slip.status === 'near_win'
-      ? 'bg-gold/5'
-      : ''
+  // Card visual language, driven off a single status classification.
+  const styleMap = {
+    won: {
+      border: 'border-gold/40',
+      bg: 'bg-gradient-to-br from-gold/[0.06] to-transparent',
+      accent: 'text-gold',
+    },
+    nearWin: {
+      border: 'border-nile-success/30',
+      bg: 'bg-gradient-to-br from-nile-success/[0.05] to-transparent',
+      accent: 'text-nile-success',
+    },
+    lost: {
+      border: 'border-nile-danger/15',
+      bg: '',
+      accent: 'text-nile-danger',
+    },
+    cancelled: {
+      border: 'border-white/10',
+      bg: '',
+      accent: 'text-white/40',
+    },
+    pending: {
+      border: 'border-nile-blue/30',
+      bg: '',
+      accent: 'text-nile-blue-light',
+    },
+  }
+  const style = isWon
+    ? styleMap.won
+    : isNearWin
+    ? styleMap.nearWin
+    : isLost
+    ? styleMap.lost
+    : isCancelled
+    ? styleMap.cancelled
+    : styleMap.pending
 
   return (
     <>
       <div
         className={cn(
-          'rounded-xl border overflow-hidden',
-          borderColor,
-          bgTint
+          'rounded-2xl border overflow-hidden transition-all hover:border-opacity-70',
+          style.border,
+          style.bg
         )}
       >
-        {/* Won banner */}
-        {(slip.status === 'won' || slip.status === 'paid') && (
-          <div className="bg-nile-success/20 border-b border-nile-success/30 px-4 py-2 text-center">
-            <span className="text-nile-success font-semibold text-sm">
-              You Won!
+        {/* Status banner */}
+        {isWon && (
+          <div className="bg-gold/10 border-b border-gold/20 px-4 py-2 flex items-center justify-center gap-1.5">
+            <Trophy className="w-3.5 h-3.5 text-gold" />
+            <span className="text-gold font-semibold text-xs tracking-wide">
+              YOU WON
             </span>
           </div>
         )}
-
-        {/* Near win banner */}
-        {slip.status === 'near_win' && (
-          <div className="bg-gold/10 border-b border-gold/30 px-4 py-2 text-center">
-            <span className="text-gold font-semibold text-sm">
-              <Shield className="w-3.5 h-3.5 inline-block -mt-0.5 mr-0.5" /> Insurance Applied —{' '}
-              {formatETB(
-                slip.insurance_payout
-              )}{' '}
-              credited
+        {isNearWin && (
+          <div className="bg-nile-success/10 border-b border-nile-success/20 px-4 py-2 text-center">
+            <span className="text-nile-success font-semibold text-xs flex items-center justify-center gap-1.5">
+              <Shield className="w-3.5 h-3.5" />
+              Insurance Applied — {formatETB(slip.insurance_payout)} credited
             </span>
             {(slip.insurance_tax ?? 0) > 0 && (
-              <span className="block text-white/40 text-[10px] mt-0.5">
+              <span className="block text-white/35 text-[10px] mt-0.5">
                 Tax of {formatETB(slip.insurance_tax)} already deducted
               </span>
             )}
@@ -188,77 +211,73 @@ export function SlipCard({
         )}
 
         {/* Main row */}
-        <div className="bg-slate-dark px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full bg-slate-dark px-3.5 py-3 md:px-4 md:py-3.5 flex items-center gap-3 text-left"
+        >
+          {/* Left: icon + id + meta */}
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div
+              className={cn(
+                'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
+                isWon ? 'bg-gold/15' : isNearWin ? 'bg-nile-success/15' : 'bg-nile-blue/10'
+              )}
+            >
+              <Ticket className={cn('w-4 h-4', style.accent)} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 {isJackpot && (
-                  <span className="inline-flex items-center gap-1 text-[10px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded">
+                  <span className="inline-flex items-center gap-1 text-[9px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded-full font-semibold">
                     <Trophy className="w-2.5 h-2.5" /> JACKPOT
                   </span>
                 )}
-                <span className="text-gold font-mono font-bold text-sm">
+                <span className="text-gold font-mono font-bold text-sm truncate">
                   #{slip.slip_id}
                 </span>
               </div>
-              <p className="text-white/40 text-xs mt-0.5">
-                {formatDate(slip.created_at)}{' '}
-                •{' '}
-                {
-                  slip.slip_selections
-                    ?.length
-                }{' '}
-                selections
+              <p className="text-white/35 text-[11px] mt-0.5 truncate">
+                {formatDate(slip.created_at)} · {slip.slip_selections?.length ?? 0} selection
+                {slip.slip_selections?.length === 1 ? '' : 's'}
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <StatusBadge
-                status={slip.status}
-                type="slip"
-              />
-              <div className="text-right">
-                <p className="text-white/50 text-xs">
-                  Stake:{' '}
-                  {formatETB(slip.stake)}
-                </p>
-                {(slip.status === 'won' ||
-                  slip.status === 'paid' ||
-                  slip.status ===
-                    'near_win') && (
-                  <p className="text-nile-success text-xs font-mono">
-                    +{formatETB(slip.net_payout)}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={() =>
-                  setExpanded(!expanded)
-                }
-                className="text-white/40 hover:text-white"
-              >
-                {expanded ? (
-                  <ChevronUp className="w-4 h-4" />
-                ) : (
-                  <ChevronDown className="w-4 h-4" />
-                )}
-              </button>
-            </div>
           </div>
-        </div>
+
+          {/* Right: status + amounts + chevron */}
+          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+            <div className="hidden sm:block">
+              <StatusBadge status={slip.status} type="slip" />
+            </div>
+            <div className="text-right">
+              <p className="text-white/40 text-[11px]">
+                {formatETB(slip.stake)}
+              </p>
+              {(isWon || isNearWin) && (
+                <p className="text-nile-success text-xs md:text-sm font-mono font-semibold">
+                  +{formatETB(slip.net_payout)}
+                </p>
+              )}
+            </div>
+            <div className="sm:hidden">
+              <StatusBadge status={slip.status} type="slip" />
+            </div>
+            {expanded ? (
+              <ChevronUp className="w-4 h-4 text-white/30" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-white/30" />
+            )}
+          </div>
+        </button>
 
         {/* Expanded content */}
         {expanded && (
-          <div className="bg-charcoal border-t border-nile-blue/20 p-4">
+          <div className="bg-charcoal border-t border-nile-blue/20 p-3.5 md:p-4">
             {/* Selections */}
-            <div className="space-y-2 mb-4">
-              {(
-                slip.slip_selections ?? []
-              ).map((sel: any, i: number) => {
+            <div className="space-y-1.5 mb-4">
+              {(slip.slip_selections ?? []).map((sel: any, i: number) => {
                 const match = sel.matches
-                const market =
-                  sel.match_markets
-                const template =
-                  market?.market_templates
+                const market = sel.match_markets
+                const template = market?.market_templates
                 const ResultIcon =
                   sel.result === 'won'
                     ? CheckCircle2
@@ -274,30 +293,27 @@ export function SlipCard({
                     ? 'text-nile-danger'
                     : sel.result === 'void'
                     ? 'text-white/40'
-                    : 'text-gold/60'
+                    : 'text-gold/50'
 
                 return (
                   <div
                     key={sel.id ?? i}
-                    className="bg-slate-dark/50 rounded-lg p-3 flex items-center justify-between"
+                    className="bg-slate-dark/60 rounded-xl px-3 py-2.5 flex items-center justify-between gap-3"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-white/50 text-xs truncate">
-                        {match?.home_team} vs{' '}
-                        {match?.away_team}
+                      <p className="text-white/45 text-[11px] truncate">
+                        {match?.home_team} vs {match?.away_team}
                       </p>
-                      <p className="text-white/40 text-xs">
+                      <p className="text-white/35 text-[10px]">
                         {template?.name}
                       </p>
-                      <p className="text-white text-sm font-medium">
+                      <p className="text-white text-sm font-medium truncate">
                         {sel.selection}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-gold font-mono text-sm">
-                        {sel.odd_at_placement?.toFixed(
-                          2
-                        )}
+                      <span className="text-gold font-mono text-sm font-semibold">
+                        {sel.odd_at_placement?.toFixed(2)}
                       </span>
                       <ResultIcon className={cn('w-4 h-4', resultColor)} />
                     </div>
@@ -307,46 +323,28 @@ export function SlipCard({
             </div>
 
             {/* Calculation */}
-            <div className="border-t border-gold/10 pt-3 space-y-1 mb-4">
+            <div className="bg-slate-dark/40 rounded-xl px-3.5 py-3 space-y-1.5 mb-3.5">
               <div className="flex justify-between text-xs">
-                <span className="text-white/50">
-                  Stake:
-                </span>
-                <span className="text-white font-mono">
-                  {formatETB(slip.stake)}
-                </span>
+                <span className="text-white/45">Stake</span>
+                <span className="text-white font-mono">{formatETB(slip.stake)}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-white/50">
-                  Total Odds:
-                </span>
-                <span className="text-white font-mono">
-                  {slip.total_odds?.toFixed(2)}
-                </span>
+                <span className="text-white/45">Total Odds</span>
+                <span className="text-white font-mono">{slip.total_odds?.toFixed(2)}</span>
               </div>
-              <div className="border-t border-gold/10 my-1" />
+              <div className="border-t border-white/5 my-1.5" />
               <div className="flex justify-between text-xs">
-                <span className="text-white/50">
-                  Max Payout:
-                </span>
-                <span className="text-white font-mono">
-                  {formatETB(slip.max_payout)}
-                </span>
+                <span className="text-white/45">Max Payout</span>
+                <span className="text-white font-mono">{formatETB(slip.max_payout)}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-white/50">
-                  Tax (15%):
-                </span>
-                <span className="text-nile-danger font-mono">
-                  -{formatETB(slip.winning_tax)}
-                </span>
+                <span className="text-white/45">Tax (15%)</span>
+                <span className="text-nile-danger font-mono">-{formatETB(slip.winning_tax)}</span>
               </div>
-              <div className="border-t border-gold/10 my-1" />
-              <div className="flex justify-between">
-                <span className="text-white font-medium text-xs">
-                  Net Payout:
-                </span>
-                <span className="text-gold font-mono font-bold">
+              <div className="border-t border-white/5 my-1.5" />
+              <div className="flex justify-between items-center">
+                <span className="text-white font-medium text-xs">Net Payout</span>
+                <span className="text-gold font-mono font-bold text-base">
                   {formatETB(slip.net_payout)}
                 </span>
               </div>
@@ -354,15 +352,14 @@ export function SlipCard({
 
             {/* Cancel timer */}
             {canCancel && (
-              <div className="flex items-center justify-between bg-nile-orange/10 border border-nile-orange/30 rounded-lg px-3 py-2 mb-3">
-                <span className="text-nile-orange text-xs">
-                  Cancel within: {countdown}
+              <div className="flex items-center justify-between bg-nile-orange/10 border border-nile-orange/25 rounded-xl px-3.5 py-2.5 mb-3.5">
+                <span className="text-nile-orange text-xs flex items-center gap-1.5">
+                  <Timer className="w-3.5 h-3.5" />
+                  Cancel within: <span className="font-mono font-semibold">{countdown}</span>
                 </span>
                 <button
-                  onClick={() =>
-                    setShowCancel(true)
-                  }
-                  className="text-xs border border-nile-danger/40 text-nile-danger px-3 py-1 rounded-lg hover:bg-nile-danger/10"
+                  onClick={() => setShowCancel(true)}
+                  className="text-xs border border-nile-danger/40 text-nile-danger px-3 py-1.5 rounded-lg hover:bg-nile-danger/10 font-medium"
                 >
                   Cancel Bet
                 </button>
@@ -373,21 +370,19 @@ export function SlipCard({
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(
-                    slip.slip_id
-                  )
+                  navigator.clipboard.writeText(slip.slip_id)
                   toast.success('Slip ID copied!')
                 }}
-                className="flex items-center gap-1.5 text-xs border border-nile-blue/30 text-white/60 px-3 py-1.5 rounded-lg hover:border-gold/30 hover:text-white"
+                className="flex-1 flex items-center justify-center gap-1.5 text-xs border border-nile-blue/30 text-white/60 px-3 py-2 rounded-xl hover:border-gold/30 hover:text-white transition-colors"
               >
-                <Copy className="w-3 h-3" />
+                <Copy className="w-3.5 h-3.5" />
                 Copy ID
               </button>
               <button
                 onClick={handleCopySlip}
-                className="flex items-center gap-1.5 text-xs border border-nile-blue/30 text-white/60 px-3 py-1.5 rounded-lg hover:border-gold/30 hover:text-white"
+                className="flex-1 flex items-center justify-center gap-1.5 text-xs border border-nile-blue/30 text-white/60 px-3 py-2 rounded-xl hover:border-gold/30 hover:text-white transition-colors"
               >
-                <RefreshCw className="w-3 h-3" />
+                <RefreshCw className="w-3.5 h-3.5" />
                 Copy Selections
               </button>
             </div>

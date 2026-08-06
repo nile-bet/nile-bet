@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Logo } from './Logo'
-import { Phone } from 'lucide-react'
+import { Phone, Mail } from 'lucide-react'
 
 export function Footer() {
   return (
@@ -128,7 +128,7 @@ export function Footer() {
               </span>
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <a href="mailto:nilebetting@gmail.com" className="text-xs md:text-sm text-gold font-medium hover:underline">✉ nilebetting@gmail.com</a>
+              <a href="mailto:nilebetting@gmail.com" className="text-xs md:text-sm text-gold font-medium hover:underline inline-flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> nilebetting@gmail.com</a>
             </div>
           </div>
         </div>

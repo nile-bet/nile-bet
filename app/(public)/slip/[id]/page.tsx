@@ -8,10 +8,7 @@ import { PublicNavbar }
   from '@/components/shared/PublicNavbar'
 import { Footer }
   from '@/components/shared/Footer'
-import {
-  ArrowLeft,
-  Trophy,
-} from 'lucide-react'
+import { ArrowLeft, Trophy, CheckCircle2, XCircle, Clock } from 'lucide-react'
 import Link from 'next/link'
 import {
   formatETB,
@@ -197,19 +194,13 @@ export default async function SlipPage({
                                 : 'X'}
                             </span>
                             {isCorrect && (
-                              <span className="text-nile-success">
-                                ✅
-                              </span>
+                              <CheckCircle2 className="w-4 h-4 text-nile-success" />
                             )}
                             {isWrong && (
-                              <span className="text-nile-danger">
-                                ❌
-                              </span>
+                              <XCircle className="w-4 h-4 text-nile-danger" />
                             )}
                             {isPending && (
-                              <span className="text-white/30">
-                                ⏳
-                              </span>
+                              <Clock className="w-4 h-4 text-white/30" />
                             )}
                           </div>
                         </div>

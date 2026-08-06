@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { redirect } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { PublicNavbar }
   from '@/components/shared/PublicNavbar'
 import { Footer }
@@ -18,7 +17,7 @@ import {
 } from '@/lib/actions/coupons'
 import { useAuthStore }
   from '@/lib/stores/authStore'
-import { Ticket, CheckCircle, XCircle, ChevronDown, ChevronUp, Trophy, Medal } from 'lucide-react'
+import { Ticket, CheckCircle, XCircle, ChevronDown, ChevronUp, Trophy, Medal, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const TABS = [
@@ -74,20 +73,39 @@ export default function MyBetsPage() {
   }
 
   if (!isAuthenticated && !user) {
-    return null
+    return (
+      <div className="min-h-screen flex flex-col">
+        <PublicNavbar />
+        <main className="flex-1 flex items-center justify-center px-4">
+          <EmptyState
+            title="Sign in to see your bets"
+            message="Log in to view your bet history and track your slips"
+            icon={Ticket}
+          />
+        </main>
+        <Footer />
+      </div>
+    )
   }
+
+  const totalPages = Math.ceil(total / 10)
 
   return (
     <div className="min-h-screen flex flex-col">
       <PublicNavbar />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-3 md:px-4 py-4 md:py-8 pb-20 md:pb-8">
-        <h1 className="font-display text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">
-          My Bets
-        </h1>
+      <main className="flex-1 max-w-3xl lg:max-w-4xl mx-auto w-full px-3 md:px-6 py-4 md:py-8 pb-20 md:pb-8">
+        <div className="flex items-center gap-2.5 mb-4 md:mb-6">
+          <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center">
+            <Ticket className="w-4.5 h-4.5 md:w-5 md:h-5 text-gold" />
+          </div>
+          <h1 className="font-display text-xl md:text-2xl font-bold text-white">
+            My Bets
+          </h1>
+        </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 overflow-x-auto scrollbar-hide mb-6 pb-1">
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide mb-5 md:mb-6 pb-1">
           {TABS.map((tab) => (
             <button
               key={tab.key}
@@ -96,10 +114,10 @@ export default function MyBetsPage() {
                 setPage(1)
               }}
               className={cn(
-                'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium whitespace-nowrap transition-colors',
+                'px-3.5 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium whitespace-nowrap transition-all',
                 activeTab === tab.key
-                  ? 'bg-gold text-charcoal'
-                  : 'bg-slate-dark text-white/60 hover:text-white border border-nile-blue/30'
+                  ? 'bg-gold text-charcoal shadow-md shadow-gold/20'
+                  : 'bg-slate-dark text-white/55 hover:text-white border border-nile-blue/25 hover:border-nile-blue/40'
               )}
             >
               {tab.label}
@@ -122,7 +140,7 @@ export default function MyBetsPage() {
               icon={Ticket}
             />
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {jackpotSlips.map((js) => (
                 <JackpotSlipCard key={js.id} slip={js} />
               ))}
@@ -135,7 +153,7 @@ export default function MyBetsPage() {
             icon={Ticket}
           />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {slips.map((slip) => (
               <SlipCard
                 key={slip.id}
@@ -146,32 +164,27 @@ export default function MyBetsPage() {
 
             {/* Pagination */}
             {total > 10 && (
-              <div className="flex justify-center gap-3 mt-6">
+              <div className="flex items-center justify-center gap-2 mt-6">
                 <button
                   onClick={() =>
-                    setPage((p) =>
-                      Math.max(1, p - 1)
-                    )
+                    setPage((p) => Math.max(1, p - 1))
                   }
                   disabled={page === 1}
-                  className="px-4 py-2 border border-nile-blue/30 text-white/60 rounded-lg text-sm disabled:opacity-30"
+                  className="flex items-center gap-1 px-3.5 py-2 border border-nile-blue/30 text-white/60 rounded-xl text-sm disabled:opacity-25 hover:text-white hover:border-gold/30 transition-colors"
                 >
-                  ← Prev
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  Prev
                 </button>
-                <span className="text-white/50 text-sm py-2">
-                  Page {page} of{' '}
-                  {Math.ceil(total / 10)}
+                <span className="text-white/45 text-xs md:text-sm px-3 font-mono">
+                  {page} / {totalPages}
                 </span>
                 <button
-                  onClick={() =>
-                    setPage((p) => p + 1)
-                  }
-                  disabled={
-                    page >= Math.ceil(total / 10)
-                  }
-                  className="px-4 py-2 border border-nile-blue/30 text-white/60 rounded-lg text-sm disabled:opacity-30"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page >= totalPages}
+                  className="flex items-center gap-1 px-3.5 py-2 border border-nile-blue/30 text-white/60 rounded-xl text-sm disabled:opacity-25 hover:text-white hover:border-gold/30 transition-colors"
                 >
-                  Next &#8594;
+                  Next
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
