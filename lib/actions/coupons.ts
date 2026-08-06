@@ -340,7 +340,12 @@ export async function getMyBets(
     .range(offset, offset + limit - 1)
 
   if (status && status !== 'all') {
-    query = query.eq('status', status)
+    if (status === 'won') {
+      // "Won" covers both pending-payout ('won') and already-redeemed ('paid') slips
+      query = query.in('status', ['won', 'paid'])
+    } else {
+      query = query.eq('status', status)
+    }
   }
 
   const {

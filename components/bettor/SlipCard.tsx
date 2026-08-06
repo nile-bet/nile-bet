@@ -134,7 +134,7 @@ export function SlipCard({
   }
 
   const borderColor =
-    slip.status === 'won'
+    slip.status === 'won' || slip.status === 'paid'
       ? 'border-nile-success/30'
       : slip.status === 'lost'
       ? 'border-nile-danger/20'
@@ -145,7 +145,7 @@ export function SlipCard({
       : 'border-nile-blue/30'
 
   const bgTint =
-    slip.status === 'won'
+    slip.status === 'won' || slip.status === 'paid'
       ? 'bg-nile-success/5'
       : slip.status === 'near_win'
       ? 'bg-gold/5'
@@ -161,7 +161,7 @@ export function SlipCard({
         )}
       >
         {/* Won banner */}
-        {slip.status === 'won' && (
+        {(slip.status === 'won' || slip.status === 'paid') && (
           <div className="bg-nile-success/20 border-b border-nile-success/30 px-4 py-2 text-center">
             <span className="text-nile-success font-semibold text-sm">
               You Won!
@@ -222,6 +222,7 @@ export function SlipCard({
                   {formatETB(slip.stake)}
                 </p>
                 {(slip.status === 'won' ||
+                  slip.status === 'paid' ||
                   slip.status ===
                     'near_win') && (
                   <p className="text-nile-success text-xs font-mono">
