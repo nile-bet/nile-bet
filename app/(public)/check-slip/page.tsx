@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Receipt } from 'lucide-react'
+import { Search, Receipt, XCircle, Trophy, Lock, Check } from 'lucide-react'
 import { PublicNavbar }
   from '@/components/shared/PublicNavbar'
 import { Footer }
@@ -144,7 +144,7 @@ export default function CheckSlipPage() {
           {notFound && !loading && (
             <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-3 md:p-6 text-center">
               <p className="text-nile-danger font-semibold">
-                ❌ Slip not found
+                <span className="inline-flex items-center gap-1.5"><XCircle className="w-4 h-4" /> Slip not found</span>
               </p>
               <p className="text-white/40 text-xs mt-1">
                 Please check the ID and try
@@ -165,7 +165,7 @@ export default function CheckSlipPage() {
                   {/* Header */}
                   <div className="bg-gold/10 border-b border-gold/20 px-3 py-2 md:px-5 md:py-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">🏆</span>
+                      <Trophy className="w-5 h-5" />
                       <div>
                         <p className="text-gold font-bold font-mono text-sm">#{jackpotSlip.slip_id}</p>
                         <p className="text-white/40 text-xs">{jackpotSlip.jackpots?.name}</p>
@@ -177,13 +177,13 @@ export default function CheckSlipPage() {
                       jackpotSlip.status === 'near_win' ? 'text-green-400 border-green-400/30 bg-green-400/10' :
                       jackpotSlip.status === 'lost' ? 'text-red-400 border-red-400/30 bg-red-400/10' :
                       'text-white/50 border-white/20 bg-white/5'
-                    }`}>{jackpotSlip.status === 'paid' ? '✓ PAID' : jackpotSlip.status?.toUpperCase()}</span>
+                    }`}>{jackpotSlip.status === 'paid' ? 'PAID' : jackpotSlip.status?.toUpperCase()}</span>
                   </div>
                   {/* Info */}
                   <div className="px-3 py-2 md:px-5 md:py-3 grid grid-cols-2 gap-2 md:gap-3 border-b border-nile-blue/20 text-xs md:text-sm">
                     <div>
                       <p className="text-white/40 text-xs">Bettor</p>
-                      <p className="text-white font-medium">{jackpotSlip.is_anonymous ? '🔒 Anonymous' : `@${(jackpotSlip.bettor as any)?.username ?? '—'}`}</p>
+                      <p className="text-white font-medium flex items-center gap-1.5">{jackpotSlip.is_anonymous ? (<><Lock className="w-3.5 h-3.5" /> Anonymous</>) : `@${(jackpotSlip.bettor as any)?.username ?? '—'}`}</p>
                     </div>
                     <div>
                       <p className="text-white/40 text-xs">Entry Fee</p>
@@ -204,7 +204,7 @@ export default function CheckSlipPage() {
                         <p className="text-white/25 text-[10px] mt-0.5">Tax deducted: ETB {jackpotSlip.reward_tax.toLocaleString()}</p>
                       )}
                       {jackpotSlip.status === 'paid' && (
-                        <p className="text-sky-400/60 text-[10px] mt-0.5">✓ Already redeemed</p>
+                        <p className="text-sky-400/60 text-[10px] mt-0.5 flex items-center gap-1"><Check className="w-3 h-3" /> Already redeemed</p>
                       )}
                     </div>
                     <div>
