@@ -342,7 +342,7 @@ export function BetSlipSidebar({
                 <div
                   key={`${s.matchMarketId}-${s.selection}`}
                   className={cn(
-                    'rounded-lg p-1.5 border transition-colors h-[64px] overflow-hidden',
+                    'rounded-lg p-1.5 border transition-colors min-h-[64px]',
                     started
                       ? 'border-nile-danger/60 bg-nile-danger/15'
                       : countdown
