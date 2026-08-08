@@ -21,6 +21,8 @@ import { cn } from '@/lib/utils'
 import {
   ArrowLeft,
   Check,
+  XCircle,
+  TriangleAlert,
 } from 'lucide-react'
 
 interface Props {
@@ -433,7 +435,7 @@ export default function ResultEntryPage({
                 />
                 {htHome > ftHome && (
                   <p className="text-nile-danger text-xs mt-1">
-                    ❌ Exceeds FT
+                    <XCircle className="w-3 h-3 inline mr-0.5" />Exceeds FT
                   </p>
                 )}
               </div>
@@ -461,7 +463,7 @@ export default function ResultEntryPage({
                 />
                 {htAway > ftAway && (
                   <p className="text-nile-danger text-xs mt-1">
-                    ❌ Exceeds FT
+                    <XCircle className="w-3 h-3 inline mr-0.5" />Exceeds FT
                   </p>
                 )}
               </div>
@@ -882,7 +884,7 @@ export default function ResultEntryPage({
           {/* Scorers */}
           {hasScorerMarkets && matchPlayers.length === 0 && (
             <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-4 mb-2">
-              <p className="text-nile-danger font-semibold text-sm mb-1">⚠️ No Players Added</p>
+              <p className="text-nile-danger font-semibold text-sm mb-1 flex items-center gap-1"><TriangleAlert className="w-4 h-4" />No Players Added</p>
               <p className="text-white/60 text-xs">This match has Scorer markets (Anytime/First/Last Scorer) but no players were added. All scorer bets will be settled as LOST. Go back to the match edit page to add players first.</p>
             </div>
           )}
@@ -1042,7 +1044,7 @@ export default function ResultEntryPage({
           {/* Warning */}
           <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-4">
             <p className="text-nile-danger font-semibold text-sm mb-1">
-              ⚠️ IRREVERSIBLE ACTION
+              <TriangleAlert className="w-4 h-4 inline mr-1" />IRREVERSIBLE ACTION
             </p>
             <p className="text-white/60 text-xs">
               Once confirmed, all slips will be settled and balances updated. This cannot be undone.

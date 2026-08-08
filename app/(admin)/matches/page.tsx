@@ -40,6 +40,7 @@ import {
   X,
   Calendar,
   Sparkles,
+  CheckCircle,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -282,7 +283,7 @@ export default function MatchesPage() {
             v ? 'opacity-100' : 'opacity-20'
           )}
         >
-          ⭐
+          <Star className="w-4 h-4" fill={"currentColor"} />
         </button>
       ),
     },
@@ -396,7 +397,7 @@ export default function MatchesPage() {
             onClick={handleBulkPublish}
             className="bg-nile-success text-white text-xs px-3 py-1.5 rounded-lg hover:bg-nile-success/80"
           >
-            ✅ Publish Selected
+            <CheckCircle className="w-3.5 h-3.5 inline mr-1" />Publish Selected
           </button>
           <button
             onClick={() => setConfirmData({ type: 'bulkDelete' })}
@@ -531,7 +532,7 @@ export default function MatchesPage() {
             <span className="text-xs text-white/50">Featured:</span>
             {[
               { key: '', label: 'All' },
-              { key: 'featured', label: '⭐ Featured Only' },
+              { key: 'featured', label: 'Featured Only' },
               { key: 'normal', label: 'Normal Only' },
             ].map((f) => (
               <button

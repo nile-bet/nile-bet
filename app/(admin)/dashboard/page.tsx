@@ -36,6 +36,9 @@ import {
   RefreshCw,
   Wallet,
   ArrowUpRight,
+  Hourglass,
+  Shield,
+  Trophy,
 } from 'lucide-react'
 import {
   LineChart,
@@ -319,16 +322,16 @@ export default function AdminDashboard() {
             <p className="text-white/50 text-xs">Won</p>
             <div className="mt-1 space-y-0.5">
               <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.wonRedeemed ?? 0} redeemed</p>
-              <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.wonPending ?? 0} pending</p>
+              <p className="text-nile-orange text-[10px] font-medium flex items-center justify-center gap-1"><Hourglass className="w-2.5 h-2.5" />{stats.wonPending ?? 0} pending</p>
             </div>
           </div>
           <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center">
-            <span className="text-xl block mb-1">🛡️</span>
+            <Shield className="w-5 h-5 text-gold mx-auto mb-1" />
             <p className="text-2xl font-bold text-gold font-mono">{stats.insuredSlips ?? 0}</p>
             <p className="text-white/50 text-xs">Insured</p>
             <div className="mt-1 space-y-0.5">
               <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.insuredRedeemed ?? 0} redeemed</p>
-              <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.insuredPending ?? 0} pending</p>
+              <p className="text-nile-orange text-[10px] font-medium flex items-center justify-center gap-1"><Hourglass className="w-2.5 h-2.5" />{stats.insuredPending ?? 0} pending</p>
             </div>
           </div>
           <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-3 text-center">
@@ -407,11 +410,11 @@ export default function AdminDashboard() {
             </div>
             <div className="rounded-xl p-3" style={{background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.18)'}}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">🛡️ Insured</span>
+                <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest flex items-center gap-1"><Shield className="w-3 h-3" />Insured</span>
                 <CheckCircle className="w-3.5 h-3.5 text-gold" />
               </div>
               <p className="text-gold font-mono text-xl font-bold">{formatETB(payouts?.totals?.insuredRedeemedNet ?? 0)}</p>
-              <p className="text-white/35 text-[10px] mt-1">✓ {payouts?.totals?.insuredRedeemedCount ?? 0} paid · ⏳ {payouts?.totals?.insuredPendingCount ?? 0} pending</p>
+              <p className="text-white/35 text-[10px] mt-1 flex items-center gap-1">✓ {payouts?.totals?.insuredRedeemedCount ?? 0} paid · <Hourglass className="w-2.5 h-2.5" />{payouts?.totals?.insuredPendingCount ?? 0} pending</p>
             </div>
             <div className="rounded-xl p-3" style={{
               background: (payouts?.totals?.pendingPayoutNet ?? 0) > 0 ? 'rgba(249,115,22,0.08)' : 'rgba(255,255,255,0.03)',
@@ -451,7 +454,7 @@ export default function AdminDashboard() {
                   <tr key={row.slip_id ?? i} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-4 py-2.5">
                       <span className="font-mono text-white/40 text-[11px]">
-                        {row.is_jackpot ? <span className="text-gold">🏆 </span> : null}···{String(row.slip_id ?? '').slice(-6)}
+                        {row.is_jackpot ? <Trophy className="w-3 h-3 inline text-gold mr-0.5" /> : null}···{String(row.slip_id ?? '').slice(-6)}
                       </span>
                     </td>
                     <td className="px-4 py-2.5"><span className="text-white/60 text-xs">@{row.cashier_username}</span></td>
@@ -467,12 +470,12 @@ export default function AdminDashboard() {
                     <td className="px-4 py-2.5 text-center">
                       {row.payout_status === 'redeemed' ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
-                          {row.is_insured ? '🛡️ INSURED · PAID' : '✓ PAID'}
+                          {row.is_insured ? <><Shield className="w-2.5 h-2.5 inline mr-0.5" />INSURED · PAID</> : '✓ PAID'}
                         </span>
                       ) : row.is_insured ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold/12 text-gold border border-gold/25">🛡️ INSURED</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold/12 text-gold border border-gold/25"><Shield className="w-2.5 h-2.5" />INSURED</span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-success/12 text-nile-success border border-nile-success/25">⏳ WON</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-success/12 text-nile-success border border-nile-success/25"><Hourglass className="w-2.5 h-2.5" />WON</span>
                       )}
                     </td>
                     <td className="px-4 py-2.5">

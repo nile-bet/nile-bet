@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, forwardRef } from 'react'
+import { Trophy, Shield } from 'lucide-react'
 import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
 import { formatETB }
@@ -193,7 +194,7 @@ export const ThermalReceipt = forwardRef<
               marginTop: '2px',
             }}
           >
-            🏆 WEEKEND JACKPOT
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Trophy size={13} />WEEKEND JACKPOT</span>
           </div>
         )}
         <div
@@ -457,7 +458,7 @@ export const ThermalReceipt = forwardRef<
         )}
         {insuranceApplied && (
           <div style={{ textAlign: 'center', marginTop: '3px', fontSize: '9px', color: '#555' }}>
-            🛡️ Insurance Active (10+ selections)
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Shield size={9} />Insurance Active (10+ selections)</span>
           </div>
         )}
       </div>

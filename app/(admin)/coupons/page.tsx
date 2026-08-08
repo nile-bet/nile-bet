@@ -20,7 +20,7 @@ import {
 import { useAuthStore } from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { Ticket, TrendingUp, Check, X, Clock, Search } from 'lucide-react'
+import { Ticket, TrendingUp, Check, X, Clock, Search, XCircle, Banknote } from 'lucide-react'
 import { DateRangeFilter, type DateFilterValue } from '@/components/shared/DateRangeFilter'
 
 export default function AdminCouponsPage() {
@@ -243,7 +243,7 @@ export default function AdminCouponsPage() {
 
       {/* Lookup panel */}
       <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
-        <h2 className="font-semibold text-white mb-4">🔍 Redeem Coupon</h2>
+        <h2 className="font-semibold text-white mb-4 flex items-center gap-2"><Search className="w-4 h-4" />Redeem Coupon</h2>
         <div className="flex gap-3 mb-4">
           <input
             type="text"
@@ -272,7 +272,7 @@ export default function AdminCouponsPage() {
 
         {lookupError && (
           <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-3">
-            <p className="text-nile-danger text-sm">❌ {lookupError}</p>
+            <p className="text-nile-danger text-sm flex items-center gap-1"><XCircle className="w-3.5 h-3.5" />{lookupError}</p>
           </div>
         )}
 
@@ -292,7 +292,7 @@ export default function AdminCouponsPage() {
                 </p>
                 {lookedUp.type === 'withdrawal' && (
                   <p className="text-nile-orange text-xs mt-1">
-                    💵 Give bettor {formatETB(lookedUp.amount)} cash
+                    <Banknote className="w-4 h-4 inline mr-1" />Give bettor {formatETB(lookedUp.amount)} cash
                   </p>
                 )}
               </div>

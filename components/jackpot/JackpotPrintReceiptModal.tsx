@@ -11,7 +11,7 @@ import {
 import { getJackpotSlipById } from '@/lib/actions/jackpot'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { formatETB } from '@/lib/utils/formatCurrency'
-import { Printer, Share2, Copy, Check } from 'lucide-react'
+import { Printer, Share2, Copy, Check, Trophy, Shield, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import QRCode from 'qrcode'
 
@@ -148,12 +148,12 @@ export function JackpotPrintReceiptModal({
         <div className="bg-charcoal/50 rounded-xl p-4 mb-4 text-center">
           <p className="text-white/50 text-xs mb-1">JACKPOT SLIP ID</p>
           <p className="text-gold font-mono text-2xl font-bold tracking-widest">#{slipId}</p>
-          <p className="text-white/50 text-xs mt-1">🏆 {jackpot?.name}</p>
+          <p className="text-white/50 text-xs mt-1 flex items-center justify-center gap-1"><Trophy className="w-3 h-3" />{jackpot?.name}</p>
           <p className="text-nile-success text-sm mt-1">
             Win All: {formatETB(jackpot?.win_all_reward ?? 0)}
           </p>
           {(jackpot?.near_win_reward ?? 0) > 0 && (
-            <p className="text-gold text-xs mt-0.5">🛡️ Miss 1: {formatETB(jackpot?.near_win_reward ?? 0)}</p>
+            <p className="text-gold text-xs mt-0.5 flex items-center justify-center gap-1"><Shield className="w-3 h-3" />Miss 1: {formatETB(jackpot?.near_win_reward ?? 0)}</p>
           )}
         </div>
 
@@ -165,7 +165,7 @@ export function JackpotPrintReceiptModal({
               onClick={() => getJackpotSlipById(slipId).then(setSlip)}
               className="text-xs bg-nile-orange/20 text-nile-orange px-3 py-1 rounded-lg hover:bg-nile-orange/30"
             >
-              🔄 Reload
+              <RefreshCw className="w-3 h-3 inline mr-1" />Reload
             </button>
           </div>
         )}
@@ -194,7 +194,7 @@ export function JackpotPrintReceiptModal({
               <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: '4px', marginBottom: '6px' }}>
                 <div style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '3px' }}>NILE BETTING</div>
                 <div style={{ fontSize: '10px' }}>Flow into Wins</div>
-                <div style={{ fontSize: '13px', fontWeight: 'bold', marginTop: '2px' }}>🏆 WEEKEND JACKPOT</div>
+                <div style={{ fontSize: '13px', fontWeight: 'bold', marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><Trophy size={13} />WEEKEND JACKPOT</div>
               </div>
 
               {/* Slip ID */}
@@ -305,7 +305,7 @@ export function JackpotPrintReceiptModal({
 
               {/* Footer */}
               <div style={{ borderTop: '1px dashed #000', marginTop: '6px', paddingTop: '4px', textAlign: 'center', fontSize: '9px', color: '#555' }}>
-                <div>Good luck! 🏆</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>Good luck! <Trophy size={11} /></div>
                 <div style={{ fontWeight: 'bold' }}>NILE BETTING</div>
                 <div>Must be 21+ to bet</div>
               </div>

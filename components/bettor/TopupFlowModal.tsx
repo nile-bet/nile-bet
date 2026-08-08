@@ -245,7 +245,7 @@ export function TopupFlowModal({
             <div className="flex flex-wrap gap-2 justify-center">
               {[
                 '⏰ Expires in 6 hours',
-                '1️⃣ One-time use only',
+                'One-time use only',
                 'Valid at any cashier',
               ].map((pill) => (
                 <span

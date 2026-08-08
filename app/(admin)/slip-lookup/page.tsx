@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Trophy, Lock } from 'lucide-react'
 import { SlipDetailCard } from '@/components/shared/SlipDetailCard'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { getSlipById } from '@/lib/actions/bets'
@@ -70,7 +70,7 @@ export default function AdminCheckSlipPage() {
           {/* Header */}
           <div className="bg-gold/10 border-b border-gold/20 px-5 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-lg">🏆</span>
+              <Trophy className="w-5 h-5 text-gold" />
               <div>
         <p className="text-gold font-bold font-mono">#{jackpotSlip.slip_id}</p>
         <p className="text-white/40 text-xs">{jackpotSlip.jackpots?.name}</p>
@@ -88,7 +88,7 @@ export default function AdminCheckSlipPage() {
           <div className="px-5 py-3 grid grid-cols-2 gap-3 border-b border-nile-blue/20 text-sm">
             <div>
               <p className="text-white/40 text-xs">Bettor</p>
-              <p className="text-white font-medium">{jackpotSlip.is_anonymous ? '🔒 Anonymous' : `@${(jackpotSlip.bettor as any)?.username ?? '—'}`}</p>
+              <p className="text-white font-medium">{jackpotSlip.is_anonymous ? <><Lock className="w-3 h-3 inline mr-1" />Anonymous</> : `@${(jackpotSlip.bettor as any)?.username ?? '—'}`}</p>
             </div>
             <div>
               <p className="text-white/40 text-xs">Entry Fee</p>

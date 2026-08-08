@@ -543,7 +543,7 @@ export async function applyWelcomeBonus(
   // Notify bettor
   await supabase.from('notifications').insert({
     to_user_id: bettorId,
-    message: `🎁 Welcome bonus of ETB ${bonusAmount} has been added to your account!`,
+    message: `Welcome bonus of ETB ${bonusAmount} has been added to your account!`,
     type: 'welcome_bonus',
     priority: 'normal',
   })

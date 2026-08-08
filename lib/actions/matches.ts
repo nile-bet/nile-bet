@@ -167,7 +167,7 @@ export async function getUpcomingMatches(options: {
       m.leagues?.countries?.name ?? '',
     flag_emoji:
       m.leagues?.countries
-        ?.flag_emoji ?? '🏳️',
+        ?.flag_emoji ?? '',
     country_id:
       m.leagues?.country_id ?? '',
   })) as MatchWithLeague[]
@@ -250,7 +250,7 @@ export async function getTopLeagues(): Promise<League[]> {
   if (error) return []
   return (data ?? []).map((l: any) => ({
     ...l,
-    flag_emoji: l.countries?.flag_emoji ?? '🏳️',
+    flag_emoji: l.countries?.flag_emoji ?? '',
     country_name: l.countries?.name ?? '',
   })) as League[]
 }

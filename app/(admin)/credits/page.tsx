@@ -24,6 +24,7 @@ import {
   Search,
   Check,
   X,
+  DollarSign,
 } from 'lucide-react'
 import {
   Dialog,
@@ -261,8 +262,8 @@ export default function CreditsPage() {
         <div className="space-y-6">
           {/* Admin balance */}
           <div className="bg-slate-dark border border-gold/30 rounded-xl p-5">
-            <p className="text-white/60 text-sm mb-1">
-              💰 Admin Balance
+            <p className="text-white/60 text-sm mb-1 flex items-center gap-1">
+              <DollarSign className="w-3.5 h-3.5" />Admin Balance
             </p>
             <p className="text-gold font-mono text-3xl font-bold">
               {formatETB(

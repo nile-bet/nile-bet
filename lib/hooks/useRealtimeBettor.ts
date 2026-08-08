@@ -58,20 +58,20 @@ export function useRealtimeBettor() {
           const updated = payload.new as any
           if (updated.status === 'won') {
             toast.success(
-              `🎉 You won ${formatETB(updated.net_payout)}!`,
+              `You won ${formatETB(updated.net_payout)}!`,
               { duration: 8000 }
             )
           } else if (
             updated.status === 'near_win'
           ) {
             toast(
-              `🛡️ Insurance applied! ${formatETB(updated.insurance_payout)} credited`,
+              `Insurance applied! ${formatETB(updated.insurance_payout)} credited`,
               { duration: 8000 }
             )
           } else if (
             updated.status === 'lost'
           ) {
-            toast('Better luck next time! 💪')
+            toast('Better luck next time!')
           }
         }
       )
@@ -113,7 +113,7 @@ export function useRealtimeBettor() {
           const updated = payload.new as any
           if (updated.status === 'redeemed') {
             toast.success(
-              '✅ Your coupon has been redeemed!'
+              'Your coupon has been redeemed!'
             )
           } else if (
             updated.status === 'expired'

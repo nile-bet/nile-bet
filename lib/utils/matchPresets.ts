@@ -63,7 +63,7 @@ export function resolvePresetTemplateIds(
 }
 
 /**
- * ⚠️ PLACEHOLDER PRICING — NOT REAL ODDS.
+ * PLACEHOLDER PRICING — NOT REAL ODDS.
  *
  * These values exist purely so a Quick Match doesn't start every market blank.
  * They are NOT derived from any real probability model, odds feed, or bookmaker

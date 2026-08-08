@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Megaphone } from 'lucide-react'
+import { X, Megaphone, TriangleAlert } from 'lucide-react'
 import { createClient }
   from '@/lib/supabase/client'
 import { useAuthStore }
@@ -138,8 +138,8 @@ export function BroadcastBanner() {
               <div className="p-2 bg-nile-danger/20 rounded-full">
                 <Megaphone className="w-5 h-5 text-nile-danger" />
               </div>
-              <DialogTitle className="text-nile-danger text-lg">
-                ⚠️ URGENT MESSAGE
+              <DialogTitle className="text-nile-danger text-lg flex items-center gap-2">
+                <TriangleAlert className="w-4 h-4" />URGENT MESSAGE
               </DialogTitle>
             </div>
           </DialogHeader>

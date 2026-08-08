@@ -6,7 +6,7 @@ import { placeJackpotBet, getMyJackpotSlips, autoCloseExpiredJackpot } from '@/l
 import { formatETB, formatDate, formatCountdown } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { Trophy, Clock, CheckCircle, XCircle, Star, Copy, Check, Zap, Target, TrendingUp, Shield, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
+import { Trophy, Clock, CheckCircle, XCircle, Star, Copy, Check, Zap, Target, TrendingUp, Shield, ChevronRight, ChevronDown, ChevronUp, Printer, Lock, Unlock, Hourglass, Medal, Ticket, Timer, Flag } from 'lucide-react'
 import { JackpotPrintReceiptModal } from './JackpotPrintReceiptModal'
 import { FlagImage } from '@/components/shared/FlagImage'
 
@@ -72,7 +72,7 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
     }))
     const result = await placeJackpotBet({ jackpotId: jackpot.id, bettorId: user.id, placedById: user.id, isAnonymous, selections: sels })
     if (result.success && result.slipId) {
-      toast.success(`🏆 Jackpot entered! Slip #${result.slipId}`)
+      toast.success(`Jackpot entered! Slip #${result.slipId}`)
       setReceiptSlipId(result.slipId)
       setShowReceipt(true)
       setLastSelections(selections)
@@ -89,10 +89,10 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
   }
 
   const tabs = [
-    { key: 'pick', label: '🎯 Pick', icon: Target },
-    ...(isAuthenticated ? [{ key: 'myslips', label: '🎫 My Slips', icon: Shield }] : []),
+    { key: 'pick', label: 'Pick', icon: Target },
+    ...(isAuthenticated ? [{ key: 'myslips', label: 'My Slips', icon: Shield }] : []),
     
-    { key: 'history', label: '📋 History', icon: Star },
+    { key: 'history', label: 'History', icon: Star },
   ]
 
   if (!jackpot) {
@@ -161,7 +161,7 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-[#D4AF37]/30" style={{ background: 'linear-gradient(160deg, #1A1F4D 0%, #252E6D 100%)' }}>
             <div className="text-center mb-5">
-              <div className="text-4xl mb-3">🏆</div>
+              <Trophy className="w-10 h-10 mb-3 mx-auto text-gold" />
               <h3 className="text-white font-bold text-lg">Your Jackpot Slip Code</h3>
               <p className="text-white/40 text-xs mt-1">Show this code to the cashier to place your bet</p>
             </div>
@@ -173,7 +173,7 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
                   {copiedGuestCode ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
                 </button>
               </div>
-              {copiedGuestCode && <p className="text-xs mt-2" style={{ color: '#4ade80' }}>✅ Copied!</p>}
+              {copiedGuestCode && <p className="text-xs mt-2 flex items-center justify-center gap-1" style={{ color: '#4ade80' }}><CheckCircle size={12} />Copied!</p>}
             </div>
             <p className="text-white/30 text-xs text-center mb-4">The cashier will use this code to find your selections and place the bet for you.</p>
             <button onClick={() => { setShowGuestSlipModal(false); setSelections({}); setGuestSlipCode('') }}
@@ -211,9 +211,9 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
           <div className="flex gap-0 rounded-xl overflow-hidden border border-[#252E6D]/60" style={{ background: '#1A1F4D' }}>
             {tabs.map(t => (
               <button key={t.key} onClick={() => handleTabChange(t.key as any)}
-                className="flex-1 py-2.5 text-xs font-semibold transition-all"
+                className="flex-1 py-2.5 text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
                 style={activeTab === t.key ? { background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#1C2155' } : { color: 'rgba(255,255,255,0.4)' }}>
-                {t.label}
+                <t.icon className="w-3.5 h-3.5" />{t.label}
               </button>
             ))}
           </div>
@@ -257,7 +257,7 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
                   { background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }
                 }>
                   <p className="font-semibold text-sm" style={isClosed ? { color: '#f59e0b' } : { color: 'rgba(255,255,255,0.4)' }}>
-                    {isClosed ? '⏱️ Betting has closed — results coming soon' : '🏁 This jackpot has been settled'}
+                    {isClosed ? <><Timer className="w-3.5 h-3.5 inline mr-1" />Betting has closed — results coming soon</> : <><Flag className="w-3.5 h-3.5 inline mr-1" />This jackpot has been settled</>}
                   </p>
                 </div>
               )}
@@ -598,7 +598,7 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
                     }} disabled={!allSelected || generatingGuestCode}
                       className="w-full py-3 rounded-xl text-sm font-bold transition-all"
                       style={allSelected && !generatingGuestCode ? { background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#1C2155', boxShadow: '0 4px 15px rgba(212,175,55,0.3)' } : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed' }}>
-                      {generatingGuestCode ? 'Generating...' : !allSelected ? `Pick ${12 - selectedCount} more` : '🎟️ Get Slip Code'}
+                      {generatingGuestCode ? 'Generating...' : !allSelected ? `Pick ${12 - selectedCount} more` : <><Ticket className="w-4 h-4 inline mr-1.5" />Get Slip Code</>}
                     </button>
                     <a href="/login" className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold transition-all border border-[#252E6D]/60 text-white/50 hover:text-white hover:border-[#D4AF37]/30">
                       Login to Play Directly
@@ -609,13 +609,13 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
                     <button onClick={() => setIsAnonymous(!isAnonymous)}
                       className="flex items-center gap-2 text-xs px-3 py-2 rounded-xl border w-full transition-all"
                       style={isAnonymous ? { borderColor: 'rgba(251,191,36,0.4)', color: '#fbbf24', background: 'rgba(251,191,36,0.08)' } : { borderColor: 'rgba(37,46,109,0.8)', color: 'rgba(255,255,255,0.4)' }}>
-                      <span>{isAnonymous ? '🔒' : '🔓'}</span>
+                      <span>{isAnonymous ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}</span>
                       {isAnonymous ? 'Anonymous entry' : 'Enter with username'}
                     </button>
                     <button onClick={handlePlace} disabled={!allSelected || placing}
                       className="w-full py-3 rounded-xl text-sm font-bold transition-all"
                       style={allSelected && !placing ? { background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#1C2155', boxShadow: '0 4px 20px rgba(212,175,55,0.35)' } : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed' }}>
-                      {placing ? '⏳ Placing...' : !allSelected ? `Pick ${12 - selectedCount} more` : `🏆 Enter — ${formatETB(jackpot.fixed_stake)}`}
+                      {placing ? <><Hourglass className="w-4 h-4 inline mr-1.5" />Placing...</> : !allSelected ? `Pick ${12 - selectedCount} more` : <><Trophy className="w-4 h-4 inline mr-1.5" />Enter — {formatETB(jackpot.fixed_stake)}</>}
                     </button>
                   </div>
                 )}
@@ -650,13 +650,13 @@ export function JackpotClient({ jackpot, leaderboard, pastJackpots }: Props) {
             }} disabled={!allSelected || generatingGuestCode}
               className="w-full py-3 rounded-xl text-sm font-bold"
               style={allSelected ? { background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#1C2155' } : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed' }}>
-              {!allSelected ? `Select ${12 - selectedCount} more` : '🎟️ Get Slip Code'}
+              {!allSelected ? `Select ${12 - selectedCount} more` : <><Ticket className="w-4 h-4 inline mr-1.5" />Get Slip Code</>}
             </button>
           ) : (
             <button onClick={handlePlace} disabled={!allSelected || placing}
               className="w-full py-3 rounded-xl text-sm font-bold"
               style={allSelected && !placing ? { background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#1C2155', boxShadow: '0 4px 20px rgba(212,175,55,0.3)' } : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed' }}>
-              {placing ? '⏳ Placing...' : !allSelected ? `Pick ${12 - selectedCount} more` : `🏆 Enter Jackpot — ${formatETB(jackpot.fixed_stake)}`}
+              {placing ? <><Hourglass className="w-4 h-4 inline mr-1.5" />Placing...</> : !allSelected ? `Pick ${12 - selectedCount} more` : <><Trophy className="w-4 h-4 inline mr-1.5" />Enter Jackpot — {formatETB(jackpot.fixed_stake)}</>}
             </button>
           )}
         </div>
@@ -683,12 +683,12 @@ function JackpotSlipCard({ slip, onPrint }: { slip: any; onPrint: (slipId: strin
     }>
       {slip.status === 'won' && (
         <div className="px-4 py-2.5 text-center border-b border-[#D4AF37]/20" style={{ background: 'rgba(212,175,55,0.1)' }}>
-          <p className="font-bold text-sm" style={{ color: '#FFD700' }}>🏆 JACKPOT WINNER!</p>
+          <p className="font-bold text-sm flex items-center gap-1.5" style={{ color: '#FFD700' }}><Trophy className="w-4 h-4" />JACKPOT WINNER!</p>
         </div>
       )}
       {slip.status === 'near_win' && (
         <div className="px-4 py-2.5 text-center border-b border-green-500/20" style={{ background: 'rgba(74,222,128,0.06)' }}>
-          <p className="font-semibold text-sm text-green-400">🥈 11/12 Correct!</p>
+          <p className="font-semibold text-sm text-green-400 flex items-center gap-1.5"><Medal className="w-4 h-4" style={{ color: '#4ade80' }} />11/12 Correct!</p>
         </div>
       )}
       <div className="p-4">
@@ -734,7 +734,7 @@ function JackpotSlipCard({ slip, onPrint }: { slip: any; onPrint: (slipId: strin
           <button onClick={() => onPrint(slip.slip_id)}
             className="px-3 py-2 rounded-xl text-xs border transition-all hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/10"
             style={{ borderColor: 'rgba(212,175,55,0.2)', color: '#D4AF37' }}>
-            🖨️
+            <Printer className="w-4 h-4" />
           </button>
         </div>
         {expanded && (

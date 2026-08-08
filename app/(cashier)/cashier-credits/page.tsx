@@ -9,7 +9,7 @@ import { formatETB, formatDate } from '@/lib/utils/formatCurrency'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { CheckCircle, Clock, XCircle, CreditCard, TrendingUp, User, Shield } from 'lucide-react'
+import { CheckCircle, Clock, XCircle, CreditCard, TrendingUp, User, Shield, TriangleAlert } from 'lucide-react'
 
 export default function CashierCreditsPage() {
   const { user } = useAuthStore()
@@ -100,7 +100,7 @@ export default function CashierCreditsPage() {
             )}>
               <div>
                 <p className={cn('text-[11px] font-medium mb-0.5', isLowBalance ? 'text-red-400' : 'text-white/50')}>
-                  {isLowBalance ? '⚠️ Low Balance' : 'Current Balance'}
+                  {isLowBalance ? <><TriangleAlert className="w-3.5 h-3.5 inline mr-1" />Low Balance</> : 'Current Balance'}
                 </p>
                 <p className="text-gold font-mono text-2xl font-bold">{formatETB(user?.credit_balance ?? 0)}</p>
               </div>

@@ -32,6 +32,8 @@ import {
   RefreshCw,
   Trash2,
   KeyRound,
+  DollarSign,
+  LogOut,
 } from 'lucide-react'
 import {
   Dialog,
@@ -447,7 +449,7 @@ export default function UsersPage() {
             }}
             className="text-xs border border-gold/30 text-gold px-2 py-1 rounded hover:bg-gold/10"
           >
-            💰
+            <DollarSign className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => {
@@ -459,7 +461,7 @@ export default function UsersPage() {
             className="text-xs border border-white/20 text-white/50 px-2 py-1 rounded hover:bg-white/10 hover:text-white disabled:opacity-40"
             title="Reset balance to zero"
           >
-            🔄
+            <RefreshCw className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => {
@@ -490,7 +492,7 @@ export default function UsersPage() {
             }
             className="text-xs border border-nile-danger/30 text-nile-danger px-2 py-1 rounded hover:bg-nile-danger/10"
           >
-            🚪
+            <LogOut className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => {

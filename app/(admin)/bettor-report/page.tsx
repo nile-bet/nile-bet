@@ -7,7 +7,7 @@ import { DataTable } from '@/components/shared/DataTable'
 import { StatsCard } from '@/components/shared/StatsCard'
 import { formatETB } from '@/lib/utils/formatCurrency'
 import { cn } from '@/lib/utils'
-import { Users, TrendingUp, Ticket, Trophy } from 'lucide-react'
+import { Users, TrendingUp, Ticket, Trophy, FileSpreadsheet, Medal } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
 export default function BettorReportPage() {
@@ -69,7 +69,7 @@ export default function BettorReportPage() {
           disabled={!bettors.length}
           className="border border-gold/30 text-gold px-4 py-2 rounded-lg text-sm hover:bg-gold/10 disabled:opacity-40"
         >
-          📊 Export Excel
+          <FileSpreadsheet className="w-4 h-4 inline mr-1.5" />Export Excel
         </button>
       </div>
 
@@ -86,13 +86,13 @@ export default function BettorReportPage() {
 
       {!loading && top3.length >= 3 && (
         <div className="bg-slate-dark border border-gold/20 rounded-xl p-6">
-          <h2 className="text-white font-semibold mb-6 text-center">🏆 Top Bettors Podium</h2>
+          <h2 className="text-white font-semibold mb-6 text-center flex items-center justify-center gap-2"><Trophy className="w-5 h-5 text-gold" />Top Bettors Podium</h2>
           <div className="flex items-end justify-center gap-6">
             {[1, 0, 2].map((idx) => {
               const item = top3[idx]
               if (!item) return null
               const rank = idx + 1
-              const medals = ['🥇', '🥈', '🥉']
+              const medalColors = ['#FFD700', '#C0C0C0', '#CD7F32']
               const heights = ['h-32', 'h-24', 'h-20']
               const colors = ['#FFD700', '#CBD5E1', '#D97706']
               const styles = [
@@ -102,7 +102,7 @@ export default function BettorReportPage() {
               ]
               return (
                 <div key={idx} className="text-center">
-                  <p className="text-2xl mb-1">{medals[idx]}</p>
+                  <Medal className="w-7 h-7 mb-1 mx-auto" style={{ color: medalColors[idx] }} />
                   <p className="text-white font-medium text-sm">@{item.username}</p>
                   <p className="text-gold font-mono text-xs">{formatETB(item.totalStaked ?? 0)}</p>
                   <p className="text-white/40 text-[10px]">{item.slipCount} bets · {item.winRate?.toFixed(1)}% win</p>

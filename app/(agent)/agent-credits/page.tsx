@@ -23,6 +23,8 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  TriangleAlert,
+  Shuffle,
 } from 'lucide-react'
 
 export default function AgentCreditsPage() {
@@ -95,7 +97,7 @@ export default function AgentCreditsPage() {
     await supabase.from('notifications').insert({
       to_user_id: requesterId,
       from_user_id: user.id,
-      message: `❌ Your credit request has been declined by your agent.`,
+      message: `Your credit request has been declined by your agent.`,
       type: 'balance_updated',
       priority: 'normal',
     })
@@ -208,7 +210,7 @@ export default function AgentCreditsPage() {
       >
         <p className="text-white/60 text-xs md:text-sm mb-0.5 md:mb-1">
           {isLowBalance
-            ? '⚠️ Low Balance'
+            ? <><TriangleAlert className="w-3.5 h-3.5 inline mr-1" />Low Balance</>
             : 'My Balance'}
         </p>
         <p className="text-gold font-mono text-2xl md:text-3xl font-bold">
@@ -428,9 +430,9 @@ export default function AgentCreditsPage() {
           {/* Filter buttons */}
           <div className="flex gap-2 flex-wrap">
             {[
-              { key: 'all', label: '🔁 All' },
-              { key: 'admin_to_agent', label: '⬇️ Admin → Me' },
-              { key: 'agent_to_cashier', label: '⬆️ Me → Cashier' },
+              { key: 'all', label: <><Shuffle className="w-3 h-3 inline mr-1" />All</> },
+              { key: 'admin_to_agent', label: 'Admin → Me' },
+              { key: 'agent_to_cashier', label: 'Me → Cashier' },
             ].map((f) => (
               <button
                 key={f.key}

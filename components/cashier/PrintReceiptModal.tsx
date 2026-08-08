@@ -12,7 +12,7 @@ import { ThermalReceipt }
   from './ThermalReceipt'
 import { formatETB }
   from '@/lib/utils/formatCurrency'
-import { Printer, Share2, Copy, Check } from 'lucide-react'
+import { Printer, Share2, Copy, Check, Shield } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface PrintReceiptModalProps {
@@ -150,8 +150,8 @@ export function PrintReceiptModal({
             </p>
           )}
           {slipData.insuranceApplied && (
-            <p className="text-gold text-xs mt-0.5">
-              🛡️ Insured slip
+            <p className="text-gold text-xs mt-0.5 flex items-center gap-1">
+              <Shield className="w-3 h-3" />Insured slip
             </p>
           )}
         </div>

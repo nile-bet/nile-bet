@@ -29,13 +29,14 @@ import {
   Legend,
 } from 'recharts'
 import * as XLSX from 'xlsx'
+import { Trophy, FileSpreadsheet, Medal } from 'lucide-react'
 
 const REPORT_TABS = [
   { key: 'agent', label: 'Agent Profit' },
   { key: 'topusers', label: 'Top Users' },
   { key: 'platform', label: 'Platform P&L' },
   { key: 'tax', label: 'Tax Collection' },
-  { key: 'jackpot', label: '🏆 Jackpot' },
+  { key: 'jackpot', label: <><Trophy className="w-3.5 h-3.5 inline mr-1" />Jackpot</> },
 ]
 
 const DATE_PRESETS = [
@@ -307,7 +308,7 @@ export default function ReportsPage() {
               }
               className="border border-gold/30 text-gold px-4 py-1.5 rounded-lg text-xs hover:bg-gold/10"
             >
-              📊 Export Cashiers
+              <FileSpreadsheet className="w-3.5 h-3.5 inline mr-1" />Export Cashiers
             </button>
             <button
               onClick={() =>
@@ -327,7 +328,7 @@ export default function ReportsPage() {
               }
               className="border border-gold/30 text-gold px-4 py-1.5 rounded-lg text-xs hover:bg-gold/10"
             >
-              📊 Export Bettors
+              <FileSpreadsheet className="w-3.5 h-3.5 inline mr-1" />Export Bettors
             </button>
           </div>
         ) : (
@@ -348,7 +349,7 @@ export default function ReportsPage() {
             }
             className="ml-auto border border-gold/30 text-gold px-4 py-1.5 rounded-lg text-xs hover:bg-gold/10"
           >
-            📊 Export Excel
+            <FileSpreadsheet className="w-3.5 h-3.5 inline mr-1" />Export Excel
           </button>
         )}
       </div>
@@ -482,7 +483,7 @@ export default function ReportsPage() {
               {/* Top Cashiers */}
               <div>
                 <h2 className="text-white font-semibold text-lg mb-4">
-                  🏆 Top Cashiers
+                  <Trophy className="w-4 h-4 inline mr-1.5" />Top Cashiers
                 </h2>
                 {/* Podium */}
                 {topCashiers.length >= 3 && (
@@ -498,12 +499,12 @@ export default function ReportsPage() {
                           : rank === 2
                           ? 'h-24'
                           : 'h-20'
-                      const medal =
+                      const medalColor =
                         rank === 1
-                          ? '🥇'
+                          ? '#FFD700'
                           : rank === 2
-                          ? '🥈'
-                          : '🥉'
+                          ? '#C0C0C0'
+                          : '#CD7F32'
                       const stageStyle =
                         rank === 1
                           ? {
@@ -534,7 +535,7 @@ export default function ReportsPage() {
                           className="text-center"
                         >
                           <p className="text-2xl mb-1">
-                            {medal}
+                            <Medal className="w-7 h-7 mx-auto" style={{ color: medalColor }} />
                           </p>
                           <p className="text-white font-medium text-sm">
                             @{item.username}
@@ -636,7 +637,7 @@ export default function ReportsPage() {
               {/* Top Bettors */}
               <div>
                 <h2 className="text-white font-semibold text-lg mb-4">
-                  🏆 Top Bettors
+                  <Trophy className="w-4 h-4 inline mr-1.5" />Top Bettors
                 </h2>
                 <DataTable
                   columns={[

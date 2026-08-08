@@ -7,7 +7,7 @@ import { useAuthStore } from '@/lib/stores/authStore'
 import { formatETB, formatCountdown, formatDate } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { Check, X, History, Ticket } from 'lucide-react'
+import { Check, X, History, Ticket, XCircle, Banknote, TriangleAlert } from 'lucide-react'
 
 const STATUS_COLORS: Record<string, string> = {
   pending:  'text-gold bg-gold/10 border-gold/30',
@@ -110,7 +110,7 @@ export default function AgentCouponsPage() {
               {loading ? 'Searching...' : 'Look Up'}
             </button>
           </div>
-          {error && <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-3"><p className="text-nile-danger text-sm">❌ {error}</p></div>}
+          {error && <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-3"><p className="text-nile-danger text-sm flex items-center gap-1"><XCircle className="w-3.5 h-3.5" />{error}</p></div>}
           {lookedUp && (
             <div className="bg-nile-blue/20 border border-gold/30 rounded-xl p-3 md:p-4 space-y-2 md:space-y-3">
               <div>
@@ -133,13 +133,13 @@ export default function AgentCouponsPage() {
               )}
               {lookedUp.type === 'withdrawal' && (
                 <div className="bg-nile-success/10 border border-nile-success/20 rounded-lg p-3 text-xs">
-                  <p className="text-nile-success">💵 Give bettor {formatETB(lookedUp.amount)} cash</p>
+                  <p className="text-nile-success flex items-center gap-1"><Banknote className="w-4 h-4" />Give bettor {formatETB(lookedUp.amount)} cash</p>
                   <p className="text-white/50 mt-1">Your balance will increase by {formatETB(lookedUp.amount)} after approval</p>
                 </div>
               )}
               {isInsufficient && (
                 <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-lg p-3">
-                  <p className="text-nile-danger text-sm font-semibold">⚠️ Insufficient Balance</p>
+                  <p className="text-nile-danger text-sm font-semibold flex items-center gap-1"><TriangleAlert className="w-3.5 h-3.5" />Insufficient Balance</p>
                   <p className="text-white/60 text-xs mt-1">You need {formatETB(lookedUp.amount)} but have {formatETB(user?.credit_balance ?? 0)}</p>
                   <a href="/agent-credits" className="text-xs text-nile-orange hover:text-nile-orange/80 mt-2 block">→ Request credits from admin</a>
                 </div>

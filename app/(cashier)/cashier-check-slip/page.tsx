@@ -6,7 +6,7 @@ import { getJackpotSlipById } from '@/lib/actions/jackpot'
 import { SlipDetailCard } from '@/components/shared/SlipDetailCard'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { QRScanner } from '@/components/cashier/QRScanner'
-import { Search, Receipt, Camera, Clock, Trash2, ScanSearch } from 'lucide-react'
+import { Search, Receipt, Camera, Clock, Trash2, ScanSearch, Trophy, Lock } from 'lucide-react'
 import type { SlipWithSelections } from '@/types/database.types'
 import { cn } from '@/lib/utils'
 
@@ -119,7 +119,7 @@ export default function CashierCheckSlipPage() {
               )}
 
               <p className="text-white/20 text-[11px] text-center">
-                ↵ Barcode scanner submits on Enter · 📷 Camera for QR
+                <span className="inline-flex items-center gap-1">↵ Barcode scanner submits on Enter · <Camera className="w-3 h-3" />Camera for QR</span>
               </p>
             </div>
 
@@ -158,7 +158,7 @@ export default function CashierCheckSlipPage() {
 
             {notFound && !loading && (
               <div className="bg-red-500/8 border border-red-500/25 rounded-xl p-6 text-center space-y-1.5">
-                <p className="text-3xl">🔍</p>
+                <Search className="w-8 h-8 mx-auto text-white/40" />
                 <p className="text-red-400 font-semibold text-sm">Slip not found</p>
                 <p className="text-white/40 text-xs">Double-check the ID and try again</p>
               </div>
@@ -170,7 +170,7 @@ export default function CashierCheckSlipPage() {
               <div className="bg-slate-dark border border-gold/25 rounded-xl overflow-hidden">
                 <div className="bg-gold/8 border-b border-gold/15 px-4 py-3 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-xl">🏆</span>
+                    <Trophy className="w-5 h-5 text-gold" />
                     <div>
                       <p className="text-gold font-bold font-mono text-sm">#{jackpotSlip.slip_id}</p>
                       <p className="text-white/40 text-xs">{jackpotSlip.jackpots?.name}</p>
@@ -189,7 +189,7 @@ export default function CashierCheckSlipPage() {
 
                 <div className="px-4 py-3 grid grid-cols-4 gap-3 border-b border-white/6">
                   {[
-                    { label: 'Bettor', value: jackpotSlip.is_anonymous ? '🔒 Anon' : `@${(jackpotSlip.bettor as any)?.username ?? '—'}` },
+                    { label: 'Bettor', value: jackpotSlip.is_anonymous ? <><Lock className="w-3 h-3 inline mr-1" />Anon</> : `@${(jackpotSlip.bettor as any)?.username ?? '—'}` },
                     { label: 'Entry', value: jackpotSlip.stake ? `ETB ${Number(jackpotSlip.stake).toLocaleString()}` : '—', gold: true },
                     { label: 'Score', value: jackpotSlip.correct_count !== null ? `${jackpotSlip.correct_count}/12` : 'Pending' },
                     { label: 'Prize', value: (jackpotSlip.reward_amount ?? 0) > 0 ? `+ETB ${jackpotSlip.reward_amount.toLocaleString()}` : '—', green: (jackpotSlip.reward_amount ?? 0) > 0 },

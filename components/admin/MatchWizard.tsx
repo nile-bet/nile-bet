@@ -692,7 +692,7 @@ export function MatchWizard({
         {step === 3 && (
           <div className="space-y-4">
             <div className="bg-nile-orange/10 border border-nile-orange/30 rounded-lg p-3 text-xs text-nile-orange">
-              ⚠️ All odds must be greater than 1.00. Unavailable markets leave odds blank.
+              <AlertTriangle className="w-3.5 h-3.5 inline mr-1" />All odds must be greater than 1.00. Unavailable markets leave odds blank.
             </div>
 
             <div className="space-y-4 max-h-[400px] overflow-y-auto scrollbar-hide">
@@ -823,7 +823,7 @@ export function MatchWizard({
                                       />
                                       {isHigh && (
                                         <span className="text-[9px] text-nile-orange">
-                                          ⚠️ high
+                                          <AlertTriangle className="w-2.5 h-2.5 inline mr-0.5" />high
                                         </span>
                                       )}
                                     </div>

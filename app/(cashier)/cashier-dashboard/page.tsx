@@ -32,6 +32,12 @@ import {
   Ticket,
   RefreshCw,
   ArrowUpRight,
+  TriangleAlert,
+  Calendar,
+  Shield,
+  Trophy,
+  Shuffle,
+  Hourglass,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import * as XLSX from 'xlsx'
@@ -195,7 +201,7 @@ export default function CashierDashboard() {
       render: (v: any, row: any) => (
         <div>
           <span className="text-gold font-mono text-xs">
-            {row.is_jackpot && '🏆 '}#{v}
+            {row.is_jackpot && <Trophy className="w-3 h-3 inline mr-0.5 text-gold" />}#{v}
           </span>
           {row.is_jackpot && row.jackpot_name && (
             <span className="text-gold/50 text-[9px] block">{row.jackpot_name}</span>
@@ -245,11 +251,11 @@ export default function CashierDashboard() {
           // won/near_win/paid slips → show redeemed/pending + insured badge
           return row.payout_status === 'redeemed' ? (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border text-nile-blue-light border-nile-blue-light/25 bg-nile-blue-light/15">
-              {row.is_insured ? '🛡️ PAID' : '✓ PAID'}
+              {row.is_insured ? <><Shield className="w-2.5 h-2.5 inline mr-0.5" />PAID</> : '✓ PAID'}
             </span>
           ) : (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border text-nile-orange border-nile-orange/25 bg-nile-orange/12">
-              {row.is_insured ? '🛡️ PENDING' : '⏳ PENDING'}
+              {row.is_insured ? <><Shield className="w-2.5 h-2.5 inline mr-0.5" />PENDING</> : <><Hourglass className="w-2.5 h-2.5 inline mr-0.5" />PENDING</>}
             </span>
           )
         }
@@ -286,8 +292,8 @@ export default function CashierDashboard() {
       {!loading && isLowBalance && (
         <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-4 flex items-center justify-between">
           <div>
-            <p className="text-nile-danger font-semibold text-sm">
-              ⚠️ Low Balance:{' '}
+            <p className="text-nile-danger font-semibold text-sm flex items-center gap-1">
+              <TriangleAlert className="w-3.5 h-3.5" />Low Balance:{' '}
               {formatETB(
                 user?.credit_balance ?? 0
               )}
@@ -318,7 +324,7 @@ export default function CashierDashboard() {
       {/* Data banner */}
       {!loading && stats && (
         <div className="border border-gold/10 rounded-lg px-3 py-1.5 text-[11px] text-white/40 flex items-center gap-2" style={{background:'rgba(37,46,109,0.15)'}}>
-          <span>📅</span>
+          <Calendar className="w-3 h-3" />
           <span>{dateFilter.type === 'custom' ? `${dateFilter.startDate?.slice(0,10)} → ${dateFilter.endDate?.slice(0,10)}` : dateFilter.type}</span>
           <span className="text-white/20">·</span>
           <span>{stats.totalSlips} slips</span>
@@ -411,17 +417,17 @@ export default function CashierDashboard() {
             <p className="text-white/50 text-xs">Won</p>
             <div className="mt-1 space-y-0.5">
               <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.wonRedeemed ?? 0} redeemed</p>
-              <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.wonPending ?? 0} pending</p>
+              <p className="text-nile-orange text-[10px] font-medium flex items-center justify-center gap-1"><Hourglass className="w-2.5 h-2.5" />{stats.wonPending ?? 0} pending</p>
             </div>
           </div>
           {/* Insured */}
           <div className="bg-gold/10 border border-gold/30 rounded-lg p-1.5 text-center">
-            <span className="text-base block mb-0.5">🛡️</span>
+            <Shield className="w-4 h-4 text-gold mx-auto mb-0.5" />
             <p className="text-lg font-bold text-gold font-mono">{stats.insuredSlips}</p>
             <p className="text-white/50 text-xs">Insured</p>
             <div className="mt-1 space-y-0.5">
               <p className="text-nile-blue-light text-[10px] font-medium">✓ {stats.insuredRedeemed ?? 0} redeemed</p>
-              <p className="text-nile-orange text-[10px] font-medium">⏳ {stats.insuredPending ?? 0} pending</p>
+              <p className="text-nile-orange text-[10px] font-medium flex items-center justify-center gap-1"><Hourglass className="w-2.5 h-2.5" />{stats.insuredPending ?? 0} pending</p>
             </div>
           </div>
           {/* Lost */}
@@ -478,7 +484,7 @@ export default function CashierDashboard() {
           >
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gold/10 rounded-lg">
-                🏆
+                <Trophy className="w-5 h-5 text-gold" />
               </div>
               <div className="text-left">
                 <p className="text-white font-semibold text-sm">Jackpot Status</p>
@@ -703,7 +709,7 @@ export default function CashierDashboard() {
             {/* Insured */}
             <div className="rounded-xl p-2.5" style={{background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.18)'}}>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">🛡️ Insured</span>
+                <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest flex items-center gap-1"><Shield className="w-3 h-3" />Insured</span>
                 <div className="p-1 rounded-md" style={{background:'rgba(201,168,76,0.15)'}}>
                   <CheckCircle className="w-3.5 h-3.5 text-gold" />
                 </div>
@@ -712,7 +718,7 @@ export default function CashierDashboard() {
               <div className="mt-1.5 pt-1.5 border-t border-gold/10 flex items-center justify-between">
                   <span className="text-white/35 text-[10px]">✓ {payouts?.totals?.insuredRedeemedCount ?? 0} paid</span>
                 {(payouts?.totals?.insuredPendingCount ?? 0) > 0
-                  ? <span className="text-nile-orange/70 text-[10px] font-medium">⏳ {payouts?.totals?.insuredPendingCount ?? 0} pending</span>
+                  ? <span className="text-nile-orange/70 text-[10px] font-medium flex items-center gap-1"><Hourglass className="w-2.5 h-2.5" />{payouts?.totals?.insuredPendingCount ?? 0} pending</span>
                   : <span className="text-white/25 text-[10px]">all settled</span>
                 }
               </div>
@@ -763,7 +769,7 @@ export default function CashierDashboard() {
                   <tr key={row.slip_id ?? i} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-4 py-2.5">
                       <span className="font-mono text-white/40 text-[11px] flex items-center gap-1">
-                        {row.is_jackpot ? <span className="text-gold">🏆</span> : null}
+                        {row.is_jackpot ? <Trophy className="w-3 h-3 text-gold" /> : null}
                         ···{String(row.slip_id ?? '').slice(-6)}
                       </span>
                       {row.is_jackpot && row.jackpot_name && (
@@ -799,7 +805,7 @@ export default function CashierDashboard() {
                       {row.payout_status === 'redeemed' ? (
                         row.is_insured ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
-                            🛡️ INSURED · PAID
+                            <Shield className="w-2.5 h-2.5" />INSURED · PAID
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
@@ -808,11 +814,11 @@ export default function CashierDashboard() {
                         )
                       ) : row.is_insured ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold/12 text-gold border border-gold/25">
-                          🛡️ INSURED
+                          <Shield className="w-2.5 h-2.5" />INSURED
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-success/12 text-nile-success border border-nile-success/25">
-                          ⏳ WON
+                          <Hourglass className="w-2.5 h-2.5" />WON
                         </span>
                       )}
                     </td>
@@ -864,8 +870,8 @@ export default function CashierDashboard() {
       {/* ── ROW 7: Recent Slips ── */}
       <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-3">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold text-white">
-            🔀 Recent Slips
+          <h3 className="font-semibold text-white flex items-center gap-1.5">
+            <Shuffle className="w-4 h-4" />Recent Slips
           </h3>
           <div className="flex items-center gap-2">
             <select
@@ -875,9 +881,9 @@ export default function CashierDashboard() {
               }
               className="bg-charcoal border border-nile-blue/30 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none"
             >
-              <option value="all">⚽🏆 All Types</option>
-              <option value="regular">⚽ Regular Only</option>
-              <option value="jackpot">🏆 Jackpot Only</option>
+              <option value="all">All Types</option>
+              <option value="regular">Regular Only</option>
+              <option value="jackpot">Jackpot Only</option>
             </select>
             <select
               value={slipStatus}

@@ -7,7 +7,7 @@ import { useAuthStore } from '@/lib/stores/authStore'
 import { formatDate } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { Megaphone, Trash2, CheckSquare, Square, User, Users, X } from 'lucide-react'
+import { Megaphone, Trash2, CheckSquare, Square, User, Users, X, TriangleAlert, Mail } from 'lucide-react'
 
 async function deleteBroadcasts(ids: string[]) {
   const supabase = createClient()
@@ -194,7 +194,7 @@ export default function BroadcastPage() {
                     className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-colors',
                       r.state ? 'bg-gold/20 border-gold text-gold' : 'border-nile-blue/30 text-white/50 hover:text-white'
                     )}>
-                    <span>{r.state ? '☑️' : '☐'}</span>{r.label}
+                    {r.state ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}{r.label}
                   </button>
                 ))}
               </div>
@@ -209,11 +209,11 @@ export default function BroadcastPage() {
                         ? p === 'urgent' ? 'bg-nile-danger border-nile-danger text-white' : 'bg-nile-blue border-nile-blue text-white'
                         : 'border-nile-blue/30 text-white/50 hover:text-white'
                     )}>
-                    {p === 'urgent' ? '⚠️ Urgent' : '📢 Normal'}
+                    {p === 'urgent' ? <><TriangleAlert className="w-3 h-3 inline mr-1" />Urgent</> : <><Megaphone className="w-3 h-3 inline mr-1" />Normal</>}
                   </button>
                 ))}
               </div>
-              {priority === 'urgent' && <p className="text-nile-danger text-xs mt-1">⚠️ Urgent messages cannot be dismissed</p>}
+              {priority === 'urgent' && <p className="text-nile-danger text-xs mt-1 flex items-center gap-1"><TriangleAlert className="w-3 h-3" />Urgent messages cannot be dismissed</p>}
             </div>
             <div>
               <label className="text-xs text-white/60 block mb-2">Message</label>
@@ -235,7 +235,7 @@ export default function BroadcastPage() {
                 !sending && message.trim() && (sendToBettors || sendToCashiers || sendToAgents)
                   ? 'bg-gold text-charcoal hover:bg-gold-light' : 'bg-white/10 text-white/30 cursor-not-allowed'
               )}>
-              {sending ? 'Sending...' : '📢 Send Broadcast'}
+              {sending ? 'Sending...' : <><Megaphone className="w-4 h-4 inline mr-1.5" />Send Broadcast</>}
             </button>
           </div>
 
@@ -392,7 +392,7 @@ export default function BroadcastPage() {
                         ? p === 'urgent' ? 'bg-nile-danger border-nile-danger text-white' : 'bg-nile-blue border-nile-blue text-white'
                         : 'border-nile-blue/30 text-white/50 hover:text-white'
                     )}>
-                    {p === 'urgent' ? '⚠️ Urgent' : '📢 Normal'}
+                    {p === 'urgent' ? <><TriangleAlert className="w-3 h-3 inline mr-1" />Urgent</> : <><Megaphone className="w-3 h-3 inline mr-1" />Normal</>}
                   </button>
                 ))}
               </div>
@@ -421,7 +421,7 @@ export default function BroadcastPage() {
                 !dmSending && dmMessage.trim() && dmUsernames.length > 0
                   ? 'bg-gold text-charcoal hover:bg-gold-light' : 'bg-white/10 text-white/30 cursor-not-allowed'
               )}>
-              {dmSending ? 'Sending...' : `✉️ Send to ${dmUsernames.length} User${dmUsernames.length !== 1 ? 's' : ''}`}
+              {dmSending ? 'Sending...' : <><Mail className="w-4 h-4 inline mr-1.5" />Send to {dmUsernames.length} User{dmUsernames.length !== 1 ? 's' : ''}</>}
             </button>
           </div>
 

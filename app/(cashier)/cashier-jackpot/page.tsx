@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { placeJackpotBet, getJackpotSlipById } from '@/lib/actions/jackpot'
-import { Trophy, Loader2, User, CheckCircle, XCircle, ChevronDown, ChevronUp, Search, X, Printer, Clock, Star } from 'lucide-react'
+import { Trophy, Loader2, User, CheckCircle, XCircle, ChevronDown, ChevronUp, Search, X, Printer, Target, Ticket, Lock } from 'lucide-react'
 import { ThermalReceipt } from '@/components/cashier/ThermalReceipt'
 import { FlagImage } from '@/components/shared/FlagImage'
 import { usePrint } from '@/lib/hooks/usePrint'
@@ -102,7 +102,7 @@ export default function CashierJackpotPage() {
       selections: matches.map(m => ({ gameNumber: m.game_number, selection: selections[m.game_number], odd: selections[m.game_number] === 'home' ? m.home_odd : selections[m.game_number] === 'draw' ? m.draw_odd : m.away_odd })),
     })
     if (result.success && result.slipId) {
-      toast.success(`🏆 Slip #${result.slipId} placed!`)
+      toast.success(`Slip #${result.slipId} placed!`)
       const savedBettorName = bettorName
       setTimeout(async () => {
         const slip = await getJackpotSlipById(result.slipId!)
@@ -206,7 +206,7 @@ export default function CashierJackpotPage() {
           </div>
           <div>
             <p className="text-white font-bold text-sm leading-tight">{jackpot.name}</p>
-            <p className="text-[10px]" style={{ color: GOLD + '0.5)' }}>Pick {matches.length} · {jackpot.status === 'open' ? '🟢 Open' : '🟡 Draft'}</p>
+            <p className="text-[10px]" style={{ color: GOLD + '0.5)' }}>Pick {matches.length} · {jackpot.status === 'open' ? 'Open' : 'Draft'}</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -227,7 +227,7 @@ export default function CashierJackpotPage() {
 
       {/* Tabs */}
       <div className="flex flex-shrink-0 border-b" style={{ background: '#1C2155', borderColor: BLUE + '0.6)' }}>
-        {([{ key: 'pick', label: '🎯 Place Bet' }, { key: 'slips', label: '🎫 Weekly Slips' }] as { key: Tab; label: string }[]).map(t => (
+        {([{ key: 'pick', label: <><Target className="w-3 h-3 inline mr-1" />Place Bet</> }, { key: 'slips', label: <><Ticket className="w-3 h-3 inline mr-1" />Weekly Slips</> }] as { key: Tab; label: React.ReactNode }[]).map(t => (
           <button key={t.key} onClick={() => handleTabChange(t.key)}
             className="flex-1 py-2 text-xs font-bold tracking-wide transition-all border-b-2"
             style={activeTab === t.key ? { borderColor: G, color: G, background: GOLD + '0.04)' } : { borderColor: 'transparent', color: 'rgba(255,255,255,0.25)' }}>
@@ -353,7 +353,7 @@ export default function CashierJackpotPage() {
             {/* Picks list */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
               <div className="px-2 py-2 border-b flex items-center justify-between flex-shrink-0" style={{ borderColor: BLUE + '0.4)' }}>
-                <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: GOLD + '0.6)' }}>🏆 Slip</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1" style={{ color: GOLD + '0.6)' }}><Trophy className="w-3 h-3" />Slip</p>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-mono font-bold" style={{ color: allSelected ? '#4ade80' : G }}>{selectedCount}/{matches.length}</span>
                   {selectedCount > 0 && <button onClick={() => setSelections({})} className="text-[9px] text-white/20 hover:text-red-400 transition-colors">✕</button>}
@@ -454,7 +454,7 @@ export default function CashierJackpotPage() {
                 {placing ? <span className="flex items-center justify-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" />Placing...</span>
                   : !allSelected ? `Pick ${matches.length - selectedCount} more`
                   : !bettorName.trim() ? 'Enter name'
-                  : `🏆 Place — ${formatETB(jackpot.fixed_stake)}`}
+                  : <><Trophy className="w-4 h-4 inline mr-1" />Place — {formatETB(jackpot.fixed_stake)}</>}
               </button>
             </div>
           </div>
@@ -506,8 +506,8 @@ function CashierSlipCard({ slip }: { slip: any }) {
   const dateTime = d.toLocaleDateString('en-ET', { month: 'short', day: 'numeric' }) + ' · ' + d.toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' })
   const totalGames = selections.length || 12
   const statusCfg: Record<string, { color: string; bg: string; border: string; label: string }> = {
-    won: { color: '#FFD700', bg: 'rgba(212,175,55,0.08)', border: 'rgba(212,175,55,0.35)', label: '🏆 WON' },
-    near_win: { color: '#4ade80', bg: 'rgba(74,222,128,0.06)', border: 'rgba(74,222,128,0.25)', label: '🥈 NEAR WIN' },
+    won: { color: '#FFD700', bg: 'rgba(212,175,55,0.08)', border: 'rgba(212,175,55,0.35)', label: 'WON' },
+    near_win: { color: '#4ade80', bg: 'rgba(74,222,128,0.06)', border: 'rgba(74,222,128,0.25)', label: 'NEAR WIN' },
     lost: { color: '#ef4444', bg: 'rgba(239,68,68,0.05)', border: 'rgba(239,68,68,0.2)', label: 'LOST' },
     pending: { color: 'rgba(255,255,255,0.35)', bg: 'rgba(255,255,255,0.02)', border: 'rgba(37,46,109,0.6)', label: 'PENDING' },
   }
@@ -543,7 +543,7 @@ function CashierSlipCard({ slip }: { slip: any }) {
         {/* Row 2: bettor + datetime + stake */}
         <div className="flex items-center justify-between text-[10px] text-white/30 mb-2">
           <div className="flex items-center gap-2">
-            <span>{slip.is_anonymous ? '🔒 Anonymous' : `👤 ${slip.bettor_name ?? slip.bettor?.username ?? slip.placed_by ?? '—'}`}</span>
+            <span className="inline-flex items-center gap-1">{slip.is_anonymous ? <><Lock className="w-2.5 h-2.5" />Anonymous</> : <><User className="w-2.5 h-2.5" />{slip.bettor_name ?? slip.bettor?.username ?? slip.placed_by ?? '—'}</>}</span>
             <span className="text-white/15">·</span>
             <span>{dateTime}</span>
           </div>

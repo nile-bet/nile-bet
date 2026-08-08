@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { updatePlatformSettings } from '@/lib/actions/admin'
 import { useAuthStore } from '@/lib/stores/authStore'
+import { Goal, Shield, Lock, Gift, Settings } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -117,7 +118,7 @@ export default function SettingsPage() {
       {/* Betting Rules */}
       <div className={sectionClass}>
         <h2 className="font-semibold text-white text-sm">
-          ⚽ Betting Rules
+          <Goal className="w-4 h-4 inline mr-1.5" />Betting Rules
         </h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -262,7 +263,7 @@ export default function SettingsPage() {
       {/* Insurance */}
       <div className={sectionClass}>
         <h2 className="font-semibold text-white text-sm">
-          🛡️ Insurance Settings
+          <Shield className="w-4 h-4 inline mr-1.5" />Insurance Settings
         </h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -336,7 +337,7 @@ export default function SettingsPage() {
       {/* Security */}
       <div className={sectionClass}>
         <h2 className="font-semibold text-white text-sm">
-          🔒 Security Settings
+          <Lock className="w-4 h-4 inline mr-1.5" />Security Settings
         </h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -391,7 +392,7 @@ export default function SettingsPage() {
       {/* Bonus */}
       <div className={sectionClass}>
         <h2 className="font-semibold text-white text-sm">
-          🎁 Welcome Bonus Settings
+          <Gift className="w-4 h-4 inline mr-1.5" />Welcome Bonus Settings
         </h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -469,7 +470,7 @@ export default function SettingsPage() {
       {/* Platform */}
       <div className={sectionClass}>
         <h2 className="font-semibold text-white text-sm">
-          ⚙️ Platform Settings
+          <Settings className="w-4 h-4 inline mr-1.5" />Platform Settings
         </h2>
         <div className="grid grid-cols-2 gap-4">
           <div>

@@ -160,7 +160,7 @@ export async function approveCreditRequest(
     .from('notifications')
     .insert({
       to_user_id: req.requester_id,
-      message: `✅ Credit request of ETB ${req.amount.toLocaleString()} approved!`,
+      message: `Credit request of ETB ${req.amount.toLocaleString()} approved!`,
       type: 'balance_updated',
     })
 
@@ -215,7 +215,7 @@ export async function declineCreditRequest(
     .from('notifications')
     .insert({
       to_user_id: req.requester_id,
-      message: `❌ Credit request of ETB ${req.amount.toLocaleString()} was declined.${adminNote ? ` Reason: ${adminNote}` : ''}`,
+      message: `Credit request of ETB ${req.amount.toLocaleString()} was declined.${adminNote ? ` Reason: ${adminNote}` : ''}`,
       type: 'broadcast',
     })
 
@@ -420,7 +420,7 @@ export async function approveTopupByAdmin(
     .from('notifications')
     .insert({
       to_user_id: coupon.bettor_id,
-      message: `✅ Top-up of ETB ${coupon.amount.toLocaleString()} credited to your account!`,
+      message: `Top-up of ETB ${coupon.amount.toLocaleString()} credited to your account!`,
       type: 'balance_updated',
     })
 
@@ -532,7 +532,7 @@ export async function approveWithdrawalByAdmin(
     .from('notifications')
     .insert({
       to_user_id: coupon.bettor_id,
-      message: `✅ Withdrawal of ETB ${coupon.amount.toLocaleString()} processed. Collect your cash.`,
+      message: `Withdrawal of ETB ${coupon.amount.toLocaleString()} processed. Collect your cash.`,
       type: 'balance_updated',
     })
 

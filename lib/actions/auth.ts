@@ -106,7 +106,7 @@ export async function loginUser(
           .from('notifications')
           .insert({
             to_user_id: admin.id,
-            message: `⚠️ Account @${username} has been locked after ${limit} failed login attempts`,
+            message: `Account @${username} has been locked after ${limit} failed login attempts`,
             type: 'account_locked',
             priority: 'urgent',
           })

@@ -546,7 +546,7 @@ export async function requestCreditsFromAdmin(
     .from('notifications')
     .insert({
       to_user_id: admin.id,
-      message: `💰 Credit request: @${agent?.username} needs ETB ${amount.toLocaleString()}`,
+      message: `Credit request: @${agent?.username} needs ETB ${amount.toLocaleString()}`,
       type: 'balance_updated',
       priority: 'normal',
     })
@@ -782,8 +782,8 @@ export async function approveCouponByAgent(
     .insert({
       to_user_id: coupon.bettor_id,
       message: isTopup
-        ? `✅ Top-up of ETB ${coupon.amount.toLocaleString()} credited!`
-        : `✅ Withdrawal of ETB ${coupon.amount.toLocaleString()} processed!`,
+        ? `Top-up of ETB ${coupon.amount.toLocaleString()} credited!`
+        : `Withdrawal of ETB ${coupon.amount.toLocaleString()} processed!`,
       type: 'balance_updated',
     })
 
@@ -1134,7 +1134,7 @@ export async function agentDeclineCreditRequest(
       await adminClient.from('notifications').insert({
         to_user_id: req.requester_id,
         from_user_id: agentId,
-        message: `❌ Your credit request has been declined by your agent.`,
+        message: `Your credit request has been declined by your agent.`,
         type: 'balance_updated',
         priority: 'normal',
       })

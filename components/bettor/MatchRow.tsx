@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { OddButton } from './OddButton'
 import { useBetSlipStore } from '@/lib/stores/betSlipStore'
-import { ChevronDown, ChevronUp, ClipboardList } from 'lucide-react'
+import { ChevronDown, ChevronUp, ClipboardList, Star } from 'lucide-react'
 import type { MatchWithMarkets } from '@/types/database.types'
 
 const CATEGORY_ORDER = [
@@ -88,7 +88,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
         <div className="flex items-center gap-2">
           {match.is_featured && (
             <span className="text-[10px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded font-medium">
-              ⭐ FEATURED
+              <Star className="w-2.5 h-2.5 inline mr-0.5" fill="currentColor" />FEATURED
             </span>
           )}
           <span className="text-[13px] font-semibold text-white tracking-wide">
@@ -131,7 +131,7 @@ export function MatchRow({ match, isEven, basePath = '' }: MatchRowProps) {
           <div className="flex-1 min-w-0">
             {match.is_featured && (
               <span className="text-[9px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded font-medium mr-1">
-                ⭐
+                <Star className="w-2.5 h-2.5" fill="currentColor" />
               </span>
             )}
             <span className="text-[15px] font-bold text-white leading-tight">

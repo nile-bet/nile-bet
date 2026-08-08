@@ -97,7 +97,7 @@ export async function getMatchesForAdmin(
         m.leagues?.countries?.name ?? '',
       flag_emoji:
         m.leagues?.countries
-          ?.flag_emoji ?? '🏳️',
+          ?.flag_emoji ?? '',
       enabled_markets: (
         m.match_markets ?? []
       ).filter((mm: any) => mm.is_enabled)
@@ -1929,9 +1929,9 @@ export async function enterMatchResult(data: {
         to_user_id: slip.bettor_id,
         message:
           slip.status === 'won'
-            ? `🎉 You won ETB ${slip.net_payout?.toFixed(2)}! Slip settled.`
+            ? `You won ETB ${slip.net_payout?.toFixed(2)}! Slip settled.`
             : slip.status === 'near_win'
-            ? `🛡️ Insurance applied! ETB ${slip.insurance_payout?.toFixed(2)} credited.`
+            ? `Insurance applied! ETB ${slip.insurance_payout?.toFixed(2)} credited.`
             : `Your slip has been settled: ${slip.status}`,
         type:
           slip.status === 'won'
@@ -2128,7 +2128,7 @@ export async function publishJackpot(
     const notifications = users.map((u) => ({
       to_user_id: u.id,
       message:
-        '🏆 Weekend Jackpot is now OPEN! Pick 12 matches to win ETB 250,000! Entry: ETB 50',
+        'Weekend Jackpot is now OPEN! Pick 12 matches to win ETB 250,000! Entry: ETB 50',
       type: 'jackpot_open',
       priority: 'normal' as const,
     }))
@@ -2355,8 +2355,8 @@ export async function settleJackpot(
           .insert({
             to_user_id: slip.bettor_id,
             message: isWin
-              ? `🏆🏆 JACKPOT WINNER! All 12 correct! ETB ${reward.toLocaleString()} credited (after ${taxPct}% tax)!`
-              : `🥈 So close! 11/12 correct. ETB ${reward.toLocaleString()} credited (after ${taxPct}% tax)!`,
+              ? `JACKPOT WINNER! All 12 correct! ETB ${reward.toLocaleString()} credited (after ${taxPct}% tax)!`
+              : `So close! 11/12 correct. ETB ${reward.toLocaleString()} credited (after ${taxPct}% tax)!`,
             type: isWin
               ? 'jackpot_won'
               : 'jackpot_won',

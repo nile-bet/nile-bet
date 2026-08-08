@@ -1,4 +1,5 @@
 'use client'
+import { WifiOff } from 'lucide-react'
 
 export default function OfflinePage() {
   return (
@@ -10,8 +11,8 @@ export default function OfflinePage() {
         Flow into Wins
       </p>
 
-      <div className="text-7xl mb-6">
-        📡
+      <div className="mb-6">
+        <WifiOff className="w-16 h-16 text-white/60" />
       </div>
       <h1 className="text-white font-bold text-2xl mb-3">
         You're Offline

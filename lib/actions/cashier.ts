@@ -642,7 +642,7 @@ export async function requestCreditsByCashier(
     .from('notifications')
     .insert({
       to_user_id: toUserId,
-      message: `💰 Cashier @${cashier.username} requests ETB ${amount.toLocaleString()}. Note: ${note || 'No note'}`,
+      message: `Cashier @${cashier.username} requests ETB ${amount.toLocaleString()}. Note: ${note || 'No note'}`,
       type: 'balance_updated',
       priority: 'normal',
     })

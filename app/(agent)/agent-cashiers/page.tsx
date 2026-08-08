@@ -18,7 +18,7 @@ import { useAuthStore }
   from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, DollarSign } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -193,7 +193,7 @@ export default function AgentCashiersPage() {
             }}
             className="text-xs border border-gold/30 text-gold px-2 py-1 rounded hover:bg-gold/10"
           >
-            💰
+            <DollarSign className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => {

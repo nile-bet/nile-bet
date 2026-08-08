@@ -7,7 +7,7 @@ import { useAuthStore } from '@/lib/stores/authStore'
 import { formatETB, formatCountdown } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { Check, X, Search, Scan, Trophy, Ticket, ArrowRight, AlertTriangle, Camera } from 'lucide-react'
+import { Check, X, Search, Scan, Trophy, Ticket, ArrowRight, AlertTriangle, Camera, CheckCircle, XCircle, Ban, Hourglass, Shield, VenetianMask, ArrowUpCircle, ArrowDownCircle, Banknote } from 'lucide-react'
 import { QRScanner } from '@/components/cashier/QRScanner'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 
@@ -93,7 +93,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
       ? await redeemJackpotWinningSlip(slipData.slip_id, user.id)
       : await redeemWinningSlip(slipData.slip_id, user.id)
     if (result.success) {
-      toast.success(`✅ Paid ${formatETB(result.amount)} — Slip redeemed!`)
+      toast.success(`Paid ${formatETB(result.amount)} — Slip redeemed!`)
       resetState()
       onClose?.()
     } else {
@@ -131,12 +131,12 @@ export function CouponRedeemPanel({ onClose }: Props) {
     cancelled: 'text-white/40',
   }
 
-  const slipStatusLabel: Record<string, string> = {
-    won: '🏆 WON',
-    lost: '❌ LOST',
-    pending: '⏳ PENDING',
-    paid: '✅ PAID',
-    cancelled: '🚫 CANCELLED',
+  const slipStatusLabel: Record<string, React.ReactNode> = {
+    won: <><Trophy className="w-3 h-3 inline mr-1" />WON</>,
+    lost: <><XCircle className="w-3 h-3 inline mr-1" />LOST</>,
+    pending: <><Hourglass className="w-3 h-3 inline mr-1" />PENDING</>,
+    paid: <><CheckCircle className="w-3 h-3 inline mr-1" />PAID</>,
+    cancelled: <><Ban className="w-3 h-3 inline mr-1" />CANCELLED</>,
   }
 
   const placeholder = mode === 'slip' ? '12345678 or scan barcode' : '6-digit code'
@@ -235,7 +235,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
         )}
 
         <p className="text-white/60 text-xs mt-1.5 text-center">
-          {mode === 'slip' ? '🔍 Enter 8-digit slip ID or scan barcode • 📷 Camera QR' : '🔢 Enter 6-digit coupon code • 📷 Camera QR'}
+          {mode === 'slip' ? <><Search className="w-3 h-3 inline mr-1" />Enter 8-digit slip ID or scan barcode • <Camera className="w-3 h-3 inline mr-1" />Camera QR</> : <>Enter 6-digit coupon code • <Camera className="w-3 h-3 inline mr-1" />Camera QR</>}
         </p>
       </div>
 
@@ -270,7 +270,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
               <div>
                 <p className="text-white/70 text-xs">Bettor</p>
                 <p className="text-white font-semibold">
-                  {slipData.is_anonymous ? '🎭 Anonymous' : `@${slipData.bettor?.username ?? '—'}`}
+                  {slipData.is_anonymous ? <><VenetianMask className="w-3.5 h-3.5 inline mr-1" />Anonymous</> : `@${slipData.bettor?.username ?? '—'}`}
                 </p>
               </div>
               <div className="text-right">
@@ -336,14 +336,14 @@ export function CouponRedeemPanel({ onClose }: Props) {
 
             {slipData.status === 'paid' && (
               <div className="bg-white/5 rounded-xl p-3 text-center">
-                <p className="text-white/40 text-sm">✅ This slip has already been paid out</p>
+                <p className="text-white/40 text-sm flex items-center justify-center gap-1"><CheckCircle className="w-3.5 h-3.5" />This slip has already been paid out</p>
               </div>
             )}
 
             {slipData.status === 'near_win' && slipData.redeemed_at && (
               <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center space-y-1">
                 <p className="text-gold text-sm font-semibold">
-                  🛡️ Insured payout already credited — {formatETB(payoutAmount ?? slipData.net_payout)}
+                  <Shield className="w-3.5 h-3.5 inline mr-1" />Insured payout already credited — {formatETB(payoutAmount ?? slipData.net_payout)}
                 </p>
                 <p className="text-white/40 text-xs">This slip cannot be redeemed again</p>
               </div>
@@ -381,7 +381,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
                 ? 'bg-nile-success/20 text-nile-success border border-nile-success/30'
                 : 'bg-nile-orange/20 text-nile-orange border border-nile-orange/30'
             )}>
-              {lookedUp.type === 'topup' ? '⬆ Top-up' : '⬇ Withdrawal'}
+              {lookedUp.type === 'topup' ? <><ArrowUpCircle className="w-3 h-3 inline mr-1" />Top-up</> : <><ArrowDownCircle className="w-3 h-3 inline mr-1" />Withdrawal</>}
             </span>
           </div>
 
@@ -412,7 +412,7 @@ export function CouponRedeemPanel({ onClose }: Props) {
 
             {lookedUp.type === 'withdrawal' && (
               <div className="bg-nile-success/10 border border-nile-success/20 rounded-xl px-4 py-3">
-                <p className="text-nile-success text-sm font-medium">💵 Give bettor {formatETB(lookedUp.amount)} cash</p>
+                <p className="text-nile-success text-sm font-medium flex items-center gap-1"><Banknote className="w-4 h-4" />Give bettor {formatETB(lookedUp.amount)} cash</p>
               </div>
             )}
 

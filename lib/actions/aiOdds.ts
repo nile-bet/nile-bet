@@ -6,7 +6,7 @@
  * Calls Gemini (free tier: gemini-3.6-flash) SERVER-SIDE ONLY to suggest
  * placeholder odds across all selected markets for Quick Match.
  *
- * ⚠️ IMPORTANT — READ BEFORE RELYING ON THIS ANYWHERE ELSE:
+ * IMPORTANT — READ BEFORE RELYING ON THIS ANYWHERE ELSE:
  * These are LLM-generated guesses, not real pricing. Gemini has no live odds
  * feed, no access to actual bookmaker lines, and no real probability model —
  * it is pattern-matching on team/league names and typical market structures

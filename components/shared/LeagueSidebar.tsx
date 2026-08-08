@@ -84,7 +84,7 @@ export function LeagueSidebar({
             className={cn('w-full text-left px-3 py-1.5 text-[13px] flex items-center gap-2 transition-colors',
               selectedLeagueId === 'top' ? 'bg-gold/10 text-gold border-l-2 border-gold' : 'text-white/70 hover:bg-gold/5 hover:text-white border-l-2 border-transparent'
             )}>
-            <span>⭐</span><span className="truncate">All Top Leagues</span>
+            <Star className="w-3.5 h-3.5" fill="currentColor" /><span className="truncate">All Top Leagues</span>
           </button>
           {filteredTop.map((league) => (
             <button key={league.id} onClick={() => handleLeagueSelect(league.id)}
@@ -161,11 +161,11 @@ export function LeagueSidebar({
               {!countrySearch.trim() && topLeagues.length > 0 && (
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <div style={{ padding: '8px 16px', backgroundColor: 'rgba(218,165,32,0.05)' }}>
-                    <span style={{ fontSize: 10, color: 'rgba(218,165,32,0.7)', textTransform: 'uppercase', letterSpacing: 2, fontWeight: 600 }}>⭐ Top Leagues</span>
+                    <span style={{ fontSize: 10, color: 'rgba(218,165,32,0.7)', textTransform: 'uppercase', letterSpacing: 2, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Star size={10} fill="currentColor" />Top Leagues</span>
                   </div>
                   <button onClick={() => handleLeagueSelect('top')}
                     style={{ width: '100%', textAlign: 'left', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8, background: selectedLeagueId === 'top' ? 'rgba(218,165,32,0.1)' : 'none', border: 'none', borderLeft: selectedLeagueId === 'top' ? '3px solid #d4a017' : '3px solid transparent', cursor: 'pointer', color: selectedLeagueId === 'top' ? '#d4a017' : 'rgba(255,255,255,0.8)', fontSize: 13 }}>
-                    <span>⭐</span><span>All Top Leagues</span>
+                    <Star className="w-3.5 h-3.5" fill="currentColor" /><span>All Top Leagues</span>
                   </button>
                   {topLeagues.map((league) => (
                     <button key={league.id} onClick={() => handleLeagueSelect(league.id)}

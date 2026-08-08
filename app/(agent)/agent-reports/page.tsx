@@ -10,6 +10,7 @@ import { DataTable }
   from '@/components/shared/DataTable'
 import { formatETB }
   from '@/lib/utils/formatCurrency'
+import { FileSpreadsheet, ClipboardList } from 'lucide-react'
 import { useAuthStore }
   from '@/lib/stores/authStore'
 import {
@@ -110,7 +111,7 @@ export default function AgentReportsPage() {
           disabled={!report}
           className="border border-gold/30 text-gold px-4 py-2 rounded-lg text-sm hover:bg-gold/10 disabled:opacity-40"
         >
-          📊 Export Excel
+          <FileSpreadsheet className="w-3.5 h-3.5 inline mr-1" />Export Excel
         </button>
       </div>
 
@@ -247,7 +248,7 @@ export default function AgentReportsPage() {
           {/* Cashier Network Breakdown */}
           {report.cashierBreakdown && report.cashierBreakdown.length > 0 && (
             <div>
-              <h2 className="text-white font-semibold text-lg mb-4">📋 My Cashier Network</h2>
+              <h2 className="text-white font-semibold text-lg mb-4 flex items-center gap-2"><ClipboardList className="w-4 h-4" />My Cashier Network</h2>
               <DataTable
                 columns={[
                   {

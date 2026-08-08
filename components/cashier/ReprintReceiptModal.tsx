@@ -14,7 +14,7 @@ import { getJackpotSlipById } from '@/lib/actions/jackpot'
 import { rebetJackpotSlip } from '@/lib/actions/bets'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { formatETB } from '@/lib/utils/formatCurrency'
-import { Printer } from 'lucide-react'
+import { Printer, RefreshCw, CheckCircle, Trophy } from 'lucide-react'
 import { toast } from 'sonner'
 import QRCode from 'qrcode'
 
@@ -174,7 +174,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
                 className="flex-1 flex items-center justify-center gap-2 bg-gold text-charcoal py-2.5 rounded-lg text-sm font-semibold hover:bg-gold-light disabled:opacity-50"
               >
                 <Printer className="w-4 h-4" />
-                {rebetting ? 'Placing...' : `🔄 Rebet & Print${newSlipId ? ` #${newSlipId}` : ''}`}
+                {rebetting ? 'Placing...' : <><RefreshCw className="w-3.5 h-3.5 inline mr-1" />Rebet & Print{newSlipId ? ` #${newSlipId}` : ''}</>}
               </button>
               <button
                 onClick={handlePrint}
@@ -186,12 +186,10 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
             </div>
             {newSlipId && (
               <div className="bg-nile-success/10 border border-nile-success/30 rounded-lg px-3 py-2 mb-3 text-center">
-                <p className="text-nile-success text-xs font-semibold">✅ New Slip #{newSlipId} — Balance deducted</p>
+                <p className="text-nile-success text-xs font-semibold flex items-center justify-center gap-1"><CheckCircle className="w-3.5 h-3.5" />New Slip #{newSlipId} — Balance deducted</p>
               </div>
             )}
-            <p className="text-white/25 text-[10px] text-center mb-3">
-              🔄 Rebet places a new slip with same selections and deducts balance · 🖨️ Print only reprints original
-            </p>
+            <p className="text-white/25 text-[10px] text-center mb-3 flex items-center justify-center gap-1"><RefreshCw className="w-2.5 h-2.5" />Rebet places a new slip with same selections and deducts balance · <Printer className="w-2.5 h-2.5" />Print only reprints original</p>
 
             {/* Slip summary */}
             <div className="bg-charcoal/50 rounded-xl p-4 mb-4 text-center">
@@ -201,7 +199,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
                 <p className="text-white/30 text-[10px] mt-0.5">Original: #{slipId}</p>
               )}
               {isJackpot && slip.jackpots?.name && (
-                <p className="text-white/50 text-xs mt-1">🏆 {slip.jackpots.name}</p>
+                <p className="text-white/50 text-xs mt-1 flex items-center gap-1"><Trophy className="w-3 h-3" />{slip.jackpots.name}</p>
               )}
               {!isJackpot && slip.net_payout && (
                 <p className="text-nile-success text-sm mt-1">
@@ -256,7 +254,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
                     <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: '4px', marginBottom: '6px' }}>
                       <div style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '3px' }}>NILE BETTING</div>
                       <div style={{ fontSize: '10px' }}>Flow into Wins</div>
-                      <div style={{ fontSize: '13px', fontWeight: 'bold', marginTop: '2px' }}>🏆 WEEKEND JACKPOT</div>
+                      <div style={{ fontSize: '13px', fontWeight: 'bold', marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><Trophy size={13} />WEEKEND JACKPOT</div>
                       <div style={{ fontSize: '9px', marginTop: '3px', color: '#555' }}>
                         {new Date(slip.created_at).toLocaleDateString('en-ET', { year: 'numeric', month: 'short', day: 'numeric' })}
                         {' '}
@@ -331,7 +329,7 @@ export function ReprintReceiptModal({ isOpen, onClose, slipId, isJackpot }: Prop
 
                     {/* Footer */}
                     <div style={{ borderTop: '1px dashed #000', marginTop: '6px', paddingTop: '4px', textAlign: 'center', fontSize: '9px', color: '#555' }}>
-                      <div>Good luck! 🏆</div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>Good luck! <Trophy size={11} /></div>
                       <div style={{ fontWeight: 'bold' }}>NILE BETTING</div>
                       <div>Must be 21+ to bet</div>
                       <div style={{ marginTop: '4px' }}>═══════════════════════</div>

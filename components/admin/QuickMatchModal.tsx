@@ -251,7 +251,7 @@ export function QuickMatchModal({ onClose, onSuccess }: QuickMatchModalProps) {
                 disabled={!pasteText.trim()}
                 className="bg-gold/20 border border-gold text-gold px-4 py-2 rounded-lg text-sm font-medium hover:bg-gold/30 disabled:opacity-30"
               >
-                Parse ✨
+                Parse <Sparkles className="w-3.5 h-3.5 inline ml-1" />
               </button>
 
               {parseResult && parseResult.warnings.length > 0 && (
@@ -415,7 +415,7 @@ export function QuickMatchModal({ onClose, onSuccess }: QuickMatchModalProps) {
               </div>
               {usedAIOdds ? (
                 <p className="text-gold text-xs">
-                  ✨ AI-suggested odds applied to {aiCoveredIds.length} market(s). Remaining markets use local placeholder defaults.
+                  <Sparkles className="w-3.5 h-3.5 inline mr-1" />AI-suggested odds applied to {aiCoveredIds.length} market(s). Remaining markets use local placeholder defaults.
                 </p>
               ) : (
                 <p className="text-white/40 text-xs">

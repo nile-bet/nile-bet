@@ -70,13 +70,13 @@ export function useRealtimeCashier() {
           const updated = payload.new as any
           if (updated.status === 'approved') {
             toast.success(
-              `✅ Credit request approved! ETB ${(updated.amount ?? 0).toLocaleString()} added to your balance.`
+              `Credit request approved! ETB ${(updated.amount ?? 0).toLocaleString()} added to your balance.`
             )
           } else if (
             updated.status === 'declined'
           ) {
             toast.error(
-              `❌ Credit request declined.${updated.admin_note ? ` Reason: ${updated.admin_note}` : ''}`
+              `Credit request declined.${updated.admin_note ? ` Reason: ${updated.admin_note}` : ''}`
             )
           }
         }

@@ -516,7 +516,7 @@ export async function copySlip(
       awayTeam: match?.away_team ?? '',
       leagueName: leagues?.name ?? '',
       countryFlag:
-        countries?.flag_emoji ?? '🏳️',
+        countries?.flag_emoji ?? '',
       marketName: template?.name ?? '',
       categoryName:
         template?.market_categories?.name ??

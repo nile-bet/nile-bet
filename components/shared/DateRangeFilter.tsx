@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { Calendar } from 'lucide-react'
+import { Calendar, FileSpreadsheet } from 'lucide-react'
 
 const PRESETS = [
   { key: 'daily', label: 'Today' },
@@ -92,7 +92,7 @@ export function DateRangeFilter({ value, onChange, onExport, exportLoading }: Da
           disabled={exportLoading}
           className="border border-gold/30 text-gold px-4 py-1.5 rounded-lg text-sm hover:bg-gold/10 disabled:opacity-40 flex items-center gap-2 ml-auto"
         >
-          📊 Export Excel
+          <FileSpreadsheet className="w-4 h-4" />Export Excel
         </button>
       )}
     </div>

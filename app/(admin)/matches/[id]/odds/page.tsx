@@ -19,7 +19,7 @@ import { useAuthStore }
   from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { ArrowLeft, Search, Save, X, TrendingUp, TrendingDown, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Search, Save, X, TrendingUp, TrendingDown, RotateCcw, TriangleAlert } from 'lucide-react'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -271,7 +271,7 @@ export default function OddsPage({
       {/* Warning */}
       {match.status === 'upcoming' && (
         <div className="bg-nile-orange/10 border border-nile-orange/30 rounded-lg p-3 mb-4 text-xs text-nile-orange">
-          ⚠️ Existing bets keep original odds. Changes only affect new bets.
+          <TriangleAlert className="w-3.5 h-3.5 inline mr-1" />Existing bets keep original odds. Changes only affect new bets.
         </div>
       )}
 

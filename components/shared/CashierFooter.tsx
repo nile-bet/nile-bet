@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Logo } from './Logo'
-import { Phone } from 'lucide-react'
+import { Phone, Mail } from 'lucide-react'
 
 export function CashierFooter() {
   return (
@@ -79,7 +79,7 @@ export function CashierFooter() {
               <span className="text-sm text-gold font-medium">+44 7788 443322</span>
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <a href="mailto:nilebetting@gmail.com" className="text-sm text-gold font-medium hover:underline">✉ nilebetting@gmail.com</a>
+              <a href="mailto:nilebetting@gmail.com" className="text-sm text-gold font-medium hover:underline flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" />nilebetting@gmail.com</a>
             </div>
           </div>
         </div>

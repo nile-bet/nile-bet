@@ -13,6 +13,7 @@ import { useAuthStore } from '@/lib/stores/authStore'
 import {
   Wallet, Users, TrendingUp, Clock, Ticket,
   CheckCircle, XCircle, RefreshCw, DollarSign, ArrowUpRight,
+  TriangleAlert, Calendar, Shield, Trophy,
 } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -123,7 +124,7 @@ export default function AgentDashboard() {
       {!loading && isLowBalance && (
         <div className="bg-nile-danger/10 border border-nile-danger/30 rounded-xl p-4 flex items-center justify-between">
           <div>
-            <p className="text-nile-danger font-semibold text-sm">⚠️ Low Balance Warning</p>
+            <p className="text-nile-danger font-semibold text-sm flex items-center gap-1"><TriangleAlert className="w-3.5 h-3.5" />Low Balance Warning</p>
             <p className="text-white/60 text-xs mt-0.5">Your balance is {formatETB(stats?.myBalance ?? 0)}. Request credits from admin.</p>
           </div>
           <a href="/agent-credits" className="bg-gold text-charcoal text-xs font-semibold px-4 py-2 rounded-lg hover:bg-gold-light">Request Credits</a>
@@ -138,7 +139,7 @@ export default function AgentDashboard() {
       {/* Data banner */}
       {!loading && stats && (
         <div className="bg-nile-blue/20 border border-gold/20 rounded-lg px-4 py-2 text-xs text-white/50">
-          📅 Showing: {dateFilter.type === 'custom' ? `${dateFilter.startDate?.slice(0,10)} → ${dateFilter.endDate?.slice(0,10)}` : dateFilter.type} data • {stats.totalSlips} total slips across {stats.totalCashiers} cashiers
+          <Calendar className="w-3.5 h-3.5 inline mr-1" />Showing: {dateFilter.type === 'custom' ? `${dateFilter.startDate?.slice(0,10)} → ${dateFilter.endDate?.slice(0,10)}` : dateFilter.type} data • {stats.totalSlips} total slips across {stats.totalCashiers} cashiers
         </div>
       )}
 
@@ -180,7 +181,7 @@ export default function AgentDashboard() {
             </div>
           </div>
           <div className="bg-gold/10 border border-gold/30 rounded-xl p-2 md:p-3 text-center">
-            <span className="text-xl block mb-1">🛡️</span>
+            <Shield className="w-5 h-5 text-gold mx-auto mb-1" />
             <p className="text-xl md:text-2xl font-bold text-gold font-mono">{stats.insuredSlips}</p>
             <p className="text-white/50 text-xs">Insured</p>
             <div className="mt-1 space-y-0.5">
@@ -256,7 +257,7 @@ export default function AgentDashboard() {
             className="w-full flex items-center justify-between p-4 hover:bg-gold/5 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-gold/10 rounded-lg text-lg">🏆</div>
+              <div className="p-3 bg-gold/10 rounded-lg"><Trophy className="w-5 h-5 text-gold" /></div>
               <div className="text-left">
                 <p className="text-white font-semibold text-sm">Jackpot Status</p>
                 <p className="text-white/40 text-xs">
@@ -328,7 +329,7 @@ export default function AgentDashboard() {
 
       {/* ── ROW 6: Payout Report ── */}
       <div className="bg-slate-dark border border-nile-blue/30 rounded-xl p-5">
-        <h3 className="font-semibold text-white mb-4 flex items-center gap-2">🏆 Network Payout Report</h3>
+        <h3 className="font-semibold text-white mb-4 flex items-center gap-2"><Trophy className="w-4 h-4 text-gold" />Network Payout Report</h3>
         {payouts && (
           <>
             {/* 4 summary cards — network-wide across all cashiers */}
@@ -364,7 +365,7 @@ export default function AgentDashboard() {
 
               <div className="rounded-xl p-3.5" style={{background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.18)'}}>
                 <div className="flex items-center justify-between mb-2.5">
-                  <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">🛡️ Insured</span>
+                  <span className="text-white/50 text-[11px] font-semibold uppercase tracking-widest flex items-center gap-1"><Shield className="w-3 h-3" />Insured</span>
                   <div className="p-1 rounded-md" style={{background:'rgba(201,168,76,0.15)'}}>
                     <CheckCircle className="w-3.5 h-3.5 text-gold" />
                   </div>
@@ -400,7 +401,7 @@ export default function AgentDashboard() {
 
             <DataTable
               columns={[
-                { key: 'slip_id', label: 'Slip ID', render: (v: any, row: any) => <span className="text-gold font-mono text-xs">{row?.is_jackpot && '🏆 '}#{v}</span> },
+                { key: 'slip_id', label: 'Slip ID', render: (v: any, row: any) => <span className="text-gold font-mono text-xs">{row?.is_jackpot && <Trophy className="w-3 h-3 inline mr-0.5" />}#{v}</span> },
                 { key: 'cashier_username', label: 'Cashier', render: (v: any) => <span className="text-white/60 text-xs">@{v}</span> },
                 { key: 'bettor', label: 'Bettor', render: (v: any, row: any) => <span className="text-white/60 text-xs">{row.is_anonymous ? 'Anonymous' : `@${v?.username ?? '—'}`}</span> },
                 { key: 'stake', label: 'Stake', render: (v: any) => <span className="text-white/70 font-mono text-xs">{formatETB(v)}</span> },
@@ -414,7 +415,7 @@ export default function AgentDashboard() {
                     if (v === 'redeemed') {
                       return row.is_insured ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
-                          🛡️ INSURED · PAID
+                          <Shield className="w-2.5 h-2.5" />INSURED · PAID
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-blue-light/15 text-nile-blue-light border border-nile-blue-light/25">
@@ -424,7 +425,7 @@ export default function AgentDashboard() {
                     }
                     return row.is_insured ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold/12 text-gold border border-gold/25">
-                        🛡️ INSURED
+                        <Shield className="w-2.5 h-2.5" />INSURED
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-nile-success/12 text-nile-success border border-nile-success/25">

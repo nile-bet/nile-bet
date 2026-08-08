@@ -7,7 +7,7 @@ import { useAuthStore } from '@/lib/stores/authStore'
 import { formatETB, formatCountdown, formatDate } from '@/lib/utils/formatCurrency'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { Check, X, History, Ticket, ArrowUpCircle, ArrowDownCircle, Wallet } from 'lucide-react'
+import { Check, X, History, Ticket, ArrowUpCircle, ArrowDownCircle, Wallet, XCircle, Banknote, TriangleAlert } from 'lucide-react'
 
 const STATUS_STYLES: Record<string, string> = {
   pending:  'text-amber-400 bg-amber-400/10 border-amber-400/30',
@@ -148,7 +148,7 @@ export default function CashierCouponsPage() {
 
               {error && (
                 <div className="bg-red-500/10 border border-red-500/25 rounded-lg px-3 py-2.5 text-center">
-                  <p className="text-red-400 text-xs font-medium">❌ {error}</p>
+                  <p className="text-red-400 text-xs font-medium flex items-center gap-1"><XCircle className="w-3.5 h-3.5" />{error}</p>
                 </div>
               )}
             </div>
@@ -202,7 +202,7 @@ export default function CashierCouponsPage() {
 
                     {lookedUp.type === 'withdrawal' && (
                       <div className="bg-emerald-500/8 border border-emerald-500/20 rounded-lg px-3 py-2.5 flex items-center gap-2.5">
-                        <span className="text-xl">💵</span>
+                        <Banknote className="w-5 h-5" />
                         <div>
                           <p className="text-emerald-400 font-semibold text-sm">Hand bettor {formatETB(lookedUp.amount)} cash</p>
                           <p className="text-white/40 text-xs">Your balance increases after approval</p>
@@ -212,7 +212,7 @@ export default function CashierCouponsPage() {
 
                     {isInsufficient && (
                       <div className="bg-red-500/10 border border-red-500/25 rounded-lg px-3 py-2.5">
-                        <p className="text-red-400 font-semibold text-sm">⚠️ Insufficient balance</p>
+                        <p className="text-red-400 font-semibold text-sm flex items-center gap-1"><TriangleAlert className="w-4 h-4" />Insufficient balance</p>
                         <p className="text-white/50 text-xs mt-0.5">
                           Need {formatETB(lookedUp.amount)} · have {formatETB(user?.credit_balance ?? 0)}
                         </p>
