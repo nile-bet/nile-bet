@@ -27,7 +27,7 @@ import {
 } from '@/lib/actions/matches'
 import { formatKickOff }
   from '@/lib/utils/formatCurrency'
-import { Swords, Ticket, Volleyball } from 'lucide-react'
+import { Swords, Ticket } from 'lucide-react'
 import { FlagImage } from '@/components/shared/FlagImage'
 import type {
   MatchWithLeague,
@@ -298,7 +298,7 @@ export function MatchListClient({
                     <div key={match.id}>
                       <div className="flex items-center justify-between px-4 py-2 bg-[#111C31] border-b border-[rgba(255,255,255,0.06)]">
                         <span className="text-[11px] text-[#A9B4D0] font-medium flex items-center gap-1.5">
-                          <Volleyball className="w-3 h-3" aria-hidden="true" />
+                          ⚽
                           <FlagImage emoji={m.flag_emoji ?? ''} />
                           <span className="text-[#7D89A8]">{m.country_name}</span>
                           <span className="text-[#7D89A8]/50">·</span>
